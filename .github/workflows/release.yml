@@ -71,12 +71,18 @@ jobs:
         run: dart run flutter_launcher_icons
 
       - name: Build APK (Release)
-        run: flutter build apk --release
+        run: flutter build apk --release --split-per-abi
 
-      - name: Rename APK
+      - name: Rename APKs
         run: |
           VERSION=${{ steps.get_version.outputs.version }}
-          mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/SpotiFLAC-${VERSION}-android.apk
+          cd build/app/outputs/flutter-apk
+          # Rename split APKs
+          mv app-arm64-v8a-release.apk SpotiFLAC-${VERSION}-arm64.apk || true
+          mv app-armeabi-v7a-release.apk SpotiFLAC-${VERSION}-arm32.apk || true
+          # Also rename universal if exists
+          mv app-release.apk SpotiFLAC-${VERSION}-universal.apk || true
+          ls -la
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
@@ -185,7 +191,8 @@ jobs:
             Download Spotify tracks in FLAC quality from Tidal, Qobuz & Amazon Music.
             
             ### Downloads
-            - **Android**: `SpotiFLAC-${{ needs.build-android.outputs.version }}-android.apk`
+            - **Android (arm64)**: `SpotiFLAC-${{ needs.build-android.outputs.version }}-arm64.apk` (recommended for most devices)
+            - **Android (arm32)**: `SpotiFLAC-${{ needs.build-android.outputs.version }}-arm32.apk` (for older devices)
             - **iOS**: `SpotiFLAC-${{ needs.build-android.outputs.version }}-ios-unsigned.ipa` (requires sideloading)
             
             ### Features

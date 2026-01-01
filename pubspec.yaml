@@ -48,8 +48,8 @@ dependencies:
   device_info_plus: ^12.3.0
   share_plus: ^10.1.4
   
-  # FFmpeg for audio conversion
-  ffmpeg_kit_flutter_new: ^4.1.0
+  # FFmpeg for audio conversion (audio-only version - much smaller)
+  ffmpeg_kit_flutter_new_audio: ^2.0.0
   open_filex: ^4.7.0
 
 dev_dependencies:
