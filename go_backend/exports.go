@@ -5,6 +5,7 @@ package gobackend
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"time"
 )
 
@@ -124,6 +125,13 @@ func DownloadTrack(requestJSON string) (string, error) {
 		return errorResponse("Invalid request: " + err.Error())
 	}
 	
+	// Trim whitespace from string fields to prevent filename/path issues
+	req.TrackName = strings.TrimSpace(req.TrackName)
+	req.ArtistName = strings.TrimSpace(req.ArtistName)
+	req.AlbumName = strings.TrimSpace(req.AlbumName)
+	req.AlbumArtist = strings.TrimSpace(req.AlbumArtist)
+	req.OutputDir = strings.TrimSpace(req.OutputDir)
+	
 	var filePath string
 	var err error
 	
@@ -171,6 +179,13 @@ func DownloadWithFallback(requestJSON string) (string, error) {
 	if err := json.Unmarshal([]byte(requestJSON), &req); err != nil {
 		return errorResponse("Invalid request: " + err.Error())
 	}
+	
+	// Trim whitespace from string fields to prevent filename/path issues
+	req.TrackName = strings.TrimSpace(req.TrackName)
+	req.ArtistName = strings.TrimSpace(req.ArtistName)
+	req.AlbumName = strings.TrimSpace(req.AlbumName)
+	req.AlbumArtist = strings.TrimSpace(req.AlbumArtist)
+	req.OutputDir = strings.TrimSpace(req.OutputDir)
 	
 	// Build service order starting with preferred service
 	allServices := []string{"tidal", "qobuz", "amazon"}

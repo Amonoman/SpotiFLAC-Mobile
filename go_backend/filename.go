@@ -63,7 +63,8 @@ func buildFilenameFromTemplate(template string, metadata map[string]interface{})
 func getString(m map[string]interface{}, key string) string {
 	if v, ok := m[key]; ok {
 		if s, ok := v.(string); ok {
-			return s
+			// Trim leading/trailing whitespace to prevent filename issues
+			return strings.TrimSpace(s)
 		}
 	}
 	return ""
