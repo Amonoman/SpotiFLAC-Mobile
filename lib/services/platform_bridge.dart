@@ -234,4 +234,45 @@ class PlatformBridge {
   static Future<void> cleanupConnections() async {
     await _channel.invokeMethod('cleanupConnections');
   }
+
+  /// Start foreground download service to keep downloads running in background
+  static Future<void> startDownloadService({
+    String trackName = '',
+    String artistName = '',
+    int queueCount = 0,
+  }) async {
+    await _channel.invokeMethod('startDownloadService', {
+      'track_name': trackName,
+      'artist_name': artistName,
+      'queue_count': queueCount,
+    });
+  }
+
+  /// Stop foreground download service
+  static Future<void> stopDownloadService() async {
+    await _channel.invokeMethod('stopDownloadService');
+  }
+
+  /// Update download service notification progress
+  static Future<void> updateDownloadServiceProgress({
+    required String trackName,
+    required String artistName,
+    required int progress,
+    required int total,
+    required int queueCount,
+  }) async {
+    await _channel.invokeMethod('updateDownloadServiceProgress', {
+      'track_name': trackName,
+      'artist_name': artistName,
+      'progress': progress,
+      'total': total,
+      'queue_count': queueCount,
+    });
+  }
+
+  /// Check if download service is running
+  static Future<bool> isDownloadServiceRunning() async {
+    final result = await _channel.invokeMethod('isDownloadServiceRunning');
+    return result as bool;
+  }
 }

@@ -167,6 +167,29 @@ class MainActivity: FlutterActivity() {
                             }
                             result.success(null)
                         }
+                        "startDownloadService" -> {
+                            val trackName = call.argument<String>("track_name") ?: ""
+                            val artistName = call.argument<String>("artist_name") ?: ""
+                            val queueCount = call.argument<Int>("queue_count") ?: 0
+                            DownloadService.start(this@MainActivity, trackName, artistName, queueCount)
+                            result.success(null)
+                        }
+                        "stopDownloadService" -> {
+                            DownloadService.stop(this@MainActivity)
+                            result.success(null)
+                        }
+                        "updateDownloadServiceProgress" -> {
+                            val trackName = call.argument<String>("track_name") ?: ""
+                            val artistName = call.argument<String>("artist_name") ?: ""
+                            val progress = call.argument<Long>("progress") ?: 0L
+                            val total = call.argument<Long>("total") ?: 0L
+                            val queueCount = call.argument<Int>("queue_count") ?: 0
+                            DownloadService.updateProgress(this@MainActivity, trackName, artistName, progress, total, queueCount)
+                            result.success(null)
+                        }
+                        "isDownloadServiceRunning" -> {
+                            result.success(DownloadService.isServiceRunning())
+                        }
                         else -> result.notImplemented()
                     }
                 } catch (e: Exception) {

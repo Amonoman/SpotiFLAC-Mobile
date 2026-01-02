@@ -39,7 +39,7 @@ Get Spotify tracks in true FLAC from Tidal, Qobuz & Amazon Music for Windows, ma
 
 ## Disclaimer
 
-> **📱 iOS Support**: This app is primarily tested on Android. iOS support is experimental and may have bugs — the developer is too poor to afford an iPhone for proper testing. If you encounter issues on iOS, please report them!
+> **iOS Support**: This app is primarily tested on Android. iOS support is experimental and may have bugs — the developer is too poor to afford an iPhone for proper testing. If you encounter issues on iOS, please report them!
 
 This project is for **educational and private use only**. The developer does not condone or encourage copyright infringement.
 

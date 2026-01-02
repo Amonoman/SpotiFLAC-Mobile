@@ -150,8 +150,9 @@ class _MainShellState extends ConsumerState<MainShell> {
           return;
         }
         
-        // If on Search tab and has text in search bar or has content, clear it
-        if (_currentIndex == 0 && (trackState.hasSearchText || trackState.hasContent || trackState.isLoading)) {
+        // If on Search tab and has text in search bar or has content (but not loading), clear it
+        // Don't clear while loading - this prevents clearing during share intent processing
+        if (_currentIndex == 0 && !trackState.isLoading && (trackState.hasSearchText || trackState.hasContent)) {
           ref.read(trackProvider.notifier).clear();
           return;
         }
@@ -159,6 +160,11 @@ class _MainShellState extends ConsumerState<MainShell> {
         // If not on Search tab, go to Search tab first
         if (_currentIndex != 0) {
           _onNavTap(0);
+          return;
+        }
+        
+        // If loading, ignore back press
+        if (trackState.isLoading) {
           return;
         }
         

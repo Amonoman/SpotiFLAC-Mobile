@@ -348,6 +348,17 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
               progress: bytesReceived,
               total: bytesTotal,
             );
+            
+            // Update foreground service notification (Android)
+            if (Platform.isAndroid) {
+              PlatformBridge.updateDownloadServiceProgress(
+                trackName: currentItem.track.name,
+                artistName: currentItem.track.artistName,
+                progress: bytesReceived,
+                total: bytesTotal,
+                queueCount: state.queuedCount,
+              ).catchError((_) {}); // Ignore errors
+            }
           }
           
           // Log progress
@@ -403,6 +414,17 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
               progress: bytesReceived,
               total: bytesTotal > 0 ? bytesTotal : 1,
             );
+            
+            // Update foreground service notification (Android)
+            if (Platform.isAndroid) {
+              PlatformBridge.updateDownloadServiceProgress(
+                trackName: downloadingItems.first.track.name,
+                artistName: downloadingItems.first.track.artistName,
+                progress: bytesReceived,
+                total: bytesTotal > 0 ? bytesTotal : 1,
+                queueCount: state.queuedCount,
+              ).catchError((_) {}); // Ignore errors
+            }
           }
         }
       } catch (e) {
@@ -742,6 +764,24 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
     // Track total items at start for notification
     _totalQueuedAtStart = state.items.where((i) => i.status == DownloadStatus.queued).length;
 
+    // Start foreground service to keep downloads running in background (Android only)
+    if (Platform.isAndroid && _totalQueuedAtStart > 0) {
+      final firstItem = state.items.firstWhere(
+        (item) => item.status == DownloadStatus.queued,
+        orElse: () => state.items.first,
+      );
+      try {
+        await PlatformBridge.startDownloadService(
+          trackName: firstItem.track.name,
+          artistName: firstItem.track.artistName,
+          queueCount: _totalQueuedAtStart,
+        );
+        _log.d('Foreground service started');
+      } catch (e) {
+        _log.e('Failed to start foreground service: $e');
+      }
+    }
+
     // Ensure output directory is initialized before processing
     if (state.outputDir.isEmpty) {
       _log.d('Output dir empty, initializing...');
@@ -770,6 +810,16 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
     }
 
     _stopProgressPolling();
+    
+    // Stop foreground service (Android only)
+    if (Platform.isAndroid) {
+      try {
+        await PlatformBridge.stopDownloadService();
+        _log.d('Foreground service stopped');
+      } catch (e) {
+        _log.e('Failed to stop foreground service: $e');
+      }
+    }
     
     // Final cleanup after queue finishes
     if (_downloadCount > 0) {

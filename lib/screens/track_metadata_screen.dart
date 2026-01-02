@@ -938,9 +938,11 @@ class _TrackMetadataScreenState extends ConsumerState<TrackMetadataScreen> {
       return;
     }
     
-    await Share.shareXFiles(
-      [XFile(item.filePath)],
-      text: '${item.trackName} - ${item.artistName}',
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(item.filePath)],
+        text: '${item.trackName} - ${item.artistName}',
+      ),
     );
   }
 
