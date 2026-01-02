@@ -1,14 +1,26 @@
 # Changelog
 
-## [1.5.6] - 2026-01-02
+## [1.5.7] - 2026-01-02
+
+### Added
+- **Manual Quality Selection**: New option to choose audio quality before each download
+  - Toggle "Ask Before Download" in Download Settings
+  - When enabled, shows quality picker (Lossless, Hi-Res, Hi-Res Max) before downloading
+  - Works for both single track and batch downloads
+- **Live Search**: Search results appear as you type with 400ms debounce
+  - Animated search bar moves from center to top when typing
+  - Keyboard stays open during transition
+  - Back button navigates through search history (album → artist → idle)
+  - Clear button to reset search
+  - URLs still require manual submit
+- **Search Tab Header**: Added collapsing app bar to centered search view for consistent UI across all tabs
+- **Share Audio File**: Share downloaded tracks to other apps from Track Metadata screen
 
 ### Fixed
 - **Update Checker**: Fixed version comparison for versions with suffix (e.g., `1.5.0-hotfix6`)
   - Users on hotfix versions now properly receive update notifications
   - Handles `-hotfix`, `-beta`, `-rc` suffixes correctly
-
-### Added
-- **Search Tab Header**: Added collapsing app bar to centered search view for consistent UI across all tabs
+- **Settings Ripple Effect**: Fixed splash/ripple effect to properly clip within rounded card corners
 
 ### Changed
 - **Settings UI Redesign**: New Android-style grouped settings with connected cards

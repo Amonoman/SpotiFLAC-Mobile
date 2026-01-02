@@ -20,7 +20,8 @@ AppSettings _$AppSettingsFromJson(Map<String, dynamic> json) => AppSettings(
   hasSearchedBefore: json['hasSearchedBefore'] as bool? ?? false,
   folderOrganization: json['folderOrganization'] as String? ?? 'none',
   convertLyricsToRomaji: json['convertLyricsToRomaji'] as bool? ?? false,
-  historyViewMode: json['historyViewMode'] as String? ?? 'list',
+  historyViewMode: json['historyViewMode'] as String? ?? 'grid',
+  askQualityBeforeDownload: json['askQualityBeforeDownload'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$AppSettingsToJson(AppSettings instance) =>
@@ -39,4 +40,5 @@ Map<String, dynamic> _$AppSettingsToJson(AppSettings instance) =>
       'folderOrganization': instance.folderOrganization,
       'convertLyricsToRomaji': instance.convertLyricsToRomaji,
       'historyViewMode': instance.historyViewMode,
+      'askQualityBeforeDownload': instance.askQualityBeforeDownload,
     };

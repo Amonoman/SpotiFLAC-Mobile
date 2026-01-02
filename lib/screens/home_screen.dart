@@ -219,7 +219,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   width: 80,
                   height: 80,
                   fit: BoxFit.cover,
-                  placeholder: (_, __) => Container(
+                  placeholder: (_, _) => Container(
                     width: 80,
                     height: 80,
                     color: colorScheme.surfaceContainerHighest,

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:spotiflac_android/providers/download_queue_provider.dart';
 import 'package:spotiflac_android/services/platform_bridge.dart';
 
@@ -854,7 +855,7 @@ class _TrackMetadataScreenState extends ConsumerState<TrackMetadataScreen> {
               title: const Text('Share'),
               onTap: () {
                 Navigator.pop(context);
-                // TODO: Implement share
+                _shareFile(context);
               },
             ),
             ListTile(
@@ -923,6 +924,23 @@ class _TrackMetadataScreenState extends ConsumerState<TrackMetadataScreen> {
         content: Text('Copied to clipboard'),
         duration: Duration(seconds: 2),
       ),
+    );
+  }
+
+  Future<void> _shareFile(BuildContext context) async {
+    final file = File(item.filePath);
+    if (!await file.exists()) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('File not found')),
+        );
+      }
+      return;
+    }
+    
+    await Share.shareXFiles(
+      [XFile(item.filePath)],
+      text: '${item.trackName} - ${item.artistName}',
     );
   }
 

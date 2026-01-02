@@ -17,6 +17,7 @@ DownloadItem _$DownloadItemFromJson(Map<String, dynamic> json) => DownloadItem(
   filePath: json['filePath'] as String?,
   error: json['error'] as String?,
   createdAt: DateTime.parse(json['createdAt'] as String),
+  qualityOverride: json['qualityOverride'] as String?,
 );
 
 Map<String, dynamic> _$DownloadItemToJson(DownloadItem instance) =>
@@ -29,6 +30,7 @@ Map<String, dynamic> _$DownloadItemToJson(DownloadItem instance) =>
       'filePath': instance.filePath,
       'error': instance.error,
       'createdAt': instance.createdAt.toIso8601String(),
+      'qualityOverride': instance.qualityOverride,
     };
 
 const _$DownloadStatusEnumMap = {

@@ -22,6 +22,7 @@ class DownloadItem {
   final String? filePath;
   final String? error;
   final DateTime createdAt;
+  final String? qualityOverride; // Override quality for this specific download
 
   const DownloadItem({
     required this.id,
@@ -32,6 +33,7 @@ class DownloadItem {
     this.filePath,
     this.error,
     required this.createdAt,
+    this.qualityOverride,
   });
 
   DownloadItem copyWith({
@@ -43,6 +45,7 @@ class DownloadItem {
     String? filePath,
     String? error,
     DateTime? createdAt,
+    String? qualityOverride,
   }) {
     return DownloadItem(
       id: id ?? this.id,
@@ -53,6 +56,7 @@ class DownloadItem {
       filePath: filePath ?? this.filePath,
       error: error ?? this.error,
       createdAt: createdAt ?? this.createdAt,
+      qualityOverride: qualityOverride ?? this.qualityOverride,
     );
   }
 

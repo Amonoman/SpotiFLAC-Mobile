@@ -31,9 +31,12 @@ class SettingsGroup extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: children,
+      child: Material(
+        color: Colors.transparent,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: children,
+        ),
       ),
     );
   }
@@ -67,6 +70,8 @@ class SettingsItem extends StatelessWidget {
       children: [
         InkWell(
           onTap: onTap,
+          splashColor: colorScheme.primary.withValues(alpha: 0.12),
+          highlightColor: colorScheme.primary.withValues(alpha: 0.08),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Row(
@@ -147,6 +152,8 @@ class SettingsSwitchItem extends StatelessWidget {
       children: [
         InkWell(
           onTap: onChanged != null ? () => onChanged!(!value) : null,
+          splashColor: colorScheme.primary.withValues(alpha: 0.12),
+          highlightColor: colorScheme.primary.withValues(alpha: 0.08),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: Row(

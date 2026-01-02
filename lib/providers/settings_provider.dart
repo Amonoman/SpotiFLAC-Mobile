@@ -98,6 +98,11 @@ class SettingsNotifier extends Notifier<AppSettings> {
     state = state.copyWith(historyViewMode: mode);
     _saveSettings();
   }
+
+  void setAskQualityBeforeDownload(bool enabled) {
+    state = state.copyWith(askQualityBeforeDownload: enabled);
+    _saveSettings();
+  }
 }
 
 final settingsProvider = NotifierProvider<SettingsNotifier, AppSettings>(

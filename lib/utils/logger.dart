@@ -8,7 +8,7 @@ final log = Logger(
     errorMethodCount: 5,
     lineLength: 80,
     colors: true,
-    printEmojis: true,
+    printEmojis: false,
     dateTimeFormat: DateTimeFormat.none,
   ),
   level: Level.debug,

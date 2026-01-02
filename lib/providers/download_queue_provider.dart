@@ -446,7 +446,7 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
     );
   }
 
-  String addToQueue(Track track, String service) {
+  String addToQueue(Track track, String service, {String? qualityOverride}) {
     // Sync settings before adding to queue
     final settings = ref.read(settingsProvider);
     updateSettings(settings);
@@ -457,6 +457,7 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
       track: track,
       service: service,
       createdAt: DateTime.now(),
+      qualityOverride: qualityOverride,
     );
 
     state = state.copyWith(items: [...state.items, item]);
@@ -469,7 +470,7 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
     return id;
   }
 
-  void addMultipleToQueue(List<Track> tracks, String service) {
+  void addMultipleToQueue(List<Track> tracks, String service, {String? qualityOverride}) {
     // Sync settings before adding to queue
     final settings = ref.read(settingsProvider);
     updateSettings(settings);
@@ -481,6 +482,7 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
         track: track,
         service: service,
         createdAt: DateTime.now(),
+        qualityOverride: qualityOverride,
       );
     }).toList();
 
@@ -814,11 +816,14 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
       final settings = ref.read(settingsProvider);
       final outputDir = await _buildOutputDir(item.track, settings.folderOrganization);
       
+      // Use quality override if set, otherwise use default from settings
+      final quality = item.qualityOverride ?? state.audioQuality;
+      
       Map<String, dynamic> result;
 
       if (state.autoFallback) {
         _log.d('Using auto-fallback mode');
-        _log.d('Quality: ${state.audioQuality}');
+        _log.d('Quality: $quality${item.qualityOverride != null ? ' (override)' : ''}');
         _log.d('Output dir: $outputDir');
         result = await PlatformBridge.downloadWithFallback(
           isrc: item.track.isrc ?? '',
@@ -830,7 +835,7 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
           coverUrl: item.track.coverUrl,
           outputDir: outputDir,
           filenameFormat: state.filenameFormat,
-          quality: state.audioQuality,
+          quality: quality,
           trackNumber: item.track.trackNumber ?? 1,
           discNumber: item.track.discNumber ?? 1,
           releaseDate: item.track.releaseDate,
@@ -850,7 +855,7 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
           coverUrl: item.track.coverUrl,
           outputDir: outputDir,
           filenameFormat: state.filenameFormat,
-          quality: state.audioQuality,
+          quality: quality,
           trackNumber: item.track.trackNumber ?? 1,
           discNumber: item.track.discNumber ?? 1,
           releaseDate: item.track.releaseDate,
@@ -927,7 +932,7 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
               discNumber: item.track.discNumber,
               duration: item.track.duration,
               releaseDate: item.track.releaseDate,
-              quality: state.audioQuality,
+              quality: quality,
             ),
           );
           

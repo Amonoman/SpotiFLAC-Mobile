@@ -73,25 +73,34 @@ class DownloadSettingsPage extends ConsumerWidget {
           SliverToBoxAdapter(
             child: SettingsGroup(
               children: [
-                _QualityOption(
-                  title: 'FLAC Lossless',
-                  subtitle: '16-bit / 44.1kHz',
-                  isSelected: settings.audioQuality == 'LOSSLESS',
-                  onTap: () => ref.read(settingsProvider.notifier).setAudioQuality('LOSSLESS'),
+                SettingsSwitchItem(
+                  icon: Icons.tune,
+                  title: 'Ask Before Download',
+                  subtitle: 'Choose quality for each download',
+                  value: settings.askQualityBeforeDownload,
+                  onChanged: (value) => ref.read(settingsProvider.notifier).setAskQualityBeforeDownload(value),
                 ),
-                _QualityOption(
-                  title: 'Hi-Res FLAC',
-                  subtitle: '24-bit / up to 96kHz',
-                  isSelected: settings.audioQuality == 'HI_RES',
-                  onTap: () => ref.read(settingsProvider.notifier).setAudioQuality('HI_RES'),
-                ),
-                _QualityOption(
-                  title: 'Hi-Res FLAC Max',
-                  subtitle: '24-bit / up to 192kHz',
-                  isSelected: settings.audioQuality == 'HI_RES_LOSSLESS',
-                  onTap: () => ref.read(settingsProvider.notifier).setAudioQuality('HI_RES_LOSSLESS'),
-                  showDivider: false,
-                ),
+                if (!settings.askQualityBeforeDownload) ...[
+                  _QualityOption(
+                    title: 'FLAC Lossless',
+                    subtitle: '16-bit / 44.1kHz',
+                    isSelected: settings.audioQuality == 'LOSSLESS',
+                    onTap: () => ref.read(settingsProvider.notifier).setAudioQuality('LOSSLESS'),
+                  ),
+                  _QualityOption(
+                    title: 'Hi-Res FLAC',
+                    subtitle: '24-bit / up to 96kHz',
+                    isSelected: settings.audioQuality == 'HI_RES',
+                    onTap: () => ref.read(settingsProvider.notifier).setAudioQuality('HI_RES'),
+                  ),
+                  _QualityOption(
+                    title: 'Hi-Res FLAC Max',
+                    subtitle: '24-bit / up to 192kHz',
+                    isSelected: settings.audioQuality == 'HI_RES_LOSSLESS',
+                    onTap: () => ref.read(settingsProvider.notifier).setAudioQuality('HI_RES_LOSSLESS'),
+                    showDivider: false,
+                  ),
+                ],
               ],
             ),
           ),

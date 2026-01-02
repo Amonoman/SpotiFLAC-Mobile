@@ -18,6 +18,7 @@ class AppSettings {
   final String folderOrganization; // none, artist, album, artist_album
   final bool convertLyricsToRomaji; // Convert Japanese lyrics to romaji
   final String historyViewMode; // list, grid
+  final bool askQualityBeforeDownload; // Show quality picker before each download
 
   const AppSettings({
     this.defaultService = 'tidal',
@@ -34,6 +35,7 @@ class AppSettings {
     this.folderOrganization = 'none', // Default: no folder organization
     this.convertLyricsToRomaji = false, // Default: keep original Japanese
     this.historyViewMode = 'grid', // Default: grid view
+    this.askQualityBeforeDownload = false, // Default: use preset quality
   });
 
   AppSettings copyWith({
@@ -51,6 +53,7 @@ class AppSettings {
     String? folderOrganization,
     bool? convertLyricsToRomaji,
     String? historyViewMode,
+    bool? askQualityBeforeDownload,
   }) {
     return AppSettings(
       defaultService: defaultService ?? this.defaultService,
@@ -67,6 +70,7 @@ class AppSettings {
       folderOrganization: folderOrganization ?? this.folderOrganization,
       convertLyricsToRomaji: convertLyricsToRomaji ?? this.convertLyricsToRomaji,
       historyViewMode: historyViewMode ?? this.historyViewMode,
+      askQualityBeforeDownload: askQualityBeforeDownload ?? this.askQualityBeforeDownload,
     );
   }
 
