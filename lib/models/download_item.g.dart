@@ -36,6 +36,7 @@ Map<String, dynamic> _$DownloadItemToJson(DownloadItem instance) =>
 const _$DownloadStatusEnumMap = {
   DownloadStatus.queued: 'queued',
   DownloadStatus.downloading: 'downloading',
+  DownloadStatus.finalizing: 'finalizing',
   DownloadStatus.completed: 'completed',
   DownloadStatus.failed: 'failed',
   DownloadStatus.skipped: 'skipped',

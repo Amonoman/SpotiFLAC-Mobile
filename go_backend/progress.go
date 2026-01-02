@@ -13,6 +13,7 @@ type DownloadProgress struct {
 	BytesTotal    int64   `json:"bytes_total"`
 	BytesReceived int64   `json:"bytes_received"`
 	IsDownloading bool    `json:"is_downloading"`
+	Status        string  `json:"status"` // "downloading", "finalizing", "completed"
 }
 
 // ItemProgress represents progress for a single download item
@@ -22,6 +23,7 @@ type ItemProgress struct {
 	BytesReceived int64   `json:"bytes_received"`
 	Progress      float64 `json:"progress"` // 0.0 to 1.0
 	IsDownloading bool    `json:"is_downloading"`
+	Status        string  `json:"status"` // "downloading", "finalizing", "completed"
 }
 
 // MultiProgress holds progress for multiple concurrent downloads
@@ -82,6 +84,7 @@ func StartItemProgress(itemID string) {
 		BytesReceived: 0,
 		Progress:      0,
 		IsDownloading: true,
+		Status:        "downloading",
 	}
 }
 
@@ -117,6 +120,46 @@ func CompleteItemProgress(itemID string) {
 		item.Progress = 1.0
 		item.IsDownloading = false
 	}
+}
+
+// SetItemProgress sets progress for an item directly (used to force 100% before embedding)
+func SetItemProgress(itemID string, progress float64, bytesReceived, bytesTotal int64) {
+	multiMu.Lock()
+	if item, ok := multiProgress.Items[itemID]; ok {
+		item.Progress = progress
+		if bytesReceived > 0 {
+			item.BytesReceived = bytesReceived
+		}
+		if bytesTotal > 0 {
+			item.BytesTotal = bytesTotal
+		}
+	}
+	multiMu.Unlock()
+	
+	// Also update legacy progress for backward compatibility
+	progressMu.Lock()
+	if progress >= 1.0 {
+		currentProgress.Progress = 100.0
+	} else {
+		currentProgress.Progress = progress * 100.0
+	}
+	progressMu.Unlock()
+}
+
+// SetItemFinalizing marks an item as finalizing (embedding metadata)
+func SetItemFinalizing(itemID string) {
+	multiMu.Lock()
+	if item, ok := multiProgress.Items[itemID]; ok {
+		item.Progress = 1.0
+		item.Status = "finalizing"
+	}
+	multiMu.Unlock()
+	
+	// Also update legacy progress
+	progressMu.Lock()
+	currentProgress.Progress = 100.0
+	currentProgress.Status = "finalizing"
+	progressMu.Unlock()
 }
 
 // RemoveItemProgress removes progress tracking for an item
@@ -161,6 +204,7 @@ func SetCurrentFile(filename string) {
 	currentProgress.Progress = 0
 	currentProgress.CurrentFile = filename
 	currentProgress.IsDownloading = true
+	currentProgress.Status = "downloading"
 }
 
 // ResetProgress resets the download progress

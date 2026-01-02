@@ -318,6 +318,13 @@ func downloadFromAmazon(req DownloadRequest) (string, error) {
 		return "", fmt.Errorf("download failed: %w", err)
 	}
 
+	// Set progress to 100% and status to finalizing (before embedding)
+	// This makes the UI show "Finalizing..." while embedding happens
+	if req.ItemID != "" {
+		SetItemProgress(req.ItemID, 1.0, 0, 0)
+		SetItemFinalizing(req.ItemID)
+	}
+
 	// Log track info from DoubleDouble (for debugging)
 	if trackName != "" && artistName != "" {
 		fmt.Printf("[Amazon] DoubleDouble returned: %s - %s\n", artistName, trackName)

@@ -905,6 +905,13 @@ func downloadFromTidal(req DownloadRequest) (string, error) {
 		return "", fmt.Errorf("download failed: %w", err)
 	}
 
+	// Set progress to 100% and status to finalizing (before embedding)
+	// This makes the UI show "Finalizing..." while embedding happens
+	if req.ItemID != "" {
+		SetItemProgress(req.ItemID, 1.0, 0, 0)
+		SetItemFinalizing(req.ItemID)
+	}
+
 	// Check if file was saved as M4A (DASH stream) instead of FLAC
 	// downloadFromManifest saves DASH streams as .m4a
 	actualOutputPath := outputPath

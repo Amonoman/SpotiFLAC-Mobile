@@ -24,9 +24,24 @@ const (
 	artistBaseURL       = "https://api.spotify.com/v1/artists/%s"
 	artistAlbumsURL     = "https://api.spotify.com/v1/artists/%s/albums"
 	searchBaseURL       = "https://api.spotify.com/v1/search"
+	
+	// Cache TTL settings
+	artistCacheTTL = 10 * time.Minute
+	searchCacheTTL = 5 * time.Minute
+	albumCacheTTL  = 10 * time.Minute
 )
 
 var errInvalidSpotifyURL = errors.New("invalid or unsupported Spotify URL")
+
+// cacheEntry holds cached data with expiration
+type cacheEntry struct {
+	data      interface{}
+	expiresAt time.Time
+}
+
+func (e *cacheEntry) isExpired() bool {
+	return time.Now().After(e.expiresAt)
+}
 
 // SpotifyMetadataClient handles Spotify API interactions
 type SpotifyMetadataClient struct {
@@ -39,6 +54,12 @@ type SpotifyMetadataClient struct {
 	rng            *rand.Rand
 	rngMu          sync.Mutex
 	userAgent      string
+	
+	// Caches to reduce API calls
+	artistCache map[string]*cacheEntry // key: artistID
+	searchCache map[string]*cacheEntry // key: query+type
+	albumCache  map[string]*cacheEntry // key: albumID
+	cacheMu     sync.RWMutex
 }
 
 // NewSpotifyMetadataClient creates a new Spotify client
@@ -65,6 +86,9 @@ func NewSpotifyMetadataClient() *SpotifyMetadataClient {
 		clientID:     clientID,
 		clientSecret: clientSecret,
 		rng:          rand.New(src),
+		artistCache:  make(map[string]*cacheEntry),
+		searchCache:  make(map[string]*cacheEntry),
+		albumCache:   make(map[string]*cacheEntry),
 	}
 	c.userAgent = c.randomUserAgent()
 	return c
@@ -174,6 +198,21 @@ type TrackResponse struct {
 type SearchResult struct {
 	Tracks []TrackMetadata `json:"tracks"`
 	Total  int             `json:"total"`
+}
+
+// SearchArtistResult represents an artist in search results
+type SearchArtistResult struct {
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Images     string `json:"images"`
+	Followers  int    `json:"followers"`
+	Popularity int    `json:"popularity"`
+}
+
+// SearchAllResult represents combined search results for tracks and artists
+type SearchAllResult struct {
+	Tracks  []TrackMetadata      `json:"tracks"`
+	Artists []SearchArtistResult `json:"artists"`
 }
 
 type spotifyURI struct {
@@ -299,6 +338,98 @@ func (c *SpotifyMetadataClient) SearchTracks(ctx context.Context, query string, 
 	return result, nil
 }
 
+// SearchAll searches for tracks and artists on Spotify
+func (c *SpotifyMetadataClient) SearchAll(ctx context.Context, query string, trackLimit, artistLimit int) (*SearchAllResult, error) {
+	// Create cache key
+	cacheKey := fmt.Sprintf("all:%s:%d:%d", query, trackLimit, artistLimit)
+	
+	// Check cache first
+	c.cacheMu.RLock()
+	if entry, ok := c.searchCache[cacheKey]; ok && !entry.isExpired() {
+		c.cacheMu.RUnlock()
+		return entry.data.(*SearchAllResult), nil
+	}
+	c.cacheMu.RUnlock()
+
+	token, err := c.getAccessToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	searchURL := fmt.Sprintf("%s?q=%s&type=track,artist&limit=%d", searchBaseURL, url.QueryEscape(query), trackLimit)
+	
+	var response struct {
+		Tracks struct {
+			Items []trackFull `json:"items"`
+		} `json:"tracks"`
+		Artists struct {
+			Items []struct {
+				ID         string  `json:"id"`
+				Name       string  `json:"name"`
+				Images     []image `json:"images"`
+				Followers  struct {
+					Total int `json:"total"`
+				} `json:"followers"`
+				Popularity int `json:"popularity"`
+			} `json:"items"`
+		} `json:"artists"`
+	}
+	
+	if err := c.getJSON(ctx, searchURL, token, &response); err != nil {
+		return nil, err
+	}
+
+	result := &SearchAllResult{
+		Tracks:  make([]TrackMetadata, 0, len(response.Tracks.Items)),
+		Artists: make([]SearchArtistResult, 0, len(response.Artists.Items)),
+	}
+
+	for _, track := range response.Tracks.Items {
+		result.Tracks = append(result.Tracks, TrackMetadata{
+			SpotifyID:   track.ID,
+			Artists:     joinArtists(track.Artists),
+			Name:        track.Name,
+			AlbumName:   track.Album.Name,
+			AlbumArtist: joinArtists(track.Album.Artists),
+			DurationMS:  track.DurationMS,
+			Images:      firstImageURL(track.Album.Images),
+			ReleaseDate: track.Album.ReleaseDate,
+			TrackNumber: track.TrackNumber,
+			TotalTracks: track.Album.TotalTracks,
+			DiscNumber:  track.DiscNumber,
+			ExternalURL: track.ExternalURL.Spotify,
+			ISRC:        track.ExternalID.ISRC,
+		})
+	}
+
+	// Limit artists to artistLimit
+	artistCount := len(response.Artists.Items)
+	if artistCount > artistLimit {
+		artistCount = artistLimit
+	}
+	
+	for i := 0; i < artistCount; i++ {
+		artist := response.Artists.Items[i]
+		result.Artists = append(result.Artists, SearchArtistResult{
+			ID:         artist.ID,
+			Name:       artist.Name,
+			Images:     firstImageURL(artist.Images),
+			Followers:  artist.Followers.Total,
+			Popularity: artist.Popularity,
+		})
+	}
+
+	// Store in cache
+	c.cacheMu.Lock()
+	c.searchCache[cacheKey] = &cacheEntry{
+		data:      result,
+		expiresAt: time.Now().Add(searchCacheTTL),
+	}
+	c.cacheMu.Unlock()
+
+	return result, nil
+}
+
 func (c *SpotifyMetadataClient) fetchTrack(ctx context.Context, trackID, token string) (*TrackResponse, error) {
 	var data trackFull
 	if err := c.getJSON(ctx, fmt.Sprintf(trackBaseURL, trackID), token, &data); err != nil {
@@ -325,6 +456,14 @@ func (c *SpotifyMetadataClient) fetchTrack(ctx context.Context, trackID, token s
 }
 
 func (c *SpotifyMetadataClient) fetchAlbum(ctx context.Context, albumID, token string) (*AlbumResponsePayload, error) {
+	// Check cache first
+	c.cacheMu.RLock()
+	if entry, ok := c.albumCache[albumID]; ok && !entry.isExpired() {
+		c.cacheMu.RUnlock()
+		return entry.data.(*AlbumResponsePayload), nil
+	}
+	c.cacheMu.RUnlock()
+
 	var data struct {
 		Name        string   `json:"name"`
 		ReleaseDate string   `json:"release_date"`
@@ -380,10 +519,20 @@ func (c *SpotifyMetadataClient) fetchAlbum(ctx context.Context, albumID, token s
 		})
 	}
 
-	return &AlbumResponsePayload{
+	result := &AlbumResponsePayload{
 		AlbumInfo: info,
 		TrackList: tracks,
-	}, nil
+	}
+
+	// Store in cache
+	c.cacheMu.Lock()
+	c.albumCache[albumID] = &cacheEntry{
+		data:      result,
+		expiresAt: time.Now().Add(albumCacheTTL),
+	}
+	c.cacheMu.Unlock()
+
+	return result, nil
 }
 
 func (c *SpotifyMetadataClient) fetchPlaylist(ctx context.Context, playlistID, token string) (*PlaylistResponsePayload, error) {
@@ -442,6 +591,14 @@ func (c *SpotifyMetadataClient) fetchPlaylist(ctx context.Context, playlistID, t
 }
 
 func (c *SpotifyMetadataClient) fetchArtist(ctx context.Context, artistID, token string) (*ArtistResponsePayload, error) {
+	// Check cache first
+	c.cacheMu.RLock()
+	if entry, ok := c.artistCache[artistID]; ok && !entry.isExpired() {
+		c.cacheMu.RUnlock()
+		return entry.data.(*ArtistResponsePayload), nil
+	}
+	c.cacheMu.RUnlock()
+
 	// Fetch artist info
 	var artistData struct {
 		ID         string  `json:"id"`
@@ -517,10 +674,20 @@ func (c *SpotifyMetadataClient) fetchArtist(ctx context.Context, artistID, token
 		}
 	}
 
-	return &ArtistResponsePayload{
+	result := &ArtistResponsePayload{
 		ArtistInfo: artistInfo,
 		Albums:     albums,
-	}, nil
+	}
+
+	// Store in cache
+	c.cacheMu.Lock()
+	c.artistCache[artistID] = &cacheEntry{
+		data:      result,
+		expiresAt: time.Now().Add(artistCacheTTL),
+	}
+	c.cacheMu.Unlock()
+
+	return result, nil
 }
 
 func (c *SpotifyMetadataClient) fetchTrackISRC(ctx context.Context, trackID, token string) string {

@@ -424,6 +424,25 @@ class _QueueTabState extends ConsumerState<QueueTab> {
           ],
         );
         
+      case DownloadStatus.finalizing:
+        // Finalizing: Show spinner with edit icon (embedding metadata)
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 40,
+              height: 40,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  CircularProgressIndicator(strokeWidth: 3, color: colorScheme.tertiary),
+                  Icon(Icons.edit_note, color: colorScheme.tertiary, size: 16),
+                ],
+              ),
+            ),
+          ],
+        );
+        
       case DownloadStatus.completed:
         // Completed: Show play button and check icon
         final fileExists = _checkFileExists(item.filePath);

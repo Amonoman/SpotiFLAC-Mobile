@@ -1,5 +1,90 @@
 # Changelog
 
+## [2.0.0] - 2026-01-03
+
+### Added
+- **Artist Search Results**: Search now shows artists alongside tracks
+  - Horizontal scrollable artist cards with circular avatars
+  - Tap artist to view their discography
+- **Multi-Layer Caching System**: Aggressive caching to minimize API calls
+  - Go backend cache: Artist (10 min), Album (10 min), Search (5 min)
+  - Flutter memory cache: Instant navigation for previously viewed artists/albums
+  - Duplicate search prevention: Same query won't trigger new API call
+- **Real-time Download Status**: Track items show live download progress
+  - Queued: Hourglass icon
+  - Downloading: Circular progress with percentage
+  - Completed: Check icon
+  - Works in Home search, Album, and Playlist screens
+- **Downloaded Track Indicator**: Tracks already in history show check mark
+  - Lazy file verification: Only checks file existence when tapped
+  - Auto-removes from history if file was deleted, allowing re-download
+  - Prevents accidental duplicate downloads
+- **Pre-release Support**: GitHub Actions auto-detects preview/beta/rc/alpha tags
+  - Stable users won't receive update notifications for preview versions
+
+### Changed
+- **Instant Navigation UX**: Navigate to Artist/Album screens immediately
+  - Header (name, cover) shows instantly from available data
+  - Content (albums/tracks) loads in background inside the screen
+  - Second visit to same artist/album is instant from Flutter cache
+- **Search Results UI Redesign**: 
+  - Removed "Download All" button from search results
+  - Added "Songs" section header (matches "Artists" header style)
+  - Track list now in grouped card with rounded corners (like Settings)
+  - Track items with dividers and InkWell ripple effect
+- **Larger UI Elements**: Improved touch targets and visual hierarchy
+  - Recent downloads: Album art 56→100px, section height 80→130px
+  - Artist cards: Avatar 72→88px, container 90→100px
+  - Track items: Album art 48→56px
+- **Optimized Search**: Pressing Enter with same query no longer triggers duplicate search
+- **Smoother Progress Animation**: Progress jumps to 100% after download completes
+  - Embedding (cover, metadata, lyrics) happens in background without blocking UI
+- **Finalizing Status**: Shows "Finalizing" indicator while embedding metadata
+  - Distinct icon (edit_note) with tertiary color
+  - User knows download is complete, just processing metadata
+- **Consistent Download Button Sizes**: All download/status buttons now 44x44px
+- **Better Dynamic Color Contrast**: Improved visibility for cards and chips with dynamic color
+  - Settings cards use overlay colors for better contrast
+  - Theme/view mode chips have visible borders in light mode
+- **Navigation Bar Styling**: Distinct background color from content area
+- **Ask Before Download Default**: Now enabled by default for better UX
+- **Quality Picker Track Info**: Shows track name, artist, and cover in quality picker
+  - Tap to expand long track titles
+  - Expand icon only shows when title is truncated
+  - Ripple effect follows rounded corners including drag handle
+- **Update Dialog Redesign**: Material Expressive 3 style
+  - Icon header with container
+  - Version chips with "Current" and "New" labels
+  - Changelog in rounded card
+  - Download progress with percentage indicator
+  - Cleaner button layout
+
+### Fixed
+- **Artist Profile Images**: Fixed artist images not showing in search results (field name mismatch)
+- **Album Card Overflow**: Fixed 5px overflow in artist discography album cards
+- **Optimized Rebuilds**: Each track item only rebuilds when its own status changes
+  - Uses Riverpod `select()` for granular state watching
+  - Prevents entire list rebuild on progress updates
+- **Update Notification Stuck**: Fixed notification staying at 100% after download complete
+
+## [1.6.3] - 2026-01-03
+
+### Added
+- **Predictive Back Navigation**: Support for Android 14+ predictive back gesture with smooth animations
+- **Separate Detail Screens**: Album, Artist, and Playlist now open as dedicated screens with Material Expressive 3 design
+  - Collapsing header with cover art and gradient overlay
+  - Card-based info section with rounded corners (20px radius)
+  - Tonal download buttons with circular shape
+  - Quality picker bottom sheet with drag handle
+- **Double-Tap to Exit**: Press back twice to exit app when at home screen (replaces exit dialog)
+
+### Changed
+- **Navigation Architecture**: Refactored from state-based to screen-based navigation
+  - Album/Artist/Playlist URLs navigate to dedicated screens via `Navigator.push()`
+  - Enables native predictive back gesture animations
+  - Search results stay on Home tab for quick downloads
+- **Simplified State Management**: Removed `previousState` chain from TrackProvider since Navigator handles back navigation
+
 ## [1.6.2] - 2026-01-02
 
 ### Added

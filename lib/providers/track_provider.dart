@@ -6,54 +6,59 @@ class TrackState {
   final List<Track> tracks;
   final bool isLoading;
   final String? error;
+  final String? albumId;
   final String? albumName;
   final String? playlistName;
+  final String? artistId;
   final String? artistName;
   final String? coverUrl;
   final List<ArtistAlbum>? artistAlbums; // For artist page
-  final TrackState? previousState; // For back navigation
+  final List<SearchArtist>? searchArtists; // For search results
   final bool hasSearchText; // For back button handling
 
   const TrackState({
     this.tracks = const [],
     this.isLoading = false,
     this.error,
+    this.albumId,
     this.albumName,
     this.playlistName,
+    this.artistId,
     this.artistName,
     this.coverUrl,
     this.artistAlbums,
-    this.previousState,
+    this.searchArtists,
     this.hasSearchText = false,
   });
 
-  bool get canGoBack => previousState != null;
-  
-  bool get hasContent => tracks.isNotEmpty || artistAlbums != null;
+  bool get hasContent => tracks.isNotEmpty || artistAlbums != null || (searchArtists != null && searchArtists!.isNotEmpty);
 
   TrackState copyWith({
     List<Track>? tracks,
     bool? isLoading,
     String? error,
+    String? albumId,
     String? albumName,
     String? playlistName,
+    String? artistId,
     String? artistName,
     String? coverUrl,
     List<ArtistAlbum>? artistAlbums,
-    TrackState? previousState,
-    bool clearPreviousState = false,
+    List<SearchArtist>? searchArtists,
     bool? hasSearchText,
   }) {
     return TrackState(
       tracks: tracks ?? this.tracks,
       isLoading: isLoading ?? this.isLoading,
       error: error,
+      albumId: albumId ?? this.albumId,
       albumName: albumName ?? this.albumName,
       playlistName: playlistName ?? this.playlistName,
+      artistId: artistId ?? this.artistId,
       artistName: artistName ?? this.artistName,
       coverUrl: coverUrl ?? this.coverUrl,
       artistAlbums: artistAlbums ?? this.artistAlbums,
-      previousState: clearPreviousState ? null : (previousState ?? this.previousState),
+      searchArtists: searchArtists ?? this.searchArtists,
       hasSearchText: hasSearchText ?? this.hasSearchText,
     );
   }
@@ -80,6 +85,23 @@ class ArtistAlbum {
   });
 }
 
+/// Represents an artist in search results
+class SearchArtist {
+  final String id;
+  final String name;
+  final String? imageUrl;
+  final int followers;
+  final int popularity;
+
+  const SearchArtist({
+    required this.id,
+    required this.name,
+    this.imageUrl,
+    required this.followers,
+    required this.popularity,
+  });
+}
+
 class TrackNotifier extends Notifier<TrackState> {
   /// Request ID to track and cancel outdated requests
   int _currentRequestId = 0;
@@ -95,19 +117,8 @@ class TrackNotifier extends Notifier<TrackState> {
   Future<void> fetchFromUrl(String url) async {
     // Increment request ID to cancel any pending requests
     final requestId = ++_currentRequestId;
-    
-    // Save current state for back navigation (only if we have content or it's empty)
-    final savedState = state.hasContent ? TrackState(
-      tracks: state.tracks,
-      albumName: state.albumName,
-      playlistName: state.playlistName,
-      artistName: state.artistName,
-      coverUrl: state.coverUrl,
-      artistAlbums: state.artistAlbums,
-      previousState: state.previousState,
-    ) : const TrackState(); // Empty state for back to home
 
-    state = TrackState(isLoading: true, previousState: savedState);
+    state = const TrackState(isLoading: true);
 
     try {
       final parsed = await PlatformBridge.parseSpotifyUrl(url);
@@ -125,7 +136,6 @@ class TrackNotifier extends Notifier<TrackState> {
           tracks: [track],
           isLoading: false,
           coverUrl: track.coverUrl,
-          previousState: savedState,
         );
       } else if (type == 'album') {
         final albumInfo = metadata['album_info'] as Map<String, dynamic>;
@@ -134,9 +144,9 @@ class TrackNotifier extends Notifier<TrackState> {
         state = TrackState(
           tracks: tracks,
           isLoading: false,
+          albumId: parsed['id'] as String?,
           albumName: albumInfo['name'] as String?,
           coverUrl: albumInfo['images'] as String?,
-          previousState: savedState,
         );
       } else if (type == 'playlist') {
         final playlistInfo = metadata['playlist_info'] as Map<String, dynamic>;
@@ -148,7 +158,6 @@ class TrackNotifier extends Notifier<TrackState> {
           isLoading: false,
           playlistName: owner?['name'] as String?,
           coverUrl: owner?['images'] as String?,
-          previousState: savedState,
         );
       } else if (type == 'artist') {
         final artistInfo = metadata['artist_info'] as Map<String, dynamic>;
@@ -157,49 +166,42 @@ class TrackNotifier extends Notifier<TrackState> {
         state = TrackState(
           tracks: [], // No tracks for artist view
           isLoading: false,
+          artistId: artistInfo['id'] as String?,
           artistName: artistInfo['name'] as String?,
           coverUrl: artistInfo['images'] as String?,
           artistAlbums: albums,
-          previousState: savedState,
         );
       }
     } catch (e) {
       if (!_isRequestValid(requestId)) return; // Request cancelled
-      state = TrackState(isLoading: false, error: e.toString(), previousState: savedState);
+      state = TrackState(isLoading: false, error: e.toString());
     }
   }
 
   Future<void> search(String query) async {
     // Increment request ID to cancel any pending requests
     final requestId = ++_currentRequestId;
-    
-    // Save current state for back navigation
-    final savedState = state.hasContent ? TrackState(
-      tracks: state.tracks,
-      albumName: state.albumName,
-      playlistName: state.playlistName,
-      artistName: state.artistName,
-      coverUrl: state.coverUrl,
-      artistAlbums: state.artistAlbums,
-      previousState: state.previousState,
-    ) : const TrackState();
 
-    state = TrackState(isLoading: true, previousState: savedState);
+    state = const TrackState(isLoading: true);
 
     try {
-      final results = await PlatformBridge.searchSpotify(query, limit: 20);
+      final results = await PlatformBridge.searchSpotifyAll(query, trackLimit: 20, artistLimit: 5);
       if (!_isRequestValid(requestId)) return; // Request cancelled
       
       final trackList = results['tracks'] as List<dynamic>? ?? [];
+      final artistList = results['artists'] as List<dynamic>? ?? [];
+      
       final tracks = trackList.map((t) => _parseSearchTrack(t as Map<String, dynamic>)).toList();
+      final artists = artistList.map((a) => _parseSearchArtist(a as Map<String, dynamic>)).toList();
+      
       state = TrackState(
         tracks: tracks,
+        searchArtists: artists,
         isLoading: false,
-        previousState: savedState,
       );
     } catch (e) {
       if (!_isRequestValid(requestId)) return; // Request cancelled
-      state = TrackState(isLoading: false, error: e.toString(), previousState: savedState);
+      state = TrackState(isLoading: false, error: e.toString());
     }
   }
 
@@ -250,59 +252,6 @@ class TrackNotifier extends Notifier<TrackState> {
     state = state.copyWith(hasSearchText: hasText);
   }
 
-  /// Go back to previous state (if available)
-  bool goBack() {
-    if (state.previousState != null) {
-      state = state.previousState!;
-      return true;
-    }
-    return false;
-  }
-
-  /// Fetch album from artist view - saves current artist state for back navigation
-  Future<void> fetchAlbumFromArtist(String albumId) async {
-    // Increment request ID to cancel any pending requests
-    final requestId = ++_currentRequestId;
-    
-    // Save current artist state before fetching album
-    final savedState = TrackState(
-      artistName: state.artistName,
-      coverUrl: state.coverUrl,
-      artistAlbums: state.artistAlbums,
-      previousState: state.previousState, // Keep the chain
-    );
-
-    state = TrackState(
-      isLoading: true,
-      previousState: savedState,
-    );
-
-    try {
-      final url = 'https://open.spotify.com/album/$albumId';
-      final metadata = await PlatformBridge.getSpotifyMetadata(url);
-      if (!_isRequestValid(requestId)) return; // Request cancelled
-      
-      final albumInfo = metadata['album_info'] as Map<String, dynamic>;
-      final trackList = metadata['track_list'] as List<dynamic>;
-      final tracks = trackList.map((t) => _parseTrack(t as Map<String, dynamic>)).toList();
-      
-      state = TrackState(
-        tracks: tracks,
-        isLoading: false,
-        albumName: albumInfo['name'] as String?,
-        coverUrl: albumInfo['images'] as String?,
-        previousState: savedState,
-      );
-    } catch (e) {
-      if (!_isRequestValid(requestId)) return; // Request cancelled
-      state = TrackState(
-        isLoading: false,
-        error: e.toString(),
-        previousState: savedState,
-      );
-    }
-  }
-
   Track _parseTrack(Map<String, dynamic> data) {
     return Track(
       id: data['spotify_id'] as String? ?? '',
@@ -344,6 +293,16 @@ class TrackNotifier extends Notifier<TrackState> {
       coverUrl: data['images'] as String?,
       albumType: data['album_type'] as String? ?? 'album',
       artists: data['artists'] as String? ?? '',
+    );
+  }
+
+  SearchArtist _parseSearchArtist(Map<String, dynamic> data) {
+    return SearchArtist(
+      id: data['id'] as String? ?? '',
+      name: data['name'] as String? ?? '',
+      imageUrl: data['images'] as String?,
+      followers: data['followers'] as int? ?? 0,
+      popularity: data['popularity'] as int? ?? 0,
     );
   }
 }

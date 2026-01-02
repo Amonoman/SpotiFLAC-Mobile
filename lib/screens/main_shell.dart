@@ -27,6 +27,7 @@ class _MainShellState extends ConsumerState<MainShell> {
   late PageController _pageController;
   bool _hasCheckedUpdate = false;
   StreamSubscription<String>? _shareSubscription;
+  DateTime? _lastBackPress; // For double-tap to exit
 
   @override
   void initState() {
@@ -120,65 +121,66 @@ class _MainShellState extends ConsumerState<MainShell> {
     }
   }
 
-  Future<bool> _showExitDialog() async {
-    return await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Exit App'),
-        content: const Text('Are you sure you want to exit?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('No'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Yes'),
-          ),
-        ],
-      ),
-    ) ?? false;
+  /// Handle back press with double-tap to exit
+  void _handleBackPress() {
+    final trackState = ref.read(trackProvider);
+    
+    // If on Home tab and has text in search bar or has content (but not loading), clear it
+    if (_currentIndex == 0 && !trackState.isLoading && (trackState.hasSearchText || trackState.hasContent)) {
+      ref.read(trackProvider.notifier).clear();
+      return;
+    }
+    
+    // If not on Home tab, go to Home tab first
+    if (_currentIndex != 0) {
+      _onNavTap(0);
+      return;
+    }
+    
+    // If loading, ignore back press
+    if (trackState.isLoading) {
+      return;
+    }
+    
+    // Double-tap to exit
+    final now = DateTime.now();
+    if (_lastBackPress != null && now.difference(_lastBackPress!) < const Duration(seconds: 2)) {
+      SystemNavigator.pop();
+    } else {
+      _lastBackPress = now;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Press back again to exit'),
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final queueState = ref.watch(downloadQueueProvider.select((s) => s.queuedCount));
     final trackState = ref.watch(trackProvider);
+    
+    // Determine if we can pop (for predictive back animation)
+    // canPop is true when we're at root with no content - enables predictive back gesture
+    final canPop = _currentIndex == 0 && 
+                   !trackState.hasSearchText && 
+                   !trackState.hasContent && 
+                   !trackState.isLoading;
 
     return PopScope(
-      canPop: false,
+      canPop: canPop,
       onPopInvokedWithResult: (didPop, result) async {
-        if (didPop) return;
-        
-        // If on Search tab and can go back in track history, go back
-        if (_currentIndex == 0 && trackState.canGoBack) {
-          ref.read(trackProvider.notifier).goBack();
+        if (didPop) {
+          // System handled the pop - this means predictive back completed
+          // We need to handle double-tap to exit here
           return;
         }
         
-        // If on Search tab and has text in search bar or has content (but not loading), clear it
-        // Don't clear while loading - this prevents clearing during share intent processing
-        if (_currentIndex == 0 && !trackState.isLoading && (trackState.hasSearchText || trackState.hasContent)) {
-          ref.read(trackProvider.notifier).clear();
-          return;
-        }
-        
-        // If not on Search tab, go to Search tab first
-        if (_currentIndex != 0) {
-          _onNavTap(0);
-          return;
-        }
-        
-        // If loading, ignore back press
-        if (trackState.isLoading) {
-          return;
-        }
-        
-        // Already at root, show exit dialog
-        final shouldPop = await _showExitDialog();
-        if (shouldPop && context.mounted) {
-          SystemNavigator.pop();
-        }
+        // Handle back press manually when canPop is false
+        _handleBackPress();
       },
       child: Scaffold(
         body: PageView(
@@ -195,6 +197,9 @@ class _MainShellState extends ConsumerState<MainShell> {
           selectedIndex: _currentIndex,
           onDestinationSelected: _onNavTap,
           animationDuration: const Duration(milliseconds: 200),
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? Color.alphaBlend(Colors.white.withValues(alpha: 0.05), Theme.of(context).colorScheme.surface)
+              : Color.alphaBlend(Colors.black.withValues(alpha: 0.03), Theme.of(context).colorScheme.surface),
           destinations: [
             const NavigationDestination(
               icon: Icon(Icons.home_outlined),

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +9,10 @@ import 'package:spotiflac_android/providers/track_provider.dart';
 import 'package:spotiflac_android/providers/download_queue_provider.dart';
 import 'package:spotiflac_android/providers/settings_provider.dart';
 import 'package:spotiflac_android/screens/track_metadata_screen.dart';
+import 'package:spotiflac_android/screens/album_screen.dart';
+import 'package:spotiflac_android/screens/artist_screen.dart';
+import 'package:spotiflac_android/screens/playlist_screen.dart';
+import 'package:spotiflac_android/models/download_item.dart';
 
 class HomeTab extends ConsumerStatefulWidget {
   const HomeTab({super.key});
@@ -20,6 +25,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
   Timer? _debounce;
   bool _isTyping = false;
   final FocusNode _searchFocusNode = FocusNode();
+  String? _lastSearchQuery; // Track last searched query to avoid duplicate searches
   
   @override
   bool get wantKeepAlive => true;
@@ -89,6 +95,10 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
   }
 
   Future<void> _performSearch(String query) async {
+    // Skip if same query already searched
+    if (_lastSearchQuery == query) return;
+    _lastSearchQuery = query;
+    
     await ref.read(trackProvider.notifier).search(query);
     ref.read(settingsProvider.notifier).setHasSearchedBefore();
   }
@@ -109,6 +119,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
     _debounce?.cancel();
     _urlController.clear();
     _searchFocusNode.unfocus();
+    _lastSearchQuery = null; // Reset last query
     setState(() => _isTyping = false);
     ref.read(trackProvider.notifier).clear();
   }
@@ -118,10 +129,57 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
     if (url.isEmpty) return;
     if (url.startsWith('http') || url.startsWith('spotify:')) {
       await ref.read(trackProvider.notifier).fetchFromUrl(url);
+      _navigateToDetailIfNeeded();
     } else {
       await ref.read(trackProvider.notifier).search(url);
     }
     ref.read(settingsProvider.notifier).setHasSearchedBefore();
+  }
+
+  /// Navigate to detail screen based on fetched content type
+  void _navigateToDetailIfNeeded() {
+    final trackState = ref.read(trackProvider);
+    
+    // Navigate to Album screen
+    if (trackState.albumId != null && trackState.albumName != null && trackState.tracks.isNotEmpty) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => AlbumScreen(
+        albumId: trackState.albumId!,
+        albumName: trackState.albumName!,
+        coverUrl: trackState.coverUrl,
+        tracks: trackState.tracks,
+      )));
+      ref.read(trackProvider.notifier).clear();
+      _urlController.clear();
+      setState(() => _isTyping = false);
+      return;
+    }
+    
+    // Navigate to Playlist screen
+    if (trackState.playlistName != null && trackState.tracks.isNotEmpty) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => PlaylistScreen(
+        playlistName: trackState.playlistName!,
+        coverUrl: trackState.coverUrl,
+        tracks: trackState.tracks,
+      )));
+      ref.read(trackProvider.notifier).clear();
+      _urlController.clear();
+      setState(() => _isTyping = false);
+      return;
+    }
+    
+    // Navigate to Artist screen
+    if (trackState.artistId != null && trackState.artistName != null && trackState.artistAlbums != null) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => ArtistScreen(
+        artistId: trackState.artistId!,
+        artistName: trackState.artistName!,
+        coverUrl: trackState.coverUrl,
+        albums: trackState.artistAlbums!,
+      )));
+      ref.read(trackProvider.notifier).clear();
+      _urlController.clear();
+      setState(() => _isTyping = false);
+      return;
+    }
   }
 
   void _downloadTrack(int index) {
@@ -134,7 +192,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
         _showQualityPicker(context, (quality) {
           ref.read(downloadQueueProvider.notifier).addToQueue(track, settings.defaultService, qualityOverride: quality);
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Added "${track.name}" to queue')));
-        });
+        }, trackName: track.name, artistName: track.artistName, coverUrl: track.coverUrl);
       } else {
         ref.read(downloadQueueProvider.notifier).addToQueue(track, settings.defaultService);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Added "${track.name}" to queue')));
@@ -142,23 +200,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
     }
   }
 
-  void _downloadAll() {
-    final trackState = ref.read(trackProvider);
-    if (trackState.tracks.isEmpty) return;
-    final settings = ref.read(settingsProvider);
-    
-    if (settings.askQualityBeforeDownload) {
-      _showQualityPicker(context, (quality) {
-        ref.read(downloadQueueProvider.notifier).addMultipleToQueue(trackState.tracks, settings.defaultService, qualityOverride: quality);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Added ${trackState.tracks.length} tracks to queue')));
-      });
-    } else {
-      ref.read(downloadQueueProvider.notifier).addMultipleToQueue(trackState.tracks, settings.defaultService);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Added ${trackState.tracks.length} tracks to queue')));
-    }
-  }
-
-  void _showQualityPicker(BuildContext context, void Function(String quality) onSelect) {
+  void _showQualityPicker(BuildContext context, void Function(String quality) onSelect, {String? trackName, String? artistName, String? coverUrl}) {
     final colorScheme = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
@@ -169,8 +211,15 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (trackName != null) ...[
+              _TrackInfoHeader(trackName: trackName, artistName: artistName, coverUrl: coverUrl),
+              Divider(height: 1, color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+            ] else ...[
+              const SizedBox(height: 8),
+              Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4), borderRadius: BorderRadius.circular(2)))),
+            ],
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
               child: Text('Select Quality', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
             ),
             _QualityPickerOption(
@@ -199,22 +248,24 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
   Widget build(BuildContext context) {
     super.build(context);
     
-    // Listen for state changes to sync search bar
-    ref.listen<TrackState>(trackProvider, _onTrackStateChanged);
+    // Listen for state changes to sync search bar and auto-navigate
+    ref.listen<TrackState>(trackProvider, (previous, next) {
+      _onTrackStateChanged(previous, next);
+      // Auto-navigate when URL fetch completes
+      if (previous != null && previous.isLoading && !next.isLoading && next.error == null) {
+        _navigateToDetailIfNeeded();
+      }
+    });
     
     // Use select() to only rebuild when specific fields change
     final tracks = ref.watch(trackProvider.select((s) => s.tracks));
+    final searchArtists = ref.watch(trackProvider.select((s) => s.searchArtists));
     final isLoading = ref.watch(trackProvider.select((s) => s.isLoading));
     final error = ref.watch(trackProvider.select((s) => s.error));
-    final albumName = ref.watch(trackProvider.select((s) => s.albumName));
-    final playlistName = ref.watch(trackProvider.select((s) => s.playlistName));
-    final artistName = ref.watch(trackProvider.select((s) => s.artistName));
-    final coverUrl = ref.watch(trackProvider.select((s) => s.coverUrl));
-    final artistAlbums = ref.watch(trackProvider.select((s) => s.artistAlbums));
     final hasSearchedBefore = ref.watch(settingsProvider.select((s) => s.hasSearchedBefore));
     
     final colorScheme = Theme.of(context).colorScheme;
-    final hasResults = _isTyping || tracks.isNotEmpty || artistAlbums != null || isLoading;
+    final hasResults = _isTyping || tracks.isNotEmpty || (searchArtists != null && searchArtists.isNotEmpty) || isLoading;
     final screenHeight = MediaQuery.of(context).size.height;
     final historyItems = ref.watch(downloadHistoryProvider.select((s) => s.items));
 
@@ -320,16 +371,12 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
             ),
           ),
           
-          // Results content - always in tree
-          ..._buildResultsContentOptimized(
+          // Results content - search results only (albums/artists/playlists navigate to separate screens)
+          ..._buildSearchResults(
             tracks: tracks,
+            searchArtists: searchArtists,
             isLoading: isLoading,
             error: error,
-            albumName: albumName,
-            playlistName: playlistName,
-            artistName: artistName,
-            coverUrl: coverUrl,
-            artistAlbums: artistAlbums,
             colorScheme: colorScheme,
             hasResults: hasResults,
           ),
@@ -354,7 +401,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
           ),
         ),
         SizedBox(
-          height: 80,
+          height: 130,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: displayItems.length,
@@ -365,32 +412,32 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
                 child: GestureDetector(
                   onTap: () => _navigateToMetadataScreen(item),
                   child: Container(
-                    width: 60,
+                    width: 100,
                     margin: const EdgeInsets.only(right: 12),
                     child: Column(
                       children: [
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
                           child: item.coverUrl != null
                               ? CachedNetworkImage(
                                   imageUrl: item.coverUrl!,
-                                  width: 56,
-                                  height: 56,
+                                  width: 100,
+                                  height: 100,
                                   fit: BoxFit.cover,
-                                  memCacheWidth: 112,
-                                  memCacheHeight: 112,
+                                  memCacheWidth: 200,
+                                  memCacheHeight: 200,
                                 )
                               : Container(
-                                  width: 56,
-                                  height: 56,
+                                  width: 100,
+                                  height: 100,
                                   color: colorScheme.surfaceContainerHighest,
-                                  child: Icon(Icons.music_note, color: colorScheme.onSurfaceVariant, size: 24),
+                                  child: Icon(Icons.music_note, color: colorScheme.onSurfaceVariant, size: 32),
                                 ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 6),
                         Text(
                           item.trackName,
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: colorScheme.onSurfaceVariant,
                           ),
                           maxLines: 1,
@@ -418,20 +465,15 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
     ));
   }
 
-  // Results content slivers (without app bar and search bar) - optimized version
-  List<Widget> _buildResultsContentOptimized({
+  // Search results slivers - only shows search results (track list)
+  List<Widget> _buildSearchResults({
     required List<Track> tracks,
+    required List<SearchArtist>? searchArtists,
     required bool isLoading,
     required String? error,
-    required String? albumName,
-    required String? playlistName,
-    required String? artistName,
-    required String? coverUrl,
-    required List<ArtistAlbum>? artistAlbums,
     required ColorScheme colorScheme,
     required bool hasResults,
   }) {
-    // Return empty slivers when no results to keep tree structure stable
     if (!hasResults) {
       return [const SliverToBoxAdapter(child: SizedBox.shrink())];
     }
@@ -448,135 +490,113 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
       if (isLoading)
         const SliverToBoxAdapter(child: Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: LinearProgressIndicator())),
 
-      // Album/Playlist header
-      if (albumName != null || playlistName != null)
-        SliverToBoxAdapter(child: _buildHeaderOptimized(
-          albumName: albumName,
-          playlistName: playlistName,
-          coverUrl: coverUrl,
-          trackCount: tracks.length,
-          colorScheme: colorScheme,
-        )),
+      // Artist search results (horizontal scroll)
+      if (searchArtists != null && searchArtists.isNotEmpty)
+        SliverToBoxAdapter(child: _buildArtistSearchResults(searchArtists, colorScheme)),
 
-      // Artist header and discography
-      if (artistName != null && artistAlbums != null)
-        SliverToBoxAdapter(child: _buildArtistHeaderOptimized(
-          artistName: artistName,
-          coverUrl: coverUrl,
-          albumCount: artistAlbums.length,
-          colorScheme: colorScheme,
-        )),
-
-      if (artistAlbums != null && artistAlbums.isNotEmpty)
-        SliverToBoxAdapter(child: _buildArtistDiscographyOptimized(artistAlbums, colorScheme)),
-
-      // Download All button
-      if (tracks.length > 1 && albumName == null && playlistName == null && artistAlbums == null)
+      // Songs section header
+      if (tracks.isNotEmpty)
         SliverToBoxAdapter(child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: FilledButton.icon(onPressed: _downloadAll, icon: const Icon(Icons.download),
-            label: Text('Download All (${tracks.length})'),
-            style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48))),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          child: Text('Songs', style: Theme.of(context).textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
         )),
 
-      // Track list with keys for efficient updates
-      SliverList(delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final track = tracks[index];
-          return KeyedSubtree(
-            key: ValueKey(track.id),
-            child: _buildTrackTileOptimized(track, index, colorScheme),
-          );
-        },
-        childCount: tracks.length,
-      )),
+      // Track list in grouped card
+      if (tracks.isNotEmpty)
+        SliverToBoxAdapter(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Color.alphaBlend(Colors.white.withValues(alpha: 0.08), colorScheme.surface)
+                  : colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Material(
+              color: Colors.transparent,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (int i = 0; i < tracks.length; i++)
+                    _TrackItemWithStatus(
+                      key: ValueKey(tracks[i].id),
+                      track: tracks[i],
+                      index: i,
+                      showDivider: i < tracks.length - 1,
+                      onDownload: () => _downloadTrack(i),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
 
       // Bottom padding
       const SliverToBoxAdapter(child: SizedBox(height: 16)),
     ];
   }
 
-  Widget _buildHeaderOptimized({
-    required String? albumName,
-    required String? playlistName,
-    required String? coverUrl,
-    required int trackCount,
-    required ColorScheme colorScheme,
-  }) {
-    return Card(
-      margin: const EdgeInsets.all(16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            if (coverUrl != null)
-              ClipRRect(borderRadius: BorderRadius.circular(12),
-                child: CachedNetworkImage(imageUrl: coverUrl, width: 80, height: 80, fit: BoxFit.cover,
-                  placeholder: (_, _) => Container(width: 80, height: 80, color: colorScheme.surfaceContainerHighest))),
-            const SizedBox(width: 16),
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(albumName ?? playlistName ?? '',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                maxLines: 2, overflow: TextOverflow.ellipsis),
-              const SizedBox(height: 4),
-              Text('$trackCount tracks',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
-            ])),
-            FilledButton.tonal(onPressed: _downloadAll,
-              style: FilledButton.styleFrom(shape: const CircleBorder(), padding: const EdgeInsets.all(16)),
-              child: const Icon(Icons.download)),
-          ],
+  Widget _buildArtistSearchResults(List<SearchArtist> artists, ColorScheme colorScheme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          child: Text('Artists', style: Theme.of(context).textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
         ),
-      ),
+        SizedBox(
+          height: 160,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            itemCount: artists.length,
+            itemBuilder: (context, index) {
+              final artist = artists[index];
+              return KeyedSubtree(
+                key: ValueKey(artist.id),
+                child: _buildArtistCard(artist, colorScheme),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildArtistHeaderOptimized({
-    required String? artistName,
-    required String? coverUrl,
-    required int albumCount,
-    required ColorScheme colorScheme,
-  }) {
-    return Card(
-      margin: const EdgeInsets.all(16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
+  Widget _buildArtistCard(SearchArtist artist, ColorScheme colorScheme) {
+    return GestureDetector(
+      onTap: () => _navigateToArtist(artist.id, artist.name, artist.imageUrl),
+      child: Container(
+        width: 110,
+        margin: const EdgeInsets.symmetric(horizontal: 6),
+        child: Column(
           children: [
-            if (coverUrl != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(40),
-                child: CachedNetworkImage(
-                  imageUrl: coverUrl,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                  placeholder: (_, _) => Container(
-                    width: 80,
-                    height: 80,
-                    color: colorScheme.surfaceContainerHighest,
-                    child: Icon(Icons.person, color: colorScheme.onSurfaceVariant),
-                  ),
-                ),
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: colorScheme.surfaceContainerHighest,
               ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    artistName ?? '',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '$albumCount releases',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
-                  ),
-                ],
+              child: ClipOval(
+                child: artist.imageUrl != null
+                    ? CachedNetworkImage(
+                        imageUrl: artist.imageUrl!,
+                        fit: BoxFit.cover,
+                        memCacheWidth: 200,
+                        memCacheHeight: 200,
+                      )
+                    : Icon(Icons.person, color: colorScheme.onSurfaceVariant, size: 44),
               ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              artist.name,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -584,41 +604,17 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
     );
   }
 
-  Widget _buildArtistDiscographyOptimized(List<ArtistAlbum> albums, ColorScheme colorScheme) {
-    final albumsOnly = albums.where((a) => a.albumType == 'album').toList();
-    final singles = albums.where((a) => a.albumType == 'single').toList();
-    final compilations = albums.where((a) => a.albumType == 'compilation').toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (albumsOnly.isNotEmpty) _buildAlbumSection('Albums', albumsOnly, colorScheme),
-        if (singles.isNotEmpty) _buildAlbumSection('Singles & EPs', singles, colorScheme),
-        if (compilations.isNotEmpty) _buildAlbumSection('Compilations', compilations, colorScheme),
-      ],
-    );
-  }
-
-  Widget _buildTrackTileOptimized(Track track, int index, ColorScheme colorScheme) {
-    return ListTile(
-      leading: track.coverUrl != null
-          ? ClipRRect(borderRadius: BorderRadius.circular(8),
-              child: CachedNetworkImage(
-                imageUrl: track.coverUrl!, 
-                width: 48, 
-                height: 48, 
-                fit: BoxFit.cover,
-                memCacheWidth: 96,
-                memCacheHeight: 96,
-              ))
-          : Container(width: 48, height: 48,
-              decoration: BoxDecoration(color: colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(8)),
-              child: Icon(Icons.music_note, color: colorScheme.onSurfaceVariant)),
-      title: Text(track.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-      subtitle: Text(track.artistName, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: colorScheme.onSurfaceVariant)),
-      trailing: IconButton(icon: Icon(Icons.download, color: colorScheme.primary), onPressed: () => _downloadTrack(index)),
-      onTap: () => _downloadTrack(index),
-    );
+  void _navigateToArtist(String artistId, String artistName, String? imageUrl) {
+    // Navigate immediately with data from search, fetch albums in ArtistScreen
+    ref.read(settingsProvider.notifier).setHasSearchedBefore();
+    Navigator.push(context, MaterialPageRoute(
+      builder: (context) => ArtistScreen(
+        artistId: artistId,
+        artistName: artistName,
+        coverUrl: imageUrl,
+        // albums: null - will be fetched in ArtistScreen
+      ),
+    ));
   }
 
   Widget _buildSearchBar(ColorScheme colorScheme) {
@@ -668,93 +664,6 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
     );
   }
 
-  Widget _buildAlbumSection(String title, List<ArtistAlbum> albums, ColorScheme colorScheme) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-          child: Text(
-            '$title (${albums.length})',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: colorScheme.primary,
-            ),
-          ),
-        ),
-        SizedBox(
-          height: 180,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            itemCount: albums.length,
-            itemBuilder: (context, index) {
-              final album = albums[index];
-              return KeyedSubtree(
-                key: ValueKey(album.id),
-                child: _buildAlbumCard(album, colorScheme),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAlbumCard(ArtistAlbum album, ColorScheme colorScheme) {
-    return GestureDetector(
-      onTap: () => _fetchAlbum(album.id),
-      child: Container(
-        width: 130,
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: album.coverUrl != null
-                  ? CachedNetworkImage(
-                      imageUrl: album.coverUrl!,
-                      width: 130,
-                      height: 130,
-                      fit: BoxFit.cover,
-                      memCacheWidth: 260,
-                      memCacheHeight: 260,
-                    )
-                  : Container(
-                      width: 130,
-                      height: 130,
-                      color: colorScheme.surfaceContainerHighest,
-                      child: Icon(Icons.album, color: colorScheme.onSurfaceVariant),
-                    ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              album.name,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            Text(
-              '${album.releaseDate.length >= 4 ? album.releaseDate.substring(0, 4) : album.releaseDate} • ${album.totalTracks} tracks',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                fontSize: 11,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _fetchAlbum(String albumId) {
-    // Use fetchAlbumFromArtist to save artist state for back navigation
-    ref.read(trackProvider.notifier).fetchAlbumFromArtist(albumId);
-    ref.read(settingsProvider.notifier).setHasSearchedBefore();
-  }
 }
 
 class _QualityPickerOption extends StatelessWidget {
@@ -773,5 +682,295 @@ class _QualityPickerOption extends StatelessWidget {
       subtitle: Text(subtitle, style: TextStyle(color: colorScheme.onSurfaceVariant)),
       onTap: onTap,
     );
+  }
+}
+
+class _TrackInfoHeader extends StatefulWidget {
+  final String trackName;
+  final String? artistName;
+  final String? coverUrl;
+  const _TrackInfoHeader({required this.trackName, this.artistName, this.coverUrl});
+
+  @override
+  State<_TrackInfoHeader> createState() => _TrackInfoHeaderState();
+}
+
+class _TrackInfoHeaderState extends State<_TrackInfoHeader> {
+  bool _expanded = false;
+  bool _isOverflowing = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: _isOverflowing ? () => setState(() => _expanded = !_expanded) : null,
+        borderRadius: const BorderRadius.only(topLeft: Radius.circular(28), topRight: Radius.circular(28)),
+        child: Column(
+          children: [
+            const SizedBox(height: 8),
+            Container(width: 40, height: 4, decoration: BoxDecoration(color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4), borderRadius: BorderRadius.circular(2))),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+              child: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: widget.coverUrl != null
+                        ? Image.network(widget.coverUrl!, width: 56, height: 56, fit: BoxFit.cover,
+                            errorBuilder: (_, e, s) => Container(width: 56, height: 56, color: colorScheme.surfaceContainerHighest, child: Icon(Icons.music_note, color: colorScheme.onSurfaceVariant)))
+                        : Container(width: 56, height: 56, color: colorScheme.surfaceContainerHighest, child: Icon(Icons.music_note, color: colorScheme.onSurfaceVariant)),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final titleStyle = Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600);
+                        final titleSpan = TextSpan(text: widget.trackName, style: titleStyle);
+                        final titlePainter = TextPainter(text: titleSpan, maxLines: 1, textDirection: TextDirection.ltr)..layout(maxWidth: constraints.maxWidth);
+                        final titleOverflows = titlePainter.didExceedMaxLines;
+                        
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted && _isOverflowing != titleOverflows) {
+                            setState(() => _isOverflowing = titleOverflows);
+                          }
+                        });
+                        
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.trackName,
+                              style: titleStyle,
+                              maxLines: _expanded ? 10 : 1,
+                              overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                            ),
+                            if (widget.artistName != null) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                widget.artistName!,
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+                                maxLines: _expanded ? 3 : 1,
+                                overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                  if (_isOverflowing || _expanded)
+                    Icon(_expanded ? Icons.expand_less : Icons.expand_more, color: colorScheme.onSurfaceVariant, size: 20),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Separate Consumer widget for each track item - only rebuilds when this specific track's status changes
+class _TrackItemWithStatus extends ConsumerWidget {
+  final Track track;
+  final int index;
+  final bool showDivider;
+  final VoidCallback onDownload;
+
+  const _TrackItemWithStatus({
+    super.key,
+    required this.track,
+    required this.index,
+    required this.showDivider,
+    required this.onDownload,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
+    // Only watch the specific item for this track using select()
+    final queueItem = ref.watch(downloadQueueProvider.select((state) {
+      return state.items.where((item) => item.track.id == track.id).firstOrNull;
+    }));
+    
+    // Check if track is in history (already downloaded before)
+    final isInHistory = ref.watch(downloadHistoryProvider.select((state) {
+      return state.isDownloaded(track.id);
+    }));
+    
+    final isQueued = queueItem != null;
+    final isDownloading = queueItem?.status == DownloadStatus.downloading;
+    final isFinalizing = queueItem?.status == DownloadStatus.finalizing;
+    final isCompleted = queueItem?.status == DownloadStatus.completed;
+    final progress = queueItem?.progress ?? 0.0;
+    
+    // Show as downloaded if in queue completed OR in history
+    final showAsDownloaded = isCompleted || (!isQueued && isInHistory);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        InkWell(
+          onTap: () => _handleTap(context, ref, isQueued: isQueued, isInHistory: isInHistory),
+          splashColor: colorScheme.primary.withValues(alpha: 0.12),
+          highlightColor: colorScheme.primary.withValues(alpha: 0.08),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Row(
+              children: [
+                // Album art
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: track.coverUrl != null
+                      ? CachedNetworkImage(
+                          imageUrl: track.coverUrl!,
+                          width: 56,
+                          height: 56,
+                          fit: BoxFit.cover,
+                          memCacheWidth: 112,
+                          memCacheHeight: 112,
+                        )
+                      : Container(
+                          width: 56,
+                          height: 56,
+                          color: colorScheme.surfaceContainerHighest,
+                          child: Icon(Icons.music_note, color: colorScheme.onSurfaceVariant),
+                        ),
+                ),
+                const SizedBox(width: 12),
+                // Track info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        track.name,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        track.artistName,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                // Download button / status indicator
+                _buildDownloadButton(context, ref, colorScheme, isQueued: isQueued, isDownloading: isDownloading, isFinalizing: isFinalizing, showAsDownloaded: showAsDownloaded, isInHistory: isInHistory, progress: progress),
+              ],
+            ),
+          ),
+        ),
+        if (showDivider)
+          Divider(
+            height: 1,
+            thickness: 1,
+            indent: 80,
+            endIndent: 12,
+            color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+          ),
+      ],
+    );
+  }
+
+  void _handleTap(BuildContext context, WidgetRef ref, {required bool isQueued, required bool isInHistory}) async {
+    // If already in queue, do nothing
+    if (isQueued) return;
+    
+    // If in history, check if file still exists
+    if (isInHistory) {
+      final historyItem = ref.read(downloadHistoryProvider.notifier).getBySpotifyId(track.id);
+      if (historyItem != null) {
+        final fileExists = await File(historyItem.filePath).exists();
+        if (fileExists) {
+          // File exists, show snackbar
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('"${track.name}" already downloaded')),
+            );
+          }
+          return;
+        } else {
+          // File doesn't exist, remove from history and allow download
+          ref.read(downloadHistoryProvider.notifier).removeBySpotifyId(track.id);
+        }
+      }
+    }
+    
+    // Proceed with download
+    onDownload();
+  }
+
+  Widget _buildDownloadButton(BuildContext context, WidgetRef ref, ColorScheme colorScheme, {
+    required bool isQueued,
+    required bool isDownloading,
+    required bool isFinalizing,
+    required bool showAsDownloaded,
+    required bool isInHistory,
+    required double progress,
+  }) {
+    const double size = 44.0;
+    const double iconSize = 20.0;
+    
+    if (showAsDownloaded) {
+      return GestureDetector(
+        onTap: () => _handleTap(context, ref, isQueued: isQueued, isInHistory: isInHistory),
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(color: colorScheme.primaryContainer, shape: BoxShape.circle),
+          child: Icon(Icons.check, color: colorScheme.onPrimaryContainer, size: iconSize),
+        ),
+      );
+    } else if (isFinalizing) {
+      // Show finalizing status (embedding metadata)
+      return SizedBox(
+        width: size,
+        height: size,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            CircularProgressIndicator(strokeWidth: 3, color: colorScheme.tertiary, backgroundColor: colorScheme.surfaceContainerHighest),
+            Icon(Icons.edit_note, color: colorScheme.tertiary, size: 16),
+          ],
+        ),
+      );
+    } else if (isDownloading) {
+      return SizedBox(
+        width: size,
+        height: size,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            CircularProgressIndicator(value: progress > 0 ? progress : null, strokeWidth: 3, color: colorScheme.primary, backgroundColor: colorScheme.surfaceContainerHighest),
+            if (progress > 0) Text('${(progress * 100).toInt()}', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: colorScheme.primary)),
+          ],
+        ),
+      );
+    } else if (isQueued) {
+      return Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(color: colorScheme.surfaceContainerHighest, shape: BoxShape.circle),
+        child: Icon(Icons.hourglass_empty, color: colorScheme.onSurfaceVariant, size: iconSize),
+      );
+    } else {
+      return GestureDetector(
+        onTap: onDownload,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(color: colorScheme.secondaryContainer, shape: BoxShape.circle),
+          child: Icon(Icons.download, color: colorScheme.onSecondaryContainer, size: iconSize),
+        ),
+      );
+    }
   }
 }

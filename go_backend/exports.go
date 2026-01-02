@@ -70,6 +70,26 @@ func SearchSpotify(query string, limit int) (string, error) {
 	return string(jsonBytes), nil
 }
 
+// SearchSpotifyAll searches for tracks and artists on Spotify
+// Returns JSON with tracks and artists arrays
+func SearchSpotifyAll(query string, trackLimit, artistLimit int) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+	
+	client := NewSpotifyMetadataClient()
+	results, err := client.SearchAll(ctx, query, trackLimit, artistLimit)
+	if err != nil {
+		return "", err
+	}
+	
+	jsonBytes, err := json.Marshal(results)
+	if err != nil {
+		return "", err
+	}
+	
+	return string(jsonBytes), nil
+}
+
 // CheckAvailability checks track availability on streaming services
 // Returns JSON with availability info for Tidal, Qobuz, Amazon
 func CheckAvailability(spotifyID, isrc string) (string, error) {

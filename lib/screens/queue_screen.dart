@@ -144,6 +144,18 @@ class QueueScreen extends ConsumerWidget {
             color: colorScheme.primary,
           ),
         );
+      case DownloadStatus.finalizing:
+        return SizedBox(
+          width: 24,
+          height: 24,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              CircularProgressIndicator(strokeWidth: 2, color: colorScheme.tertiary),
+              Icon(Icons.edit_note, color: colorScheme.tertiary, size: 12),
+            ],
+          ),
+        );
       case DownloadStatus.completed:
         return Icon(Icons.check_circle, color: colorScheme.primary);
       case DownloadStatus.failed:

@@ -99,8 +99,16 @@ class DownloadHistoryItem {
 // Download History State
 class DownloadHistoryState {
   final List<DownloadHistoryItem> items;
+  final Set<String> _downloadedSpotifyIds; // Cache for O(1) lookup
 
-  const DownloadHistoryState({this.items = const []});
+  DownloadHistoryState({this.items = const []})
+      : _downloadedSpotifyIds = items
+            .where((item) => item.spotifyId != null && item.spotifyId!.isNotEmpty)
+            .map((item) => item.spotifyId!)
+            .toSet();
+
+  /// Check if a track has been downloaded (by Spotify ID)
+  bool isDownloaded(String spotifyId) => _downloadedSpotifyIds.contains(spotifyId);
 
   DownloadHistoryState copyWith({List<DownloadHistoryItem>? items}) {
     return DownloadHistoryState(items: items ?? this.items);
@@ -116,7 +124,7 @@ class DownloadHistoryNotifier extends Notifier<DownloadHistoryState> {
   DownloadHistoryState build() {
     // Load history from storage on init
     _loadFromStorageSync();
-    return const DownloadHistoryState();
+    return DownloadHistoryState();
   }
 
   /// Synchronously schedule load - ensures it runs before any UI renders
@@ -173,8 +181,22 @@ class DownloadHistoryNotifier extends Notifier<DownloadHistoryState> {
     _saveToStorage();
   }
 
+  /// Remove item from history by Spotify ID
+  void removeBySpotifyId(String spotifyId) {
+    state = state.copyWith(
+      items: state.items.where((item) => item.spotifyId != spotifyId).toList(),
+    );
+    _saveToStorage();
+    _historyLog.d('Removed item with spotifyId: $spotifyId');
+  }
+
+  /// Get history item by Spotify ID
+  DownloadHistoryItem? getBySpotifyId(String spotifyId) {
+    return state.items.where((item) => item.spotifyId == spotifyId).firstOrNull;
+  }
+
   void clearHistory() {
-    state = const DownloadHistoryState();
+    state = DownloadHistoryState();
     _saveToStorage();
   }
 }
@@ -340,6 +362,22 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
         final bytesReceived = progress['bytes_received'] as int? ?? 0;
         final bytesTotal = progress['bytes_total'] as int? ?? 0;
         final isDownloading = progress['is_downloading'] as bool? ?? false;
+        final status = progress['status'] as String? ?? 'downloading';
+        
+        // Check if status is "finalizing" (embedding metadata)
+        if (status == 'finalizing') {
+          updateItemStatus(itemId, DownloadStatus.finalizing, progress: 1.0);
+          
+          // Update notification to show finalizing
+          final currentItem = state.items.where((i) => i.id == itemId).firstOrNull;
+          if (currentItem != null) {
+            _notificationService.showDownloadFinalizing(
+              trackName: currentItem.track.name,
+              artistName: currentItem.track.artistName,
+            );
+          }
+          return;
+        }
         
         if (isDownloading && bytesTotal > 0) {
           final percentage = bytesReceived / bytesTotal;
@@ -392,6 +430,22 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
           final bytesReceived = itemProgress['bytes_received'] as int? ?? 0;
           final bytesTotal = itemProgress['bytes_total'] as int? ?? 0;
           final isDownloading = itemProgress['is_downloading'] as bool? ?? false;
+          final status = itemProgress['status'] as String? ?? 'downloading';
+          
+          // Check if status is "finalizing" (embedding metadata)
+          if (status == 'finalizing') {
+            updateItemStatus(itemId, DownloadStatus.finalizing, progress: 1.0);
+            
+            // Update notification to show finalizing
+            final currentItem = state.items.where((i) => i.id == itemId).firstOrNull;
+            if (currentItem != null) {
+              _notificationService.showDownloadFinalizing(
+                trackName: currentItem.track.name,
+                artistName: currentItem.track.artistName,
+              );
+            }
+            continue;
+          }
           
           if (isDownloading && bytesTotal > 0) {
             final percentage = bytesReceived / bytesTotal;
@@ -412,7 +466,7 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
           final bytesTotal = firstProgress['bytes_total'] as int? ?? 0;
           
           // Find the item to get track info
-          final downloadingItems = state.items.where((i) => i.status == DownloadStatus.downloading).toList();
+          final downloadingItems = state.items.where((i) => i.status == DownloadStatus.downloading || i.status == DownloadStatus.finalizing).toList();
           if (downloadingItems.isNotEmpty) {
             _notificationService.showDownloadProgress(
               trackName: '${downloadingItems.length} downloads',

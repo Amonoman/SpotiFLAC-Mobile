@@ -144,27 +144,38 @@ class _ThemeModeChip extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    // Unselected chips need to be darker than the card background
+    // Unselected chips need contrast with card background
+    // Card uses: dark = white 8% overlay, light = surfaceContainerHighest
+    // So chips use: dark = white 5% overlay (darker), light = black 5% overlay (darker than card)
     final unselectedColor = isDark 
         ? Color.alphaBlend(Colors.white.withValues(alpha: 0.05), colorScheme.surface)
-        : colorScheme.surfaceContainerHigh;
+        : Color.alphaBlend(Colors.black.withValues(alpha: 0.05), colorScheme.surfaceContainerHighest);
     
     return Expanded(
-      child: Material(
-        color: isSelected ? colorScheme.primaryContainer : unselectedColor,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: isSelected ? colorScheme.primaryContainer : unselectedColor,
           borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            child: Column(children: [
-              Icon(icon, color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant),
-              const SizedBox(height: 6),
-              Text(label, style: TextStyle(fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant)),
-            ]),
+          border: !isDark && !isSelected 
+              ? Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5), width: 1)
+              : null,
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              child: Column(children: [
+                Icon(icon, color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant),
+                const SizedBox(height: 6),
+                Text(label, style: TextStyle(fontSize: 12,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant)),
+              ]),
+            ),
           ),
         ),
       ),
@@ -251,26 +262,36 @@ class _ViewModeChip extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
+    // Unselected chips need contrast with card background
     final unselectedColor = isDark 
         ? Color.alphaBlend(Colors.white.withValues(alpha: 0.05), colorScheme.surface)
-        : colorScheme.surfaceContainerHigh;
+        : Color.alphaBlend(Colors.black.withValues(alpha: 0.05), colorScheme.surfaceContainerHighest);
     
     return Expanded(
-      child: Material(
-        color: isSelected ? colorScheme.primaryContainer : unselectedColor,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: isSelected ? colorScheme.primaryContainer : unselectedColor,
           borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            child: Column(children: [
-              Icon(icon, color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant),
-              const SizedBox(height: 6),
-              Text(label, style: TextStyle(fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant)),
-            ]),
+          border: !isDark && !isSelected 
+              ? Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5), width: 1)
+              : null,
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              child: Column(children: [
+                Icon(icon, color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant),
+                const SizedBox(height: 6),
+                Text(label, style: TextStyle(fontSize: 12,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant)),
+              ]),
+            ),
           ),
         ),
       ),

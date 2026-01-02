@@ -35,7 +35,7 @@ class AppSettings {
     this.folderOrganization = 'none', // Default: no folder organization
     this.convertLyricsToRomaji = false, // Default: keep original Japanese
     this.historyViewMode = 'grid', // Default: grid view
-    this.askQualityBeforeDownload = false, // Default: use preset quality
+    this.askQualityBeforeDownload = true, // Default: ask quality before download
   });
 
   AppSettings copyWith({

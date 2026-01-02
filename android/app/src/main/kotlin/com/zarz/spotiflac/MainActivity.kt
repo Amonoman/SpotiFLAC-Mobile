@@ -50,6 +50,15 @@ class MainActivity: FlutterActivity() {
                             }
                             result.success(response)
                         }
+                        "searchSpotifyAll" -> {
+                            val query = call.argument<String>("query") ?: ""
+                            val trackLimit = call.argument<Int>("track_limit") ?: 15
+                            val artistLimit = call.argument<Int>("artist_limit") ?: 3
+                            val response = withContext(Dispatchers.IO) {
+                                Gobackend.searchSpotifyAll(query, trackLimit.toLong(), artistLimit.toLong())
+                            }
+                            result.success(response)
+                        }
                         "checkAvailability" -> {
                             val spotifyId = call.argument<String>("spotify_id") ?: ""
                             val isrc = call.argument<String>("isrc") ?: ""

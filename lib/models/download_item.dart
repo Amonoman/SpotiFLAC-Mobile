@@ -7,6 +7,7 @@ part 'download_item.g.dart';
 enum DownloadStatus {
   queued,
   downloading,
+  finalizing, // Embedding metadata, cover, lyrics
   completed,
   failed,
   skipped,

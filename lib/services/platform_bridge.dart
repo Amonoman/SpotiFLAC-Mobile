@@ -26,6 +26,16 @@ class PlatformBridge {
     return jsonDecode(result as String) as Map<String, dynamic>;
   }
 
+  /// Search Spotify for tracks and artists
+  static Future<Map<String, dynamic>> searchSpotifyAll(String query, {int trackLimit = 15, int artistLimit = 3}) async {
+    final result = await _channel.invokeMethod('searchSpotifyAll', {
+      'query': query,
+      'track_limit': trackLimit,
+      'artist_limit': artistLimit,
+    });
+    return jsonDecode(result as String) as Map<String, dynamic>;
+  }
+
   /// Check track availability on streaming services
   static Future<Map<String, dynamic>> checkAvailability(String spotifyId, String isrc) async {
     final result = await _channel.invokeMethod('checkAvailability', {

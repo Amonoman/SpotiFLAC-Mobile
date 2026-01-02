@@ -20,9 +20,10 @@ class SettingsGroup extends StatelessWidget {
     // Use a more contrasting color for cards
     // In dark mode with dynamic color, surfaceContainerHighest can be too similar to surface
     // So we add a slight white overlay to make it more visible
+    // In light mode with dynamic color, we add a slight black overlay for the same reason
     final cardColor = isDark 
         ? Color.alphaBlend(Colors.white.withValues(alpha: 0.08), colorScheme.surface)
-        : colorScheme.surfaceContainerHighest;
+        : Color.alphaBlend(Colors.black.withValues(alpha: 0.04), colorScheme.surface);
     
     return Container(
       margin: margin ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 4),

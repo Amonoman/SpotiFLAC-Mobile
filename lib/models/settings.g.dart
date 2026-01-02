@@ -21,7 +21,7 @@ AppSettings _$AppSettingsFromJson(Map<String, dynamic> json) => AppSettings(
   folderOrganization: json['folderOrganization'] as String? ?? 'none',
   convertLyricsToRomaji: json['convertLyricsToRomaji'] as bool? ?? false,
   historyViewMode: json['historyViewMode'] as String? ?? 'grid',
-  askQualityBeforeDownload: json['askQualityBeforeDownload'] as bool? ?? false,
+  askQualityBeforeDownload: json['askQualityBeforeDownload'] as bool? ?? true,
 );
 
 Map<String, dynamic> _$AppSettingsToJson(AppSettings instance) =>

@@ -69,6 +69,9 @@ class _UpdateDialogState extends State<UpdateDialog> {
     );
 
     if (filePath != null) {
+      // Cancel progress notification first
+      await notificationService.cancelUpdateNotification();
+      
       await notificationService.showUpdateDownloadComplete(
         version: widget.updateInfo.version,
       );
@@ -80,6 +83,9 @@ class _UpdateDialogState extends State<UpdateDialog> {
       // Open APK for installation
       await ApkDownloader.installApk(filePath);
     } else {
+      // Cancel progress notification first
+      await notificationService.cancelUpdateNotification();
+      
       await notificationService.showUpdateDownloadFailed();
       
       if (mounted) {
@@ -98,129 +104,202 @@ class _UpdateDialogState extends State<UpdateDialog> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    return AlertDialog(
-      title: Row(
-        children: [
-          Icon(Icons.system_update, color: colorScheme.primary),
-          const SizedBox(width: 12),
-          const Text('Update Available'),
-        ],
-      ),
-      content: SizedBox(
-        width: double.maxFinite,
+    return Dialog(
+      backgroundColor: colorScheme.surfaceContainerHigh,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Version info
+            // Header with icon
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(Icons.system_update_rounded, color: colorScheme.onPrimaryContainer, size: 28),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Update Available', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 2),
+                      Text('A new version is ready', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            
+            // Version badge
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(12),
+                color: isDark 
+                    ? Color.alphaBlend(Colors.white.withValues(alpha: 0.08), colorScheme.surface)
+                    : Color.alphaBlend(Colors.black.withValues(alpha: 0.04), colorScheme.surface),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
               ),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    'v${AppInfo.version}',
-                    style: TextStyle(color: colorScheme.onPrimaryContainer),
-                  ),
-                  const SizedBox(width: 8),
-                  Icon(Icons.arrow_forward, size: 16, color: colorScheme.onPrimaryContainer),
-                  const SizedBox(width: 8),
-                  Text(
-                    'v${widget.updateInfo.version}',
-                    style: TextStyle(
-                      color: colorScheme.onPrimaryContainer,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  _VersionChip(version: AppInfo.version, label: 'Current', colorScheme: colorScheme),
+                  const SizedBox(width: 12),
+                  Icon(Icons.arrow_forward_rounded, size: 20, color: colorScheme.primary),
+                  const SizedBox(width: 12),
+                  _VersionChip(version: widget.updateInfo.version, label: 'New', colorScheme: colorScheme, isNew: true),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             
-            // Changelog header
-            Text(
-              'What\'s New:',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            
-            // Changelog content (scrollable) - hide when downloading
-            if (!_isDownloading)
-              Flexible(
-                child: Container(
-                  constraints: const BoxConstraints(maxHeight: 200),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(12),
-                    child: Text(
-                      _formatChangelog(widget.updateInfo.changelog),
-                      style: Theme.of(context).textTheme.bodySmall,
+            // Download progress (when downloading)
+            if (_isDownloading) ...[
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isDark 
+                      ? Color.alphaBlend(Colors.white.withValues(alpha: 0.05), colorScheme.surface)
+                      : Color.alphaBlend(Colors.black.withValues(alpha: 0.03), colorScheme.surface),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: 20, height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme.primary),
+                        ),
+                        const SizedBox(width: 12),
+                        Text('Downloading...', style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
+                      ],
                     ),
+                    const SizedBox(height: 12),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: _progress,
+                        minHeight: 6,
+                        backgroundColor: colorScheme.surfaceContainerHighest,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(_statusText, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+                        Text('${(_progress * 100).toInt()}%', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.primary, fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ] else ...[
+              // Changelog section
+              Text("What's New", style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Container(
+                constraints: const BoxConstraints(maxHeight: 180),
+                decoration: BoxDecoration(
+                  color: isDark 
+                      ? Color.alphaBlend(Colors.white.withValues(alpha: 0.05), colorScheme.surface)
+                      : Color.alphaBlend(Colors.black.withValues(alpha: 0.03), colorScheme.surface),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    _formatChangelog(widget.updateInfo.changelog),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.5),
                   ),
                 ),
               ),
-            
-            // Download progress
-            if (_isDownloading) ...[
-              const SizedBox(height: 8),
-              LinearProgressIndicator(value: _progress),
-              const SizedBox(height: 8),
-              Text(
-                _statusText,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
             ],
+            const SizedBox(height: 24),
+            
+            // Action buttons
+            if (_isDownloading)
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text('Cancel'),
+                ),
+              )
+            else
+              Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: _downloadAndInstall,
+                      icon: const Icon(Icons.download_rounded, size: 20),
+                      label: const Text('Download & Install'),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextButton(
+                          onPressed: () {
+                            widget.onDisableUpdates();
+                            Navigator.pop(context);
+                          },
+                          style: TextButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: Text("Don't remind", style: TextStyle(color: colorScheme.onSurfaceVariant)),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () {
+                            widget.onDismiss();
+                            Navigator.pop(context);
+                          },
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: const Text('Later'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
           ],
         ),
       ),
-      actions: _isDownloading
-          ? [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-            ]
-          : [
-              // Don't remind again button
-              TextButton(
-                onPressed: () {
-                  widget.onDisableUpdates();
-                  Navigator.pop(context);
-                },
-                child: Text(
-                  'Don\'t remind',
-                  style: TextStyle(color: colorScheme.onSurfaceVariant),
-                ),
-              ),
-              // Later button
-              TextButton(
-                onPressed: () {
-                  widget.onDismiss();
-                  Navigator.pop(context);
-                },
-                child: const Text('Later'),
-              ),
-              // Download button
-              FilledButton(
-                onPressed: _downloadAndInstall,
-                child: const Text('Install'),
-              ),
-            ],
     );
   }
 
   /// Format changelog - clean up markdown and extract relevant content
   String _formatChangelog(String changelog) {
-    // Try to extract just the changelog section (between "What's New" and "Downloads" or "---")
     var content = changelog;
     
     // Find content after "What's New" header
@@ -238,19 +317,18 @@ class _UpdateDialogState extends State<UpdateDialog> {
     // Process line by line for better formatting
     final lines = content.split('\n');
     final formattedLines = <String>[];
-    String? currentSection;
     
     for (var line in lines) {
       line = line.trim();
       if (line.isEmpty) continue;
       
-      // Check if it's a section header (### Added, ### Fixed, etc.)
+      // Check if it's a section header
       final sectionMatch = RegExp(r'^#{1,3}\s*(.+)$').firstMatch(line);
       if (sectionMatch != null) {
-        currentSection = sectionMatch.group(1)?.trim();
-        if (currentSection != null && currentSection.isNotEmpty) {
+        final section = sectionMatch.group(1)?.trim();
+        if (section != null && section.isNotEmpty) {
           if (formattedLines.isNotEmpty) formattedLines.add('');
-          formattedLines.add('$currentSection:');
+          formattedLines.add(section);
         }
         continue;
       }
@@ -259,41 +337,66 @@ class _UpdateDialogState extends State<UpdateDialog> {
       final listMatch = RegExp(r'^[-*]\s+(.+)$').firstMatch(line);
       if (listMatch != null) {
         var itemText = listMatch.group(1) ?? '';
-        // Remove bold markdown
-        itemText = itemText.replaceAllMapped(
-          RegExp(r'\*\*([^*]+)\*\*'), 
-          (m) => m.group(1) ?? ''
-        );
-        // Remove code markdown
-        itemText = itemText.replaceAllMapped(
-          RegExp(r'`([^`]+)`'), 
-          (m) => m.group(1) ?? ''
-        );
+        itemText = itemText.replaceAllMapped(RegExp(r'\*\*([^*]+)\*\*'), (m) => m.group(1) ?? '');
+        itemText = itemText.replaceAllMapped(RegExp(r'`([^`]+)`'), (m) => m.group(1) ?? '');
         formattedLines.add('• $itemText');
         continue;
       }
       
-      // Check if it's a sub-item (indented list)
+      // Check if it's a sub-item
       final subListMatch = RegExp(r'^\s+[-*]\s+(.+)$').firstMatch(line);
       if (subListMatch != null) {
         var itemText = subListMatch.group(1) ?? '';
-        itemText = itemText.replaceAllMapped(
-          RegExp(r'\*\*([^*]+)\*\*'), 
-          (m) => m.group(1) ?? ''
-        );
+        itemText = itemText.replaceAllMapped(RegExp(r'\*\*([^*]+)\*\*'), (m) => m.group(1) ?? '');
         formattedLines.add('  - $itemText');
         continue;
       }
     }
     
     var formatted = formattedLines.join('\n').trim();
-    
-    // Limit length
     if (formatted.length > 2000) {
       formatted = '${formatted.substring(0, 2000)}...';
     }
     
     return formatted.isEmpty ? 'See release notes for details.' : formatted;
+  }
+}
+
+class _VersionChip extends StatelessWidget {
+  final String version;
+  final String label;
+  final ColorScheme colorScheme;
+  final bool isNew;
+
+  const _VersionChip({
+    required this.version,
+    required this.label,
+    required this.colorScheme,
+    this.isNew = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+        const SizedBox(height: 4),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: isNew ? colorScheme.primaryContainer : colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            'v$version',
+            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: isNew ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant,
+              fontWeight: isNew ? FontWeight.bold : FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 

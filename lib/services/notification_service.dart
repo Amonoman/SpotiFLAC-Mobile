@@ -98,6 +98,49 @@ class NotificationService {
     );
   }
 
+  Future<void> showDownloadFinalizing({
+    required String trackName,
+    required String artistName,
+  }) async {
+    if (!_isInitialized) await initialize();
+
+    final androidDetails = AndroidNotificationDetails(
+      channelId,
+      channelName,
+      channelDescription: channelDescription,
+      importance: Importance.low,
+      priority: Priority.low,
+      showProgress: true,
+      maxProgress: 100,
+      progress: 100,
+      indeterminate: false,
+      ongoing: true,
+      autoCancel: false,
+      playSound: false,
+      enableVibration: false,
+      onlyAlertOnce: true,
+      icon: '@mipmap/ic_launcher',
+    );
+
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: false,
+      presentBadge: false,
+      presentSound: false,
+    );
+
+    final details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    await _notifications.show(
+      downloadProgressId,
+      'Finalizing $trackName',
+      '$artistName • Embedding metadata...',
+      details,
+    );
+  }
+
   Future<void> showDownloadComplete({
     required String trackName,
     required String artistName,
