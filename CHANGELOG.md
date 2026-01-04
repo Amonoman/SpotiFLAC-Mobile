@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.4] - 2026-01-04
+
+### Fixed
+- **Android 11 Storage Permission**: Fixed "Permission denied" error on Android 11 (API 30) devices
+  - Added `MANAGE_EXTERNAL_STORAGE` permission for Android 11-12
+  - Shows explanation dialog before opening system settings
+
 ## [2.0.3] - 2026-01-03
 
 ### Added
@@ -13,9 +20,6 @@
 - **Search on Enter Only**: Removed auto-search debounce, now only searches when pressing Enter key (saves API calls)
 
 ### Fixed
-- **Android 11 Storage Permission**: Fixed "Permission denied" error on Android 11 (API 30) devices
-  - Added `MANAGE_EXTERNAL_STORAGE` permission for Android 11-12
-  - Shows explanation dialog before opening system settings
 - **Download Cancel**: Fixed cancelled downloads still completing in background and appearing in history. Cancelled files are now properly deleted.
 - **Search Keyboard Dismiss**: Fixed keyboard randomly dismissing and navigating back when starting to search
 - **Back Button During Search**: Back button now properly dismisses keyboard first before clearing search
