@@ -82,6 +82,7 @@ class ArtistAlbum {
   final String? coverUrl;
   final String albumType; // album, single, compilation
   final String artists;
+  final String? providerId; // Extension ID if from extension
 
   const ArtistAlbum({
     required this.id,
@@ -91,6 +92,7 @@ class ArtistAlbum {
     this.coverUrl,
     required this.albumType,
     required this.artists,
+    this.providerId,
   });
 }
 
@@ -479,6 +481,23 @@ class TrackNotifier extends Notifier<TrackState> {
   void setSearchText(bool hasText) {
     state = state.copyWith(hasSearchText: hasText);
   }
+  
+  /// Set tracks from a collection (album/playlist) opened from search results
+  void setTracksFromCollection({
+    required List<Track> tracks,
+    String? albumName,
+    String? playlistName,
+    String? coverUrl,
+  }) {
+    state = TrackState(
+      tracks: tracks,
+      isLoading: false,
+      albumName: albumName,
+      playlistName: playlistName,
+      coverUrl: coverUrl,
+      hasSearchText: state.hasSearchText,
+    );
+  }
 
   Track _parseTrack(Map<String, dynamic> data) {
     return Track(
@@ -506,13 +525,16 @@ class TrackNotifier extends Notifier<TrackState> {
       durationMs = durationValue.toInt();
     }
     
+    // Get item_type - can be 'track', 'album', or 'playlist'
+    final itemType = data['item_type']?.toString();
+    
     return Track(
       id: (data['spotify_id'] ?? data['id'] ?? '').toString(),
       name: (data['name'] ?? '').toString(),
       artistName: (data['artists'] ?? data['artist'] ?? '').toString(),
       albumName: (data['album_name'] ?? data['album'] ?? '').toString(),
       albumArtist: data['album_artist']?.toString(),
-      coverUrl: data['images']?.toString(),
+      coverUrl: (data['cover_url'] ?? data['images'])?.toString(),
       isrc: data['isrc']?.toString(),
       duration: (durationMs / 1000).round(),
       trackNumber: data['track_number'] as int?,
@@ -520,6 +542,7 @@ class TrackNotifier extends Notifier<TrackState> {
       releaseDate: data['release_date']?.toString(),
       source: source ?? data['source']?.toString() ?? data['provider_id']?.toString(),
       albumType: data['album_type']?.toString(),
+      itemType: itemType,
     );
   }
 

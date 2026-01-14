@@ -367,6 +367,35 @@ func NewQobuzDownloader() *QobuzDownloader {
 	return globalQobuzDownloader
 }
 
+// GetTrackByID fetches track info directly by Qobuz track ID
+func (q *QobuzDownloader) GetTrackByID(trackID int64) (*QobuzTrack, error) {
+	// Qobuz API: /track/get?track_id=XXX
+	apiBase, _ := base64.StdEncoding.DecodeString("aHR0cHM6Ly93d3cucW9idXouY29tL2FwaS5qc29uLzAuMi90cmFjay9nZXQ/dHJhY2tfaWQ9")
+	trackURL := fmt.Sprintf("%s%d&app_id=%s", string(apiBase), trackID, q.appID)
+
+	req, err := http.NewRequest("GET", trackURL, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := DoRequestWithUserAgent(q.client, req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("get track failed: HTTP %d", resp.StatusCode)
+	}
+
+	var track QobuzTrack
+	if err := json.NewDecoder(resp.Body).Decode(&track); err != nil {
+		return nil, err
+	}
+
+	return &track, nil
+}
+
 // GetAvailableAPIs returns list of available Qobuz APIs
 // Uses same APIs as PC version for compatibility
 func (q *QobuzDownloader) GetAvailableAPIs() []string {
@@ -936,8 +965,23 @@ func downloadFromQobuz(req DownloadRequest) (QobuzDownloadResult, error) {
 	var track *QobuzTrack
 	var err error
 
+	// STRATEGY 0: Use pre-fetched Qobuz ID from Odesli enrichment (highest priority)
+	if req.QobuzID != "" {
+		GoLog("[Qobuz] Using Qobuz ID from Odesli enrichment: %s\n", req.QobuzID)
+		var trackID int64
+		if _, parseErr := fmt.Sscanf(req.QobuzID, "%d", &trackID); parseErr == nil && trackID > 0 {
+			track, err = downloader.GetTrackByID(trackID)
+			if err != nil {
+				GoLog("[Qobuz] Failed to get track by Odesli ID %d: %v\n", trackID, err)
+				track = nil
+			} else if track != nil {
+				GoLog("[Qobuz] Successfully found track via Odesli ID: '%s' by '%s'\n", track.Title, track.Performer.Name)
+			}
+		}
+	}
+
 	// OPTIMIZATION: Check cache first for track ID
-	if req.ISRC != "" {
+	if track == nil && req.ISRC != "" {
 		if cached := GetTrackIDCache().Get(req.ISRC); cached != nil && cached.QobuzTrackID > 0 {
 			GoLog("[Qobuz] Cache hit! Using cached track ID: %d\n", cached.QobuzTrackID)
 			// For Qobuz we need to search again to get full track info, but we can use the ID

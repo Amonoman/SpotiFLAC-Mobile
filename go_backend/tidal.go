@@ -1457,8 +1457,24 @@ func downloadFromTidal(req DownloadRequest) (TidalDownloadResult, error) {
 	var track *TidalTrack
 	var err error
 
+	// STRATEGY 0: Use pre-fetched Tidal ID from Odesli enrichment (highest priority)
+	if req.TidalID != "" {
+		GoLog("[Tidal] Using Tidal ID from Odesli enrichment: %s\n", req.TidalID)
+		// Parse track ID (could be a number or extracted from URL)
+		var trackID int64
+		if _, parseErr := fmt.Sscanf(req.TidalID, "%d", &trackID); parseErr == nil && trackID > 0 {
+			track, err = downloader.GetTrackInfoByID(trackID)
+			if err != nil {
+				GoLog("[Tidal] Failed to get track by Odesli ID %d: %v\n", trackID, err)
+				track = nil
+			} else if track != nil {
+				GoLog("[Tidal] Successfully found track via Odesli ID: '%s' by '%s'\n", track.Title, track.Artist.Name)
+			}
+		}
+	}
+
 	// OPTIMIZATION: Check cache first for track ID
-	if req.ISRC != "" {
+	if track == nil && req.ISRC != "" {
 		if cached := GetTrackIDCache().Get(req.ISRC); cached != nil && cached.TidalTrackID > 0 {
 			GoLog("[Tidal] Cache hit! Using cached track ID: %d\n", cached.TidalTrackID)
 			track, err = downloader.GetTrackInfoByID(cached.TidalTrackID)

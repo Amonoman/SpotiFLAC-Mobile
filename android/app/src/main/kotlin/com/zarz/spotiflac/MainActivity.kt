@@ -572,6 +572,30 @@ class MainActivity: FlutterActivity() {
                             }
                             result.success(response)
                         }
+                        "getAlbumWithExtension" -> {
+                            val extensionId = call.argument<String>("extension_id") ?: ""
+                            val albumId = call.argument<String>("album_id") ?: ""
+                            val response = withContext(Dispatchers.IO) {
+                                Gobackend.getAlbumWithExtensionJSON(extensionId, albumId)
+                            }
+                            result.success(response)
+                        }
+                        "getPlaylistWithExtension" -> {
+                            val extensionId = call.argument<String>("extension_id") ?: ""
+                            val playlistId = call.argument<String>("playlist_id") ?: ""
+                            val response = withContext(Dispatchers.IO) {
+                                Gobackend.getPlaylistWithExtensionJSON(extensionId, playlistId)
+                            }
+                            result.success(response)
+                        }
+                        "getArtistWithExtension" -> {
+                            val extensionId = call.argument<String>("extension_id") ?: ""
+                            val artistId = call.argument<String>("artist_id") ?: ""
+                            val response = withContext(Dispatchers.IO) {
+                                Gobackend.getArtistWithExtensionJSON(extensionId, artistId)
+                            }
+                            result.success(response)
+                        }
                         // Extension Post-Processing API
                         "runPostProcessing" -> {
                             val filePath = call.argument<String>("file_path") ?: ""

@@ -503,6 +503,30 @@ import Gobackend  // Import Go framework
             if let error = error { throw error }
             return response
             
+        case "getAlbumWithExtension":
+            let args = call.arguments as! [String: Any]
+            let extensionId = args["extension_id"] as! String
+            let albumId = args["album_id"] as! String
+            let response = GobackendGetAlbumWithExtensionJSON(extensionId, albumId, &error)
+            if let error = error { throw error }
+            return response
+            
+        case "getPlaylistWithExtension":
+            let args = call.arguments as! [String: Any]
+            let extensionId = args["extension_id"] as! String
+            let playlistId = args["playlist_id"] as! String
+            let response = GobackendGetPlaylistWithExtensionJSON(extensionId, playlistId, &error)
+            if let error = error { throw error }
+            return response
+            
+        case "getArtistWithExtension":
+            let args = call.arguments as! [String: Any]
+            let extensionId = args["extension_id"] as! String
+            let artistId = args["artist_id"] as! String
+            let response = GobackendGetArtistWithExtensionJSON(extensionId, artistId, &error)
+            if let error = error { throw error }
+            return response
+            
         // Extension Post-Processing API
         case "runPostProcessing":
             let args = call.arguments as! [String: Any]

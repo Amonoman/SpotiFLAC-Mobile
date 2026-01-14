@@ -29,6 +29,14 @@ type ExtTrackMetadata struct {
 	DiscNumber  int    `json:"disc_number,omitempty"`
 	ISRC        string `json:"isrc,omitempty"`
 	ProviderID  string `json:"provider_id"`
+	ItemType    string `json:"item_type,omitempty"` // track, album, or playlist - for extension search results
+	AlbumType   string `json:"album_type,omitempty"` // album, single, ep, compilation
+	// Enrichment fields from Odesli/song.link
+	TidalID       string            `json:"tidal_id,omitempty"`
+	QobuzID       string            `json:"qobuz_id,omitempty"`
+	DeezerID      string            `json:"deezer_id,omitempty"`
+	SpotifyID     string            `json:"spotify_id,omitempty"`
+	ExternalLinks map[string]string `json:"external_links,omitempty"` // service -> URL mapping
 }
 
 // ResolvedCoverURL returns the cover URL, checking both CoverURL and Images fields
@@ -729,6 +737,19 @@ func DownloadWithExtensionFallback(req DownloadRequest) (*DownloadResponse, erro
 				if enrichedTrack.ISRC != "" && enrichedTrack.ISRC != req.ISRC {
 					GoLog("[DownloadWithExtensionFallback] ISRC enriched: %s -> %s\n", req.ISRC, enrichedTrack.ISRC)
 					req.ISRC = enrichedTrack.ISRC
+				}
+				// Update service-specific IDs from Odesli enrichment
+				if enrichedTrack.TidalID != "" {
+					GoLog("[DownloadWithExtensionFallback] Tidal ID from Odesli: %s\n", enrichedTrack.TidalID)
+					req.TidalID = enrichedTrack.TidalID
+				}
+				if enrichedTrack.QobuzID != "" {
+					GoLog("[DownloadWithExtensionFallback] Qobuz ID from Odesli: %s\n", enrichedTrack.QobuzID)
+					req.QobuzID = enrichedTrack.QobuzID
+				}
+				if enrichedTrack.DeezerID != "" {
+					GoLog("[DownloadWithExtensionFallback] Deezer ID from Odesli: %s\n", enrichedTrack.DeezerID)
+					req.DeezerID = enrichedTrack.DeezerID
 				}
 				// Can also update other fields if needed
 				if enrichedTrack.Name != "" {

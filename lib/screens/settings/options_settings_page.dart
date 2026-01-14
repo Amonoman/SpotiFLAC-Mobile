@@ -907,16 +907,12 @@ class _SourceChip extends StatelessWidget {
   final String label;
   final bool isSelected;
   final VoidCallback? onTap;
-  final String? badge;
-  final Color? badgeColor;
 
   const _SourceChip({
     required this.icon,
     required this.label,
     required this.isSelected,
     this.onTap,
-    this.badge,
-    this.badgeColor,
   });
 
   @override
@@ -962,24 +958,6 @@ class _SourceChip extends StatelessWidget {
                         : colorScheme.onSurfaceVariant,
                   ),
                 ),
-                if (badge != null) ...[
-                  const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: (badgeColor ?? colorScheme.tertiary).withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      badge!,
-                      style: TextStyle(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w500,
-                        color: badgeColor ?? colorScheme.tertiary,
-                      ),
-                    ),
-                  ),
-                ],
               ],
             ),
           ),

@@ -28,7 +28,7 @@ class AppSettings {
   final bool useExtensionProviders; // Use extension providers for downloads when available
   final String? searchProvider; // null/empty = default (Deezer/Spotify), otherwise extension ID
   final bool separateSingles; // Separate singles/EPs into their own folder
-  final String albumFolderStructure; // artist_album or album_only
+  final String albumFolderStructure; // artist_album, album_only, artist_year_album, year_album
   final bool showExtensionStore; // Show Extension Store tab in navigation
 
   const AppSettings({

@@ -13,6 +13,7 @@ import 'package:spotiflac_android/screens/track_metadata_screen.dart';
 import 'package:spotiflac_android/screens/album_screen.dart';
 import 'package:spotiflac_android/screens/artist_screen.dart';
 import 'package:spotiflac_android/services/csv_import_service.dart';
+import 'package:spotiflac_android/services/platform_bridge.dart';
 import 'package:spotiflac_android/screens/playlist_screen.dart';
 import 'package:spotiflac_android/models/download_item.dart';
 import 'package:spotiflac_android/widgets/download_service_picker.dart';
@@ -636,6 +637,12 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
       return [const SliverToBoxAdapter(child: SizedBox.shrink())];
     }
     
+    // Separate tracks from albums/playlists/artists
+    final realTracks = tracks.where((t) => !t.isCollection).toList();
+    final albumItems = tracks.where((t) => t.isAlbumItem).toList();
+    final playlistItems = tracks.where((t) => t.isPlaylistItem).toList();
+    final artistItems = tracks.where((t) => t.isArtistItem).toList();
+    
     return [
       // Error message - with special handling for rate limit (429)
       if (error != null)
@@ -648,19 +655,17 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
       if (isLoading)
         const SliverToBoxAdapter(child: Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: LinearProgressIndicator())),
 
-      // Artist search results (horizontal scroll)
+      // Artist search results (horizontal scroll) - from built-in providers
       if (searchArtists != null && searchArtists.isNotEmpty)
         SliverToBoxAdapter(child: _buildArtistSearchResults(searchArtists, colorScheme)),
 
-      // Songs section header
-      if (tracks.isNotEmpty)
+      // Artists section - from extension search
+      if (artistItems.isNotEmpty)
         SliverToBoxAdapter(child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-          child: Text('Songs', style: Theme.of(context).textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+          child: Text('Artists', style: Theme.of(context).textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
         )),
-
-      // Track list in grouped card
-      if (tracks.isNotEmpty)
+      if (artistItems.isNotEmpty)
         SliverToBoxAdapter(
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -676,13 +681,120 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  for (int i = 0; i < tracks.length; i++)
+                  for (int i = 0; i < artistItems.length; i++)
+                    _CollectionItemWidget(
+                      key: ValueKey('artist-${artistItems[i].id}'),
+                      item: artistItems[i],
+                      showDivider: i < artistItems.length - 1,
+                      onTap: () => _navigateToExtensionArtist(artistItems[i]),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+
+      // Albums section
+      if (albumItems.isNotEmpty)
+        SliverToBoxAdapter(child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          child: Text('Albums', style: Theme.of(context).textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+        )),
+      if (albumItems.isNotEmpty)
+        SliverToBoxAdapter(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Color.alphaBlend(Colors.white.withValues(alpha: 0.08), colorScheme.surface)
+                  : colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Material(
+              color: Colors.transparent,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (int i = 0; i < albumItems.length; i++)
+                    _CollectionItemWidget(
+                      key: ValueKey('album-${albumItems[i].id}'),
+                      item: albumItems[i],
+                      showDivider: i < albumItems.length - 1,
+                      onTap: () => _navigateToExtensionAlbum(albumItems[i]),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+
+      // Playlists section
+      if (playlistItems.isNotEmpty)
+        SliverToBoxAdapter(child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          child: Text('Playlists', style: Theme.of(context).textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+        )),
+      if (playlistItems.isNotEmpty)
+        SliverToBoxAdapter(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Color.alphaBlend(Colors.white.withValues(alpha: 0.08), colorScheme.surface)
+                  : colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Material(
+              color: Colors.transparent,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (int i = 0; i < playlistItems.length; i++)
+                    _CollectionItemWidget(
+                      key: ValueKey('playlist-${playlistItems[i].id}'),
+                      item: playlistItems[i],
+                      showDivider: i < playlistItems.length - 1,
+                      onTap: () => _navigateToExtensionPlaylist(playlistItems[i]),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+
+      // Songs section header
+      if (realTracks.isNotEmpty)
+        SliverToBoxAdapter(child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          child: Text('Songs', style: Theme.of(context).textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+        )),
+
+      // Track list in grouped card
+      if (realTracks.isNotEmpty)
+        SliverToBoxAdapter(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Color.alphaBlend(Colors.white.withValues(alpha: 0.08), colorScheme.surface)
+                  : colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Material(
+              color: Colors.transparent,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (int i = 0; i < realTracks.length; i++)
                     _TrackItemWithStatus(
-                      key: ValueKey(tracks[i].id),
-                      track: tracks[i],
-                      index: i,
-                      showDivider: i < tracks.length - 1,
-                      onDownload: () => _downloadTrack(i),
+                      key: ValueKey(realTracks[i].id),
+                      track: realTracks[i],
+                      index: tracks.indexOf(realTracks[i]), // Use original index for download
+                      showDivider: i < realTracks.length - 1,
+                      onDownload: () => _downloadTrack(tracks.indexOf(realTracks[i])),
                     ),
                 ],
               ),
@@ -781,6 +893,72 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
         artistName: artistName,
         coverUrl: imageUrl,
         // albums: null - will be fetched in ArtistScreen
+      ),
+    ));
+  }
+
+  void _navigateToExtensionAlbum(Track albumItem) async {
+    final extensionId = albumItem.source;
+    if (extensionId == null || extensionId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cannot load album: missing extension source')),
+      );
+      return;
+    }
+    
+    ref.read(settingsProvider.notifier).setHasSearchedBefore();
+    
+    // Navigate to AlbumScreen - it will fetch tracks via extension
+    Navigator.push(context, MaterialPageRoute(
+      builder: (context) => ExtensionAlbumScreen(
+        extensionId: extensionId,
+        albumId: albumItem.id,
+        albumName: albumItem.name,
+        coverUrl: albumItem.coverUrl,
+      ),
+    ));
+  }
+
+  void _navigateToExtensionPlaylist(Track playlistItem) async {
+    final extensionId = playlistItem.source;
+    if (extensionId == null || extensionId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cannot load playlist: missing extension source')),
+      );
+      return;
+    }
+    
+    ref.read(settingsProvider.notifier).setHasSearchedBefore();
+    
+    // Navigate to ExtensionPlaylistScreen - it will fetch tracks via extension
+    Navigator.push(context, MaterialPageRoute(
+      builder: (context) => ExtensionPlaylistScreen(
+        extensionId: extensionId,
+        playlistId: playlistItem.id,
+        playlistName: playlistItem.name,
+        coverUrl: playlistItem.coverUrl,
+      ),
+    ));
+  }
+
+  void _navigateToExtensionArtist(Track artistItem) {
+    final extensionId = artistItem.source;
+    if (extensionId == null || extensionId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cannot load artist: missing extension source')),
+      );
+      return;
+    }
+    
+    ref.read(settingsProvider.notifier).setHasSearchedBefore();
+    
+    // Navigate to ExtensionArtistScreen - it will fetch albums via extension
+    Navigator.push(context, MaterialPageRoute(
+      builder: (context) => ExtensionArtistScreen(
+        extensionId: extensionId,
+        artistId: artistItem.id,
+        artistName: artistItem.name,
+        coverUrl: artistItem.coverUrl,
       ),
     ));
   }
@@ -1107,5 +1285,500 @@ class _TrackItemWithStatus extends ConsumerWidget {
         ),
       );
     }
+  }
+}
+
+/// Widget for displaying album/playlist items in search results
+class _CollectionItemWidget extends StatelessWidget {
+  final Track item;
+  final bool showDivider;
+  final VoidCallback onTap;
+
+  const _CollectionItemWidget({
+    super.key,
+    required this.item,
+    required this.showDivider,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isPlaylist = item.isPlaylistItem;
+    final isArtist = item.isArtistItem;
+    
+    // Determine icon for placeholder
+    IconData placeholderIcon = Icons.album;
+    if (isPlaylist) placeholderIcon = Icons.playlist_play;
+    if (isArtist) placeholderIcon = Icons.person;
+    
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        InkWell(
+          onTap: onTap,
+          splashColor: colorScheme.primary.withValues(alpha: 0.12),
+          highlightColor: colorScheme.primary.withValues(alpha: 0.08),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Row(
+              children: [
+                // Cover art (circular for artists)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(isArtist ? 28 : 10),
+                  child: item.coverUrl != null && item.coverUrl!.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: item.coverUrl!,
+                          width: 56,
+                          height: 56,
+                          fit: BoxFit.cover,
+                          memCacheWidth: 112,
+                          memCacheHeight: 112,
+                        )
+                      : Container(
+                          width: 56,
+                          height: 56,
+                          color: colorScheme.surfaceContainerHighest,
+                          child: Icon(
+                            placeholderIcon,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                ),
+                const SizedBox(width: 12),
+                // Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.name,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        item.artistName.isNotEmpty ? item.artistName : (isPlaylist ? 'Playlist' : 'Album'),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                // Arrow indicator
+                Icon(
+                  Icons.chevron_right,
+                  color: colorScheme.onSurfaceVariant,
+                  size: 24,
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (showDivider)
+          Divider(
+            height: 1,
+            thickness: 1,
+            indent: 80,
+            endIndent: 12,
+            color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+          ),
+      ],
+    );
+  }
+}
+
+/// Screen for viewing extension album with track fetching
+class ExtensionAlbumScreen extends ConsumerStatefulWidget {
+  final String extensionId;
+  final String albumId;
+  final String albumName;
+  final String? coverUrl;
+
+  const ExtensionAlbumScreen({
+    super.key,
+    required this.extensionId,
+    required this.albumId,
+    required this.albumName,
+    this.coverUrl,
+  });
+
+  @override
+  ConsumerState<ExtensionAlbumScreen> createState() => _ExtensionAlbumScreenState();
+}
+
+class _ExtensionAlbumScreenState extends ConsumerState<ExtensionAlbumScreen> {
+  List<Track>? _tracks;
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchTracks();
+  }
+
+  Future<void> _fetchTracks() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    
+    try {
+      final result = await PlatformBridge.getAlbumWithExtension(
+        widget.extensionId,
+        widget.albumId,
+      );
+      
+      if (result == null) {
+        setState(() {
+          _error = 'Failed to load album';
+          _isLoading = false;
+        });
+        return;
+      }
+      
+      // Parse tracks from result
+      final trackList = result['tracks'] as List<dynamic>?;
+      if (trackList == null) {
+        setState(() {
+          _error = 'No tracks found';
+          _isLoading = false;
+        });
+        return;
+      }
+      
+      final tracks = trackList.map((t) => _parseTrack(t as Map<String, dynamic>)).toList();
+      
+      setState(() {
+        _tracks = tracks;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'Error: $e';
+        _isLoading = false;
+      });
+    }
+  }
+
+  Track _parseTrack(Map<String, dynamic> data) {
+    int durationMs = 0;
+    final durationValue = data['duration_ms'];
+    if (durationValue is int) {
+      durationMs = durationValue;
+    } else if (durationValue is double) {
+      durationMs = durationValue.toInt();
+    }
+    
+    return Track(
+      id: (data['id'] ?? '').toString(),
+      name: (data['name'] ?? '').toString(),
+      artistName: (data['artists'] ?? data['artist'] ?? '').toString(),
+      albumName: (data['album_name'] ?? widget.albumName).toString(),
+      coverUrl: _resolveCoverUrl(data['cover_url']?.toString(), widget.coverUrl),
+      isrc: data['isrc']?.toString(),
+      duration: (durationMs / 1000).round(),
+      trackNumber: data['track_number'] as int?,
+      source: widget.extensionId,
+    );
+  }
+  
+  String? _resolveCoverUrl(String? trackCover, String? albumCover) {
+    if (trackCover != null && trackCover.isNotEmpty) return trackCover;
+    return albumCover;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: Text(widget.albumName)),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+    
+    if (_error != null) {
+      return Scaffold(
+        appBar: AppBar(title: Text(widget.albumName)),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              const SizedBox(height: 16),
+              ElevatedButton(onPressed: _fetchTracks, child: const Text('Retry')),
+            ],
+          ),
+        ),
+      );
+    }
+    
+    // Navigate to AlbumScreen with fetched tracks
+    return AlbumScreen(
+      albumId: widget.albumId,
+      albumName: widget.albumName,
+      coverUrl: widget.coverUrl,
+      tracks: _tracks,
+    );
+  }
+}
+
+/// Screen for viewing extension playlist with track fetching
+class ExtensionPlaylistScreen extends ConsumerStatefulWidget {
+  final String extensionId;
+  final String playlistId;
+  final String playlistName;
+  final String? coverUrl;
+
+  const ExtensionPlaylistScreen({
+    super.key,
+    required this.extensionId,
+    required this.playlistId,
+    required this.playlistName,
+    this.coverUrl,
+  });
+
+  @override
+  ConsumerState<ExtensionPlaylistScreen> createState() => _ExtensionPlaylistScreenState();
+}
+
+class _ExtensionPlaylistScreenState extends ConsumerState<ExtensionPlaylistScreen> {
+  List<Track>? _tracks;
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchTracks();
+  }
+
+  Future<void> _fetchTracks() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    
+    try {
+      final result = await PlatformBridge.getPlaylistWithExtension(
+        widget.extensionId,
+        widget.playlistId,
+      );
+      
+      if (result == null) {
+        setState(() {
+          _error = 'Failed to load playlist';
+          _isLoading = false;
+        });
+        return;
+      }
+      
+      // Parse tracks from result
+      final trackList = result['tracks'] as List<dynamic>?;
+      if (trackList == null) {
+        setState(() {
+          _error = 'No tracks found';
+          _isLoading = false;
+        });
+        return;
+      }
+      
+      final tracks = trackList.map((t) => _parseTrack(t as Map<String, dynamic>)).toList();
+      
+      setState(() {
+        _tracks = tracks;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'Error: $e';
+        _isLoading = false;
+      });
+    }
+  }
+
+  Track _parseTrack(Map<String, dynamic> data) {
+    int durationMs = 0;
+    final durationValue = data['duration_ms'];
+    if (durationValue is int) {
+      durationMs = durationValue;
+    } else if (durationValue is double) {
+      durationMs = durationValue.toInt();
+    }
+    
+    return Track(
+      id: (data['id'] ?? '').toString(),
+      name: (data['name'] ?? '').toString(),
+      artistName: (data['artists'] ?? data['artist'] ?? '').toString(),
+      albumName: (data['album_name'] ?? '').toString(),
+      coverUrl: _resolveCoverUrl(data['cover_url']?.toString(), widget.coverUrl),
+      isrc: data['isrc']?.toString(),
+      duration: (durationMs / 1000).round(),
+      trackNumber: data['track_number'] as int?,
+      source: widget.extensionId,
+    );
+  }
+  
+  String? _resolveCoverUrl(String? trackCover, String? playlistCover) {
+    if (trackCover != null && trackCover.isNotEmpty) return trackCover;
+    return playlistCover;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: Text(widget.playlistName)),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+    
+    if (_error != null) {
+      return Scaffold(
+        appBar: AppBar(title: Text(widget.playlistName)),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              const SizedBox(height: 16),
+              ElevatedButton(onPressed: _fetchTracks, child: const Text('Retry')),
+            ],
+          ),
+        ),
+      );
+    }
+    
+    // Navigate to PlaylistScreen with fetched tracks
+    return PlaylistScreen(
+      playlistName: widget.playlistName,
+      coverUrl: widget.coverUrl,
+      tracks: _tracks!,
+    );
+  }
+}
+
+/// Screen for viewing extension artist with album fetching
+class ExtensionArtistScreen extends ConsumerStatefulWidget {
+  final String extensionId;
+  final String artistId;
+  final String artistName;
+  final String? coverUrl;
+
+  const ExtensionArtistScreen({
+    super.key,
+    required this.extensionId,
+    required this.artistId,
+    required this.artistName,
+    this.coverUrl,
+  });
+
+  @override
+  ConsumerState<ExtensionArtistScreen> createState() => _ExtensionArtistScreenState();
+}
+
+class _ExtensionArtistScreenState extends ConsumerState<ExtensionArtistScreen> {
+  List<ArtistAlbum>? _albums;
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchArtist();
+  }
+
+  Future<void> _fetchArtist() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    
+    try {
+      final result = await PlatformBridge.getArtistWithExtension(
+        widget.extensionId,
+        widget.artistId,
+      );
+      
+      if (result == null) {
+        setState(() {
+          _error = 'Failed to load artist';
+          _isLoading = false;
+        });
+        return;
+      }
+      
+      // Parse albums from result
+      final albumList = result['albums'] as List<dynamic>?;
+      if (albumList == null) {
+        setState(() {
+          _albums = [];
+          _isLoading = false;
+        });
+        return;
+      }
+      
+      final albums = albumList.map((a) => _parseAlbum(a as Map<String, dynamic>)).toList();
+      
+      setState(() {
+        _albums = albums;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'Error: $e';
+        _isLoading = false;
+      });
+    }
+  }
+
+  ArtistAlbum _parseAlbum(Map<String, dynamic> data) {
+    return ArtistAlbum(
+      id: (data['id'] ?? '').toString(),
+      name: (data['name'] ?? '').toString(),
+      artists: (data['artists'] ?? '').toString(),
+      releaseDate: (data['release_date'] ?? '').toString(),
+      totalTracks: data['total_tracks'] as int? ?? 0,
+      coverUrl: data['cover_url']?.toString(),
+      albumType: (data['album_type'] ?? 'album').toString(),
+      providerId: (data['provider_id'] ?? widget.extensionId).toString(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(title: Text(widget.artistName)),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+    
+    if (_error != null) {
+      return Scaffold(
+        appBar: AppBar(title: Text(widget.artistName)),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              const SizedBox(height: 16),
+              ElevatedButton(onPressed: _fetchArtist, child: const Text('Retry')),
+            ],
+          ),
+        ),
+      );
+    }
+    
+    // Navigate to ArtistScreen with fetched albums
+    return ArtistScreen(
+      artistId: widget.artistId,
+      artistName: widget.artistName,
+      coverUrl: widget.coverUrl,
+      albums: _albums,
+    );
   }
 }

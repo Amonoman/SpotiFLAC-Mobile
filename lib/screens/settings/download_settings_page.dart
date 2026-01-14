@@ -200,9 +200,7 @@ class DownloadSettingsPage extends ConsumerWidget {
                     SettingsItem(
                       icon: Icons.folder_outlined,
                       title: 'Album Folder Structure',
-                      subtitle: settings.albumFolderStructure == 'album_only'
-                          ? 'Albums/Album Name/'
-                          : 'Albums/Artist/Album Name/',
+                      subtitle: _getAlbumFolderStructureLabel(settings.albumFolderStructure),
                       onTap: () => _showAlbumFolderStructurePicker(
                         context,
                         ref,
@@ -234,6 +232,19 @@ class DownloadSettingsPage extends ConsumerWidget {
     );
   }
 
+  String _getAlbumFolderStructureLabel(String structure) {
+    switch (structure) {
+      case 'album_only':
+        return 'Albums/Album Name/';
+      case 'artist_year_album':
+        return 'Albums/Artist/[Year] Album/';
+      case 'year_album':
+        return 'Albums/[Year] Album/';
+      default:
+        return 'Albums/Artist/Album Name/';
+    }
+  }
+
   void _showAlbumFolderStructurePicker(BuildContext context, WidgetRef ref, String current) {
     showModalBottomSheet(
       context: context,
@@ -252,12 +263,32 @@ class DownloadSettingsPage extends ConsumerWidget {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.calendar_today_outlined),
+              title: const Text('Artist / [Year] Album'),
+              subtitle: const Text('Albums/Artist Name/[2005] Album Name/'),
+              trailing: current == 'artist_year_album' ? const Icon(Icons.check) : null,
+              onTap: () {
+                ref.read(settingsProvider.notifier).setAlbumFolderStructure('artist_year_album');
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.album_outlined),
               title: const Text('Album Only'),
               subtitle: const Text('Albums/Album Name/'),
               trailing: current == 'album_only' ? const Icon(Icons.check) : null,
               onTap: () {
                 ref.read(settingsProvider.notifier).setAlbumFolderStructure('album_only');
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.event_outlined),
+              title: const Text('[Year] Album Only'),
+              subtitle: const Text('Albums/[2005] Album Name/'),
+              trailing: current == 'year_album' ? const Icon(Icons.check) : null,
+              onTap: () {
+                ref.read(settingsProvider.notifier).setAlbumFolderStructure('year_album');
                 Navigator.pop(context);
               },
             ),

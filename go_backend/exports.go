@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/dop251/goja"
 )
 
 // ParseSpotifyURL parses and validates a Spotify URL
@@ -150,6 +152,10 @@ type DownloadRequest struct {
 	ItemID               string `json:"item_id"`     // Unique ID for progress tracking
 	DurationMS           int    `json:"duration_ms"` // Expected duration in milliseconds (for verification)
 	Source               string `json:"source"`      // Extension ID that provided this track (prioritize this extension)
+	// Enriched IDs from Odesli/song.link - used to skip search and directly fetch
+	TidalID  string `json:"tidal_id,omitempty"`
+	QobuzID  string `json:"qobuz_id,omitempty"`
+	DeezerID string `json:"deezer_id,omitempty"`
 }
 
 // DownloadResponse represents the result of a download
@@ -1516,6 +1522,8 @@ func CustomSearchWithExtensionJSON(extensionID, query string, optionsJSON string
 			"disc_number":  track.DiscNumber,
 			"isrc":         track.ISRC,
 			"provider_id":  track.ProviderID,
+			"item_type":    track.ItemType,  // track, album, or playlist
+			"album_type":   track.AlbumType, // album, single, ep, compilation
 		}
 	}
 
@@ -1613,6 +1621,8 @@ func HandleURLWithExtensionJSON(url string) (string, error) {
 				"disc_number":  track.DiscNumber,
 				"isrc":         track.ISRC,
 				"provider_id":  track.ProviderID,
+				"item_type":    track.ItemType,
+				"album_type":   track.AlbumType,
 			}
 		}
 		response["tracks"] = tracks
@@ -1627,6 +1637,7 @@ func HandleURLWithExtensionJSON(url string) (string, error) {
 			"cover_url":    result.Album.CoverURL,
 			"release_date": result.Album.ReleaseDate,
 			"total_tracks": result.Album.TotalTracks,
+			"album_type":   result.Album.AlbumType,
 		}
 	}
 
@@ -1679,6 +1690,219 @@ func FindURLHandlerJSON(url string) string {
 		return ""
 	}
 	return handler.extension.ID
+}
+
+// GetAlbumWithExtensionJSON gets album tracks using an extension
+func GetAlbumWithExtensionJSON(extensionID, albumID string) (string, error) {
+	manager := GetExtensionManager()
+	ext, err := manager.GetExtension(extensionID)
+	if err != nil {
+		return "", err
+	}
+
+	if !ext.Manifest.IsMetadataProvider() {
+		return "", fmt.Errorf("extension '%s' is not a metadata provider", extensionID)
+	}
+
+	provider := NewExtensionProviderWrapper(ext)
+	album, err := provider.GetAlbum(albumID)
+	if err != nil {
+		return "", err
+	}
+
+	if album == nil {
+		return "", fmt.Errorf("album not found")
+	}
+
+	// Convert tracks to map format
+	tracks := make([]map[string]interface{}, len(album.Tracks))
+	for i, track := range album.Tracks {
+		// Use album cover as fallback if track doesn't have its own cover
+		trackCover := track.ResolvedCoverURL()
+		if trackCover == "" {
+			trackCover = album.CoverURL
+		}
+		tracks[i] = map[string]interface{}{
+			"id":           track.ID,
+			"name":         track.Name,
+			"artists":      track.Artists,
+			"album_name":   track.AlbumName,
+			"album_artist": track.AlbumArtist,
+			"duration_ms":  track.DurationMS,
+			"cover_url":    trackCover,
+			"release_date": track.ReleaseDate,
+			"track_number": track.TrackNumber,
+			"disc_number":  track.DiscNumber,
+			"isrc":         track.ISRC,
+			"provider_id":  track.ProviderID,
+			"item_type":    track.ItemType,
+			"album_type":   track.AlbumType,
+		}
+	}
+
+	response := map[string]interface{}{
+		"id":           album.ID,
+		"name":         album.Name,
+		"artists":      album.Artists,
+		"cover_url":    album.CoverURL,
+		"release_date": album.ReleaseDate,
+		"total_tracks": album.TotalTracks,
+		"album_type":   album.AlbumType,
+		"tracks":       tracks,
+		"provider_id":  album.ProviderID,
+	}
+
+	jsonBytes, err := json.Marshal(response)
+	if err != nil {
+		return "", err
+	}
+
+	return string(jsonBytes), nil
+}
+
+// GetPlaylistWithExtensionJSON gets playlist tracks using an extension
+func GetPlaylistWithExtensionJSON(extensionID, playlistID string) (string, error) {
+	manager := GetExtensionManager()
+	ext, err := manager.GetExtension(extensionID)
+	if err != nil {
+		return "", err
+	}
+
+	if !ext.Manifest.IsMetadataProvider() {
+		return "", fmt.Errorf("extension '%s' is not a metadata provider", extensionID)
+	}
+
+	provider := NewExtensionProviderWrapper(ext)
+
+	// Try getPlaylist first, fall back to getAlbum (some extensions use album for playlists)
+	script := fmt.Sprintf(`
+		(function() {
+			if (typeof extension !== 'undefined' && typeof extension.getPlaylist === 'function') {
+				return extension.getPlaylist(%q);
+			}
+			if (typeof extension !== 'undefined' && typeof extension.getAlbum === 'function') {
+				return extension.getAlbum(%q);
+			}
+			return null;
+		})()
+	`, playlistID, playlistID)
+
+	result, err := RunWithTimeoutAndRecover(provider.vm, script, DefaultJSTimeout)
+	if err != nil {
+		return "", fmt.Errorf("getPlaylist failed: %w", err)
+	}
+
+	if result == nil || goja.IsUndefined(result) || goja.IsNull(result) {
+		return "", fmt.Errorf("playlist not found")
+	}
+
+	exported := result.Export()
+	jsonBytes, err := json.Marshal(exported)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal result: %w", err)
+	}
+
+	// Parse into album metadata (same structure)
+	var album ExtAlbumMetadata
+	if err := json.Unmarshal(jsonBytes, &album); err != nil {
+		return "", fmt.Errorf("failed to parse playlist: %w", err)
+	}
+
+	// Convert tracks to map format
+	tracks := make([]map[string]interface{}, len(album.Tracks))
+	for i, track := range album.Tracks {
+		// Use playlist cover as fallback if track doesn't have its own cover
+		trackCover := track.ResolvedCoverURL()
+		if trackCover == "" {
+			trackCover = album.CoverURL
+		}
+		tracks[i] = map[string]interface{}{
+			"id":           track.ID,
+			"name":         track.Name,
+			"artists":      track.Artists,
+			"album_name":   track.AlbumName,
+			"album_artist": track.AlbumArtist,
+			"duration_ms":  track.DurationMS,
+			"cover_url":    trackCover,
+			"release_date": track.ReleaseDate,
+			"track_number": track.TrackNumber,
+			"disc_number":  track.DiscNumber,
+			"isrc":         track.ISRC,
+			"provider_id":  track.ProviderID,
+			"item_type":    track.ItemType,
+			"album_type":   track.AlbumType,
+		}
+	}
+
+	response := map[string]interface{}{
+		"id":           album.ID,
+		"name":         album.Name,
+		"owner":        album.Artists,
+		"cover_url":    album.CoverURL,
+		"total_tracks": album.TotalTracks,
+		"tracks":       tracks,
+		"provider_id":  album.ProviderID,
+	}
+
+	jsonBytes, err = json.Marshal(response)
+	if err != nil {
+		return "", err
+	}
+
+	return string(jsonBytes), nil
+}
+
+// GetArtistWithExtensionJSON gets artist info and albums using an extension
+func GetArtistWithExtensionJSON(extensionID, artistID string) (string, error) {
+	manager := GetExtensionManager()
+	ext, err := manager.GetExtension(extensionID)
+	if err != nil {
+		return "", err
+	}
+
+	if !ext.Manifest.IsMetadataProvider() {
+		return "", fmt.Errorf("extension '%s' is not a metadata provider", extensionID)
+	}
+
+	provider := NewExtensionProviderWrapper(ext)
+	artist, err := provider.GetArtist(artistID)
+	if err != nil {
+		return "", err
+	}
+
+	if artist == nil {
+		return "", fmt.Errorf("artist not found")
+	}
+
+	// Convert albums to map format
+	albums := make([]map[string]interface{}, len(artist.Albums))
+	for i, album := range artist.Albums {
+		albums[i] = map[string]interface{}{
+			"id":           album.ID,
+			"name":         album.Name,
+			"artists":      album.Artists,
+			"cover_url":    album.CoverURL,
+			"release_date": album.ReleaseDate,
+			"total_tracks": album.TotalTracks,
+			"album_type":   album.AlbumType,
+			"provider_id":  album.ProviderID,
+		}
+	}
+
+	response := map[string]interface{}{
+		"id":          artist.ID,
+		"name":        artist.Name,
+		"cover_url":   artist.ImageURL,
+		"albums":      albums,
+		"provider_id": artist.ProviderID,
+	}
+
+	jsonBytes, err := json.Marshal(response)
+	if err != nil {
+		return "", err
+	}
+
+	return string(jsonBytes), nil
 }
 
 // GetURLHandlersJSON returns all extensions that handle custom URLs

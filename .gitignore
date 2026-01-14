@@ -56,3 +56,6 @@ android/app/libs/gobackend-sources.jar
 
 # Extension folder
 extension/
+AGENTS.md
+nul
+/extension

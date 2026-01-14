@@ -688,15 +688,28 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
       } else {
         // Albums folder structure based on setting
         final albumName = _sanitizeFolderName(track.albumName);
+        final artistName = _sanitizeFolderName(track.albumArtist ?? track.artistName);
+        final year = _extractYear(track.releaseDate);
         String albumPath;
         
-        if (albumFolderStructure == 'album_only') {
-          // Albums/Album structure (no artist folder)
-          albumPath = '$baseDir${Platform.pathSeparator}Albums${Platform.pathSeparator}$albumName';
-        } else {
-          // Albums/Artist/Album structure (default)
-          final artistName = _sanitizeFolderName(track.albumArtist ?? track.artistName);
-          albumPath = '$baseDir${Platform.pathSeparator}Albums${Platform.pathSeparator}$artistName${Platform.pathSeparator}$albumName';
+        switch (albumFolderStructure) {
+          case 'album_only':
+            // Albums/Album structure (no artist folder)
+            albumPath = '$baseDir${Platform.pathSeparator}Albums${Platform.pathSeparator}$albumName';
+            break;
+          case 'artist_year_album':
+            // Albums/Artist/[Year] Album structure
+            final yearAlbum = year != null ? '[$year] $albumName' : albumName;
+            albumPath = '$baseDir${Platform.pathSeparator}Albums${Platform.pathSeparator}$artistName${Platform.pathSeparator}$yearAlbum';
+            break;
+          case 'year_album':
+            // Albums/[Year] Album structure (no artist folder)
+            final yearAlbum = year != null ? '[$year] $albumName' : albumName;
+            albumPath = '$baseDir${Platform.pathSeparator}Albums${Platform.pathSeparator}$yearAlbum';
+            break;
+          default:
+            // Albums/Artist/Album structure (default: artist_album)
+            albumPath = '$baseDir${Platform.pathSeparator}Albums${Platform.pathSeparator}$artistName${Platform.pathSeparator}$albumName';
         }
         
         final dir = Directory(albumPath);
@@ -749,6 +762,14 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
         .replaceAll(RegExp(r'[<>:"/\\|?*]'), '_')
         .replaceAll(RegExp(r'\.+$'), '') // Remove trailing dots
         .trim();
+  }
+
+  /// Extract year from release date (format: "2005-06-13" or "2005")
+  String? _extractYear(String? releaseDate) {
+    if (releaseDate == null || releaseDate.isEmpty) return null;
+    // Handle both "2005-06-13" and "2005" formats
+    final match = RegExp(r'^(\d{4})').firstMatch(releaseDate);
+    return match?.group(1);
   }
 
   void updateSettings(AppSettings settings) {

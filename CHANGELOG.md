@@ -1,5 +1,49 @@
 # Changelog
 
+## [3.0.1] - 2026-01-21
+
+### Added
+
+- **Year in Album Folder Name** ([#50](https://github.com/zarzet/SpotiFLAC-Mobile/issues/50)): New album folder structure options with release year
+  - `Artist / [Year] Album`: Albums/Coldplay/[2005] X&Y/
+  - `[Year] Album Only`: Albums/[2005] X&Y/
+  - Year extracted from release date metadata
+  - Matches desktop SpotiFLAC folder structure
+
+- **Extension Album/Playlist/Artist Support**: Extensions can now return albums, playlists, and artists in search results
+  - Search results now properly separated into Albums, Playlists, Artists, and Songs sections
+  - Albums, playlists, and artists show chevron icon (navigate to detail) instead of download button
+  - Tap album/playlist to view track list and download
+  - Tap artist to view their albums/discography
+  - New `getAlbum()`, `getPlaylist()`, and `getArtist()` extension functions
+  - New `ExtensionAlbumScreen`, `ExtensionPlaylistScreen`, and `ExtensionArtistScreen` for fetching content from extensions
+  - YouTube Music extension updated with album/playlist/artist support
+  - See [Extension Development Guide](docs/EXTENSION_DEVELOPMENT.md#artist-support) for implementation details
+
+- **Odesli (song.link) Integration for YouTube Music Extension**
+  - New `enrichTrack()` function to fetch ISRC and external service links
+  - Uses Odesli API to convert YouTube Music tracks to Deezer/Tidal/Qobuz/Spotify
+  - Enables built-in service fallback for high-quality audio downloads
+  - Extension version updated to 1.4.0 with `api.song.link` and `odesli.io` network permissions
+
+### Fixed
+
+- Fixed PageView overscroll at edges (BouncingScrollPhysics → ClampingScrollPhysics)
+- Fixed settings item highlight on swipe (highlightColor: Colors.transparent)
+- Fixed extension duplicate load error (skip silently instead of throwing error)
+- Fixed keyboard appearing when swiping between tabs (unfocus on page change)
+- Removed "Free"/"API Key" badges from search source selector
+- **Go Backend: Missing `item_type` and `album_type` fields**
+  - Added `ItemType` and `AlbumType` fields to `ExtTrackMetadata` struct
+  - Fixed `CustomSearchWithExtensionJSON` - now includes `item_type` and `album_type` in response
+  - Fixed `HandleURLWithExtensionJSON` - now includes `item_type` and `album_type` for tracks
+  - Fixed `GetAlbumWithExtensionJSON` - now includes `item_type` and `album_type` for album tracks
+  - Fixed `GetPlaylistWithExtensionJSON` - now includes `item_type` and `album_type` for playlist tracks
+- **Album/Playlist Track Thumbnails**: Tracks inside albums/playlists now use album/playlist cover as fallback when no individual cover exists
+- **YouTube Music Extension getArtist**: Fixed `getArtist()` function not being registered in extension, causing artist pages to fail with "returned null" error
+
+---
+
 ## [3.0.0] - 2026-01-14
 
 ### 🎉 Extension System (Major Feature)
@@ -44,6 +88,12 @@ SpotiFLAC 3.0 introduces a powerful extension system that allows third-party int
 - **Separate Singles Folder**: Organize downloads into Albums/ and Singles/ folders
   - Based on `album_type` from Spotify/Deezer metadata
   - Toggle in Settings > Download > Separate Singles Folder
+
+- **Year in Album Folder Name**: New album folder structure options with release year
+  - `Artist / [Year] Album`: Albums/Coldplay/[2005] X&Y/
+  - `[Year] Album Only`: Albums/[2005] X&Y/
+  - Year extracted from release date metadata
+  - Matches desktop SpotiFLAC folder structure
 
 - **Parallel API Calls**: Download URL fetching now uses parallel requests
   - Tidal: All 8 APIs requested simultaneously, first success wins

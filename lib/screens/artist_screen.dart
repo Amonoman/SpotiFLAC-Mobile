@@ -5,6 +5,7 @@ import 'package:spotiflac_android/providers/track_provider.dart';
 import 'package:spotiflac_android/providers/settings_provider.dart';
 import 'package:spotiflac_android/services/platform_bridge.dart';
 import 'package:spotiflac_android/screens/album_screen.dart';
+import 'package:spotiflac_android/screens/home_tab.dart' show ExtensionAlbumScreen;
 
 /// Simple in-memory cache for artist discography
 class _ArtistCache {
@@ -346,14 +347,29 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
   void _navigateToAlbum(ArtistAlbum album) {
     // Navigate immediately with data from artist discography, fetch tracks in AlbumScreen
     ref.read(settingsProvider.notifier).setHasSearchedBefore();
-    Navigator.push(context, MaterialPageRoute(
-      builder: (context) => AlbumScreen(
-        albumId: album.id,
-        albumName: album.name,
-        coverUrl: album.coverUrl,
-        // tracks: null - will be fetched in AlbumScreen
-      ),
-    ));
+    
+    // Check if this album is from an extension (has providerId)
+    if (album.providerId != null && album.providerId!.isNotEmpty) {
+      // Use ExtensionAlbumScreen for extension albums
+      Navigator.push(context, MaterialPageRoute(
+        builder: (context) => ExtensionAlbumScreen(
+          extensionId: album.providerId!,
+          albumId: album.id,
+          albumName: album.name,
+          coverUrl: album.coverUrl,
+        ),
+      ));
+    } else {
+      // Use regular AlbumScreen for Spotify/Deezer albums
+      Navigator.push(context, MaterialPageRoute(
+        builder: (context) => AlbumScreen(
+          albumId: album.id,
+          albumName: album.name,
+          coverUrl: album.coverUrl,
+          // tracks: null - will be fetched in AlbumScreen
+        ),
+      ));
+    }
   }
 
   /// Build error widget with special handling for rate limit (429)

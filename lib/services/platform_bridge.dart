@@ -787,6 +787,60 @@ class PlatformBridge {
     return list.map((e) => e as Map<String, dynamic>).toList();
   }
 
+  /// Get album tracks using an extension
+  static Future<Map<String, dynamic>?> getAlbumWithExtension(
+    String extensionId,
+    String albumId,
+  ) async {
+    try {
+      final result = await _channel.invokeMethod('getAlbumWithExtension', {
+        'extension_id': extensionId,
+        'album_id': albumId,
+      });
+      if (result == null || result == '') return null;
+      return jsonDecode(result as String) as Map<String, dynamic>;
+    } catch (e) {
+      _log.e('getAlbumWithExtension failed: $e');
+      return null;
+    }
+  }
+
+  /// Get playlist tracks using an extension
+  static Future<Map<String, dynamic>?> getPlaylistWithExtension(
+    String extensionId,
+    String playlistId,
+  ) async {
+    try {
+      final result = await _channel.invokeMethod('getPlaylistWithExtension', {
+        'extension_id': extensionId,
+        'playlist_id': playlistId,
+      });
+      if (result == null || result == '') return null;
+      return jsonDecode(result as String) as Map<String, dynamic>;
+    } catch (e) {
+      _log.e('getPlaylistWithExtension failed: $e');
+      return null;
+    }
+  }
+
+  /// Get artist info and albums using an extension
+  static Future<Map<String, dynamic>?> getArtistWithExtension(
+    String extensionId,
+    String artistId,
+  ) async {
+    try {
+      final result = await _channel.invokeMethod('getArtistWithExtension', {
+        'extension_id': extensionId,
+        'artist_id': artistId,
+      });
+      if (result == null || result == '') return null;
+      return jsonDecode(result as String) as Map<String, dynamic>;
+    } catch (e) {
+      _log.e('getArtistWithExtension failed: $e');
+      return null;
+    }
+  }
+
   // ==================== EXTENSION POST-PROCESSING ====================
 
   /// Run post-processing hooks on a file
