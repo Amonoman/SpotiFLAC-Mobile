@@ -7,6 +7,7 @@ import 'package:spotiflac_android/models/track.dart';
 import 'package:spotiflac_android/models/download_item.dart';
 import 'package:spotiflac_android/providers/download_queue_provider.dart';
 import 'package:spotiflac_android/providers/settings_provider.dart';
+import 'package:spotiflac_android/providers/recent_access_provider.dart';
 import 'package:spotiflac_android/services/platform_bridge.dart';
 import 'package:spotiflac_android/widgets/download_service_picker.dart';
 
@@ -63,6 +64,19 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
   @override
   void initState() {
     super.initState();
+    
+    // Record access for recent history
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final providerId = widget.albumId.startsWith('deezer:') ? 'deezer' : 'spotify';
+      ref.read(recentAccessProvider.notifier).recordAlbumAccess(
+        id: widget.albumId,
+        name: widget.albumName,
+        artistName: widget.tracks?.firstOrNull?.artistName,
+        imageUrl: widget.coverUrl,
+        providerId: providerId,
+      );
+    });
+    
     // Priority: widget.tracks > cache > fetch
     _tracks = widget.tracks ?? _AlbumCache.get(widget.albumId);
     if (_tracks == null) {

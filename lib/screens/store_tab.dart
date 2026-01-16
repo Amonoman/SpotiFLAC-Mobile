@@ -548,15 +548,41 @@ class _ExtensionItem extends StatelessWidget {
                           color: colorScheme.onSurfaceVariant,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        extension.description,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+                      // Warning badge for incompatible extensions
+                      if (extension.requiresNewerApp) ...[
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: colorScheme.errorContainer,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.warning_amber_rounded, size: 12, color: colorScheme.onErrorContainer),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Requires v${extension.minAppVersion}+',
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: colorScheme.onErrorContainer,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      ] else ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          extension.description,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ],
                   ),
                 ),

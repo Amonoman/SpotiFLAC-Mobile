@@ -324,6 +324,8 @@
 
   "artistReleases": "{count, plural, =1{1 rilis} other{{count} rilis}}",
   "artistCompilations": "Kompilasi",
+  "artistPopular": "Populer",
+  "artistMonthlyListeners": "{count} pendengar bulanan",
 
   "tracksHeader": "Lagu",
   "downloadAllCount": "Unduh Semua ({count})",
@@ -667,5 +669,13 @@
   "folderOrganizationByAlbum": "Berdasarkan Album",
   "folderOrganizationByAlbumSubtitle": "Folder terpisah untuk setiap album",
   "folderOrganizationByArtistAlbum": "Berdasarkan Artis & Album",
-  "folderOrganizationByArtistAlbumSubtitle": "Folder bersarang untuk artis dan album"
+  "folderOrganizationByArtistAlbumSubtitle": "Folder bersarang untuk artis dan album",
+
+  "recentTypeArtist": "Artis",
+  "recentTypeAlbum": "Album",
+  "recentTypeSong": "Lagu",
+  "recentTypePlaylist": "Playlist",
+
+  "recentPlaylistInfo": "Playlist: {name}",
+  "errorGeneric": "Error: {message}"
 }

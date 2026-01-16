@@ -30,7 +30,7 @@ type ExtTrackMetadata struct {
 	DiscNumber  int    `json:"disc_number,omitempty"`
 	ISRC        string `json:"isrc,omitempty"`
 	ProviderID  string `json:"provider_id"`
-	ItemType    string `json:"item_type,omitempty"` // track, album, or playlist - for extension search results
+	ItemType    string `json:"item_type,omitempty"`  // track, album, or playlist - for extension search results
 	AlbumType   string `json:"album_type,omitempty"` // album, single, ep, compilation
 	// Enrichment fields from Odesli/song.link
 	TidalID       string            `json:"tidal_id,omitempty"`
@@ -63,11 +63,14 @@ type ExtAlbumMetadata struct {
 
 // ExtArtistMetadata represents artist metadata from an extension
 type ExtArtistMetadata struct {
-	ID         string             `json:"id"`
-	Name       string             `json:"name"`
-	ImageURL   string             `json:"image_url,omitempty"`
-	Albums     []ExtAlbumMetadata `json:"albums,omitempty"`
-	ProviderID string             `json:"provider_id"`
+	ID          string             `json:"id"`
+	Name        string             `json:"name"`
+	ImageURL    string             `json:"image_url,omitempty"`
+	HeaderImage string             `json:"header_image,omitempty"` // Header image for artist page background
+	Listeners   int                `json:"listeners,omitempty"`    // Monthly listeners
+	Albums      []ExtAlbumMetadata `json:"albums,omitempty"`
+	TopTracks   []ExtTrackMetadata `json:"top_tracks,omitempty"` // Popular tracks
+	ProviderID  string             `json:"provider_id"`
 }
 
 // ExtSearchResult represents search results from an extension
@@ -1251,6 +1254,10 @@ func (p *ExtensionProviderWrapper) HandleURL(url string) (*ExtURLHandleResult, e
 			for j := range handleResult.Artist.Albums[i].Tracks {
 				handleResult.Artist.Albums[i].Tracks[j].ProviderID = p.extension.ID
 			}
+		}
+		// Set provider ID on top tracks
+		for i := range handleResult.Artist.TopTracks {
+			handleResult.Artist.TopTracks[i].ProviderID = p.extension.ID
 		}
 	}
 

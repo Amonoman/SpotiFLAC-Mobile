@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spotiflac_android/l10n/l10n.dart';
+import 'package:spotiflac_android/l10n/supported_locales.dart';
 import 'package:spotiflac_android/providers/settings_provider.dart';
 import 'package:spotiflac_android/providers/theme_provider.dart';
 import 'package:spotiflac_android/widgets/settings_group.dart';
@@ -709,7 +710,8 @@ class _LanguageSelector extends StatelessWidget {
     required this.onChanged,
   });
 
-  static const _languages = [
+  // All available languages (code, displayName, icon)
+  static const _allLanguages = [
     ('system', 'System Default', Icons.phone_android),
     ('en', 'English', Icons.language),
     ('id', 'Bahasa Indonesia', Icons.language),
@@ -726,8 +728,20 @@ class _LanguageSelector extends StatelessWidget {
     ('zh_TW', '繁體中文', Icons.language),
   ];
 
+  /// Get only languages that meet the translation threshold.
+  /// Uses filteredLocaleCodes from supported_locales.dart (generated file).
+  List<(String, String, IconData)> get _languages {
+    return _allLanguages.where((lang) {
+      // Always include 'system' option
+      if (lang.$1 == 'system') return true;
+      // Only include languages in the filtered set
+      return filteredLocaleCodes.contains(lang.$1);
+    }).toList();
+  }
+
   String _getLanguageName(String code) {
-    for (final lang in _languages) {
+    // Search in all languages (not just filtered) for display name fallback
+    for (final lang in _allLanguages) {
       if (lang.$1 == code) return lang.$2;
     }
     return code;

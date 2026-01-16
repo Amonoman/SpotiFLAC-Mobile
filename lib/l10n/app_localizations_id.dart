@@ -519,6 +519,14 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String get artistPopular => 'Populer';
+
+  @override
+  String artistMonthlyListeners(String count) {
+    return '$count pendengar bulanan';
+  }
+
+  @override
   String get trackMetadataTitle => 'Info Lagu';
 
   @override
@@ -1989,4 +1997,26 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get utilityFunctions => 'Fungsi Utilitas';
+
+  @override
+  String get recentTypeArtist => 'Artis';
+
+  @override
+  String get recentTypeAlbum => 'Album';
+
+  @override
+  String get recentTypeSong => 'Lagu';
+
+  @override
+  String get recentTypePlaylist => 'Playlist';
+
+  @override
+  String recentPlaylistInfo(String name) {
+    return 'Playlist: $name';
+  }
+
+  @override
+  String errorGeneric(String message) {
+    return 'Error: $message';
+  }
 }

@@ -127,6 +127,9 @@ class SettingsTab extends ConsumerWidget {
   }
 
   void _navigateTo(BuildContext context, Widget page) {
+    // Unfocus any focused widget before navigating to prevent keyboard from appearing on return
+    FocusManager.instance.primaryFocus?.unfocus();
+    
     Navigator.of(context).push(
       // Use PageRouteBuilder for better predictive back gesture support
       // MaterialPageRoute can cause freeze on some devices with gesture navigation

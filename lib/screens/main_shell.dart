@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spotiflac_android/l10n/l10n.dart';
 import 'package:spotiflac_android/providers/download_queue_provider.dart';
 import 'package:spotiflac_android/providers/settings_provider.dart';
+import 'package:spotiflac_android/providers/store_provider.dart';
 import 'package:spotiflac_android/providers/track_provider.dart';
 import 'package:spotiflac_android/screens/home_tab.dart';
 import 'package:spotiflac_android/screens/store_tab.dart';
@@ -124,7 +125,8 @@ class _MainShellState extends ConsumerState<MainShell> {
     if (_currentIndex != index) {
       setState(() => _currentIndex = index);
       // Unfocus any text field when switching tabs to prevent keyboard from appearing
-      FocusScope.of(context).unfocus();
+      // Use primaryFocus for more aggressive unfocus that works with keep-alive widgets
+      FocusManager.instance.primaryFocus?.unfocus();
     }
   }
 
@@ -135,7 +137,15 @@ class _MainShellState extends ConsumerState<MainShell> {
     // Check if keyboard is visible - if so, just dismiss keyboard, don't clear search
     final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
     if (isKeyboardVisible) {
-      FocusScope.of(context).unfocus();
+      FocusManager.instance.primaryFocus?.unfocus();
+      return;
+    }
+    
+    // If on Home tab and showing recent access mode, exit it
+    if (_currentIndex == 0 && trackState.isShowingRecentAccess) {
+      ref.read(trackProvider.notifier).setShowingRecentAccess(false);
+      // Also unfocus search bar when exiting recent access mode
+      FocusManager.instance.primaryFocus?.unfocus();
       return;
     }
     
@@ -177,6 +187,7 @@ class _MainShellState extends ConsumerState<MainShell> {
     final queueState = ref.watch(downloadQueueProvider.select((s) => s.queuedCount));
     final trackState = ref.watch(trackProvider);
     final showStore = ref.watch(settingsProvider.select((s) => s.showExtensionStore));
+    final storeUpdatesCount = ref.watch(storeProvider.select((s) => s.updatesAvailableCount));
     
     // Check if keyboard is visible (bottom inset > 0 means keyboard is showing)
     final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
@@ -188,6 +199,7 @@ class _MainShellState extends ConsumerState<MainShell> {
                    !trackState.hasSearchText && 
                    !trackState.hasContent && 
                    !trackState.isLoading &&
+                   !trackState.isShowingRecentAccess &&
                    !isKeyboardVisible;
 
     // Build tabs and destinations based on settings
@@ -224,8 +236,16 @@ class _MainShellState extends ConsumerState<MainShell> {
       ),
       if (showStore)
         NavigationDestination(
-          icon: const Icon(Icons.store_outlined),
-          selectedIcon: const Icon(Icons.store),
+          icon: Badge(
+            isLabelVisible: storeUpdatesCount > 0,
+            label: Text('$storeUpdatesCount'),
+            child: const Icon(Icons.store_outlined),
+          ),
+          selectedIcon: Badge(
+            isLabelVisible: storeUpdatesCount > 0,
+            label: Text('$storeUpdatesCount'),
+            child: const Icon(Icons.store),
+          ),
           label: l10n.navStore,
         ),
       NavigationDestination(

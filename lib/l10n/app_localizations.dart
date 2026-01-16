@@ -995,6 +995,18 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 release} other{{count} releases}}'**
   String artistReleases(int count);
 
+  /// Section header for popular/top tracks
+  ///
+  /// In en, this message translates to:
+  /// **'Popular'**
+  String get artistPopular;
+
+  /// Monthly listener count display
+  ///
+  /// In en, this message translates to:
+  /// **'{count} monthly listeners'**
+  String artistMonthlyListeners(String count);
+
   /// Track metadata screen title
   ///
   /// In en, this message translates to:
@@ -3598,6 +3610,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Utility Functions'**
   String get utilityFunctions;
+
+  /// Recent access item type - artist
+  ///
+  /// In en, this message translates to:
+  /// **'Artist'**
+  String get recentTypeArtist;
+
+  /// Recent access item type - album
+  ///
+  /// In en, this message translates to:
+  /// **'Album'**
+  String get recentTypeAlbum;
+
+  /// Recent access item type - song/track
+  ///
+  /// In en, this message translates to:
+  /// **'Song'**
+  String get recentTypeSong;
+
+  /// Recent access item type - playlist
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist'**
+  String get recentTypePlaylist;
+
+  /// Snackbar message when tapping playlist in recent access
+  ///
+  /// In en, this message translates to:
+  /// **'Playlist: {name}'**
+  String recentPlaylistInfo(String name);
+
+  /// Generic error message format
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {message}'**
+  String errorGeneric(String message);
 }
 
 class _AppLocalizationsDelegate

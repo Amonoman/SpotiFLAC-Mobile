@@ -1657,10 +1657,12 @@ func HandleURLWithExtensionJSON(url string) (string, error) {
 	// Add artist info if present
 	if result.Artist != nil {
 		artistResponse := map[string]interface{}{
-			"id":          result.Artist.ID,
-			"name":        result.Artist.Name,
-			"image_url":   result.Artist.ImageURL,
-			"provider_id": result.Artist.ProviderID,
+			"id":           result.Artist.ID,
+			"name":         result.Artist.Name,
+			"image_url":    result.Artist.ImageURL,
+			"header_image": result.Artist.HeaderImage,
+			"listeners":    result.Artist.Listeners,
+			"provider_id":  result.Artist.ProviderID,
 		}
 
 		// Add albums if present
@@ -1684,6 +1686,29 @@ func HandleURLWithExtensionJSON(url string) (string, error) {
 				}
 			}
 			artistResponse["albums"] = albums
+		}
+
+		// Add top tracks if present
+		if len(result.Artist.TopTracks) > 0 {
+			topTracks := make([]map[string]interface{}, len(result.Artist.TopTracks))
+			for i, track := range result.Artist.TopTracks {
+				topTracks[i] = map[string]interface{}{
+					"id":           track.ID,
+					"name":         track.Name,
+					"artists":      track.Artists,
+					"album_name":   track.AlbumName,
+					"album_artist": track.AlbumArtist,
+					"duration_ms":  track.DurationMS,
+					"images":       track.ResolvedCoverURL(),
+					"release_date": track.ReleaseDate,
+					"track_number": track.TrackNumber,
+					"disc_number":  track.DiscNumber,
+					"isrc":         track.ISRC,
+					"provider_id":  track.ProviderID,
+					"spotify_id":   track.SpotifyID,
+				}
+			}
+			artistResponse["top_tracks"] = topTracks
 		}
 
 		response["artist"] = artistResponse
@@ -1918,6 +1943,39 @@ func GetArtistWithExtensionJSON(extensionID, artistID string) (string, error) {
 		"cover_url":   artist.ImageURL,
 		"albums":      albums,
 		"provider_id": artist.ProviderID,
+	}
+
+	// Add header image if present
+	if artist.HeaderImage != "" {
+		response["header_image"] = artist.HeaderImage
+	}
+
+	// Add listeners if present
+	if artist.Listeners > 0 {
+		response["listeners"] = artist.Listeners
+	}
+
+	// Add top tracks if present
+	if len(artist.TopTracks) > 0 {
+		topTracks := make([]map[string]interface{}, len(artist.TopTracks))
+		for i, track := range artist.TopTracks {
+			topTracks[i] = map[string]interface{}{
+				"id":           track.ID,
+				"name":         track.Name,
+				"artists":      track.Artists,
+				"album_name":   track.AlbumName,
+				"album_artist": track.AlbumArtist,
+				"duration_ms":  track.DurationMS,
+				"images":       track.ResolvedCoverURL(),
+				"release_date": track.ReleaseDate,
+				"track_number": track.TrackNumber,
+				"disc_number":  track.DiscNumber,
+				"isrc":         track.ISRC,
+				"provider_id":  track.ProviderID,
+				"spotify_id":   track.SpotifyID,
+			}
+		}
+		response["top_tracks"] = topTracks
 	}
 
 	jsonBytes, err := json.Marshal(response)

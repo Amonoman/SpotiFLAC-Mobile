@@ -17,9 +17,13 @@ class TrackState {
   final String? artistId;
   final String? artistName;
   final String? coverUrl;
+  final String? headerImageUrl; // Artist header image for background
+  final int? monthlyListeners; // Artist monthly listeners
   final List<ArtistAlbum>? artistAlbums; // For artist page
+  final List<Track>? artistTopTracks; // Artist's popular tracks
   final List<SearchArtist>? searchArtists; // For search results
   final bool hasSearchText; // For back button handling
+  final bool isShowingRecentAccess; // For recent access mode
   final String? searchExtensionId; // Extension ID used for current search results
 
   const TrackState({
@@ -32,9 +36,13 @@ class TrackState {
     this.artistId,
     this.artistName,
     this.coverUrl,
+    this.headerImageUrl,
+    this.monthlyListeners,
     this.artistAlbums,
+    this.artistTopTracks,
     this.searchArtists,
     this.hasSearchText = false,
+    this.isShowingRecentAccess = false,
     this.searchExtensionId,
   });
 
@@ -50,9 +58,13 @@ class TrackState {
     String? artistId,
     String? artistName,
     String? coverUrl,
+    String? headerImageUrl,
+    int? monthlyListeners,
     List<ArtistAlbum>? artistAlbums,
+    List<Track>? artistTopTracks,
     List<SearchArtist>? searchArtists,
     bool? hasSearchText,
+    bool? isShowingRecentAccess,
     String? searchExtensionId,
   }) {
     return TrackState(
@@ -65,9 +77,13 @@ class TrackState {
       artistId: artistId ?? this.artistId,
       artistName: artistName ?? this.artistName,
       coverUrl: coverUrl ?? this.coverUrl,
+      headerImageUrl: headerImageUrl ?? this.headerImageUrl,
+      monthlyListeners: monthlyListeners ?? this.monthlyListeners,
       artistAlbums: artistAlbums ?? this.artistAlbums,
+      artistTopTracks: artistTopTracks ?? this.artistTopTracks,
       searchArtists: searchArtists ?? this.searchArtists,
       hasSearchText: hasSearchText ?? this.hasSearchText,
+      isShowingRecentAccess: isShowingRecentAccess ?? this.isShowingRecentAccess,
       searchExtensionId: searchExtensionId,
     );
   }
@@ -171,13 +187,21 @@ class TrackNotifier extends Notifier<TrackState> {
             final artistData = result['artist'] as Map<String, dynamic>;
             final albumsList = artistData['albums'] as List<dynamic>? ?? [];
             final albums = albumsList.map((a) => _parseArtistAlbum(a as Map<String, dynamic>)).toList();
+            
+            // Parse top tracks if available
+            final topTracksList = artistData['top_tracks'] as List<dynamic>? ?? [];
+            final topTracks = topTracksList.map((t) => _parseSearchTrack(t as Map<String, dynamic>, source: extensionId)).toList();
+            
             state = TrackState(
               tracks: [],
               isLoading: false,
               artistId: artistData['id'] as String?,
               artistName: artistData['name'] as String?,
               coverUrl: artistData['image_url'] as String? ?? artistData['images'] as String?,
+              headerImageUrl: artistData['header_image'] as String?,
+              monthlyListeners: artistData['listeners'] as int?,
               artistAlbums: albums,
+              artistTopTracks: topTracks.isNotEmpty ? topTracks : null,
               searchExtensionId: extensionId,
             );
             return;
@@ -489,6 +513,11 @@ class TrackNotifier extends Notifier<TrackState> {
   /// Set search text state for back button handling
   void setSearchText(bool hasText) {
     state = state.copyWith(hasSearchText: hasText);
+  }
+  
+  /// Set recent access mode state
+  void setShowingRecentAccess(bool showing) {
+    state = state.copyWith(isShowingRecentAccess: showing);
   }
   
   /// Set tracks from a collection (album/playlist) opened from search results
