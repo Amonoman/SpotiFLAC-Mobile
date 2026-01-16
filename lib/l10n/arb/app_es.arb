@@ -1,5 +1,5 @@
 {
-  "@@locale": "es",
+  "@@locale": "es-ES",
   "@@last_modified": "2026-01-16",
   "appName": "SpotiFLAC",
   "@appName": {
@@ -1848,6 +1848,30 @@
   "sectionLayout": "Layout",
   "@sectionLayout": {
     "description": "Settings section header"
+  },
+  "sectionLanguage": "Language",
+  "@sectionLanguage": {
+    "description": "Settings section header for language selection"
+  },
+  "appearanceLanguage": "App Language",
+  "@appearanceLanguage": {
+    "description": "Setting title for language selection"
+  },
+  "appearanceLanguageSubtitle": "Choose your preferred language",
+  "@appearanceLanguageSubtitle": {
+    "description": "Subtitle for language setting"
+  },
+  "languageSystem": "System Default",
+  "@languageSystem": {
+    "description": "Use device system language"
+  },
+  "languageEnglish": "English",
+  "@languageEnglish": {
+    "description": "English language option"
+  },
+  "languageIndonesian": "Bahasa Indonesia",
+  "@languageIndonesian": {
+    "description": "Indonesian language option"
   },
   "settingsAppearanceSubtitle": "Theme, colors, display",
   "@settingsAppearanceSubtitle": {
