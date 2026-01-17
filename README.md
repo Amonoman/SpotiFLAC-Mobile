@@ -69,6 +69,9 @@ A: The app needs permission to save downloaded files to your device. On Android 
 **Q: How do I download Daily Mix or Discover Weekly?**  
 A: Install the **Spotify Web** extension from the Store. This extension can access personalized playlists that aren't available through the public API.
 
+**Q: Why is the mobile app so large (~50MB) compared to the PC version (~3MB)?**  
+A: The mobile app includes FFmpeg libraries for audio processing and format conversion, which adds significant size. The PC version relies on system-installed FFmpeg, keeping the download smaller. We bundle FFmpeg to ensure compatibility across all Android devices without requiring users to install additional software.
+
 **Q: Is this app safe?**  
 A: Yes, the app is open source and you can verify the code yourself. Each release is scanned with VirusTotal (see badge at top of README).
 
