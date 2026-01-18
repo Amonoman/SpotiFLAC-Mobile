@@ -405,13 +405,13 @@ class _ContributorItem extends StatelessWidget {
 /// Translator data model
 class _Translator {
   final String name;
-  final String githubUsername;
+  final String crowdinUsername;
   final String language;
   final String flag;
 
   const _Translator({
     required this.name,
-    required this.githubUsername,
+    required this.crowdinUsername,
     required this.language,
     required this.flag,
   });
@@ -424,25 +424,25 @@ class _TranslatorsSection extends StatelessWidget {
   static const List<_Translator> _translators = [
     _Translator(
       name: 'Pedro Marcondes',
-      githubUsername: 'justapedro',
+      crowdinUsername: 'justapedro',
       language: 'Portuguese',
       flag: '🇵🇹',
     ),
     _Translator(
       name: 'Credits 125',
-      githubUsername: 'credits125',
+      crowdinUsername: 'credits125',
       language: 'Spanish',
       flag: '🇪🇸',
     ),
     _Translator(
       name: 'Владислав',
-      githubUsername: 'OdiNoKiY_KoT',
+      crowdinUsername: 'odinokiy_kot',
       language: 'Russian',
       flag: '🇷🇺',
     ),
     _Translator(
       name: 'Max',
-      githubUsername: 'Amonoman',
+      crowdinUsername: 'amonoman',
       language: 'German',
       flag: '🇩🇪',
     ),
@@ -491,31 +491,22 @@ class _TranslatorChip extends StatelessWidget {
       color: colorScheme.secondaryContainer,
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
-        onTap: () => _launchGitHub(translator.githubUsername),
+        onTap: () => _launchCrowdin(translator.crowdinUsername),
         borderRadius: BorderRadius.circular(20),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: CachedNetworkImage(
-                  imageUrl: 'https://github.com/${translator.githubUsername}.png',
-                  width: 20,
-                  height: 20,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
-                    width: 20,
-                    height: 20,
-                    color: colorScheme.surface,
-                    child: Icon(Icons.person, size: 12, color: colorScheme.onSurfaceVariant),
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    width: 20,
-                    height: 20,
-                    color: colorScheme.surface,
-                    child: Icon(Icons.person, size: 12, color: colorScheme.onSurfaceVariant),
+              CircleAvatar(
+                radius: 10,
+                backgroundColor: colorScheme.primary.withValues(alpha: 0.2),
+                child: Text(
+                  translator.name.isNotEmpty ? translator.name[0].toUpperCase() : '?',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.primary,
                   ),
                 ),
               ),
@@ -539,8 +530,8 @@ class _TranslatorChip extends StatelessWidget {
     );
   }
 
-  Future<void> _launchGitHub(String username) async {
-    final uri = Uri.parse('https://github.com/$username');
+  Future<void> _launchCrowdin(String username) async {
+    final uri = Uri.parse('https://crowdin.com/profile/$username');
     await launchUrl(uri, mode: LaunchMode.inAppBrowserView);
   }
 }
