@@ -1,8 +1,17 @@
 # Changelog
 
+## [Unreleased]
+
 ## [3.1.3] - 2026-01-19
 
 ### Added
+
+- **Persistent Cover Image Cache**: Album/track cover images now cached to persistent storage instead of temporary directory
+  - Cover images no longer disappear when app is closed or device restarts
+  - Cache stored in `app_flutter/cover_cache/` directory (not cleared by system)
+  - Maximum 1000 images cached for up to 365 days
+  - Covers are cached when displayed in History, Home, Album, Artist, or any other screen
+  - New `CoverCacheManager` service with `clearCache()` and `getStats()` methods for future cache management
 
 - **External LRC Lyrics File Support**: Option to save lyrics as separate .lrc files for compatibility with external music players
   - New "Lyrics Mode" setting in Settings > Download > Lyrics section
@@ -70,6 +79,27 @@
   - `enrichTrack()` now returns all extended metadata to Go backend
   - Replaced all hardcoded User-Agent strings with `utils.randomUserAgent()`
 
+### Performance
+
+- **Faster App Startup**: Notification, Share Intent, and Cover Cache Manager initialization now run in parallel
+- **Download Queue Polling**: Batched progress updates reduce rebuilds and list allocations during active downloads
+- **Queue Item Updates**: Status/progress updates now skip no-op changes and update by index for fewer allocations
+- **Directory Creation**: Download output folders are created once per path, reducing repeated I/O for albums/singles
+- **Search Results Rendering**: Single-pass filtering avoids repeated `indexOf` calls for large result sets
+- **Queue Lookups in UI**: O(1) lookup for queue status in Home/Album/Playlist/Artist track lists
+- **History Filtering**: Album/single counts and grouping are computed once per build
+- **Downloaded Album View**: Tracks are grouped by disc in one pass to reduce filtering overhead
+- **Track Metadata Screen**:
+  - Palette extraction deferred until after transition; reduced sample size for smoother navigation
+  - File stat uses a single syscall and only triggers state updates on change
+  - Static regex/month table avoids repeated allocations
+  - Cover precached before opening metadata from history/queue/recents
+
+### Backend
+
+- **Deezer ISRC Fetching**: Uses ISRCs already present in payloads and caches them, cutting extra API calls
+- **SearchAll Allocation**: Preallocated slices to reduce allocations during Deezer search
+
 ### Technical
 
 - **Go Backend Changes**:
@@ -82,9 +112,18 @@
   - `go_backend/exports.go`: Added `Genre`, `Label`, `Copyright` fields to `DownloadResponse`
 
 - **Flutter Changes**:
+  - `lib/services/cover_cache_manager.dart`: New persistent cache manager for cover images (365 days, 1000 images max)
+  - `lib/widgets/cached_cover_image.dart`: Wrapper widget for CachedNetworkImage with persistent cache
+  - `lib/main.dart`: Added `CoverCacheManager.initialize()` to app startup
+  - `lib/screens/*.dart`: All 11 screens updated to use persistent cache manager for CachedNetworkImage
   - `lib/providers/download_queue_provider.dart`: Updated `_embedMetadataAndCover()` to accept and embed genre, label, copyright; added `genre`, `label`, `copyright` fields to `DownloadHistoryItem`
   - `lib/screens/track_metadata_screen.dart`: Display genre, label, copyright in metadata grid
   - `lib/l10n/arb/app_en.arb`: Added `trackGenre`, `trackLabel`, `trackCopyright` localization strings
+
+### Dependencies
+
+- Added `flutter_cache_manager: ^3.4.1` (explicit dependency for persistent cache)
+- Added `path: ^1.9.0` (for cache directory path handling)
 
 ---
 

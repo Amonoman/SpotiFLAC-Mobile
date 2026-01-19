@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:open_filex/open_filex.dart';
+import 'package:spotiflac_android/services/cover_cache_manager.dart';
 import 'package:spotiflac_android/utils/mime_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
@@ -32,6 +33,22 @@ class _TrackMetadataScreenState extends ConsumerState<TrackMetadataScreen> {
   Color? _dominantColor;
   bool _showTitleInAppBar = false;
   final ScrollController _scrollController = ScrollController();
+  static final RegExp _lrcTimestampPattern =
+      RegExp(r'^\[\d{2}:\d{2}\.\d{2,3}\]');
+  static const List<String> _months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
 
   String? _normalizeOptionalString(String? value) {
     if (value == null) return null;
@@ -64,17 +81,23 @@ class _TrackMetadataScreenState extends ConsumerState<TrackMetadataScreen> {
   }
 
   Future<void> _extractDominantColor() async {
-    if (widget.item.coverUrl == null) return;
+    final coverUrl = widget.item.coverUrl;
+    if (coverUrl == null || coverUrl.isEmpty) return;
+    if (!coverUrl.startsWith('http://') && !coverUrl.startsWith('https://')) {
+      return;
+    }
     try {
       final paletteGenerator = await PaletteGenerator.fromImageProvider(
-        CachedNetworkImageProvider(widget.item.coverUrl!),
-        maximumColorCount: 16,
+        CachedNetworkImageProvider(coverUrl),
+        size: const Size(128, 128),
+        maximumColorCount: 12,
       );
-      if (mounted) {
+      final nextColor = paletteGenerator.dominantColor?.color ??
+          paletteGenerator.vibrantColor?.color ??
+          paletteGenerator.mutedColor?.color;
+      if (mounted && nextColor != _dominantColor) {
         setState(() {
-          _dominantColor = paletteGenerator.dominantColor?.color ??
-              paletteGenerator.vibrantColor?.color ??
-              paletteGenerator.mutedColor?.color;
+          _dominantColor = nextColor;
         });
       }
     } catch (_) {
@@ -87,26 +110,26 @@ class _TrackMetadataScreenState extends ConsumerState<TrackMetadataScreen> {
     if (filePath.startsWith('EXISTS:')) {
       filePath = filePath.substring(7);
     }
-    
-    final file = File(filePath);
-    final exists = await file.exists();
+
+    bool exists = false;
     int? size;
-    
-    if (exists) {
-      try {
-        size = await file.length();
-      } catch (_) {}
-    }
-    
-    if (mounted) {
+    try {
+      final stat = await FileStat.stat(filePath);
+      exists = stat.type != FileSystemEntityType.notFound;
+      if (exists) {
+        size = stat.size;
+      }
+    } catch (_) {}
+
+    if (mounted && (exists != _fileExists || size != _fileSize)) {
       setState(() {
         _fileExists = exists;
         _fileSize = size;
       });
-      
-      if (exists) {
-        _fetchLyrics();
-      }
+    }
+
+    if (mounted && exists && _lyrics == null && !_lyricsLoading) {
+      _fetchLyrics();
     }
   }
 
@@ -282,10 +305,11 @@ class _TrackMetadataScreenState extends ConsumerState<TrackMetadataScreen> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: item.coverUrl != null
-                        ? CachedNetworkImage(
+? CachedNetworkImage(
                             imageUrl: item.coverUrl!,
                             fit: BoxFit.cover,
                             memCacheWidth: (coverSize * 2).toInt(),
+                            cacheManager: CoverCacheManager.instance,
                             placeholder: (_, _) => Container(
                               color: colorScheme.surfaceContainerHighest,
                               child: Icon(
@@ -909,10 +933,9 @@ class _TrackMetadataScreenState extends ConsumerState<TrackMetadataScreen> {
   String _cleanLrcForDisplay(String lrc) {
     final lines = lrc.split('\n');
     final cleanLines = <String>[];
-    final timestampPattern = RegExp(r'^\[\d{2}:\d{2}\.\d{2,3}\]');
     
     for (final line in lines) {
-      final cleanLine = line.replaceAll(timestampPattern, '').trim();
+      final cleanLine = line.replaceAll(_lrcTimestampPattern, '').trim();
       if (cleanLine.isNotEmpty) {
         cleanLines.add(cleanLine);
       }
@@ -1093,9 +1116,7 @@ class _TrackMetadataScreenState extends ConsumerState<TrackMetadataScreen> {
   }
 
   String _formatFullDate(DateTime date) {
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return '${date.day} ${months[date.month - 1]} ${date.year}, '
+    return '${date.day} ${_months[date.month - 1]} ${date.year}, '
            '${date.hour.toString().padLeft(2, '0')}:'
            '${date.minute.toString().padLeft(2, '0')}';
   }

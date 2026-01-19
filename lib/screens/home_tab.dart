@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:spotiflac_android/services/cover_cache_manager.dart';
 import 'package:spotiflac_android/l10n/l10n.dart';
 import 'package:spotiflac_android/models/track.dart';
 import 'package:spotiflac_android/providers/track_provider.dart';
@@ -637,13 +638,14 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
                         ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: item.coverUrl != null
-                              ? CachedNetworkImage(
+? CachedNetworkImage(
                                   imageUrl: item.coverUrl!,
                                   width: 100,
                                   height: 100,
                                   fit: BoxFit.cover,
                                   memCacheWidth: 200,
                                   memCacheHeight: 200,
+                                  cacheManager: CoverCacheManager.instance,
                                 )
                               : Container(
                                   width: 100,
@@ -845,12 +847,13 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
               ClipRRect(
                 borderRadius: BorderRadius.circular(item.type == RecentAccessType.artist ? 28 : 4),
                 child: item.imageUrl != null && item.imageUrl!.isNotEmpty
-                    ? CachedNetworkImage(
+? CachedNetworkImage(
                         imageUrl: item.imageUrl!,
                         width: 56,
                         height: 56,
                         fit: BoxFit.cover,
                         memCacheWidth: 112,
+                        cacheManager: CoverCacheManager.instance,
                         errorWidget: (context, url, error) => Container(
                           width: 56,
                           height: 56,
@@ -977,12 +980,24 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
   }
 
   void _navigateToMetadataScreen(DownloadHistoryItem item) {
+    _precacheCover(item.coverUrl);
     Navigator.push(context, PageRouteBuilder(
       transitionDuration: const Duration(milliseconds: 300),
       reverseTransitionDuration: const Duration(milliseconds: 250),
       pageBuilder: (context, animation, secondaryAnimation) => TrackMetadataScreen(item: item),
       transitionsBuilder: (context, animation, secondaryAnimation, child) => FadeTransition(opacity: animation, child: child),
     ));
+  }
+
+  void _precacheCover(String? url) {
+    if (url == null || url.isEmpty) return;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      return;
+    }
+    precacheImage(
+      CachedNetworkImageProvider(url, cacheManager: CoverCacheManager.instance),
+      context,
+    );
   }
 
   /// Build error widget with special handling for rate limit (429)
@@ -1059,10 +1074,28 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
       return [const SliverToBoxAdapter(child: SizedBox.shrink())];
     }
     
-    final realTracks = tracks.where((t) => !t.isCollection).toList();
-    final albumItems = tracks.where((t) => t.isAlbumItem).toList();
-    final playlistItems = tracks.where((t) => t.isPlaylistItem).toList();
-    final artistItems = tracks.where((t) => t.isArtistItem).toList();
+    final realTracks = <Track>[];
+    final realTrackIndexes = <int>[];
+    final albumItems = <Track>[];
+    final playlistItems = <Track>[];
+    final artistItems = <Track>[];
+    
+    for (int i = 0; i < tracks.length; i++) {
+      final track = tracks[i];
+      if (!track.isCollection) {
+        realTracks.add(track);
+        realTrackIndexes.add(i);
+      }
+      if (track.isAlbumItem) {
+        albumItems.add(track);
+      }
+      if (track.isPlaylistItem) {
+        playlistItems.add(track);
+      }
+      if (track.isArtistItem) {
+        artistItems.add(track);
+      }
+    }
     
     return [
       if (error != null)
@@ -1205,9 +1238,9 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
                     _TrackItemWithStatus(
                       key: ValueKey(realTracks[i].id),
                       track: realTracks[i],
-                      index: tracks.indexOf(realTracks[i]), // Use original index for download
+                      index: realTrackIndexes[i],
                       showDivider: i < realTracks.length - 1,
-                      onDownload: () => _downloadTrack(tracks.indexOf(realTracks[i])),
+                      onDownload: () => _downloadTrack(realTrackIndexes[i]),
                     ),
                 ],
               ),
@@ -1267,11 +1300,12 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
               ),
               child: ClipOval(
                 child: hasValidImage
-                    ? CachedNetworkImage(
+? CachedNetworkImage(
                         imageUrl: artist.imageUrl!,
                         fit: BoxFit.cover,
                         memCacheWidth: 200,
                         memCacheHeight: 200,
+                        cacheManager: CoverCacheManager.instance,
                         errorWidget: (context, url, error) => Icon(
                           Icons.person,
                           color: colorScheme.onSurfaceVariant,
@@ -1701,9 +1735,9 @@ class _TrackItemWithStatus extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     
-    final queueItem = ref.watch(downloadQueueProvider.select((state) {
-      return state.items.where((item) => item.track.id == track.id).firstOrNull;
-    }));
+    final queueItem = ref.watch(
+      downloadQueueLookupProvider.select((lookup) => lookup.byTrackId[track.id]),
+    );
     
     final isInHistory = ref.watch(downloadHistoryProvider.select((state) {
       return state.isDownloaded(track.id);
@@ -1750,13 +1784,14 @@ class _TrackItemWithStatus extends ConsumerWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: track.coverUrl != null
-                      ? CachedNetworkImage(
+? CachedNetworkImage(
                           imageUrl: track.coverUrl!,
                           width: thumbWidth,
                           height: thumbHeight,
                           fit: BoxFit.cover,
                           memCacheWidth: (thumbWidth * 2).toInt(),
                           memCacheHeight: (thumbHeight * 2).toInt(),
+                          cacheManager: CoverCacheManager.instance,
                         )
                       : Container(
                           width: thumbWidth,
@@ -1929,13 +1964,14 @@ class _CollectionItemWidget extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(isArtist ? 28 : 10),
                   child: item.coverUrl != null && item.coverUrl!.isNotEmpty
-                      ? CachedNetworkImage(
+? CachedNetworkImage(
                           imageUrl: item.coverUrl!,
                           width: 56,
                           height: 56,
                           fit: BoxFit.cover,
                           memCacheWidth: 112,
                           memCacheHeight: 112,
+                          cacheManager: CoverCacheManager.instance,
                         )
                       : Container(
                           width: 56,

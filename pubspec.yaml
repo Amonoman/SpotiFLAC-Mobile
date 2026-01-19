@@ -22,9 +22,10 @@ dependencies:
   # Navigation
   go_router: ^17.0.1
 
-  # Storage & Persistence
+# Storage & Persistence
   shared_preferences: ^2.5.3
   path_provider: ^2.1.5
+  path: ^1.9.0
 
   # HTTP & Network
   http: ^1.6.0
@@ -33,6 +34,7 @@ dependencies:
   # UI Components
   cupertino_icons: ^1.0.8
   cached_network_image: ^3.4.1
+  flutter_cache_manager: ^3.4.1
   flutter_svg: ^2.1.0
 
   # Material Expressive 3 / Dynamic Color

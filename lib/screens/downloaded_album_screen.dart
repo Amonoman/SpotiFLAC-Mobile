@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:open_filex/open_filex.dart';
+import 'package:spotiflac_android/services/cover_cache_manager.dart';
 import 'package:spotiflac_android/l10n/l10n.dart';
 import 'package:spotiflac_android/utils/mime_utils.dart';
 import 'package:spotiflac_android/providers/download_queue_provider.dart';
@@ -103,24 +104,15 @@ class _DownloadedAlbumScreenState extends ConsumerState<DownloadedAlbumScreen> {
       });
   }
 
-  /// Get unique disc numbers from tracks (sorted)
-  List<int> _getDiscNumbers(List<DownloadHistoryItem> tracks) {
-    final discNumbers = tracks
-        .map((t) => t.discNumber ?? 1)
-        .toSet()
-        .toList()
-      ..sort();
-    return discNumbers;
-  }
-
-  /// Check if album has multiple discs
-  bool _hasMultipleDiscs(List<DownloadHistoryItem> tracks) {
-    return _getDiscNumbers(tracks).length > 1;
-  }
-
-  /// Get tracks for a specific disc
-  List<DownloadHistoryItem> _getTracksForDisc(List<DownloadHistoryItem> tracks, int discNumber) {
-    return tracks.where((t) => (t.discNumber ?? 1) == discNumber).toList();
+  Map<int, List<DownloadHistoryItem>> _groupTracksByDisc(
+    List<DownloadHistoryItem> tracks,
+  ) {
+    final discMap = <int, List<DownloadHistoryItem>>{};
+    for (final track in tracks) {
+      final discNumber = track.discNumber ?? 1;
+      discMap.putIfAbsent(discNumber, () => []).add(track);
+    }
+    return discMap;
   }
 
   void _enterSelectionMode(String itemId) {
@@ -223,12 +215,24 @@ class _DownloadedAlbumScreenState extends ConsumerState<DownloadedAlbumScreen> {
   }
 
   void _navigateToMetadataScreen(DownloadHistoryItem item) {
+    _precacheCover(item.coverUrl);
     Navigator.push(context, PageRouteBuilder(
       transitionDuration: const Duration(milliseconds: 300),
       reverseTransitionDuration: const Duration(milliseconds: 250),
       pageBuilder: (context, animation, secondaryAnimation) => TrackMetadataScreen(item: item),
       transitionsBuilder: (context, animation, secondaryAnimation, child) => FadeTransition(opacity: animation, child: child),
     ));
+  }
+
+  void _precacheCover(String? url) {
+    if (url == null || url.isEmpty) return;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      return;
+    }
+    precacheImage(
+      CachedNetworkImageProvider(url, cacheManager: CoverCacheManager.instance),
+      context,
+    );
   }
 
   @override
@@ -368,10 +372,11 @@ class _DownloadedAlbumScreenState extends ConsumerState<DownloadedAlbumScreen> {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(20),
                           child: widget.coverUrl != null
-                              ? CachedNetworkImage(
+? CachedNetworkImage(
                                   imageUrl: widget.coverUrl!, 
                                   fit: BoxFit.cover, 
                                   memCacheWidth: (coverSize * 2).toInt(),
+                                  cacheManager: CoverCacheManager.instance,
                                 )
                               : Container(
                                   color: colorScheme.surfaceContainerHighest,
@@ -501,8 +506,10 @@ class _DownloadedAlbumScreenState extends ConsumerState<DownloadedAlbumScreen> {
   }
 
   Widget _buildTrackList(BuildContext context, ColorScheme colorScheme, List<DownloadHistoryItem> tracks) {
-    // Check if album has multiple discs
-    if (!_hasMultipleDiscs(tracks)) {
+    final discMap = _groupTracksByDisc(tracks);
+
+    // Single disc - use simple list
+    if (discMap.length <= 1) {
       // Single disc - use simple list
       return SliverList(
         delegate: SliverChildBuilderDelegate(
@@ -519,12 +526,12 @@ class _DownloadedAlbumScreenState extends ConsumerState<DownloadedAlbumScreen> {
     }
 
     // Multiple discs - build list with separators
-    final discNumbers = _getDiscNumbers(tracks);
+    final discNumbers = discMap.keys.toList()..sort();
     final List<Widget> children = [];
 
     for (final discNumber in discNumbers) {
-      final discTracks = _getTracksForDisc(tracks, discNumber);
-      if (discTracks.isEmpty) continue;
+      final discTracks = discMap[discNumber];
+      if (discTracks == null || discTracks.isEmpty) continue;
 
       // Add disc separator
       children.add(_buildDiscSeparator(context, colorScheme, discNumber));

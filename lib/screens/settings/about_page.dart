@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:spotiflac_android/services/cover_cache_manager.dart';
 import 'package:spotiflac_android/constants/app_info.dart';
 import 'package:spotiflac_android/l10n/l10n.dart';
 import 'package:spotiflac_android/widgets/settings_group.dart';
@@ -333,11 +334,12 @@ class _ContributorItem extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: CachedNetworkImage(
+child: CachedNetworkImage(
                     imageUrl: 'https://github.com/$githubUsername.png',
                     width: 40,
                     height: 40,
                     fit: BoxFit.cover,
+                    cacheManager: CoverCacheManager.instance,
                     placeholder: (context, url) => Container(
                       width: 40,
                       height: 40,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:spotiflac_android/services/cover_cache_manager.dart';
 import 'package:spotiflac_android/providers/track_provider.dart';
 import 'package:spotiflac_android/providers/download_queue_provider.dart';
 import 'package:spotiflac_android/providers/settings_provider.dart';
@@ -135,11 +136,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       leading: track.coverUrl != null
           ? ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: CachedNetworkImage(
+child: CachedNetworkImage(
                 imageUrl: track.coverUrl!,
                 width: 48,
                 height: 48,
                 fit: BoxFit.cover,
+                cacheManager: CoverCacheManager.instance,
               ),
             )
           : Container(

@@ -201,8 +201,8 @@ func (c *DeezerClient) SearchAll(ctx context.Context, query string, trackLimit, 
 	c.cacheMu.RUnlock()
 
 	result := &SearchAllResult{
-		Tracks:  make([]TrackMetadata, 0),
-		Artists: make([]SearchArtistResult, 0),
+		Tracks:  make([]TrackMetadata, 0, trackLimit),
+		Artists: make([]SearchArtistResult, 0, artistLimit),
 	}
 
 	// Search tracks - NO ISRC fetch for performance
@@ -577,13 +577,24 @@ func (c *DeezerClient) fetchFullTrack(ctx context.Context, trackID string) (*dee
 
 // fetchISRCsParallel fetches ISRCs for multiple tracks in parallel with caching
 func (c *DeezerClient) fetchISRCsParallel(ctx context.Context, tracks []deezerTrack) map[string]string {
-	result := make(map[string]string)
+	result := make(map[string]string, len(tracks))
 	var resultMu sync.Mutex
 
 	var tracksToFetch []deezerTrack
+	var directISRCs map[string]string
 	c.cacheMu.RLock()
 	for _, track := range tracks {
 		trackIDStr := fmt.Sprintf("%d", track.ID)
+		if track.ISRC != "" {
+			result[trackIDStr] = track.ISRC
+			if _, ok := c.isrcCache[trackIDStr]; !ok {
+				if directISRCs == nil {
+					directISRCs = make(map[string]string)
+				}
+				directISRCs[trackIDStr] = track.ISRC
+			}
+			continue
+		}
 		if isrc, ok := c.isrcCache[trackIDStr]; ok {
 			result[trackIDStr] = isrc
 		} else {
@@ -591,6 +602,13 @@ func (c *DeezerClient) fetchISRCsParallel(ctx context.Context, tracks []deezerTr
 		}
 	}
 	c.cacheMu.RUnlock()
+	if len(directISRCs) > 0 {
+		c.cacheMu.Lock()
+		for trackIDStr, isrc := range directISRCs {
+			c.isrcCache[trackIDStr] = isrc
+		}
+		c.cacheMu.Unlock()
+	}
 
 	if len(tracksToFetch) == 0 {
 		return result

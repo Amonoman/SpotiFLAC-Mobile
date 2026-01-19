@@ -488,6 +488,9 @@ class TrackNotifier extends Notifier<TrackState> {
 
   /// Set search text state for back button handling
   void setSearchText(bool hasText) {
+    if (state.hasSearchText == hasText) {
+      return;
+    }
     state = state.copyWith(hasSearchText: hasText);
   }
   

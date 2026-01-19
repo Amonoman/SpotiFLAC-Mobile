@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:open_filex/open_filex.dart';
+import 'package:spotiflac_android/services/cover_cache_manager.dart';
 import 'package:spotiflac_android/l10n/l10n.dart';
 import 'package:spotiflac_android/utils/mime_utils.dart';
 import 'package:spotiflac_android/models/download_item.dart';
@@ -29,6 +30,20 @@ class _GroupedAlbum {
   });
 
   String get key => '$albumName|$artistName';
+}
+
+class _HistoryStats {
+  final Map<String, int> albumCounts;
+  final List<_GroupedAlbum> groupedAlbums;
+  final int albumCount;
+  final int singleTracks;
+
+  const _HistoryStats({
+    required this.albumCounts,
+    required this.groupedAlbums,
+    required this.albumCount,
+    required this.singleTracks,
+  });
 }
 
 class QueueTab extends ConsumerStatefulWidget {
@@ -234,6 +249,17 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     }
   }
 
+  void _precacheCover(String? url) {
+    if (url == null || url.isEmpty) return;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      return;
+    }
+    precacheImage(
+      CachedNetworkImageProvider(url, cacheManager: CoverCacheManager.instance),
+      context,
+    );
+  }
+
   void _navigateToMetadataScreen(DownloadItem item) {
     final historyItem = ref
         .read(downloadHistoryProvider)
@@ -252,6 +278,7 @@ class _QueueTabState extends ConsumerState<QueueTab> {
           ),
         );
 
+    _precacheCover(historyItem.coverUrl);
     Navigator.push(
       context,
       PageRouteBuilder(
@@ -266,6 +293,7 @@ class _QueueTabState extends ConsumerState<QueueTab> {
   }
 
   void _navigateToHistoryMetadataScreen(DownloadHistoryItem item) {
+    _precacheCover(item.coverUrl);
     Navigator.push(
       context,
       PageRouteBuilder(
@@ -285,14 +313,9 @@ class _QueueTabState extends ConsumerState<QueueTab> {
   List<DownloadHistoryItem> _filterHistoryItems(
     List<DownloadHistoryItem> items,
     String filterMode,
+    Map<String, int> albumCounts,
   ) {
     if (filterMode == 'all') return items;
-
-    final albumCounts = <String, int>{};
-    for (final item in items) {
-      final key = '${item.albumName}|${item.albumArtist ?? item.artistName}';
-      albumCounts[key] = (albumCounts[key] ?? 0) + 1;
-    }
 
     switch (filterMode) {
       case 'albums':
@@ -312,82 +335,56 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     }
   }
 
-  /// Count albums vs singles for filter chips
-  Map<String, int> _countAlbumsAndSingles(List<DownloadHistoryItem> items) {
+  _HistoryStats _buildHistoryStats(List<DownloadHistoryItem> items) {
     final albumCounts = <String, int>{};
+    final albumMap = <String, List<DownloadHistoryItem>>{};
     for (final item in items) {
       final key = '${item.albumName}|${item.albumArtist ?? item.artistName}';
       albumCounts[key] = (albumCounts[key] ?? 0) + 1;
+      albumMap.putIfAbsent(key, () => []).add(item);
     }
 
-    int albumTracks = 0;
     int singleTracks = 0;
-
     for (final item in items) {
       final key = '${item.albumName}|${item.albumArtist ?? item.artistName}';
-      if ((albumCounts[key] ?? 0) > 1) {
-        albumTracks++;
-      } else {
+      if ((albumCounts[key] ?? 0) <= 1) {
         singleTracks++;
       }
     }
 
-    return {'albums': albumTracks, 'singles': singleTracks};
-  }
+    final groupedAlbums = <_GroupedAlbum>[];
+    albumMap.forEach((_, tracks) {
+      if (tracks.length <= 1) return;
+      tracks.sort((a, b) {
+        final aNum = a.trackNumber ?? 999;
+        final bNum = b.trackNumber ?? 999;
+        return aNum.compareTo(bNum);
+      });
 
-  /// Group history items by album (for Albums filter view)
-  List<_GroupedAlbum> _groupByAlbum(List<DownloadHistoryItem> items) {
-    final albumMap = <String, List<DownloadHistoryItem>>{};
-
-    for (final item in items) {
-      final key = '${item.albumName}|${item.albumArtist ?? item.artistName}';
-      albumMap.putIfAbsent(key, () => []).add(item);
-    }
-
-    final groupedAlbums = albumMap.entries.where((e) => e.value.length > 1).map(
-      (e) {
-        final tracks = e.value;
-        tracks.sort((a, b) {
-          final aNum = a.trackNumber ?? 999;
-          final bNum = b.trackNumber ?? 999;
-          return aNum.compareTo(bNum);
-        });
-
-        return _GroupedAlbum(
-          albumName: tracks.first.albumName,
-          artistName: tracks.first.albumArtist ?? tracks.first.artistName,
-          coverUrl: tracks.first.coverUrl,
-          tracks: tracks,
-          latestDownload: tracks
-              .map((t) => t.downloadedAt)
-              .reduce((a, b) => a.isAfter(b) ? a : b),
-        );
-      },
-    ).toList();
+      groupedAlbums.add(_GroupedAlbum(
+        albumName: tracks.first.albumName,
+        artistName: tracks.first.albumArtist ?? tracks.first.artistName,
+        coverUrl: tracks.first.coverUrl,
+        tracks: tracks,
+        latestDownload: tracks
+            .map((t) => t.downloadedAt)
+            .reduce((a, b) => a.isAfter(b) ? a : b),
+      ));
+    });
 
     groupedAlbums.sort((a, b) => b.latestDownload.compareTo(a.latestDownload));
 
-    return groupedAlbums;
-  }
-
-  /// Count unique albums (for filter chip badge)
-  int _countUniqueAlbums(List<DownloadHistoryItem> items) {
-    final albumKeys = <String>{};
-    for (final item in items) {
-      final key = '${item.albumName}|${item.albumArtist ?? item.artistName}';
-      albumKeys.add(key);
+    int albumCount = 0;
+    for (final count in albumCounts.values) {
+      if (count > 1) albumCount++;
     }
 
-    int count = 0;
-    for (final key in albumKeys) {
-      final trackCount = items
-          .where(
-            (i) => '${i.albumName}|${i.albumArtist ?? i.artistName}' == key,
-          )
-          .length;
-      if (trackCount > 1) count++;
-    }
-    return count;
+    return _HistoryStats(
+      albumCounts: albumCounts,
+      groupedAlbums: groupedAlbums,
+      albumCount: albumCount,
+      singleTracks: singleTracks,
+    );
   }
 
   void _navigateToDownloadedAlbum(_GroupedAlbum album) {
@@ -435,11 +432,10 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     final colorScheme = Theme.of(context).colorScheme;
     final topPadding = MediaQuery.of(context).padding.top;
 
-    final groupedAlbums = _groupByAlbum(allHistoryItems);
-
-    final counts = _countAlbumsAndSingles(allHistoryItems);
-    final albumCount = _countUniqueAlbums(allHistoryItems);
-    final singleCount = counts['singles'] ?? 0;
+    final historyStats = _buildHistoryStats(allHistoryItems);
+    final groupedAlbums = historyStats.groupedAlbums;
+    final albumCount = historyStats.albumCount;
+    final singleCount = historyStats.singleTracks;
 
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
@@ -679,6 +675,7 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                     historyViewMode: historyViewMode,
                     queueItems: queueItems,
                     groupedAlbums: groupedAlbums,
+                    albumCounts: historyStats.albumCounts,
                   ),
                   _buildFilterContent(
                     context: context,
@@ -688,6 +685,7 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                     historyViewMode: historyViewMode,
                     queueItems: queueItems,
                     groupedAlbums: groupedAlbums,
+                    albumCounts: historyStats.albumCounts,
                   ),
                   _buildFilterContent(
                     context: context,
@@ -697,6 +695,7 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                     historyViewMode: historyViewMode,
                     queueItems: queueItems,
                     groupedAlbums: groupedAlbums,
+                    albumCounts: historyStats.albumCounts,
                   ),
                 ],
               ),
@@ -713,7 +712,11 @@ class _QueueTabState extends ConsumerState<QueueTab> {
             child: _buildSelectionBottomBar(
               context,
               colorScheme,
-              _filterHistoryItems(allHistoryItems, historyFilterMode),
+              _filterHistoryItems(
+                allHistoryItems,
+                historyFilterMode,
+                historyStats.albumCounts,
+              ),
               bottomPadding,
             ),
           ),
@@ -731,8 +734,10 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     required String historyViewMode,
     required List<DownloadItem> queueItems,
     required List<_GroupedAlbum> groupedAlbums,
+    required Map<String, int> albumCounts,
   }) {
-    final historyItems = _filterHistoryItems(allHistoryItems, filterMode);
+    final historyItems =
+        _filterHistoryItems(allHistoryItems, filterMode, albumCounts);
 
     return CustomScrollView(
       slivers: [
@@ -943,13 +948,14 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: album.coverUrl != null
-                      ? CachedNetworkImage(
+? CachedNetworkImage(
                           imageUrl: album.coverUrl!,
                           fit: BoxFit.cover,
                           width: double.infinity,
                           height: double.infinity,
                           memCacheWidth: 300,
                           memCacheHeight: 300,
+                          cacheManager: CoverCacheManager.instance,
                         )
                       : Container(
                           color: colorScheme.surfaceContainerHighest,
@@ -1245,13 +1251,14 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     return item.track.coverUrl != null
         ? ClipRRect(
             borderRadius: BorderRadius.circular(8),
-            child: CachedNetworkImage(
+child: CachedNetworkImage(
               imageUrl: item.track.coverUrl!,
               width: 56,
               height: 56,
               fit: BoxFit.cover,
               memCacheWidth: 112,
               memCacheHeight: 112,
+              cacheManager: CoverCacheManager.instance,
             ),
           )
         : Container(
@@ -1404,11 +1411,12 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: item.coverUrl != null
-                          ? CachedNetworkImage(
+? CachedNetworkImage(
                               imageUrl: item.coverUrl!,
                               fit: BoxFit.cover,
                               memCacheWidth: 200,
                               memCacheHeight: 200,
+                              cacheManager: CoverCacheManager.instance,
                             )
                           : Container(
                               color: colorScheme.surfaceContainerHighest,
@@ -1613,13 +1621,14 @@ class _QueueTabState extends ConsumerState<QueueTab> {
               item.coverUrl != null
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: CachedNetworkImage(
+child: CachedNetworkImage(
                         imageUrl: item.coverUrl!,
                         width: 56,
                         height: 56,
                         fit: BoxFit.cover,
                         memCacheWidth: 112,
                         memCacheHeight: 112,
+                        cacheManager: CoverCacheManager.instance,
                       ),
                     )
                   : Container(

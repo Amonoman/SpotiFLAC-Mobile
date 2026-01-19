@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:spotiflac_android/services/cover_cache_manager.dart';
 import 'package:spotiflac_android/providers/track_provider.dart';
 import 'package:spotiflac_android/providers/download_queue_provider.dart';
 import 'package:spotiflac_android/providers/settings_provider.dart';
@@ -210,11 +211,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             if (state.coverUrl != null)
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: CachedNetworkImage(
+child: CachedNetworkImage(
                   imageUrl: state.coverUrl!,
                   width: 80,
                   height: 80,
                   fit: BoxFit.cover,
+                  cacheManager: CoverCacheManager.instance,
                   placeholder: (_, _) => Container(
                     width: 80,
                     height: 80,
@@ -281,11 +283,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       leading: track.coverUrl != null
           ? ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: CachedNetworkImage(
+child: CachedNetworkImage(
                 imageUrl: track.coverUrl!,
                 width: 48,
                 height: 48,
                 fit: BoxFit.cover,
+                cacheManager: CoverCacheManager.instance,
               ),
             )
           : Container(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
+import 'package:spotiflac_android/services/cover_cache_manager.dart';
 import 'package:spotiflac_android/l10n/l10n.dart';
 import 'package:spotiflac_android/models/track.dart';
 import 'package:spotiflac_android/models/download_item.dart';
@@ -355,12 +356,13 @@ return SliverAppBar(
         background: Stack(
           fit: StackFit.expand,
           children: [
-            if (hasValidImage)
+if (hasValidImage)
               CachedNetworkImage(
                 imageUrl: imageUrl,
                 fit: BoxFit.cover,
                 alignment: Alignment.topCenter, // Show top of image (faces)
                 memCacheWidth: 800,
+                cacheManager: CoverCacheManager.instance,
                 placeholder: (context, url) => Container(
                   color: colorScheme.surfaceContainerHighest,
                 ),
@@ -479,9 +481,9 @@ return SliverAppBar(
 
   /// Build a single popular track item with dynamic download status
   Widget _buildPopularTrackItem(int rank, Track track, ColorScheme colorScheme) {
-    final queueItem = ref.watch(downloadQueueProvider.select((state) {
-      return state.items.where((item) => item.track.id == track.id).firstOrNull;
-    }));
+    final queueItem = ref.watch(
+      downloadQueueLookupProvider.select((lookup) => lookup.byTrackId[track.id]),
+    );
     
     final isInHistory = ref.watch(downloadHistoryProvider.select((state) {
       return state.isDownloaded(track.id);
@@ -515,12 +517,13 @@ return SliverAppBar(
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: track.coverUrl != null
-                  ? CachedNetworkImage(
+? CachedNetworkImage(
                       imageUrl: track.coverUrl!,
                       width: 48,
                       height: 48,
                       fit: BoxFit.cover,
                       memCacheWidth: 96,
+                      cacheManager: CoverCacheManager.instance,
                       placeholder: (context, url) => Container(
                         width: 48,
                         height: 48,
@@ -751,12 +754,13 @@ return SliverAppBar(
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: album.coverUrl != null
-                  ? CachedNetworkImage(
+? CachedNetworkImage(
                       imageUrl: album.coverUrl!,
                       width: 140,
                       height: 140,
                       fit: BoxFit.cover,
                       memCacheWidth: 280,
+                      cacheManager: CoverCacheManager.instance,
                       placeholder: (context, url) => Container(
                         width: 140,
                         height: 140,

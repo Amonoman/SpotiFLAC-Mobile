@@ -7,13 +7,15 @@ import 'package:spotiflac_android/providers/download_queue_provider.dart';
 import 'package:spotiflac_android/providers/extension_provider.dart';
 import 'package:spotiflac_android/services/notification_service.dart';
 import 'package:spotiflac_android/services/share_intent_service.dart';
+import 'package:spotiflac_android/services/cover_cache_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  await NotificationService().initialize();
-  
-  await ShareIntentService().initialize();
+  await Future.wait([
+    NotificationService().initialize(),
+    ShareIntentService().initialize(),
+    CoverCacheManager.initialize(),
+  ]);
   
   runApp(
     ProviderScope(

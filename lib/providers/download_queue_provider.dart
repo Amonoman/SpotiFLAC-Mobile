@@ -372,6 +372,18 @@ class DownloadQueueState {
       items.where((i) => i.status == DownloadStatus.downloading).length;
 }
 
+class _ProgressUpdate {
+  final DownloadStatus status;
+  final double progress;
+  final double? speedMBps;
+
+  const _ProgressUpdate({
+    required this.status,
+    required this.progress,
+    this.speedMBps,
+  });
+}
+
 class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
   Timer? _progressTimer;
   int _downloadCount = 0; // Counter for connection cleanup
@@ -383,6 +395,7 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
   int _completedInSession = 0; // Track completed downloads in current session
   int _failedInSession = 0; // Track failed downloads in current session
   bool _isLoaded = false;
+  final Set<String> _ensuredDirs = {};
 
   @override
   DownloadQueueState build() {
@@ -475,6 +488,15 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
       try {
         final allProgress = await PlatformBridge.getAllDownloadProgress();
         final items = allProgress['items'] as Map<String, dynamic>? ?? {};
+        final currentItems = state.items;
+        final itemsById = <String, DownloadItem>{};
+        final itemIndexById = <String, int>{};
+        for (int i = 0; i < currentItems.length; i++) {
+          final item = currentItems[i];
+          itemsById[item.id] = item;
+          itemIndexById[item.id] = i;
+        }
+        final progressUpdates = <String, _ProgressUpdate>{};
 
         bool hasFinalizingItem = false;
         String? finalizingTrackName;
@@ -482,9 +504,7 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
 
         for (final entry in items.entries) {
           final itemId = entry.key;
-          final localItem = state.items
-              .where((i) => i.id == itemId)
-              .firstOrNull;
+          final localItem = itemsById[itemId];
           if (localItem == null) {
             continue;
           }
@@ -506,16 +526,13 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
           final status = itemProgress['status'] as String? ?? 'downloading';
 
           if (status == 'finalizing' && bytesTotal > 0) {
-            updateItemStatus(itemId, DownloadStatus.finalizing, progress: 1.0);
-
-            final currentItem = state.items
-                .where((i) => i.id == itemId)
-                .firstOrNull;
-            if (currentItem != null) {
-              hasFinalizingItem = true;
-              finalizingTrackName = currentItem.track.name;
-              finalizingArtistName = currentItem.track.artistName;
-            }
+            progressUpdates[itemId] = const _ProgressUpdate(
+              status: DownloadStatus.finalizing,
+              progress: 1.0,
+            );
+            hasFinalizingItem = true;
+            finalizingTrackName = localItem.track.name;
+            finalizingArtistName = localItem.track.artistName;
             continue;
           }
 
@@ -530,7 +547,11 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
               percentage = progressFromBackend;
             }
 
-            updateProgress(itemId, percentage, speedMBps: speedMBps);
+            progressUpdates[itemId] = _ProgressUpdate(
+              status: DownloadStatus.downloading,
+              progress: percentage,
+              speedMBps: speedMBps,
+            );
 
             final mbReceived = bytesReceived / (1024 * 1024);
             final mbTotal = bytesTotal / (1024 * 1024);
@@ -543,6 +564,41 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
                 'Progress [$itemId]: ${(percentage * 100).toStringAsFixed(1)}% (DASH segments/unknown size) @ ${speedMBps.toStringAsFixed(2)} MB/s',
               );
             }
+          }
+        }
+
+        if (progressUpdates.isNotEmpty) {
+          var updatedItems = currentItems;
+          bool changed = false;
+
+          for (final entry in progressUpdates.entries) {
+            final index = itemIndexById[entry.key];
+            if (index == null) continue;
+            final current = updatedItems[index];
+            if (current.status == DownloadStatus.skipped ||
+                current.status == DownloadStatus.completed ||
+                current.status == DownloadStatus.failed) {
+              continue;
+            }
+            final update = entry.value;
+            final next = current.copyWith(
+              status: update.status,
+              progress: update.progress,
+              speedMBps: update.speedMBps ?? current.speedMBps,
+            );
+            if (current.status != next.status ||
+                current.progress != next.progress ||
+                current.speedMBps != next.speedMBps) {
+              if (!changed) {
+                updatedItems = List<DownloadItem>.from(updatedItems);
+                changed = true;
+              }
+              updatedItems[index] = next;
+            }
+          }
+
+          if (changed) {
+            state = state.copyWith(items: updatedItems);
           }
         }
 
@@ -651,6 +707,20 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
     }
   }
 
+  Future<void> _ensureDirExists(String path, {String? label}) async {
+    if (_ensuredDirs.contains(path)) return;
+    final dir = Directory(path);
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+      if (label != null) {
+        _log.d('Created $label: $path');
+      } else {
+        _log.d('Created folder: $path');
+      }
+    }
+    _ensuredDirs.add(path);
+  }
+
   void setOutputDir(String dir) {
     state = state.copyWith(outputDir: dir);
   }
@@ -665,11 +735,7 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
       
       if (isSingle) {
         final singlesPath = '$baseDir${Platform.pathSeparator}Singles';
-        final dir = Directory(singlesPath);
-        if (!await dir.exists()) {
-          await dir.create(recursive: true);
-          _log.d('Created Singles folder: $singlesPath');
-        }
+        await _ensureDirExists(singlesPath, label: 'Singles folder');
         return singlesPath;
       } else {
         final albumName = _sanitizeFolderName(track.albumName);
@@ -693,11 +759,7 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
             albumPath = '$baseDir${Platform.pathSeparator}Albums${Platform.pathSeparator}$artistName${Platform.pathSeparator}$albumName';
         }
         
-        final dir = Directory(albumPath);
-        if (!await dir.exists()) {
-          await dir.create(recursive: true);
-          _log.d('Created Album folder: $albumPath');
-        }
+        await _ensureDirExists(albumPath, label: 'Album folder');
         return albumPath;
       }
     }
@@ -725,11 +787,7 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
 
     if (subPath.isNotEmpty) {
       final fullPath = '$baseDir${Platform.pathSeparator}$subPath';
-      final dir = Directory(fullPath);
-      if (!await dir.exists()) {
-        await dir.create(recursive: true);
-        _log.d('Created folder: $fullPath');
-      }
+      await _ensureDirExists(fullPath);
       return fullPath;
     }
 
@@ -824,21 +882,32 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
     String? error,
     DownloadErrorType? errorType,
   }) {
-    final items = state.items.map((item) {
-      if (item.id == id) {
-        return item.copyWith(
-          status: status,
-          progress: progress ?? item.progress,
-          speedMBps: speedMBps ?? item.speedMBps,
-          filePath: filePath,
-          error: error,
-          errorType: errorType,
-        );
-      }
-      return item;
-    }).toList();
+    final items = state.items;
+    final index = items.indexWhere((item) => item.id == id);
+    if (index == -1) return;
 
-    state = state.copyWith(items: items);
+    final current = items[index];
+    final next = current.copyWith(
+      status: status,
+      progress: progress ?? current.progress,
+      speedMBps: speedMBps ?? current.speedMBps,
+      filePath: filePath,
+      error: error,
+      errorType: errorType,
+    );
+
+    if (current.status == next.status &&
+        current.progress == next.progress &&
+        current.speedMBps == next.speedMBps &&
+        current.filePath == next.filePath &&
+        current.error == next.error &&
+        current.errorType == next.errorType) {
+      return;
+    }
+
+    final updatedItems = List<DownloadItem>.from(items);
+    updatedItems[index] = next;
+    state = state.copyWith(items: updatedItems);
 
     if (status == DownloadStatus.completed ||
         status == DownloadStatus.failed ||
@@ -848,9 +917,11 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
   }
 
   void updateProgress(String id, double progress, {double? speedMBps}) {
-    final item = state.items.where((i) => i.id == id).firstOrNull;
-    if (item == null ||
-        item.status == DownloadStatus.skipped ||
+    final items = state.items;
+    final index = items.indexWhere((i) => i.id == id);
+    if (index == -1) return;
+    final item = items[index];
+    if (item.status == DownloadStatus.skipped ||
         item.status == DownloadStatus.completed ||
         item.status == DownloadStatus.failed) {
       return;
@@ -2121,3 +2192,22 @@ final downloadQueueProvider =
     NotifierProvider<DownloadQueueNotifier, DownloadQueueState>(
       DownloadQueueNotifier.new,
     );
+
+class DownloadQueueLookup {
+  final Map<String, DownloadItem> byTrackId;
+
+  DownloadQueueLookup._(this.byTrackId);
+
+  factory DownloadQueueLookup.fromItems(List<DownloadItem> items) {
+    final map = <String, DownloadItem>{};
+    for (final item in items) {
+      map.putIfAbsent(item.track.id, () => item);
+    }
+    return DownloadQueueLookup._(map);
+  }
+}
+
+final downloadQueueLookupProvider = Provider<DownloadQueueLookup>((ref) {
+  final items = ref.watch(downloadQueueProvider.select((s) => s.items));
+  return DownloadQueueLookup.fromItems(items);
+});
