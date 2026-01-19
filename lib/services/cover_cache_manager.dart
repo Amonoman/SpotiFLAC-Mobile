@@ -51,8 +51,8 @@ class CoverCacheManager {
           _cacheKey,
           stalePeriod: _maxCacheAge,
           maxNrOfCacheObjects: _maxCacheObjects,
-          // Store database in the same persistent directory
-          repo: JsonCacheInfoRepository(databaseName: _cacheKey, path: _cachePath),
+          // Use path only (not databaseName) to store database in persistent directory
+          repo: JsonCacheInfoRepository(path: _cachePath),
           fileSystem: IOFileSystem(_cachePath!),
           fileService: HttpFileService(),
         ),
