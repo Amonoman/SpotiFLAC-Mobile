@@ -446,8 +446,20 @@ jobs:
           if [ -z "$FULL_CHANGELOG" ]; then
             CHANGELOG="See release notes on GitHub for details."
           else
+            # Convert GitHub Markdown to Telegram Markdown:
+            # - **text** → *text* (GitHub bold to Telegram bold)
+            # - ### Header → *Header* (headers to bold)
+            # - Add extra line break before major list items for readability
+            CHANGELOG=$(echo "$FULL_CHANGELOG" | \
+              sed 's/\*\*\([^*]*\)\*\*/*\1*/g' | \
+              sed 's/^### \(.*\)$/*\1*/g' | \
+              sed 's/^## \(.*\)$/*\1*/g' | \
+              sed 's/^- \*\*\([^:]*\):\*\*/\n• *\1:*/g' | \
+              sed 's/^- /• /g' | \
+              sed 's/^  - /  ◦ /g')
+            
             # Take first 2500 characters, then cut at last complete line
-            CHANGELOG=$(echo "$FULL_CHANGELOG" | head -c 2500 | sed '$d')
+            CHANGELOG=$(echo "$CHANGELOG" | head -c 2500 | sed '$d')
             
             # Check if truncated
             FULL_LEN=${#FULL_CHANGELOG}
