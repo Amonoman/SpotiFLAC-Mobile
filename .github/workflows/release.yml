@@ -441,7 +441,11 @@ jobs:
           VERSION_NUM=${VERSION#v}
 
           # Extract changelog, limit to ~2500 chars for Telegram (4096 limit minus message overhead)
-          FULL_CHANGELOG=$(sed -n "/^## \[$VERSION_NUM\]/,/^## \[/{ /^## \[$VERSION_NUM\]/d; /^## \[/d; p; }" CHANGELOG.md | sed '/^---$/d')
+          # Use tr -d '\r' to handle CRLF line endings from Windows
+          FULL_CHANGELOG=$(cat CHANGELOG.md | tr -d '\r' | sed -n "/^## \[$VERSION_NUM\]/,/^## \[/{ /^## \[$VERSION_NUM\]/d; /^## \[/d; p; }" | sed '/^---$/d')
+          
+          echo "DEBUG: Extracted changelog length: ${#FULL_CHANGELOG}"
+          echo "DEBUG: First 200 chars: ${FULL_CHANGELOG:0:200}"
           
           if [ -z "$FULL_CHANGELOG" ]; then
             CHANGELOG="See release notes on GitHub for details."
@@ -451,7 +455,9 @@ jobs:
             # - `code` → <code>code</code>
             # - ### Header → <b>Header</b>
             # - Escape HTML special chars first
+            # - Remove > blockquote prefix
             CHANGELOG=$(echo "$FULL_CHANGELOG" | \
+              sed 's/^> //' | \
               sed 's/&/\&amp;/g' | \
               sed 's/</\&lt;/g' | \
               sed 's/>/\&gt;/g' | \
@@ -473,6 +479,8 @@ jobs:
           fi
 
           echo "$CHANGELOG" > /tmp/changelog.txt
+          echo "DEBUG: Final changelog:"
+          cat /tmp/changelog.txt
 
       - name: Send to Telegram Channel
         env:
