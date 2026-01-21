@@ -446,15 +446,19 @@ jobs:
           if [ -z "$FULL_CHANGELOG" ]; then
             CHANGELOG="See release notes on GitHub for details."
           else
-            # Convert GitHub Markdown to Telegram Markdown:
-            # - **text** → *text* (GitHub bold to Telegram bold)
-            # - ### Header → *Header* (headers to bold)
-            # - Add extra line break before major list items for readability
+            # Convert GitHub Markdown to Telegram HTML:
+            # - **text** → <b>text</b>
+            # - `code` → <code>code</code>
+            # - ### Header → <b>Header</b>
+            # - Escape HTML special chars first
             CHANGELOG=$(echo "$FULL_CHANGELOG" | \
-              sed 's/\*\*\([^*]*\)\*\*/*\1*/g' | \
-              sed 's/^### \(.*\)$/*\1*/g' | \
-              sed 's/^## \(.*\)$/*\1*/g' | \
-              sed 's/^- \*\*\([^:]*\):\*\*/\n• *\1:*/g' | \
+              sed 's/&/\&amp;/g' | \
+              sed 's/</\&lt;/g' | \
+              sed 's/>/\&gt;/g' | \
+              sed 's/`\([^`]*\)`/<code>\1<\/code>/g' | \
+              sed 's/\*\*\([^*]*\)\*\*/<b>\1<\/b>/g' | \
+              sed 's/^### \(.*\)$/<b>\1<\/b>/g' | \
+              sed 's/^## \(.*\)$/<b>\1<\/b>/g' | \
               sed 's/^- /• /g' | \
               sed 's/^  - /  ◦ /g')
             
@@ -482,23 +486,23 @@ jobs:
           ARM64_APK=$(find ./release -name "*arm64*.apk" | head -1)
           ARM32_APK=$(find ./release -name "*arm32*.apk" | head -1)
           
-          # Prepare message with changelog (files uploaded separately)
+          # Prepare message with changelog (HTML format)
           printf '%s\n' \
-            "*SpotiFLAC Mobile ${VERSION} Released!*" \
+            "<b>SpotiFLAC Mobile ${VERSION} Released!</b>" \
             "" \
-            "*What's New:*" \
+            "<b>What's New:</b>" \
             "${CHANGELOG}" \
             "" \
-            "[View Release Notes](https://github.com/${{ github.repository }}/releases/tag/${VERSION})" \
+            "<a href=\"https://github.com/${{ github.repository }}/releases/tag/${VERSION}\">View Release Notes</a>" \
             > /tmp/telegram_message.txt
 
           MESSAGE=$(cat /tmp/telegram_message.txt)
 
-          # Send message first
+          # Send message first (using HTML parse mode)
           curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             -d chat_id="${TELEGRAM_CHANNEL_ID}" \
             -d text="${MESSAGE}" \
-            -d parse_mode="Markdown" \
+            -d parse_mode="HTML" \
             -d disable_web_page_preview="true"
 
           # Upload arm64 APK to channel
