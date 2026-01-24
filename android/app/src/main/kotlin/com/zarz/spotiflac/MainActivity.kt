@@ -1,8 +1,10 @@
 package com.zarz.spotiflac
 
 import android.content.Intent
+import android.os.Build
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.embedding.engine.FlutterShellArgs
 import io.flutter.plugin.common.MethodChannel
 import gobackend.Gobackend
 import com.arthenica.ffmpegkit.FFmpegKit
@@ -12,11 +14,143 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Locale
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "com.zarz.spotiflac/backend"
     private val FFMPEG_CHANNEL = "com.zarz.spotiflac/ffmpeg"
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
+    companion object {
+        // Minimum API level we consider "safe" for Impeller (Android 10+)
+        private const val SAFE_API_FOR_IMPELLER = 29
+        
+        // Known problematic GPU patterns (lowercase)
+        private val PROBLEMATIC_GPU_PATTERNS = listOf(
+            "adreno (tm) 3",   // Adreno 300 series (305, 320, 330, etc.) - old Qualcomm
+            "adreno (tm) 4",   // Adreno 400 series - some have issues
+            "mali-4",          // Mali-400 series - old ARM GPUs
+            "mali-t6",         // Mali-T600 series
+            "mali-t7",         // Mali-T700 series (some)
+            "powervr sgx",     // PowerVR SGX series - old Imagination GPUs
+            "powervr ge8320",  // PowerVR GE8320 - known issues
+            "gc1000",          // Vivante GC1000
+            "gc2000",          // Vivante GC2000
+        )
+        
+        // Known problematic chipsets/hardware (lowercase)
+        private val PROBLEMATIC_CHIPSETS = listOf(
+            "mt6762",   // MediaTek Helio P22 with PowerVR GE8320
+            "mt6765",   // MediaTek Helio P35 with PowerVR GE8320
+            "mt8768",   // MediaTek tablet chip
+            "mp0873",   // MediaTek variant
+            "msm8974",  // Snapdragon 800/801 with Adreno 330
+            "msm8226",  // Snapdragon 400 with Adreno 305
+            "msm8926",  // Snapdragon 400 with Adreno 305
+            "apq8084",  // Snapdragon 805 (some issues)
+        )
+        
+        // Known problematic device models (lowercase)
+        private val PROBLEMATIC_MODELS = listOf(
+            "sm-t220",      // Samsung Tab A7 Lite
+            "sm-t225",      // Samsung Tab A7 Lite LTE
+            "hammerhead",   // Nexus 5 (Adreno 330)
+        )
+    }
+
+    /**
+     * Override Flutter shell args to disable Impeller on problematic devices.
+     * This is called before the Flutter engine starts.
+     */
+    override fun getFlutterShellArgs(): FlutterShellArgs {
+        val args = super.getFlutterShellArgs()
+        
+        if (shouldDisableImpeller()) {
+            // Log for debugging
+            android.util.Log.i("SpotiFLAC", "Legacy/problematic GPU detected: Disabling Impeller for ${Build.MODEL}")
+            android.util.Log.i("SpotiFLAC", "Device: ${Build.MANUFACTURER} ${Build.MODEL}, SDK: ${Build.VERSION.SDK_INT}")
+            android.util.Log.i("SpotiFLAC", "Hardware: ${Build.HARDWARE}, Board: ${Build.BOARD}")
+            
+            // Disable Impeller, forcing Skia renderer
+            args.add("--enable-impeller=false")
+        } else {
+            android.util.Log.i("SpotiFLAC", "Using Impeller renderer for ${Build.MODEL}")
+        }
+        
+        return args
+    }
+
+    /**
+     * Check if device should use Skia instead of Impeller.
+     * Returns true for devices with old/problematic GPUs or old Android versions.
+     */
+    private fun shouldDisableImpeller(): Boolean {
+        val hardware = Build.HARDWARE.lowercase(Locale.ROOT)
+        val board = Build.BOARD.lowercase(Locale.ROOT)
+        val model = Build.MODEL.lowercase(Locale.ROOT)
+        val device = Build.DEVICE.lowercase(Locale.ROOT)
+        
+        // 1. Check for explicitly problematic device models
+        for (problematicModel in PROBLEMATIC_MODELS) {
+            if (model.contains(problematicModel) || device.contains(problematicModel)) {
+                android.util.Log.i("SpotiFLAC", "Matched problematic model: $problematicModel")
+                return true
+            }
+        }
+        
+        // 2. Check for problematic chipsets
+        for (chipset in PROBLEMATIC_CHIPSETS) {
+            if (hardware.contains(chipset) || board.contains(chipset)) {
+                android.util.Log.i("SpotiFLAC", "Matched problematic chipset: $chipset")
+                return true
+            }
+        }
+        
+        // 3. For Android < 10 (API 29), be more aggressive about disabling Impeller
+        if (Build.VERSION.SDK_INT < SAFE_API_FOR_IMPELLER) {
+            // For older Android, check GPU renderer if available
+            val gpuRenderer = getGpuRenderer().lowercase(Locale.ROOT)
+            
+            // Check for known problematic GPUs
+            for (pattern in PROBLEMATIC_GPU_PATTERNS) {
+                if (gpuRenderer.contains(pattern)) {
+                    android.util.Log.i("SpotiFLAC", "Matched problematic GPU on old Android: $pattern")
+                    return true
+                }
+            }
+            
+            // For very old Android (< 8.0), always use Skia as Vulkan support is spotty
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                android.util.Log.i("SpotiFLAC", "Android < 8.0, using Skia for safety")
+                return true
+            }
+        }
+        
+        // 4. For Android 10+, still check for known problematic GPUs
+        val gpuRenderer = getGpuRenderer().lowercase(Locale.ROOT)
+        for (pattern in PROBLEMATIC_GPU_PATTERNS) {
+            if (gpuRenderer.contains(pattern)) {
+                android.util.Log.i("SpotiFLAC", "Matched problematic GPU: $pattern")
+                return true
+            }
+        }
+        
+        return false
+    }
+    
+    /**
+     * Try to get GPU renderer string.
+     * Note: This may return empty on some devices before OpenGL context is created.
+     */
+    private fun getGpuRenderer(): String {
+        return try {
+            // This might not work before GL context is created,
+            // but worth trying for additional detection
+            android.opengl.GLES20.glGetString(android.opengl.GLES20.GL_RENDERER) ?: ""
+        } catch (e: Exception) {
+            ""
+        }
+    }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
