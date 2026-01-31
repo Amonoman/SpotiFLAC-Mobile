@@ -13,7 +13,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get appDescription =>
-      'Download Spotify tracks in lossless quality from Tidal, Qobuz, and Amazon Music.';
+      'Tidal、Qobuz、Amazon Music から Spotify のトラックをロスレス品質でダウンロードします。';
 
   @override
   String get navHome => 'ホーム';
@@ -31,24 +31,24 @@ class AppLocalizationsJa extends AppLocalizations {
   String get homeTitle => 'ホーム';
 
   @override
-  String get homeSearchHint => 'Paste Spotify URL or search...';
+  String get homeSearchHint => 'Spotify の URL を貼り付けまたは検索...';
 
   @override
   String homeSearchHintExtension(String extensionName) {
-    return 'Search with $extensionName...';
+    return '$extensionName で検索...';
   }
 
   @override
-  String get homeSubtitle => 'Paste a Spotify link or search by name';
+  String get homeSubtitle => 'Spotify のリンクを貼り付けるか、名前で検索します';
 
   @override
-  String get homeSupports => 'Supports: Track, Album, Playlist, Artist URLs';
+  String get homeSupports => 'サポート: トラック、アルバム、プレイリスト、アーティスト、URL';
 
   @override
-  String get homeRecent => 'Recent';
+  String get homeRecent => '最近';
 
   @override
-  String get historyTitle => 'History';
+  String get historyTitle => '履歴';
 
   @override
   String historyDownloading(int count) {
@@ -72,8 +72,8 @@ class AppLocalizationsJa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count tracks',
-      one: '1 track',
+      other: '$count 個のトラック',
+      one: '1 個のトラック',
     );
     return '$_temp0';
   }
@@ -83,34 +83,34 @@ class AppLocalizationsJa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count albums',
-      one: '1 album',
+      other: '$count 個のアルバム',
+      one: '1 個のアルバム',
     );
     return '$_temp0';
   }
 
   @override
-  String get historyNoDownloads => 'No download history';
+  String get historyNoDownloads => 'ダウンロード履歴はありません';
 
   @override
-  String get historyNoDownloadsSubtitle => 'Downloaded tracks will appear here';
+  String get historyNoDownloadsSubtitle => 'ダウンロードしたトラックはここに表示されます';
 
   @override
-  String get historyNoAlbums => 'No album downloads';
+  String get historyNoAlbums => 'アルバムのダウンロードはありません';
 
   @override
   String get historyNoAlbumsSubtitle =>
       'Download multiple tracks from an album to see them here';
 
   @override
-  String get historyNoSingles => 'No single downloads';
+  String get historyNoSingles => 'シングルのダウンロードはありません';
 
   @override
   String get historyNoSinglesSubtitle =>
       'Single track downloads will appear here';
 
   @override
-  String get historySearchHint => 'Search history...';
+  String get historySearchHint => '検索履歴...';
 
   @override
   String get settingsTitle => '設定';
@@ -134,10 +134,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get downloadTitle => 'ダウンロード';
 
   @override
-  String get downloadLocation => 'Download Location';
+  String get downloadLocation => 'ダウンロード先';
 
   @override
-  String get downloadLocationSubtitle => 'Choose where to save files';
+  String get downloadLocationSubtitle => 'ファイルの保存先を選択';
 
   @override
   String get downloadLocationDefault => 'デフォルトの場所';
@@ -152,7 +152,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get downloadDefaultQuality => 'デフォルトの品質';
 
   @override
-  String get downloadAskQuality => 'Ask Quality Before Download';
+  String get downloadAskQuality => 'ダウンロード前に品質を確認する';
 
   @override
   String get downloadAskQualitySubtitle =>
@@ -162,17 +162,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String get downloadFilenameFormat => 'ファイル名の形式';
 
   @override
-  String get downloadFolderOrganization => 'Folder Organization';
+  String get downloadFolderOrganization => 'フォルダ構成';
 
   @override
-  String get downloadSeparateSingles => 'Separate Singles';
+  String get downloadSeparateSingles => 'シングルを分割';
 
   @override
   String get downloadSeparateSinglesSubtitle =>
       'Put single tracks in a separate folder';
 
   @override
-  String get qualityBest => 'Best Available';
+  String get qualityBest => 'おすすめ';
 
   @override
   String get qualityFlac => 'FLAC';
@@ -202,7 +202,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get appearanceDynamicColor => 'ダイナミックカラー';
 
   @override
-  String get appearanceDynamicColorSubtitle => 'Use colors from your wallpaper';
+  String get appearanceDynamicColorSubtitle => '壁紙の色を使用する';
 
   @override
   String get appearanceAccentColor => 'アクセントカラー';
@@ -249,7 +249,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get optionsUseExtensionProviders => '拡張のプロバイダーを使用する';
 
   @override
-  String get optionsUseExtensionProvidersOn => 'Extensions will be tried first';
+  String get optionsUseExtensionProvidersOn => '最初に拡張で試みます';
 
   @override
   String get optionsUseExtensionProvidersOff => '内蔵のプロバイダーのみを使用する';
@@ -258,18 +258,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String get optionsEmbedLyrics => '歌詞を埋め込む';
 
   @override
-  String get optionsEmbedLyricsSubtitle =>
-      'Embed synced lyrics into FLAC files';
+  String get optionsEmbedLyricsSubtitle => '同期する歌詞を FLAC ファイルに埋め込む';
 
   @override
   String get optionsMaxQualityCover => '最大品質のカバー';
 
   @override
-  String get optionsMaxQualityCoverSubtitle =>
-      'Download highest resolution cover art';
+  String get optionsMaxQualityCoverSubtitle => '最高解像度のカバーアートをダウンロード';
 
   @override
-  String get optionsConcurrentDownloads => 'Concurrent Downloads';
+  String get optionsConcurrentDownloads => '同時ダウンロード';
 
   @override
   String get optionsConcurrentSequential => 'Sequential (1 at a time)';
@@ -287,7 +285,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get optionsExtensionStore => '拡張ストア';
 
   @override
-  String get optionsExtensionStoreSubtitle => 'Show Store tab in navigation';
+  String get optionsExtensionStoreSubtitle => 'ナビゲーションにストアタブを表示';
 
   @override
   String get optionsCheckUpdates => '更新を確認';
@@ -310,20 +308,19 @@ class AppLocalizationsJa extends AppLocalizations {
       'Preview may contain bugs or incomplete features';
 
   @override
-  String get optionsClearHistory => 'Clear Download History';
+  String get optionsClearHistory => 'ダウンロード履歴を消去';
 
   @override
-  String get optionsClearHistorySubtitle =>
-      'Remove all downloaded tracks from history';
+  String get optionsClearHistorySubtitle => 'ダウンロード済みのすべてのトラックを履歴から削除';
 
   @override
-  String get optionsDetailedLogging => 'Detailed Logging';
+  String get optionsDetailedLogging => '詳細ログ';
 
   @override
-  String get optionsDetailedLoggingOn => 'Detailed logs are being recorded';
+  String get optionsDetailedLoggingOn => '詳細なログを記録しています';
 
   @override
-  String get optionsDetailedLoggingOff => 'Enable for bug reports';
+  String get optionsDetailedLoggingOff => 'バグレポートを有効';
 
   @override
   String get optionsSpotifyCredentials => 'Spotify の認証情報';
@@ -334,11 +331,11 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get optionsSpotifyCredentialsRequired => 'Required - tap to configure';
+  String get optionsSpotifyCredentialsRequired => '必須 - タップで設定';
 
   @override
   String get optionsSpotifyWarning =>
-      'Spotify requires your own API credentials. Get them free from developer.spotify.com';
+      'Spotify は独自の API 認証情報が必要です。developer.spotify.com から取得できます。';
 
   @override
   String get extensionsTitle => '拡張';
@@ -356,7 +353,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get extensionsEnabled => '有効';
 
   @override
-  String get extensionsDisabled => 'Disabled';
+  String get extensionsDisabled => '無効';
 
   @override
   String extensionsVersion(String version) {
@@ -372,7 +369,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get extensionsUninstall => 'アンインストール';
 
   @override
-  String get extensionsSetAsSearch => '検索プロバイダーを設定';
+  String get extensionsSetAsSearch => '検索のプロバイダーを設定';
 
   @override
   String get storeTitle => '拡張ストア';
@@ -399,14 +396,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get aboutMobileDeveloper => 'モバイルバージョンの開発者';
 
   @override
-  String get aboutOriginalCreator => 'Creator of the original SpotiFLAC';
+  String get aboutOriginalCreator => 'オリジナルの SpotiFLAC の作者';
 
   @override
-  String get aboutLogoArtist =>
-      'The talented artist who created our beautiful app logo!';
+  String get aboutLogoArtist => '美しいアプリロゴを作成した才能あるアーティストです！';
 
   @override
-  String get aboutTranslators => 'Translators';
+  String get aboutTranslators => '翻訳者';
 
   @override
   String get aboutSpecialThanks => 'スペシャルサンクス';
@@ -421,34 +417,34 @@ class AppLocalizationsJa extends AppLocalizations {
   String get aboutPCSource => 'PC 版のソースコード';
 
   @override
-  String get aboutReportIssue => 'Issue で報告する';
+  String get aboutReportIssue => '問題を報告する';
 
   @override
-  String get aboutReportIssueSubtitle => 'Report any problems you encounter';
+  String get aboutReportIssueSubtitle => '問題が発生した場合に報告してください';
 
   @override
   String get aboutFeatureRequest => '機能の要望';
 
   @override
-  String get aboutFeatureRequestSubtitle => 'Suggest new features for the app';
+  String get aboutFeatureRequestSubtitle => 'アプリの新機能を提案する';
 
   @override
-  String get aboutTelegramChannel => 'Telegram Channel';
+  String get aboutTelegramChannel => 'Telegram チャンネル';
 
   @override
-  String get aboutTelegramChannelSubtitle => 'Announcements and updates';
+  String get aboutTelegramChannelSubtitle => 'お知らせと更新';
 
   @override
-  String get aboutTelegramChat => 'Telegram Community';
+  String get aboutTelegramChat => 'Telegram コミュニティ';
 
   @override
-  String get aboutTelegramChatSubtitle => 'Chat with other users';
+  String get aboutTelegramChatSubtitle => 'その他のユーザーとチャット';
 
   @override
-  String get aboutSocial => 'Social';
+  String get aboutSocial => 'ソーシャル';
 
   @override
-  String get aboutSupport => 'Support';
+  String get aboutSupport => 'サポート';
 
   @override
   String get aboutBuyMeCoffee => 'コーヒーを買ってください';
@@ -486,36 +482,36 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get aboutAppDescription =>
-      'Download Spotify tracks in lossless quality from Tidal, Qobuz, and Amazon Music.';
+      'Tidal、Qobuz、Amazon Music から Spotify のトラックをロスレス品質でダウンロードします。';
 
   @override
-  String get albumTitle => 'Album';
+  String get albumTitle => 'アルバム';
 
   @override
   String albumTracks(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count tracks',
-      one: '1 track',
+      other: '$count 個のトラック',
+      one: '1 個のトラック',
     );
     return '$_temp0';
   }
 
   @override
-  String get albumDownloadAll => 'Download All';
+  String get albumDownloadAll => 'すべてダウンロード';
 
   @override
   String get albumDownloadRemaining => 'Download Remaining';
 
   @override
-  String get playlistTitle => 'Playlist';
+  String get playlistTitle => 'プレイリスト';
 
   @override
-  String get artistTitle => 'Artist';
+  String get artistTitle => 'アーティスト';
 
   @override
-  String get artistAlbums => 'Albums';
+  String get artistAlbums => 'アルバム';
 
   @override
   String get artistSingles => 'シングルと EP';
@@ -528,86 +524,85 @@ class AppLocalizationsJa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count releases',
-      one: '1 release',
+      other: '$count 個のリリース',
+      one: '1 個のリリース',
     );
     return '$_temp0';
   }
 
   @override
-  String get artistPopular => 'Popular';
+  String get artistPopular => '人気';
 
   @override
   String artistMonthlyListeners(String count) {
-    return '$count monthly listeners';
+    return '$count 人の月間リスナー';
   }
 
   @override
-  String get trackMetadataTitle => 'Track Info';
+  String get trackMetadataTitle => 'トラック情報';
 
   @override
-  String get trackMetadataArtist => 'Artist';
+  String get trackMetadataArtist => 'アーティスト';
 
   @override
-  String get trackMetadataAlbum => 'Album';
+  String get trackMetadataAlbum => 'アルバム';
 
   @override
-  String get trackMetadataDuration => 'Duration';
+  String get trackMetadataDuration => '再生時間';
 
   @override
-  String get trackMetadataQuality => 'Quality';
+  String get trackMetadataQuality => '品質';
 
   @override
-  String get trackMetadataPath => 'File Path';
+  String get trackMetadataPath => 'ファイルパス';
 
   @override
-  String get trackMetadataDownloadedAt => 'Downloaded';
+  String get trackMetadataDownloadedAt => 'ダウンロード済み';
 
   @override
-  String get trackMetadataService => 'Service';
+  String get trackMetadataService => 'サービス';
 
   @override
-  String get trackMetadataPlay => 'Play';
+  String get trackMetadataPlay => '再生';
 
   @override
-  String get trackMetadataShare => 'Share';
+  String get trackMetadataShare => '共有';
 
   @override
-  String get trackMetadataDelete => 'Delete';
+  String get trackMetadataDelete => '削除';
 
   @override
-  String get trackMetadataRedownload => 'Re-download';
+  String get trackMetadataRedownload => '再ダウンロード';
 
   @override
-  String get trackMetadataOpenFolder => 'Open Folder';
+  String get trackMetadataOpenFolder => 'フォルダを開く';
 
   @override
-  String get setupTitle => 'Welcome to SpotiFLAC';
+  String get setupTitle => 'SpotiFLAC へようこそ';
 
   @override
   String get setupSubtitle => 'Let\'s get you started';
 
   @override
-  String get setupStoragePermission => 'Storage Permission';
+  String get setupStoragePermission => 'ストレージの権限';
 
   @override
-  String get setupStoragePermissionSubtitle =>
-      'Required to save downloaded files';
+  String get setupStoragePermissionSubtitle => 'ダウンロードしたファイルを保存するために必要です';
 
   @override
-  String get setupStoragePermissionGranted => 'Permission granted';
+  String get setupStoragePermissionGranted => '権限を許可しました';
 
   @override
-  String get setupStoragePermissionDenied => 'Permission denied';
+  String get setupStoragePermissionDenied => '権限が拒否されました';
 
   @override
-  String get setupGrantPermission => 'Grant Permission';
+  String get setupGrantPermission => '権限を許可';
 
   @override
-  String get setupDownloadLocation => 'Download Location';
+  String get setupDownloadLocation => 'ダウンロード先';
 
   @override
-  String get setupChooseFolder => 'Choose Folder';
+  String get setupChooseFolder => 'フォルダを選択';
 
   @override
   String get setupContinue => '続行';
@@ -627,7 +622,7 @@ class AppLocalizationsJa extends AppLocalizations {
       'Android 11+ requires \"All files access\" permission to save files to your chosen download folder.';
 
   @override
-  String get setupOpenSettings => 'Open Settings';
+  String get setupOpenSettings => '設定を開く';
 
   @override
   String get setupPermissionDeniedMessage =>
@@ -635,62 +630,62 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String setupPermissionRequired(String permissionType) {
-    return '$permissionType Permission Required';
+    return '$permissionType の権限が必要です';
   }
 
   @override
   String setupPermissionRequiredMessage(String permissionType) {
-    return '$permissionType permission is required for the best experience. You can change this later in Settings.';
+    return '最適な体験を得るには $permissionType の権限が必要です。この権限は設定で後から変更できます。';
   }
 
   @override
-  String get setupSelectDownloadFolder => 'Select Download Folder';
+  String get setupSelectDownloadFolder => 'ダウンロードフォルダを選択';
 
   @override
-  String get setupUseDefaultFolder => 'Use Default Folder?';
+  String get setupUseDefaultFolder => 'デフォルトのフォルダを使用しますか？';
 
   @override
   String get setupNoFolderSelected =>
       'No folder selected. Would you like to use the default Music folder?';
 
   @override
-  String get setupUseDefault => 'Use Default';
+  String get setupUseDefault => 'デフォルトを使用する';
 
   @override
-  String get setupDownloadLocationTitle => 'Download Location';
+  String get setupDownloadLocationTitle => 'ダウンロード先';
 
   @override
   String get setupDownloadLocationIosMessage =>
       'On iOS, downloads are saved to the app\'s Documents folder. You can access them via the Files app.';
 
   @override
-  String get setupAppDocumentsFolder => 'App Documents Folder';
+  String get setupAppDocumentsFolder => 'アプリのドキュメントフォルダ';
 
   @override
   String get setupAppDocumentsFolderSubtitle =>
       'Recommended - accessible via Files app';
 
   @override
-  String get setupChooseFromFiles => 'Choose from Files';
+  String get setupChooseFromFiles => 'ファイルから選択';
 
   @override
-  String get setupChooseFromFilesSubtitle => 'Select iCloud or other location';
+  String get setupChooseFromFilesSubtitle => 'iCloud またはその他の場所を選択';
 
   @override
   String get setupIosEmptyFolderWarning =>
       'iOS limitation: Empty folders cannot be selected. Choose a folder with at least one file.';
 
   @override
-  String get setupDownloadInFlac => 'Download Spotify tracks in FLAC';
+  String get setupDownloadInFlac => 'Spotify のトラックを FLAC でダウンロード';
 
   @override
-  String get setupStepStorage => 'Storage';
+  String get setupStepStorage => 'ストレージ';
 
   @override
-  String get setupStepNotification => 'Notification';
+  String get setupStepNotification => '通知';
 
   @override
-  String get setupStepFolder => 'Folder';
+  String get setupStepFolder => 'フォルダ';
 
   @override
   String get setupStepSpotify => 'Spotify';
@@ -699,17 +694,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String get setupStepPermission => '権限';
 
   @override
-  String get setupStorageGranted => 'Storage Permission Granted!';
+  String get setupStorageGranted => 'ストレージの権限が許可されました！';
 
   @override
-  String get setupStorageRequired => 'Storage Permission Required';
+  String get setupStorageRequired => 'ストレージの権限が必要です';
 
   @override
   String get setupStorageDescription =>
-      'SpotiFLAC needs storage permission to save your downloaded music files.';
+      'SpotiFLAC はダウンロードした音楽ファイルを保存するためにストレージの権限が必要です。';
 
   @override
-  String get setupNotificationGranted => 'Notification Permission Granted!';
+  String get setupNotificationGranted => '通知の権限が許可されました！';
 
   @override
   String get setupNotificationEnable => '通知を有効化する';
@@ -722,17 +717,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String get setupFolderSelected => 'ダウンロードフォルダが選択済みです！';
 
   @override
-  String get setupFolderChoose => 'Choose Download Folder';
+  String get setupFolderChoose => 'ダウンロードフォルダを選択';
 
   @override
   String get setupFolderDescription =>
       'Select a folder where your downloaded music will be saved.';
 
   @override
-  String get setupChangeFolder => 'Change Folder';
+  String get setupChangeFolder => 'フォルダを変更';
 
   @override
-  String get setupSelectFolder => 'Select Folder';
+  String get setupSelectFolder => 'フォルダを選択';
 
   @override
   String get setupSpotifyApiOptional => 'Spotify API (任意)';
@@ -745,7 +740,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get setupUseSpotifyApi => 'Spotify API を使用する';
 
   @override
-  String get setupEnterCredentialsBelow => 'Enter your credentials below';
+  String get setupEnterCredentialsBelow => '以下に認証情報を入力してください';
 
   @override
   String get setupUsingDeezer => 'Deezer を使用中 (アカウントは不要です)';
@@ -758,10 +753,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get setupGetFreeCredentials =>
-      'Get your free API credentials from the Spotify Developer Dashboard.';
+      'Spotify 開発者ダッシュボードから無料の API 認証情報を取得します。';
 
   @override
-  String get setupEnableNotifications => 'Enable Notifications';
+  String get setupEnableNotifications => '通知を有効化する';
 
   @override
   String get setupProceedToNextStep => 'You can now proceed to the next step.';
@@ -795,84 +790,84 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get setupGetCredentialsFromSpotify =>
-      'Get credentials from developer.spotify.com';
+      'developer.spotify.com から認証情報を取得します';
 
   @override
-  String get dialogCancel => 'Cancel';
+  String get dialogCancel => 'キャンセル';
 
   @override
   String get dialogOk => 'OK';
 
   @override
-  String get dialogSave => 'Save';
+  String get dialogSave => '保存';
 
   @override
-  String get dialogDelete => 'Delete';
+  String get dialogDelete => '削除';
 
   @override
-  String get dialogRetry => 'Retry';
+  String get dialogRetry => '再試行';
 
   @override
-  String get dialogClose => 'Close';
+  String get dialogClose => '閉じる';
 
   @override
-  String get dialogYes => 'Yes';
+  String get dialogYes => 'はい';
 
   @override
-  String get dialogNo => 'No';
+  String get dialogNo => 'いいえ';
 
   @override
-  String get dialogClear => 'Clear';
+  String get dialogClear => '消去';
 
   @override
-  String get dialogConfirm => 'Confirm';
+  String get dialogConfirm => '続行';
 
   @override
-  String get dialogDone => 'Done';
+  String get dialogDone => '完了';
 
   @override
-  String get dialogImport => 'Import';
+  String get dialogImport => 'インポート';
 
   @override
-  String get dialogDiscard => 'Discard';
+  String get dialogDiscard => '破棄';
 
   @override
-  String get dialogRemove => 'Remove';
+  String get dialogRemove => '削除';
 
   @override
-  String get dialogUninstall => 'Uninstall';
+  String get dialogUninstall => 'アンインストール';
 
   @override
-  String get dialogDiscardChanges => 'Discard Changes?';
+  String get dialogDiscardChanges => '変更を破棄しますか？';
 
   @override
   String get dialogUnsavedChanges =>
       'You have unsaved changes. Do you want to discard them?';
 
   @override
-  String get dialogDownloadFailed => 'Download Failed';
+  String get dialogDownloadFailed => 'ダウンロードに失敗しました';
 
   @override
-  String get dialogTrackLabel => 'Track:';
+  String get dialogTrackLabel => 'トラック:';
 
   @override
-  String get dialogArtistLabel => 'Artist:';
+  String get dialogArtistLabel => 'アーティスト:';
 
   @override
-  String get dialogErrorLabel => 'Error:';
+  String get dialogErrorLabel => 'エラー:';
 
   @override
-  String get dialogClearAll => 'Clear All';
+  String get dialogClearAll => 'すべて消去';
 
   @override
   String get dialogClearAllDownloads =>
       'Are you sure you want to clear all downloads?';
 
   @override
-  String get dialogRemoveFromDevice => 'Remove from device?';
+  String get dialogRemoveFromDevice => 'デバイスから削除しますか？';
 
   @override
-  String get dialogRemoveExtension => 'Remove Extension';
+  String get dialogRemoveExtension => '拡張を削除';
 
   @override
   String get dialogRemoveExtensionMessage =>
@@ -887,14 +882,14 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get dialogClearHistoryTitle => 'Clear History';
+  String get dialogClearHistoryTitle => '履歴を消去';
 
   @override
   String get dialogClearHistoryMessage =>
       'Are you sure you want to clear all download history? This cannot be undone.';
 
   @override
-  String get dialogDeleteSelectedTitle => 'Delete Selected';
+  String get dialogDeleteSelectedTitle => '選択済みを削除';
 
   @override
   String dialogDeleteSelectedMessage(int count) {
@@ -922,88 +917,87 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String snackbarAddedToQueue(String trackName) {
-    return 'Added \"$trackName\" to queue';
+    return '「$trackName」をキューに追加しました';
   }
 
   @override
   String snackbarAddedTracksToQueue(int count) {
-    return 'Added $count tracks to queue';
+    return '$count 個のトラックをキューに追加しました';
   }
 
   @override
   String snackbarAlreadyDownloaded(String trackName) {
-    return '\"$trackName\" already downloaded';
+    return '「$trackName」は既にダウンロードされています';
   }
 
   @override
-  String get snackbarHistoryCleared => 'History cleared';
+  String get snackbarHistoryCleared => '履歴を消去しました';
 
   @override
-  String get snackbarCredentialsSaved => 'Credentials saved';
+  String get snackbarCredentialsSaved => '認証情報を保存しました';
 
   @override
-  String get snackbarCredentialsCleared => 'Credentials cleared';
+  String get snackbarCredentialsCleared => '認証情報を消去しました';
 
   @override
   String snackbarDeletedTracks(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'tracks',
-      one: 'track',
+      other: '個のトラック',
+      one: '個のトラック',
     );
-    return 'Deleted $count $_temp0';
+    return '$count $_temp0を削除';
   }
 
   @override
   String snackbarCannotOpenFile(String error) {
-    return 'Cannot open file: $error';
+    return 'ファイルが開けません: $error';
   }
 
   @override
-  String get snackbarFillAllFields => 'Please fill all fields';
+  String get snackbarFillAllFields => 'すべての項目を入力してください';
 
   @override
-  String get snackbarViewQueue => 'View Queue';
+  String get snackbarViewQueue => 'キューを表示';
 
   @override
   String snackbarFailedToLoad(String error) {
-    return 'Failed to load: $error';
+    return '読み込みに失敗: $error';
   }
 
   @override
   String snackbarUrlCopied(String platform) {
-    return '$platform URL copied to clipboard';
+    return '$platform の URL をクリップボードにコピーしました';
   }
 
   @override
-  String get snackbarFileNotFound => 'File not found';
+  String get snackbarFileNotFound => 'ファイルがありません';
 
   @override
-  String get snackbarSelectExtFile => 'Please select a .spotiflac-ext file';
+  String get snackbarSelectExtFile => '.spotiflac-ext ファイルを選択してください';
 
   @override
-  String get snackbarProviderPrioritySaved => 'Provider priority saved';
+  String get snackbarProviderPrioritySaved => 'プロバイダーの優先度を保存しました';
 
   @override
-  String get snackbarMetadataProviderSaved =>
-      'Metadata provider priority saved';
+  String get snackbarMetadataProviderSaved => 'メタデータプロバイダーの優先度を保存しました';
 
   @override
   String snackbarExtensionInstalled(String extensionName) {
-    return '$extensionName installed.';
+    return '$extensionName をインストールしました。';
   }
 
   @override
   String snackbarExtensionUpdated(String extensionName) {
-    return '$extensionName updated.';
+    return '$extensionName を更新しました。';
   }
 
   @override
-  String get snackbarFailedToInstall => 'Failed to install extension';
+  String get snackbarFailedToInstall => '拡張のインストールに失敗しました';
 
   @override
-  String get snackbarFailedToUpdate => 'Failed to update extension';
+  String get snackbarFailedToUpdate => '拡張の更新に失敗しました';
 
   @override
   String get errorRateLimited => 'レート制限';
@@ -1018,143 +1012,143 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get errorNoTracksFound => 'No tracks found';
+  String get errorNoTracksFound => 'トラックがありません';
 
   @override
   String errorMissingExtensionSource(String item) {
-    return 'Cannot load $item: missing extension source';
+    return '$item を読み込めません: 拡張ソースがありません';
   }
 
   @override
-  String get statusQueued => 'Queued';
+  String get statusQueued => 'キュー済み';
 
   @override
-  String get statusDownloading => 'Downloading';
+  String get statusDownloading => 'ダウンロード中';
 
   @override
-  String get statusFinalizing => 'Finalizing';
+  String get statusFinalizing => '終了処理中';
 
   @override
-  String get statusCompleted => 'Completed';
+  String get statusCompleted => '完了しました';
 
   @override
-  String get statusFailed => 'Failed';
+  String get statusFailed => '失敗しました';
 
   @override
-  String get statusSkipped => 'Skipped';
+  String get statusSkipped => 'スキップしました';
 
   @override
-  String get statusPaused => 'Paused';
+  String get statusPaused => '一時停止中';
 
   @override
-  String get actionPause => 'Pause';
+  String get actionPause => '一時停止';
 
   @override
-  String get actionResume => 'Resume';
+  String get actionResume => '再開';
 
   @override
-  String get actionCancel => 'Cancel';
+  String get actionCancel => 'キャンセル';
 
   @override
-  String get actionStop => 'Stop';
+  String get actionStop => '停止';
 
   @override
-  String get actionSelect => 'Select';
+  String get actionSelect => '選択';
 
   @override
-  String get actionSelectAll => 'Select All';
+  String get actionSelectAll => 'すべて選択';
 
   @override
-  String get actionDeselect => 'Deselect';
+  String get actionDeselect => '選択を解除';
 
   @override
-  String get actionPaste => 'Paste';
+  String get actionPaste => '貼り付け';
 
   @override
-  String get actionImportCsv => 'Import CSV';
+  String get actionImportCsv => 'CSV をインポート';
 
   @override
-  String get actionRemoveCredentials => 'Remove Credentials';
+  String get actionRemoveCredentials => '認証情報を削除';
 
   @override
-  String get actionSaveCredentials => 'Save Credentials';
+  String get actionSaveCredentials => '認証情報を保存';
 
   @override
   String selectionSelected(int count) {
-    return '$count selected';
+    return '$count 個を選択済み';
   }
 
   @override
-  String get selectionAllSelected => 'All tracks selected';
+  String get selectionAllSelected => 'すべてのトラックを選択済み';
 
   @override
-  String get selectionTapToSelect => 'Tap tracks to select';
+  String get selectionTapToSelect => 'トラックをタップで選択';
 
   @override
   String selectionDeleteTracks(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'tracks',
-      one: 'track',
+      other: '個のトラック',
+      one: '個のトラック',
     );
-    return 'Delete $count $_temp0';
+    return '$count $_temp0を削除';
   }
 
   @override
-  String get selectionSelectToDelete => 'Select tracks to delete';
+  String get selectionSelectToDelete => 'トラックを選択で削除';
 
   @override
   String progressFetchingMetadata(int current, int total) {
-    return 'Fetching metadata... $current/$total';
+    return 'メタデータを取得中... $current/$total';
   }
 
   @override
-  String get progressReadingCsv => 'Reading CSV...';
+  String get progressReadingCsv => 'CSV を読み取り中...';
 
   @override
-  String get searchSongs => 'Songs';
+  String get searchSongs => '曲';
 
   @override
-  String get searchArtists => 'Artists';
+  String get searchArtists => 'アーティスト';
 
   @override
-  String get searchAlbums => 'Albums';
+  String get searchAlbums => 'アルバム';
 
   @override
-  String get searchPlaylists => 'Playlists';
+  String get searchPlaylists => 'プレイリスト';
 
   @override
-  String get tooltipPlay => 'Play';
+  String get tooltipPlay => '再生';
 
   @override
-  String get tooltipCancel => 'Cancel';
+  String get tooltipCancel => 'キャンセル';
 
   @override
-  String get tooltipStop => 'Stop';
+  String get tooltipStop => '停止';
 
   @override
-  String get tooltipRetry => 'Retry';
+  String get tooltipRetry => '再試行';
 
   @override
-  String get tooltipRemove => 'Remove';
+  String get tooltipRemove => '削除';
 
   @override
-  String get tooltipClear => 'Clear';
+  String get tooltipClear => '消去';
 
   @override
-  String get tooltipPaste => 'Paste';
+  String get tooltipPaste => '貼り付け';
 
   @override
-  String get filenameFormat => 'Filename Format';
+  String get filenameFormat => 'ファイル名の形式';
 
   @override
   String filenameFormatPreview(String preview) {
-    return 'Preview: $preview';
+    return 'プレビュー: $preview';
   }
 
   @override
-  String get filenameAvailablePlaceholders => 'Available placeholders:';
+  String get filenameAvailablePlaceholders => '利用可能なプレースホルダー:';
 
   @override
   String filenameHint(Object artist, Object title) {
@@ -1162,26 +1156,25 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get folderOrganization => 'Folder Organization';
+  String get folderOrganization => 'フォルダ構成';
 
   @override
-  String get folderOrganizationNone => 'No organization';
+  String get folderOrganizationNone => '構成がありません';
 
   @override
-  String get folderOrganizationByArtist => 'By Artist';
+  String get folderOrganizationByArtist => 'アーティスト別';
 
   @override
-  String get folderOrganizationByAlbum => 'By Album';
+  String get folderOrganizationByAlbum => 'アルバム別';
 
   @override
-  String get folderOrganizationByArtistAlbum => 'Artist/Album';
+  String get folderOrganizationByArtistAlbum => 'アーティスト/アルバム';
 
   @override
-  String get folderOrganizationDescription =>
-      'Organize downloaded files into folders';
+  String get folderOrganizationDescription => 'ダウンロードしたファイルをフォルダに整理する';
 
   @override
-  String get folderOrganizationNoneSubtitle => 'All files in download folder';
+  String get folderOrganizationNoneSubtitle => 'ダウンロードフォルダ内のすべてのファイル';
 
   @override
   String get folderOrganizationByArtistSubtitle =>
@@ -1196,60 +1189,60 @@ class AppLocalizationsJa extends AppLocalizations {
       'Nested folders for artist and album';
 
   @override
-  String get updateAvailable => 'Update Available';
+  String get updateAvailable => '更新が利用可能です';
 
   @override
   String updateNewVersion(String version) {
-    return 'Version $version is available';
+    return 'バージョン $version が利用可能です';
   }
 
   @override
   String get updateDownload => 'ダウンロード';
 
   @override
-  String get updateLater => 'Later';
+  String get updateLater => '後で';
 
   @override
-  String get updateChangelog => 'Changelog';
+  String get updateChangelog => '更新履歴';
 
   @override
-  String get updateStartingDownload => 'Starting download...';
+  String get updateStartingDownload => 'ダウンロードを開始中...';
 
   @override
-  String get updateDownloadFailed => 'Download failed';
+  String get updateDownloadFailed => 'ダウンロードに失敗しました';
 
   @override
-  String get updateFailedMessage => 'Failed to download update';
+  String get updateFailedMessage => '更新のダウンロードに失敗しました';
 
   @override
-  String get updateNewVersionReady => 'A new version is ready';
+  String get updateNewVersionReady => '新しいバージョンの準備ができています';
 
   @override
   String get updateCurrent => '現在';
 
   @override
-  String get updateNew => 'New';
+  String get updateNew => '新着';
 
   @override
-  String get updateDownloading => 'Downloading...';
+  String get updateDownloading => 'ダウンロード中...';
 
   @override
-  String get updateWhatsNew => 'What\'s New';
+  String get updateWhatsNew => '新着情報';
 
   @override
-  String get updateDownloadInstall => 'Download & Install';
+  String get updateDownloadInstall => 'ダウンロードとインストール';
 
   @override
-  String get updateDontRemind => 'Don\'t remind';
+  String get updateDontRemind => '通知しない';
 
   @override
-  String get providerPriority => 'Provider Priority';
+  String get providerPriority => 'プロバイダーの優先度';
 
   @override
-  String get providerPrioritySubtitle => 'Drag to reorder download providers';
+  String get providerPrioritySubtitle => 'ドラッグでダウンロードプロバイダーを並べ替え';
 
   @override
-  String get providerPriorityTitle => 'Provider Priority';
+  String get providerPriorityTitle => 'プロバイダーの優先度';
 
   @override
   String get providerPriorityDescription =>
@@ -1260,20 +1253,20 @@ class AppLocalizationsJa extends AppLocalizations {
       'If a track is not available on the first provider, the app will automatically try the next one.';
 
   @override
-  String get providerBuiltIn => 'Built-in';
+  String get providerBuiltIn => '内蔵';
 
   @override
-  String get providerExtension => 'Extension';
+  String get providerExtension => '拡張';
 
   @override
-  String get metadataProviderPriority => 'Metadata Provider Priority';
+  String get metadataProviderPriority => 'メタデータプロバイダーの優先度';
 
   @override
   String get metadataProviderPrioritySubtitle =>
       'Order used when fetching track metadata';
 
   @override
-  String get metadataProviderPriorityTitle => 'Metadata Priority';
+  String get metadataProviderPriorityTitle => 'メタデータの優先度';
 
   @override
   String get metadataProviderPriorityDescription =>
@@ -1284,49 +1277,49 @@ class AppLocalizationsJa extends AppLocalizations {
       'Deezer has no rate limits and is recommended as primary. Spotify may rate limit after many requests.';
 
   @override
-  String get metadataNoRateLimits => 'No rate limits';
+  String get metadataNoRateLimits => 'レート制限はありません';
 
   @override
   String get metadataMayRateLimit => 'May rate limit';
 
   @override
-  String get logTitle => 'Logs';
+  String get logTitle => 'ログ';
 
   @override
-  String get logCopy => 'Copy Logs';
+  String get logCopy => 'ログをコピー';
 
   @override
-  String get logClear => 'Clear Logs';
+  String get logClear => 'ログを消去';
 
   @override
-  String get logShare => 'Share Logs';
+  String get logShare => 'ログを共有';
 
   @override
-  String get logEmpty => 'No logs yet';
+  String get logEmpty => 'まだログはありません';
 
   @override
-  String get logCopied => 'Logs copied to clipboard';
+  String get logCopied => 'ログをクリップボードにコピーしました';
 
   @override
-  String get logSearchHint => 'Search logs...';
+  String get logSearchHint => 'ログを検索...';
 
   @override
-  String get logFilterLevel => 'Level';
+  String get logFilterLevel => 'レベル';
 
   @override
-  String get logFilterSection => 'Filter';
+  String get logFilterSection => 'フィルター';
 
   @override
-  String get logShareLogs => 'Share logs';
+  String get logShareLogs => 'ログを共有';
 
   @override
-  String get logClearLogs => 'Clear logs';
+  String get logClearLogs => 'ログを消去';
 
   @override
-  String get logClearLogsTitle => 'Clear Logs';
+  String get logClearLogsTitle => 'ログを消去';
 
   @override
-  String get logClearLogsMessage => 'Are you sure you want to clear all logs?';
+  String get logClearLogsMessage => 'すべてのログを消去してもよろしいですか？';
 
   @override
   String get logIspBlocking => 'ISP のブロックを検出しました';
@@ -1338,40 +1331,40 @@ class AppLocalizationsJa extends AppLocalizations {
   String get logNetworkError => 'ネットワークエラー';
 
   @override
-  String get logTrackNotFound => 'TRACK NOT FOUND';
+  String get logTrackNotFound => 'トラックがありません';
 
   @override
   String get logFilterBySeverity => 'Filter logs by severity';
 
   @override
-  String get logNoLogsYet => 'No logs yet';
+  String get logNoLogsYet => 'まだログはありません';
 
   @override
   String get logNoLogsYetSubtitle => 'Logs will appear here as you use the app';
 
   @override
-  String get logIssueSummary => 'Issue Summary';
+  String get logIssueSummary => '問題の概要';
 
   @override
   String get logIspBlockingDescription =>
-      'Your ISP may be blocking access to download services';
+      'ISP がダウンロードサービスのアクセスをブロックしている可能性があります';
 
   @override
   String get logIspBlockingSuggestion =>
-      'Try using a VPN or change DNS to 1.1.1.1 or 8.8.8.8';
+      'VPN を使用するか DNS を 1.1.1.1 または 8.8.8.8 に変更をお試しください';
 
   @override
-  String get logRateLimitedDescription => 'Too many requests to the service';
+  String get logRateLimitedDescription => 'サービスへのリクエストが多すぎます';
 
   @override
   String get logRateLimitedSuggestion =>
       'Wait a few minutes before trying again';
 
   @override
-  String get logNetworkErrorDescription => 'Connection issues detected';
+  String get logNetworkErrorDescription => '接続の問題が検出されました';
 
   @override
-  String get logNetworkErrorSuggestion => 'Check your internet connection';
+  String get logNetworkErrorSuggestion => 'インターネット接続を確認してください';
 
   @override
   String get logTrackNotFoundDescription =>
@@ -1383,81 +1376,81 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String logTotalErrors(int count) {
-    return 'Total errors: $count';
+    return 'エラーの合計: $count';
   }
 
   @override
   String logAffected(String domains) {
-    return 'Affected: $domains';
+    return '影響: $domains';
   }
 
   @override
   String logEntriesFiltered(int count) {
-    return 'Entries ($count filtered)';
+    return 'エントリー ($count 個をフィルター済み)';
   }
 
   @override
   String logEntries(int count) {
-    return 'Entries ($count)';
+    return 'エントリー ($count)';
   }
 
   @override
-  String get credentialsTitle => 'Spotify Credentials';
+  String get credentialsTitle => 'Spotify の認証情報';
 
   @override
   String get credentialsDescription =>
       'Enter your Client ID and Secret to use your own Spotify application quota.';
 
   @override
-  String get credentialsClientId => 'Client ID';
+  String get credentialsClientId => 'クライアント ID';
 
   @override
-  String get credentialsClientIdHint => 'Paste Client ID';
+  String get credentialsClientIdHint => 'クライアント ID を貼り付け';
 
   @override
-  String get credentialsClientSecret => 'Client Secret';
+  String get credentialsClientSecret => 'クライアントシークレット';
 
   @override
-  String get credentialsClientSecretHint => 'Paste Client Secret';
+  String get credentialsClientSecretHint => 'クライアントシークレットを貼り付け';
 
   @override
-  String get channelStable => 'Stable';
+  String get channelStable => '安定版';
 
   @override
-  String get channelPreview => 'Preview';
+  String get channelPreview => 'プレビュー';
 
   @override
-  String get sectionSearchSource => 'Search Source';
+  String get sectionSearchSource => '検索ソース';
 
   @override
-  String get sectionDownload => 'Download';
+  String get sectionDownload => 'ダウンロード';
 
   @override
-  String get sectionPerformance => 'Performance';
+  String get sectionPerformance => 'パフォーマンス';
 
   @override
-  String get sectionApp => 'App';
+  String get sectionApp => 'アプリ';
 
   @override
-  String get sectionData => 'Data';
+  String get sectionData => 'データ';
 
   @override
-  String get sectionDebug => 'Debug';
+  String get sectionDebug => 'デバッグ';
 
   @override
-  String get sectionService => 'Service';
+  String get sectionService => 'サービス';
 
   @override
-  String get sectionAudioQuality => 'Audio Quality';
+  String get sectionAudioQuality => 'オーディオ品質';
 
   @override
-  String get sectionFileSettings => 'File Settings';
+  String get sectionFileSettings => 'ファイル設定';
 
   @override
-  String get sectionLyrics => 'Lyrics';
+  String get sectionLyrics => '歌詞';
 
   @override
-  String get lyricsMode => 'Lyrics Mode';
+  String get lyricsMode => '歌詞モード';
 
   @override
   String get lyricsModeDescription =>
@@ -1467,66 +1460,66 @@ class AppLocalizationsJa extends AppLocalizations {
   String get lyricsModeEmbed => 'Embed in file';
 
   @override
-  String get lyricsModeEmbedSubtitle => 'Lyrics stored inside FLAC metadata';
+  String get lyricsModeEmbedSubtitle => 'FLAC メタデータに保存された歌詞';
 
   @override
-  String get lyricsModeExternal => 'External .lrc file';
+  String get lyricsModeExternal => '外部 .lrc ファイル';
 
   @override
   String get lyricsModeExternalSubtitle =>
       'Separate .lrc file for players like Samsung Music';
 
   @override
-  String get lyricsModeBoth => 'Both';
+  String get lyricsModeBoth => '両方';
 
   @override
   String get lyricsModeBothSubtitle => 'Embed and save .lrc file';
 
   @override
-  String get sectionColor => 'Color';
+  String get sectionColor => 'カラー';
 
   @override
-  String get sectionTheme => 'Theme';
+  String get sectionTheme => 'テーマ';
 
   @override
-  String get sectionLayout => 'Layout';
+  String get sectionLayout => 'レイアウト';
 
   @override
-  String get sectionLanguage => 'Language';
+  String get sectionLanguage => '言語';
 
   @override
-  String get appearanceLanguage => 'App Language';
+  String get appearanceLanguage => 'アプリの言語';
 
   @override
-  String get appearanceLanguageSubtitle => 'Choose your preferred language';
+  String get appearanceLanguageSubtitle => 'お好みの言語を選択してください';
 
   @override
-  String get settingsAppearanceSubtitle => 'Theme, colors, display';
+  String get settingsAppearanceSubtitle => 'テーマ、カラー、画面';
 
   @override
-  String get settingsDownloadSubtitle => 'Service, quality, filename format';
+  String get settingsDownloadSubtitle => 'サービス、品質、ファイル名、形式';
 
   @override
   String get settingsOptionsSubtitle => 'Fallback, lyrics, cover art, updates';
 
   @override
-  String get settingsExtensionsSubtitle => 'Manage download providers';
+  String get settingsExtensionsSubtitle => 'ダウンロードプロバイダーを管理';
 
   @override
-  String get settingsLogsSubtitle => 'View app logs for debugging';
+  String get settingsLogsSubtitle => 'デバッグのためのアプリログを表示';
 
   @override
-  String get loadingSharedLink => 'Loading shared link...';
+  String get loadingSharedLink => '共有リンクを読み込み中...';
 
   @override
   String get pressBackAgainToExit => 'Press back again to exit';
 
   @override
-  String get tracksHeader => 'Tracks';
+  String get tracksHeader => 'トラック';
 
   @override
   String downloadAllCount(int count) {
-    return 'Download All ($count)';
+    return 'すべてダウンロード ($count)';
   }
 
   @override
@@ -1534,23 +1527,23 @@ class AppLocalizationsJa extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count tracks',
-      one: '1 track',
+      other: '$count 個のトラック',
+      one: '1 個のトラック',
     );
     return '$_temp0';
   }
 
   @override
-  String get trackCopyFilePath => 'Copy file path';
+  String get trackCopyFilePath => 'ファイルパスをコピー';
 
   @override
-  String get trackRemoveFromDevice => 'Remove from device';
+  String get trackRemoveFromDevice => 'デバイスから削除';
 
   @override
-  String get trackLoadLyrics => 'Load Lyrics';
+  String get trackLoadLyrics => '歌詞を読み込み';
 
   @override
-  String get trackMetadata => 'Metadata';
+  String get trackMetadata => 'メタデータ';
 
   @override
   String get trackFileInfo => 'ファイル情報';
@@ -1571,52 +1564,52 @@ class AppLocalizationsJa extends AppLocalizations {
   String get trackTrackName => 'トラック名';
 
   @override
-  String get trackArtist => 'Artist';
+  String get trackArtist => 'アーティスト';
 
   @override
-  String get trackAlbumArtist => 'Album artist';
+  String get trackAlbumArtist => 'アルバムアーティスト';
 
   @override
-  String get trackAlbum => 'Album';
+  String get trackAlbum => 'アルバム';
 
   @override
-  String get trackTrackNumber => 'Track number';
+  String get trackTrackNumber => 'トラック番号';
 
   @override
-  String get trackDiscNumber => 'Disc number';
+  String get trackDiscNumber => 'ディスク番号';
 
   @override
-  String get trackDuration => 'Duration';
+  String get trackDuration => '再生時間';
 
   @override
-  String get trackAudioQuality => 'Audio quality';
+  String get trackAudioQuality => 'オーディオ品質';
 
   @override
-  String get trackReleaseDate => 'Release date';
+  String get trackReleaseDate => 'リリース日';
 
   @override
-  String get trackGenre => 'Genre';
+  String get trackGenre => 'ジャンル';
 
   @override
-  String get trackLabel => 'Label';
+  String get trackLabel => 'レーベル';
 
   @override
-  String get trackCopyright => 'Copyright';
+  String get trackCopyright => '著作権';
 
   @override
-  String get trackDownloaded => 'Downloaded';
+  String get trackDownloaded => 'ダウンロード済み';
 
   @override
-  String get trackCopyLyrics => 'Copy lyrics';
+  String get trackCopyLyrics => '歌詞をコピー';
 
   @override
-  String get trackLyricsNotAvailable => 'Lyrics not available for this track';
+  String get trackLyricsNotAvailable => 'このトラックの歌詞は利用できません';
 
   @override
-  String get trackLyricsTimeout => 'Request timed out. Try again later.';
+  String get trackLyricsTimeout => 'リクエストがタイムアウトしました。後ほどお試しください。';
 
   @override
-  String get trackLyricsLoadFailed => 'Failed to load lyrics';
+  String get trackLyricsLoadFailed => '歌詞の読み込みに失敗しました';
 
   @override
   String get trackEmbedLyrics => 'Embed Lyrics';
@@ -1628,10 +1621,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get trackInstrumental => 'Instrumental track';
 
   @override
-  String get trackCopiedToClipboard => 'Copied to clipboard';
+  String get trackCopiedToClipboard => 'クリップボードにコピーしました';
 
   @override
-  String get trackDeleteConfirmTitle => 'Remove from device?';
+  String get trackDeleteConfirmTitle => 'デバイスから削除しますか？';
 
   @override
   String get trackDeleteConfirmMessage =>
@@ -1639,74 +1632,74 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String trackCannotOpen(String message) {
-    return 'Cannot open: $message';
+    return '開けません: $message';
   }
 
   @override
-  String get dateToday => 'Today';
+  String get dateToday => '今日';
 
   @override
-  String get dateYesterday => 'Yesterday';
+  String get dateYesterday => '昨日';
 
   @override
   String dateDaysAgo(int count) {
-    return '$count days ago';
+    return '$count 日前';
   }
 
   @override
   String dateWeeksAgo(int count) {
-    return '$count weeks ago';
+    return '$count 週間前';
   }
 
   @override
   String dateMonthsAgo(int count) {
-    return '$count months ago';
+    return '$count ヶ月前';
   }
 
   @override
   String get concurrentSequential => 'Sequential';
 
   @override
-  String get concurrentParallel2 => '2 Parallel';
+  String get concurrentParallel2 => '2 並列';
 
   @override
-  String get concurrentParallel3 => '3 Parallel';
+  String get concurrentParallel3 => '3 並列';
 
   @override
-  String get tapToSeeError => 'Tap to see error details';
+  String get tapToSeeError => 'タップでエラーの詳細を表示';
 
   @override
-  String get storeFilterAll => 'All';
+  String get storeFilterAll => 'すべて';
 
   @override
-  String get storeFilterMetadata => 'Metadata';
+  String get storeFilterMetadata => 'メタデータ';
 
   @override
-  String get storeFilterDownload => 'Download';
+  String get storeFilterDownload => 'ダウンロード';
 
   @override
-  String get storeFilterUtility => 'Utility';
+  String get storeFilterUtility => 'ユーティリティ';
 
   @override
-  String get storeFilterLyrics => 'Lyrics';
+  String get storeFilterLyrics => '歌詞';
 
   @override
-  String get storeFilterIntegration => 'Integration';
+  String get storeFilterIntegration => '統合';
 
   @override
-  String get storeClearFilters => 'Clear filters';
+  String get storeClearFilters => 'フィルターを消去';
 
   @override
-  String get storeNoResults => 'No extensions found';
+  String get storeNoResults => '拡張がありません';
 
   @override
-  String get extensionProviderPriority => 'Provider Priority';
+  String get extensionProviderPriority => 'プロバイダーの優先度';
 
   @override
-  String get extensionInstallButton => 'Install Extension';
+  String get extensionInstallButton => '拡張をインストール';
 
   @override
-  String get extensionDefaultProvider => 'Default (Deezer/Spotify)';
+  String get extensionDefaultProvider => 'デフォルト (Deezer/Spotify)';
 
   @override
   String get extensionDefaultProviderSubtitle => '内蔵の検索を使用する';
@@ -1721,31 +1714,31 @@ class AppLocalizationsJa extends AppLocalizations {
   String get extensionError => 'エラー';
 
   @override
-  String get extensionCapabilities => 'Capabilities';
+  String get extensionCapabilities => '機能';
 
   @override
-  String get extensionMetadataProvider => 'Metadata Provider';
+  String get extensionMetadataProvider => 'メタデータのプロバイダー';
 
   @override
-  String get extensionDownloadProvider => 'Download Provider';
+  String get extensionDownloadProvider => 'ダウンロードのプロバイダー';
 
   @override
-  String get extensionLyricsProvider => 'Lyrics Provider';
+  String get extensionLyricsProvider => '歌詞のプロバイダー';
 
   @override
-  String get extensionUrlHandler => 'URL Handler';
+  String get extensionUrlHandler => 'URL ハンドラ';
 
   @override
-  String get extensionQualityOptions => 'Quality Options';
+  String get extensionQualityOptions => '品質のオプション';
 
   @override
-  String get extensionPostProcessingHooks => 'Post-Processing Hooks';
+  String get extensionPostProcessingHooks => 'ポストプロセスフック';
 
   @override
-  String get extensionPermissions => 'Permissions';
+  String get extensionPermissions => '権限';
 
   @override
-  String get extensionSettings => 'Settings';
+  String get extensionSettings => '設定';
 
   @override
   String get extensionRemoveButton => '拡張を削除';
@@ -1760,25 +1753,25 @@ class AppLocalizationsJa extends AppLocalizations {
   String get extensionCustomTrackMatching => 'カスタムトラックマッチング';
 
   @override
-  String get extensionPostProcessing => 'Post-Processing';
+  String get extensionPostProcessing => 'ポストプロセス';
 
   @override
   String extensionHooksAvailable(int count) {
-    return '$count hook(s) available';
+    return '$count 個のフックが利用可能です';
   }
 
   @override
   String extensionPatternsCount(int count) {
-    return '$count pattern(s)';
+    return '$count 個のパターン';
   }
 
   @override
   String extensionStrategy(String strategy) {
-    return 'Strategy: $strategy';
+    return 'ストラテジー: $strategy';
   }
 
   @override
-  String get extensionsProviderPrioritySection => 'Provider Priority';
+  String get extensionsProviderPrioritySection => 'プロバイダーの優先度';
 
   @override
   String get extensionsInstalledSection => 'インストール済みの拡張';
@@ -1788,54 +1781,50 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get extensionsNoExtensionsSubtitle =>
-      'Install .spotiflac-ext files to add new providers';
+      '新しいプロバイダーを追加するには .spotiflac-ext ファイルをインストールします';
 
   @override
   String get extensionsInstallButton => '拡張をインストール';
 
   @override
   String get extensionsInfoTip =>
-      'Extensions can add new metadata and download providers. Only install extensions from trusted sources.';
+      '拡張は新しいメタデータとダウンロードプロバイダーを追加することがあります。信頼できるソースからの拡張のみをインストールしてください。';
 
   @override
-  String get extensionsInstalledSuccess => 'Extension installed successfully';
+  String get extensionsInstalledSuccess => '拡張のインストールが成功しました';
 
   @override
-  String get extensionsDownloadPriority => 'Download Priority';
+  String get extensionsDownloadPriority => 'ダウンロードの優先度';
 
   @override
-  String get extensionsDownloadPrioritySubtitle => 'Set download service order';
+  String get extensionsDownloadPrioritySubtitle => 'ダウンロードサービスの順序を設定';
 
   @override
-  String get extensionsNoDownloadProvider =>
-      'No extensions with download provider';
+  String get extensionsNoDownloadProvider => 'ダウンロードプロバイダーの拡張はありません';
 
   @override
-  String get extensionsMetadataPriority => 'Metadata Priority';
+  String get extensionsMetadataPriority => 'メタデータの優先度';
 
   @override
-  String get extensionsMetadataPrioritySubtitle =>
-      'Set search & metadata source order';
+  String get extensionsMetadataPrioritySubtitle => '検索とメタデータソースの順序を設定';
 
   @override
-  String get extensionsNoMetadataProvider =>
-      'No extensions with metadata provider';
+  String get extensionsNoMetadataProvider => 'メタデータプロバイダーの拡張はありません';
 
   @override
-  String get extensionsSearchProvider => 'Search Provider';
+  String get extensionsSearchProvider => '検索のプロバイダー';
 
   @override
-  String get extensionsNoCustomSearch => 'No extensions with custom search';
+  String get extensionsNoCustomSearch => 'カスタム検索の拡張はありません';
 
   @override
-  String get extensionsSearchProviderDescription =>
-      'Choose which service to use for searching tracks';
+  String get extensionsSearchProviderDescription => 'トラックの検索に使用するサービスを選択してください';
 
   @override
-  String get extensionsCustomSearch => 'Custom search';
+  String get extensionsCustomSearch => 'カスタム検索';
 
   @override
-  String get extensionsErrorLoading => 'Error loading extension';
+  String get extensionsErrorLoading => '拡張の読み込みエラー';
 
   @override
   String get qualityFlacLossless => 'FLAC ロスレス';
@@ -1888,11 +1877,10 @@ class AppLocalizationsJa extends AppLocalizations {
       '128kbps, better quality at smaller size';
 
   @override
-  String get qualityNote =>
-      'Actual quality depends on track availability from the service';
+  String get qualityNote => '実際の品質はサービスからのトラックの可用性に依存します';
 
   @override
-  String get downloadAskBeforeDownload => 'Ask Before Download';
+  String get downloadAskBeforeDownload => 'ダウンロード前に確認する';
 
   @override
   String get downloadDirectory => 'ダウンロードディレクトリ';
@@ -1901,49 +1889,49 @@ class AppLocalizationsJa extends AppLocalizations {
   String get downloadSeparateSinglesFolder => 'シングルのフォルダを分割';
 
   @override
-  String get downloadAlbumFolderStructure => 'Album Folder Structure';
+  String get downloadAlbumFolderStructure => 'アルバムフォルダの構造';
 
   @override
-  String get downloadSaveFormat => 'Save Format';
+  String get downloadSaveFormat => '形式を保存';
 
   @override
-  String get downloadSelectService => 'Select Service';
+  String get downloadSelectService => 'サービスを選択';
 
   @override
-  String get downloadSelectQuality => 'Select Quality';
+  String get downloadSelectQuality => '品質を選択';
 
   @override
-  String get downloadFrom => 'Download From';
+  String get downloadFrom => 'ダウンロード元';
 
   @override
-  String get downloadDefaultQualityLabel => 'Default Quality';
+  String get downloadDefaultQualityLabel => 'デフォルトの品質';
 
   @override
-  String get downloadBestAvailable => 'Best available';
+  String get downloadBestAvailable => 'おすすめ';
 
   @override
-  String get folderNone => 'None';
+  String get folderNone => 'なし';
 
   @override
-  String get folderNoneSubtitle => 'Save all files directly to download folder';
+  String get folderNoneSubtitle => 'すべてのファイルをダウンロードフォルダに保存します';
 
   @override
-  String get folderArtist => 'Artist';
+  String get folderArtist => 'アーティスト';
 
   @override
-  String get folderArtistSubtitle => 'Artist Name/filename';
+  String get folderArtistSubtitle => 'アーティスト名/ファイル名';
 
   @override
-  String get folderAlbum => 'Album';
+  String get folderAlbum => 'アルバム';
 
   @override
-  String get folderAlbumSubtitle => 'Album Name/filename';
+  String get folderAlbumSubtitle => 'アルバム名/ファイル名';
 
   @override
-  String get folderArtistAlbum => 'Artist/Album';
+  String get folderArtistAlbum => 'アーティスト/アルバム';
 
   @override
-  String get folderArtistAlbumSubtitle => 'Artist Name/Album Name/filename';
+  String get folderArtistAlbumSubtitle => 'アーティスト名/アルバム名/ファイル名';
 
   @override
   String get serviceTidal => 'Tidal';
@@ -1967,7 +1955,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get appearanceAmoledDarkSubtitle => 'ピュアブラックの背景';
 
   @override
-  String get appearanceChooseAccentColor => 'Choose Accent Color';
+  String get appearanceChooseAccentColor => 'アクセントカラーを選択';
 
   @override
   String get appearanceChooseTheme => 'テーマモード';
@@ -1979,57 +1967,55 @@ class AppLocalizationsJa extends AppLocalizations {
   String get queueClearAll => 'すべて消去';
 
   @override
-  String get queueClearAllMessage =>
-      'Are you sure you want to clear all downloads?';
+  String get queueClearAllMessage => 'すべてのダウンロードを消去してもよろしいですか？';
 
   @override
-  String get queueEmpty => 'No downloads in queue';
+  String get queueEmpty => 'キューにダウンロードがありません';
 
   @override
-  String get queueEmptySubtitle => 'Add tracks from the home screen';
+  String get queueEmptySubtitle => 'ホーム画面からトラックを追加';
 
   @override
-  String get queueClearCompleted => 'Clear completed';
+  String get queueClearCompleted => '完了済みを消去';
 
   @override
-  String get queueDownloadFailed => 'Download Failed';
+  String get queueDownloadFailed => 'ダウンロードに失敗しました';
 
   @override
-  String get queueTrackLabel => 'Track:';
+  String get queueTrackLabel => 'トラック:';
 
   @override
-  String get queueArtistLabel => 'Artist:';
+  String get queueArtistLabel => 'アーティスト:';
 
   @override
-  String get queueErrorLabel => 'Error:';
+  String get queueErrorLabel => 'エラー:';
 
   @override
-  String get queueUnknownError => 'Unknown error';
+  String get queueUnknownError => '不明なエラー';
 
   @override
-  String get albumFolderArtistAlbum => 'Artist / Album';
+  String get albumFolderArtistAlbum => 'アーティスト / アルバム';
 
   @override
-  String get albumFolderArtistAlbumSubtitle => 'Albums/Artist Name/Album Name/';
+  String get albumFolderArtistAlbumSubtitle => 'アルバム/アーティスト名/アルバム名/';
 
   @override
-  String get albumFolderArtistYearAlbum => 'Artist / [Year] Album';
+  String get albumFolderArtistYearAlbum => 'アーティスト / [年] アルバム';
 
   @override
-  String get albumFolderArtistYearAlbumSubtitle =>
-      'Albums/Artist Name/[2005] Album Name/';
+  String get albumFolderArtistYearAlbumSubtitle => 'アルバム/アーティスト名/[2005] アルバム名/';
 
   @override
-  String get albumFolderAlbumOnly => 'Album Only';
+  String get albumFolderAlbumOnly => 'アルバムのみ';
 
   @override
-  String get albumFolderAlbumOnlySubtitle => 'Albums/Album Name/';
+  String get albumFolderAlbumOnlySubtitle => 'アルバム/アルバム名/';
 
   @override
-  String get albumFolderYearAlbum => '[Year] Album';
+  String get albumFolderYearAlbum => '[年] アルバム';
 
   @override
-  String get albumFolderYearAlbumSubtitle => 'Albums/[2005] Album Name/';
+  String get albumFolderYearAlbumSubtitle => 'アルバム/[2005] アルバム名/';
 
   @override
   String get albumFolderArtistAlbumSingles => 'Artist / Album + Singles';
@@ -2039,7 +2025,7 @@ class AppLocalizationsJa extends AppLocalizations {
       'Artist/Album/ and Artist/Singles/';
 
   @override
-  String get downloadedAlbumDeleteSelected => 'Delete Selected';
+  String get downloadedAlbumDeleteSelected => '選択済みを削除';
 
   @override
   String downloadedAlbumDeleteMessage(int count) {
@@ -2053,81 +2039,81 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get downloadedAlbumTracksHeader => 'Tracks';
+  String get downloadedAlbumTracksHeader => 'トラック';
 
   @override
   String downloadedAlbumDownloadedCount(int count) {
-    return '$count downloaded';
+    return '$count 個をダウンロード済み';
   }
 
   @override
   String downloadedAlbumSelectedCount(int count) {
-    return '$count selected';
+    return '$count 個を選択済み';
   }
 
   @override
-  String get downloadedAlbumAllSelected => 'All tracks selected';
+  String get downloadedAlbumAllSelected => 'すべてのトラックを選択済み';
 
   @override
-  String get downloadedAlbumTapToSelect => 'Tap tracks to select';
+  String get downloadedAlbumTapToSelect => 'トラックをタップで選択';
 
   @override
   String downloadedAlbumDeleteCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'tracks',
-      one: 'track',
+      other: '個のトラック',
+      one: '個のトラック',
     );
-    return 'Delete $count $_temp0';
+    return '$count $_temp0を削除';
   }
 
   @override
-  String get downloadedAlbumSelectToDelete => 'Select tracks to delete';
+  String get downloadedAlbumSelectToDelete => 'トラックを選択で削除';
 
   @override
   String downloadedAlbumDiscHeader(int discNumber) {
-    return 'Disc $discNumber';
+    return 'ディスク $discNumber';
   }
 
   @override
-  String get utilityFunctions => 'Utility Functions';
+  String get utilityFunctions => 'ユーティリティ機能';
 
   @override
-  String get recentTypeArtist => 'Artist';
+  String get recentTypeArtist => 'アーティスト';
 
   @override
-  String get recentTypeAlbum => 'Album';
+  String get recentTypeAlbum => 'アルバム';
 
   @override
-  String get recentTypeSong => 'Song';
+  String get recentTypeSong => '曲';
 
   @override
-  String get recentTypePlaylist => 'Playlist';
+  String get recentTypePlaylist => 'プレイリスト';
 
   @override
   String recentPlaylistInfo(String name) {
-    return 'Playlist: $name';
+    return 'プレイリスト: $name';
   }
 
   @override
   String errorGeneric(String message) {
-    return 'Error: $message';
+    return 'エラー: $message';
   }
 
   @override
-  String get discographyDownload => 'Download Discography';
+  String get discographyDownload => 'ディスコグラフィをダウンロード';
 
   @override
-  String get discographyDownloadAll => 'Download All';
+  String get discographyDownloadAll => 'すべてダウンロード';
 
   @override
   String discographyDownloadAllSubtitle(int count, int albumCount) {
-    return '$count tracks from $albumCount releases';
+    return '$albumCount 個のリリースから $count 個のトラック';
   }
 
   @override
-  String get discographyAlbumsOnly => 'Albums Only';
+  String get discographyAlbumsOnly => 'アルバムのみ';
 
   @override
   String discographyAlbumsOnlySubtitle(int count, int albumCount) {
@@ -2135,7 +2121,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get discographySinglesOnly => 'Singles & EPs Only';
+  String get discographySinglesOnly => 'シングルと EP のみ';
 
   @override
   String discographySinglesOnlySubtitle(int count, int albumCount) {
@@ -2143,14 +2129,14 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get discographySelectAlbums => 'Select Albums...';
+  String get discographySelectAlbums => 'アルバムを選択...';
 
   @override
   String get discographySelectAlbumsSubtitle =>
       'Choose specific albums or singles';
 
   @override
-  String get discographyFetchingTracks => 'Fetching tracks...';
+  String get discographyFetchingTracks => 'トラックを取得中です...';
 
   @override
   String discographyFetchingAlbum(int current, int total) {
@@ -2159,11 +2145,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String discographySelectedCount(int count) {
-    return '$count selected';
+    return '$count 個を選択済み';
   }
 
   @override
-  String get discographyDownloadSelected => 'Download Selected';
+  String get discographyDownloadSelected => '選択済みをダウンロード';
 
   @override
   String discographyAddedToQueue(int count) {
@@ -2176,8 +2162,8 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get discographyNoAlbums => 'No albums available';
+  String get discographyNoAlbums => '利用可能なアルバムがありません';
 
   @override
-  String get discographyFailedToFetch => 'Failed to fetch some albums';
+  String get discographyFailedToFetch => '一部のアルバムの取得に失敗しました';
 }

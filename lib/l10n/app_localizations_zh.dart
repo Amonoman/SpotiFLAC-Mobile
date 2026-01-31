@@ -2288,6 +2288,9 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
       'Single track downloads will appear here';
 
   @override
+  String get historySearchHint => 'Search history...';
+
+  @override
   String get settingsTitle => 'Settings';
 
   @override
@@ -2581,6 +2584,9 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
       'The talented artist who created our beautiful app logo!';
 
   @override
+  String get aboutTranslators => 'Translators';
+
+  @override
   String get aboutSpecialThanks => 'Special Thanks';
 
   @override
@@ -2603,6 +2609,21 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get aboutFeatureRequestSubtitle => 'Suggest new features for the app';
+
+  @override
+  String get aboutTelegramChannel => 'Telegram Channel';
+
+  @override
+  String get aboutTelegramChannelSubtitle => 'Announcements and updates';
+
+  @override
+  String get aboutTelegramChat => 'Telegram Community';
+
+  @override
+  String get aboutTelegramChatSubtitle => 'Chat with other users';
+
+  @override
+  String get aboutSocial => 'Social';
 
   @override
   String get aboutSupport => 'Support';
@@ -3070,6 +3091,11 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   @override
   String dialogImportPlaylistMessage(int count) {
     return 'Found $count tracks in CSV. Add them to download queue?';
+  }
+
+  @override
+  String csvImportTracks(int count) {
+    return '$count tracks from CSV';
   }
 
   @override
@@ -3606,6 +3632,35 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get sectionFileSettings => 'File Settings';
 
   @override
+  String get sectionLyrics => 'Lyrics';
+
+  @override
+  String get lyricsMode => 'Lyrics Mode';
+
+  @override
+  String get lyricsModeDescription =>
+      'Choose how lyrics are saved with your downloads';
+
+  @override
+  String get lyricsModeEmbed => 'Embed in file';
+
+  @override
+  String get lyricsModeEmbedSubtitle => 'Lyrics stored inside FLAC metadata';
+
+  @override
+  String get lyricsModeExternal => 'External .lrc file';
+
+  @override
+  String get lyricsModeExternalSubtitle =>
+      'Separate .lrc file for players like Samsung Music';
+
+  @override
+  String get lyricsModeBoth => 'Both';
+
+  @override
+  String get lyricsModeBothSubtitle => 'Embed and save .lrc file';
+
+  @override
   String get sectionColor => 'Color';
 
   @override
@@ -3718,6 +3773,15 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get trackReleaseDate => 'Release date';
 
   @override
+  String get trackGenre => 'Genre';
+
+  @override
+  String get trackLabel => 'Label';
+
+  @override
+  String get trackCopyright => 'Copyright';
+
+  @override
   String get trackDownloaded => 'Downloaded';
 
   @override
@@ -3731,6 +3795,15 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
 
   @override
   String get trackLyricsLoadFailed => 'Failed to load lyrics';
+
+  @override
+  String get trackEmbedLyrics => 'Embed Lyrics';
+
+  @override
+  String get trackLyricsEmbedded => 'Lyrics embedded successfully';
+
+  @override
+  String get trackInstrumental => 'Instrumental track';
 
   @override
   String get trackCopiedToClipboard => 'Copied to clipboard';
@@ -4105,6 +4178,13 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get albumFolderYearAlbumSubtitle => 'Albums/[2005] Album Name/';
 
   @override
+  String get albumFolderArtistAlbumSingles => 'Artist / Album + Singles';
+
+  @override
+  String get albumFolderArtistAlbumSinglesSubtitle =>
+      'Artist/Album/ and Artist/Singles/';
+
+  @override
   String get downloadedAlbumDeleteSelected => 'Delete Selected';
 
   @override
@@ -4152,6 +4232,11 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String get downloadedAlbumSelectToDelete => 'Select tracks to delete';
 
   @override
+  String downloadedAlbumDiscHeader(int discNumber) {
+    return 'Disc $discNumber';
+  }
+
+  @override
   String get utilityFunctions => 'Utility Functions';
 
   @override
@@ -4175,6 +4260,72 @@ class AppLocalizationsZhCn extends AppLocalizationsZh {
   String errorGeneric(String message) {
     return 'Error: $message';
   }
+
+  @override
+  String get discographyDownload => 'Download Discography';
+
+  @override
+  String get discographyDownloadAll => 'Download All';
+
+  @override
+  String discographyDownloadAllSubtitle(int count, int albumCount) {
+    return '$count tracks from $albumCount releases';
+  }
+
+  @override
+  String get discographyAlbumsOnly => 'Albums Only';
+
+  @override
+  String discographyAlbumsOnlySubtitle(int count, int albumCount) {
+    return '$count tracks from $albumCount albums';
+  }
+
+  @override
+  String get discographySinglesOnly => 'Singles & EPs Only';
+
+  @override
+  String discographySinglesOnlySubtitle(int count, int albumCount) {
+    return '$count tracks from $albumCount singles';
+  }
+
+  @override
+  String get discographySelectAlbums => 'Select Albums...';
+
+  @override
+  String get discographySelectAlbumsSubtitle =>
+      'Choose specific albums or singles';
+
+  @override
+  String get discographyFetchingTracks => 'Fetching tracks...';
+
+  @override
+  String discographyFetchingAlbum(int current, int total) {
+    return 'Fetching $current of $total...';
+  }
+
+  @override
+  String discographySelectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get discographyDownloadSelected => 'Download Selected';
+
+  @override
+  String discographyAddedToQueue(int count) {
+    return 'Added $count tracks to queue';
+  }
+
+  @override
+  String discographySkippedDownloaded(int added, int skipped) {
+    return '$added added, $skipped already downloaded';
+  }
+
+  @override
+  String get discographyNoAlbums => 'No albums available';
+
+  @override
+  String get discographyFailedToFetch => 'Failed to fetch some albums';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -4283,6 +4434,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
       'Single track downloads will appear here';
 
   @override
+  String get historySearchHint => 'Search history...';
+
+  @override
   String get settingsTitle => 'Settings';
 
   @override
@@ -4576,6 +4730,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
       'The talented artist who created our beautiful app logo!';
 
   @override
+  String get aboutTranslators => 'Translators';
+
+  @override
   String get aboutSpecialThanks => 'Special Thanks';
 
   @override
@@ -4598,6 +4755,21 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get aboutFeatureRequestSubtitle => 'Suggest new features for the app';
+
+  @override
+  String get aboutTelegramChannel => 'Telegram Channel';
+
+  @override
+  String get aboutTelegramChannelSubtitle => 'Announcements and updates';
+
+  @override
+  String get aboutTelegramChat => 'Telegram Community';
+
+  @override
+  String get aboutTelegramChatSubtitle => 'Chat with other users';
+
+  @override
+  String get aboutSocial => 'Social';
 
   @override
   String get aboutSupport => 'Support';
@@ -5065,6 +5237,11 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String dialogImportPlaylistMessage(int count) {
     return 'Found $count tracks in CSV. Add them to download queue?';
+  }
+
+  @override
+  String csvImportTracks(int count) {
+    return '$count tracks from CSV';
   }
 
   @override
@@ -5601,6 +5778,35 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get sectionFileSettings => 'File Settings';
 
   @override
+  String get sectionLyrics => 'Lyrics';
+
+  @override
+  String get lyricsMode => 'Lyrics Mode';
+
+  @override
+  String get lyricsModeDescription =>
+      'Choose how lyrics are saved with your downloads';
+
+  @override
+  String get lyricsModeEmbed => 'Embed in file';
+
+  @override
+  String get lyricsModeEmbedSubtitle => 'Lyrics stored inside FLAC metadata';
+
+  @override
+  String get lyricsModeExternal => 'External .lrc file';
+
+  @override
+  String get lyricsModeExternalSubtitle =>
+      'Separate .lrc file for players like Samsung Music';
+
+  @override
+  String get lyricsModeBoth => 'Both';
+
+  @override
+  String get lyricsModeBothSubtitle => 'Embed and save .lrc file';
+
+  @override
   String get sectionColor => 'Color';
 
   @override
@@ -5713,6 +5919,15 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get trackReleaseDate => 'Release date';
 
   @override
+  String get trackGenre => 'Genre';
+
+  @override
+  String get trackLabel => 'Label';
+
+  @override
+  String get trackCopyright => 'Copyright';
+
+  @override
   String get trackDownloaded => 'Downloaded';
 
   @override
@@ -5726,6 +5941,15 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get trackLyricsLoadFailed => 'Failed to load lyrics';
+
+  @override
+  String get trackEmbedLyrics => 'Embed Lyrics';
+
+  @override
+  String get trackLyricsEmbedded => 'Lyrics embedded successfully';
+
+  @override
+  String get trackInstrumental => 'Instrumental track';
 
   @override
   String get trackCopiedToClipboard => 'Copied to clipboard';
@@ -6100,6 +6324,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get albumFolderYearAlbumSubtitle => 'Albums/[2005] Album Name/';
 
   @override
+  String get albumFolderArtistAlbumSingles => 'Artist / Album + Singles';
+
+  @override
+  String get albumFolderArtistAlbumSinglesSubtitle =>
+      'Artist/Album/ and Artist/Singles/';
+
+  @override
   String get downloadedAlbumDeleteSelected => 'Delete Selected';
 
   @override
@@ -6147,6 +6378,11 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get downloadedAlbumSelectToDelete => 'Select tracks to delete';
 
   @override
+  String downloadedAlbumDiscHeader(int discNumber) {
+    return 'Disc $discNumber';
+  }
+
+  @override
   String get utilityFunctions => 'Utility Functions';
 
   @override
@@ -6170,4 +6406,70 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String errorGeneric(String message) {
     return 'Error: $message';
   }
+
+  @override
+  String get discographyDownload => 'Download Discography';
+
+  @override
+  String get discographyDownloadAll => 'Download All';
+
+  @override
+  String discographyDownloadAllSubtitle(int count, int albumCount) {
+    return '$count tracks from $albumCount releases';
+  }
+
+  @override
+  String get discographyAlbumsOnly => 'Albums Only';
+
+  @override
+  String discographyAlbumsOnlySubtitle(int count, int albumCount) {
+    return '$count tracks from $albumCount albums';
+  }
+
+  @override
+  String get discographySinglesOnly => 'Singles & EPs Only';
+
+  @override
+  String discographySinglesOnlySubtitle(int count, int albumCount) {
+    return '$count tracks from $albumCount singles';
+  }
+
+  @override
+  String get discographySelectAlbums => 'Select Albums...';
+
+  @override
+  String get discographySelectAlbumsSubtitle =>
+      'Choose specific albums or singles';
+
+  @override
+  String get discographyFetchingTracks => 'Fetching tracks...';
+
+  @override
+  String discographyFetchingAlbum(int current, int total) {
+    return 'Fetching $current of $total...';
+  }
+
+  @override
+  String discographySelectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get discographyDownloadSelected => 'Download Selected';
+
+  @override
+  String discographyAddedToQueue(int count) {
+    return 'Added $count tracks to queue';
+  }
+
+  @override
+  String discographySkippedDownloaded(int added, int skipped) {
+    return '$added added, $skipped already downloaded';
+  }
+
+  @override
+  String get discographyNoAlbums => 'No albums available';
+
+  @override
+  String get discographyFailedToFetch => 'Failed to fetch some albums';
 }

@@ -9,20 +9,20 @@ class AppLocalizationsHi extends AppLocalizations {
   AppLocalizationsHi([String locale = 'hi']) : super(locale);
 
   @override
-  String get appName => 'SpotiFLAC';
+  String get appName => 'SpotiFlac';
 
   @override
   String get appDescription =>
-      'Download Spotify tracks in lossless quality from Tidal, Qobuz, and Amazon Music.';
+      'स्पॉटीफाई ट्रैक डाउनलोड करें टाइडल, क्वाबज एवं एवं अमेजन म्यूजिक से उच्चतम क्वालिटी में।';
 
   @override
-  String get navHome => 'Home';
+  String get navHome => 'होम';
 
   @override
-  String get navHistory => 'History';
+  String get navHistory => 'इतिहास';
 
   @override
-  String get navSettings => 'Settings';
+  String get navSettings => 'विकल्प';
 
   @override
   String get navStore => 'Store';
@@ -184,7 +184,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get quality128 => '128 kbps';
 
   @override
-  String get appearanceTitle => 'Appearance';
+  String get appearanceTitle => 'दिखावट';
 
   @override
   String get appearanceTheme => 'Theme';
@@ -199,10 +199,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get appearanceThemeDark => 'Dark';
 
   @override
-  String get appearanceDynamicColor => 'Dynamic Color';
+  String get appearanceDynamicColor => 'डायनेमिक रंग';
 
   @override
-  String get appearanceDynamicColorSubtitle => 'Use colors from your wallpaper';
+  String get appearanceDynamicColorSubtitle => 'वॉलपेपर से रंग इस्तेमाल करें';
 
   @override
   String get appearanceAccentColor => 'Accent Color';

@@ -112,7 +112,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Einzelne Titel-Downloads werden hier angezeigt';
 
   @override
-  String get historySearchHint => 'Search history...';
+  String get historySearchHint => 'Suchverlauf...';
 
   @override
   String get settingsTitle => 'Einstellungen';
@@ -416,7 +416,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Der talentierte Künstler, der unser wunderschönes App-Logo entworfen hat!';
 
   @override
-  String get aboutTranslators => 'Translators';
+  String get aboutTranslators => 'Übersetzer';
 
   @override
   String get aboutSpecialThanks => 'Besonderer Dank';
@@ -445,19 +445,19 @@ class AppLocalizationsDe extends AppLocalizations {
       'Schlage neue Funktionen für die App vor';
 
   @override
-  String get aboutTelegramChannel => 'Telegram Channel';
+  String get aboutTelegramChannel => 'Telegram Kanal';
 
   @override
-  String get aboutTelegramChannelSubtitle => 'Announcements and updates';
+  String get aboutTelegramChannelSubtitle => 'Ankündigungen und Updates';
 
   @override
   String get aboutTelegramChat => 'Telegram Community';
 
   @override
-  String get aboutTelegramChatSubtitle => 'Chat with other users';
+  String get aboutTelegramChatSubtitle => 'Mit anderen Nutzern chatten';
 
   @override
-  String get aboutSocial => 'Social';
+  String get aboutSocial => 'Sozial';
 
   @override
   String get aboutSupport => 'Support';
@@ -499,7 +499,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get aboutAppDescription =>
-      'Download Spotify tracks in lossless quality from Tidal, Qobuz, and Amazon Music.';
+      'Lade Spotify-Titel in verlustfreier Qualität von Tidal, Qobuz und Amazon Music herunter.';
 
   @override
   String get albumTitle => 'Album';
@@ -509,246 +509,248 @@ class AppLocalizationsDe extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count tracks',
-      one: '1 track',
+      other: '$count Songs',
+      one: '1 Song',
     );
     return '$_temp0';
   }
 
   @override
-  String get albumDownloadAll => 'Download All';
+  String get albumDownloadAll => 'Alle Herunterladen';
 
   @override
-  String get albumDownloadRemaining => 'Download Remaining';
+  String get albumDownloadRemaining => 'Downloads verbleibend';
 
   @override
   String get playlistTitle => 'Playlist';
 
   @override
-  String get artistTitle => 'Artist';
+  String get artistTitle => 'Künstler';
 
   @override
-  String get artistAlbums => 'Albums';
+  String get artistAlbums => 'Alben';
 
   @override
   String get artistSingles => 'Singles & EPs';
 
   @override
-  String get artistCompilations => 'Compilations';
+  String get artistCompilations => 'Zusammenstellungen';
 
   @override
   String artistReleases(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count releases',
-      one: '1 release',
+      other: '$count Veröffentlichungen',
+      one: '1 Veröffentlichung',
     );
     return '$_temp0';
   }
 
   @override
-  String get artistPopular => 'Popular';
+  String get artistPopular => 'Beliebt';
 
   @override
   String artistMonthlyListeners(String count) {
-    return '$count monthly listeners';
+    return '$count monatliche Hörer';
   }
 
   @override
-  String get trackMetadataTitle => 'Track Info';
+  String get trackMetadataTitle => 'Titel Info';
 
   @override
-  String get trackMetadataArtist => 'Artist';
+  String get trackMetadataArtist => 'Künstler';
 
   @override
   String get trackMetadataAlbum => 'Album';
 
   @override
-  String get trackMetadataDuration => 'Duration';
+  String get trackMetadataDuration => 'Länge';
 
   @override
-  String get trackMetadataQuality => 'Quality';
+  String get trackMetadataQuality => 'Qualität';
 
   @override
-  String get trackMetadataPath => 'File Path';
+  String get trackMetadataPath => 'Dateipfad';
 
   @override
-  String get trackMetadataDownloadedAt => 'Downloaded';
+  String get trackMetadataDownloadedAt => 'Heruntergeladen';
 
   @override
-  String get trackMetadataService => 'Service';
+  String get trackMetadataService => 'Anbieter';
 
   @override
-  String get trackMetadataPlay => 'Play';
+  String get trackMetadataPlay => 'Abspielen';
 
   @override
-  String get trackMetadataShare => 'Share';
+  String get trackMetadataShare => 'Teilen';
 
   @override
-  String get trackMetadataDelete => 'Delete';
+  String get trackMetadataDelete => 'Löschen';
 
   @override
-  String get trackMetadataRedownload => 'Re-download';
+  String get trackMetadataRedownload => 'Erneut herunterladen';
 
   @override
-  String get trackMetadataOpenFolder => 'Open Folder';
+  String get trackMetadataOpenFolder => 'Ordner öffnen';
 
   @override
-  String get setupTitle => 'Welcome to SpotiFLAC';
+  String get setupTitle => 'Willkommen bei SpotiFLAC';
 
   @override
-  String get setupSubtitle => 'Let\'s get you started';
+  String get setupSubtitle => 'Los geht\'s';
 
   @override
-  String get setupStoragePermission => 'Storage Permission';
+  String get setupStoragePermission => 'Speicherberechtigung';
 
   @override
   String get setupStoragePermissionSubtitle =>
-      'Required to save downloaded files';
+      'Benötigt um heruntergeladene Dateien zu Speichern';
 
   @override
-  String get setupStoragePermissionGranted => 'Permission granted';
+  String get setupStoragePermissionGranted => 'Berechtigung erteilt';
 
   @override
-  String get setupStoragePermissionDenied => 'Permission denied';
+  String get setupStoragePermissionDenied => 'Berechtigung verweigert';
 
   @override
-  String get setupGrantPermission => 'Grant Permission';
+  String get setupGrantPermission => 'Berechtigung erlauben';
 
   @override
-  String get setupDownloadLocation => 'Download Location';
+  String get setupDownloadLocation => 'Speicherort';
 
   @override
-  String get setupChooseFolder => 'Choose Folder';
+  String get setupChooseFolder => 'Ordner wählen';
 
   @override
-  String get setupContinue => 'Continue';
+  String get setupContinue => 'Fortfahren';
 
   @override
-  String get setupSkip => 'Skip for now';
+  String get setupSkip => 'Vorerst überspringen';
 
   @override
-  String get setupStorageAccessRequired => 'Storage Access Required';
+  String get setupStorageAccessRequired => 'Speicherzugriff erforderlich';
 
   @override
   String get setupStorageAccessMessage =>
-      'SpotiFLAC needs \"All files access\" permission to save music files to your chosen folder.';
+      'SpotiFLAC benötigt die Berechtigung \"Auf alle Dateien zugreifen\", um Musikdateien in deinen gewählten Ordner zu speichern.';
 
   @override
   String get setupStorageAccessMessageAndroid11 =>
-      'Android 11+ requires \"All files access\" permission to save files to your chosen download folder.';
+      'Android 11+ benötigt die Berechtigung „Auf alle Dateien“, um Dateien im ausgewählten Download-Ordner zu speichern.';
 
   @override
-  String get setupOpenSettings => 'Open Settings';
+  String get setupOpenSettings => 'Einstellungen öffnen';
 
   @override
   String get setupPermissionDeniedMessage =>
-      'Permission denied. Please grant all permissions to continue.';
+      'Berechtigung verweigert. Bitte erteilen Sie alle Berechtigungen um fortzufahren.';
 
   @override
   String setupPermissionRequired(String permissionType) {
-    return '$permissionType Permission Required';
+    return '$permissionType Zugriff verweigert';
   }
 
   @override
   String setupPermissionRequiredMessage(String permissionType) {
-    return '$permissionType permission is required for the best experience. You can change this later in Settings.';
+    return '$permissionType Berechtigung ist erforderlich für\ndie beste Benutzererfahrung. Für kannst dies später in den Einstellungen ändern.';
   }
 
   @override
-  String get setupSelectDownloadFolder => 'Select Download Folder';
+  String get setupSelectDownloadFolder => 'Wähle Download-Ordner aus';
 
   @override
-  String get setupUseDefaultFolder => 'Use Default Folder?';
+  String get setupUseDefaultFolder => 'Als Standardordner verwenden?';
 
   @override
   String get setupNoFolderSelected =>
-      'No folder selected. Would you like to use the default Music folder?';
+      'Kein Ordner ausgewählt. Soll der Standard-Musikordner verwendet werden?';
 
   @override
-  String get setupUseDefault => 'Use Default';
+  String get setupUseDefault => 'Standart benutzen';
 
   @override
-  String get setupDownloadLocationTitle => 'Download Location';
+  String get setupDownloadLocationTitle => 'Speicherort';
 
   @override
   String get setupDownloadLocationIosMessage =>
-      'On iOS, downloads are saved to the app\'s Documents folder. You can access them via the Files app.';
+      'Auf iOS werden Downloads im Dokumentenverzeichnis der App gespeichert. Sie können sie über die Datei-App aufrufen.';
 
   @override
-  String get setupAppDocumentsFolder => 'App Documents Folder';
+  String get setupAppDocumentsFolder => 'App-Dokumentenordner';
 
   @override
   String get setupAppDocumentsFolderSubtitle =>
-      'Recommended - accessible via Files app';
+      'Empfohlen - zugänglich über die Datei-App';
 
   @override
-  String get setupChooseFromFiles => 'Choose from Files';
+  String get setupChooseFromFiles => 'Aus Dateien auswählen';
 
   @override
-  String get setupChooseFromFilesSubtitle => 'Select iCloud or other location';
+  String get setupChooseFromFilesSubtitle =>
+      'Wählen Sie iCloud oder einen anderen Ort';
 
   @override
   String get setupIosEmptyFolderWarning =>
-      'iOS limitation: Empty folders cannot be selected. Choose a folder with at least one file.';
+      'iOS-Einschränkung: Leere Ordner können nicht ausgewählt werden. Wählen Sie einen Ordner mit mindestens einer Datei.';
 
   @override
-  String get setupDownloadInFlac => 'Download Spotify tracks in FLAC';
+  String get setupDownloadInFlac => 'Spotify Titel in FLAC herunterladen';
 
   @override
-  String get setupStepStorage => 'Storage';
+  String get setupStepStorage => 'Speicherort';
 
   @override
-  String get setupStepNotification => 'Notification';
+  String get setupStepNotification => 'Benachrichtigung';
 
   @override
-  String get setupStepFolder => 'Folder';
+  String get setupStepFolder => 'Ordner';
 
   @override
   String get setupStepSpotify => 'Spotify';
 
   @override
-  String get setupStepPermission => 'Permission';
+  String get setupStepPermission => 'Berechtigung';
 
   @override
-  String get setupStorageGranted => 'Storage Permission Granted!';
+  String get setupStorageGranted => 'Speicherberechtigung erlaubt!';
 
   @override
-  String get setupStorageRequired => 'Storage Permission Required';
+  String get setupStorageRequired => 'Speicherzugriff erforderlich';
 
   @override
   String get setupStorageDescription =>
-      'SpotiFLAC needs storage permission to save your downloaded music files.';
+      'SpotiFLAC benötigt Speicherrechte, um die heruntergeladenen Musikdateien zu speichern.';
 
   @override
-  String get setupNotificationGranted => 'Notification Permission Granted!';
+  String get setupNotificationGranted =>
+      'Benachrichtigungs-Berechtigung erteilt';
 
   @override
-  String get setupNotificationEnable => 'Enable Notifications';
+  String get setupNotificationEnable => 'Benachrichtigungen aktivieren';
 
   @override
   String get setupNotificationDescription =>
-      'Get notified when downloads complete or require attention.';
+      'Benachrichtigt werden, wenn Downloads abgeschlossen sind.';
 
   @override
-  String get setupFolderSelected => 'Download Folder Selected!';
+  String get setupFolderSelected => 'Download Ordner ausgewählt!';
 
   @override
-  String get setupFolderChoose => 'Choose Download Folder';
+  String get setupFolderChoose => 'Speicherort auwählen';
 
   @override
   String get setupFolderDescription =>
-      'Select a folder where your downloaded music will be saved.';
+      'Wählen Sie einen Ordner, in dem Ihre heruntergeladene Musik gespeichert wird.';
 
   @override
-  String get setupChangeFolder => 'Change Folder';
+  String get setupChangeFolder => 'Ordner ändern';
 
   @override
-  String get setupSelectFolder => 'Select Folder';
+  String get setupSelectFolder => 'Ordner wählen';
 
   @override
-  String get setupSpotifyApiOptional => 'Spotify API (Optional)';
+  String get setupSpotifyApiOptional => 'Spotify-API (optional)';
 
   @override
   String get setupSpotifyApiDescription =>

@@ -74,9 +74,9 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count треков',
+      one: '1 трек',
       many: '$count треков',
       few: '$count трека',
-      one: '$count трек',
     );
     return '$_temp0';
   }
@@ -87,9 +87,9 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count альбомов',
+      one: '1 альбом',
       many: '$count альбомов',
       few: '$count альбома',
-      one: '$count альбом',
     );
     return '$_temp0';
   }
@@ -115,7 +115,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Здесь будут отображаться загрузки синглов';
 
   @override
-  String get historySearchHint => 'Search history...';
+  String get historySearchHint => 'Поиск в истории...';
 
   @override
   String get settingsTitle => 'Настройки';
@@ -418,7 +418,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Талантливый художник, который создал наш красивый логотип приложения!';
 
   @override
-  String get aboutTranslators => 'Translators';
+  String get aboutTranslators => 'Переводчики';
 
   @override
   String get aboutSpecialThanks => 'Особая благодарность';
@@ -446,19 +446,19 @@ class AppLocalizationsRu extends AppLocalizations {
       'Предложить новые функции для приложения';
 
   @override
-  String get aboutTelegramChannel => 'Telegram Channel';
+  String get aboutTelegramChannel => 'Telegram канал';
 
   @override
-  String get aboutTelegramChannelSubtitle => 'Announcements and updates';
+  String get aboutTelegramChannelSubtitle => 'Объявления и обновления';
 
   @override
-  String get aboutTelegramChat => 'Telegram Community';
+  String get aboutTelegramChat => 'Сообщество в Telegram';
 
   @override
-  String get aboutTelegramChatSubtitle => 'Chat with other users';
+  String get aboutTelegramChatSubtitle => 'Чат с другими пользователями';
 
   @override
-  String get aboutSocial => 'Social';
+  String get aboutSocial => 'Соцсети';
 
   @override
   String get aboutSupport => 'Поддержка';
@@ -510,9 +510,9 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count треков',
+      one: '1 трек',
       many: '$count треков',
       few: '$count трека',
-      one: '$count трек',
     );
     return '$_temp0';
   }
@@ -544,9 +544,9 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count релизов',
+      one: '1 релиз',
       many: '$count релизов',
       few: '$count релиза',
-      one: '$count релиз',
     );
     return '$_temp0';
   }
@@ -922,9 +922,9 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other: 'треков',
+      one: 'трек',
       many: 'треков',
       few: 'трека',
-      one: 'трек',
     );
     return 'Удалить $count $_temp0 из истории?\n\nЭто также удалит файлы из хранилища.';
   }
@@ -939,7 +939,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String csvImportTracks(int count) {
-    return '$count tracks from CSV';
+    return '$count треков из CSV';
   }
 
   @override
@@ -972,9 +972,9 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other: 'треков',
+      one: 'трек',
       many: 'треков',
       few: 'трека',
-      one: 'трек',
     );
     return 'Удалено $count $_temp0';
   }
@@ -1121,9 +1121,9 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other: 'треков',
+      one: 'трек',
       many: 'треков',
       few: 'трека',
-      one: 'трек',
     );
     return 'Удалить $count $_temp0';
   }
@@ -1482,33 +1482,33 @@ class AppLocalizationsRu extends AppLocalizations {
   String get sectionFileSettings => 'Настройки файла';
 
   @override
-  String get sectionLyrics => 'Lyrics';
+  String get sectionLyrics => 'Тексты песен';
 
   @override
-  String get lyricsMode => 'Lyrics Mode';
+  String get lyricsMode => 'Режим текстов песен';
 
   @override
   String get lyricsModeDescription =>
-      'Choose how lyrics are saved with your downloads';
+      'Выберите как сохранить тексты песен при скачивании';
 
   @override
-  String get lyricsModeEmbed => 'Embed in file';
+  String get lyricsModeEmbed => 'Вставить в файл';
 
   @override
-  String get lyricsModeEmbedSubtitle => 'Lyrics stored inside FLAC metadata';
+  String get lyricsModeEmbedSubtitle => 'Встроить текст в метаданные FLAC';
 
   @override
-  String get lyricsModeExternal => 'External .lrc file';
+  String get lyricsModeExternal => 'Внешний файл .lrc';
 
   @override
   String get lyricsModeExternalSubtitle =>
-      'Separate .lrc file for players like Samsung Music';
+      'Отдельный файл .lrc для плееров, таких, как Samsung Music';
 
   @override
-  String get lyricsModeBoth => 'Both';
+  String get lyricsModeBoth => 'Оба варианта';
 
   @override
-  String get lyricsModeBothSubtitle => 'Embed and save .lrc file';
+  String get lyricsModeBothSubtitle => 'Вставить и сохранить файл .lrc';
 
   @override
   String get sectionColor => 'Цвет';
@@ -1565,9 +1565,9 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count треков',
+      one: '1 трек',
       many: '$count треков',
       few: '$count трека',
-      one: '$count трек',
     );
     return '$_temp0';
   }
@@ -1627,13 +1627,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get trackReleaseDate => 'Дата выхода';
 
   @override
-  String get trackGenre => 'Genre';
+  String get trackGenre => 'Жанр';
 
   @override
-  String get trackLabel => 'Label';
+  String get trackLabel => 'Заголовок';
 
   @override
-  String get trackCopyright => 'Copyright';
+  String get trackCopyright => 'Авторские права';
 
   @override
   String get trackDownloaded => 'Скачано';
@@ -1653,13 +1653,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get trackLyricsLoadFailed => 'Не удалось загрузить текст песни';
 
   @override
-  String get trackEmbedLyrics => 'Embed Lyrics';
+  String get trackEmbedLyrics => 'Вставить текст песни';
 
   @override
-  String get trackLyricsEmbedded => 'Lyrics embedded successfully';
+  String get trackLyricsEmbedded => 'Текст успешно добавлен';
 
   @override
-  String get trackInstrumental => 'Instrumental track';
+  String get trackInstrumental => 'Инструментальный трек';
 
   @override
   String get trackCopiedToClipboard => 'Скопировано в буфер обмена';
@@ -2073,11 +2073,11 @@ class AppLocalizationsRu extends AppLocalizations {
       'Альбомы/[2005] Название Альбома /';
 
   @override
-  String get albumFolderArtistAlbumSingles => 'Artist / Album + Singles';
+  String get albumFolderArtistAlbumSingles => 'Исполнитель / Альбом + Синглы';
 
   @override
   String get albumFolderArtistAlbumSinglesSubtitle =>
-      'Artist/Album/ and Artist/Singles/';
+      'Исполнитель/Альбом и Исполнитель/Сингл/';
 
   @override
   String get downloadedAlbumDeleteSelected => 'Удалить выбранные';
@@ -2088,9 +2088,9 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other: 'треков',
+      one: 'трек',
       many: 'треков',
       few: 'трека',
-      one: 'трек',
     );
     return 'Удалить $count $_temp0 из этого альбома?\n\nЭто также удалит файлы из хранилища.';
   }
@@ -2120,9 +2120,9 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other: 'треков',
+      one: 'трек',
       many: 'треков',
       few: 'трека',
-      one: 'трек',
     );
     return 'Удалить $count $_temp0';
   }
@@ -2132,7 +2132,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String downloadedAlbumDiscHeader(int discNumber) {
-    return 'Disc $discNumber';
+    return 'Диск $discNumber';
   }
 
   @override
@@ -2161,68 +2161,69 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get discographyDownload => 'Download Discography';
+  String get discographyDownload => 'Скачать дискографию';
 
   @override
-  String get discographyDownloadAll => 'Download All';
+  String get discographyDownloadAll => 'Скачать всё';
 
   @override
   String discographyDownloadAllSubtitle(int count, int albumCount) {
-    return '$count tracks from $albumCount releases';
+    return '$count треков из $albumCount релизов';
   }
 
   @override
-  String get discographyAlbumsOnly => 'Albums Only';
+  String get discographyAlbumsOnly => 'Только альбомы';
 
   @override
   String discographyAlbumsOnlySubtitle(int count, int albumCount) {
-    return '$count tracks from $albumCount albums';
+    return '$count треков из $albumCount альбомов';
   }
 
   @override
-  String get discographySinglesOnly => 'Singles & EPs Only';
+  String get discographySinglesOnly => 'Только синглы и EP';
 
   @override
   String discographySinglesOnlySubtitle(int count, int albumCount) {
-    return '$count tracks from $albumCount singles';
+    return '$count треков из $albumCount синглов';
   }
 
   @override
-  String get discographySelectAlbums => 'Select Albums...';
+  String get discographySelectAlbums => 'Выбрать альбомы...';
 
   @override
   String get discographySelectAlbumsSubtitle =>
-      'Choose specific albums or singles';
+      'Выберите конкретные альбомы или синглы';
 
   @override
-  String get discographyFetchingTracks => 'Fetching tracks...';
+  String get discographyFetchingTracks => 'Получение треков...';
 
   @override
   String discographyFetchingAlbum(int current, int total) {
-    return 'Fetching $current of $total...';
+    return 'Получение $current из $total...';
   }
 
   @override
   String discographySelectedCount(int count) {
-    return '$count selected';
+    return '$count выбрано';
   }
 
   @override
-  String get discographyDownloadSelected => 'Download Selected';
+  String get discographyDownloadSelected => 'Скачать выбранное';
 
   @override
   String discographyAddedToQueue(int count) {
-    return 'Added $count tracks to queue';
+    return 'Добавлено $count треков в очередь';
   }
 
   @override
   String discographySkippedDownloaded(int added, int skipped) {
-    return '$added added, $skipped already downloaded';
+    return '$added добавлено, $skipped уже скачано';
   }
 
   @override
-  String get discographyNoAlbums => 'No albums available';
+  String get discographyNoAlbums => 'Нет доступных альбомов';
 
   @override
-  String get discographyFailedToFetch => 'Failed to fetch some albums';
+  String get discographyFailedToFetch =>
+      'Не удалось получить некоторые альбомы';
 }
