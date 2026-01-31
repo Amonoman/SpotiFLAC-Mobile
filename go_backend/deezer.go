@@ -186,7 +186,8 @@ type deezerPlaylistFull struct {
 func (c *DeezerClient) SearchAll(ctx context.Context, query string, trackLimit, artistLimit int) (*SearchAllResult, error) {
 	GoLog("[Deezer] SearchAll: query=%q, trackLimit=%d, artistLimit=%d\n", query, trackLimit, artistLimit)
 
-	cacheKey := fmt.Sprintf("deezer:all:%s:%d:%d", query, trackLimit, artistLimit)
+	albumLimit := 5 // Same as artistLimit for consistency
+	cacheKey := fmt.Sprintf("deezer:all:%s:%d:%d:%d", query, trackLimit, artistLimit, albumLimit)
 
 	c.cacheMu.RLock()
 	if entry, ok := c.searchCache[cacheKey]; ok && !entry.isExpired() {
@@ -199,6 +200,7 @@ func (c *DeezerClient) SearchAll(ctx context.Context, query string, trackLimit, 
 	result := &SearchAllResult{
 		Tracks:  make([]TrackMetadata, 0, trackLimit),
 		Artists: make([]SearchArtistResult, 0, artistLimit),
+		Albums:  make([]SearchAlbumResult, 0, albumLimit),
 	}
 
 	// Search tracks - NO ISRC fetch for performance
@@ -229,6 +231,7 @@ func (c *DeezerClient) SearchAll(ctx context.Context, query string, trackLimit, 
 		result.Tracks = append(result.Tracks, c.convertTrack(track))
 	}
 
+	// Search artists
 	artistURL := fmt.Sprintf("%s/artist?q=%s&limit=%d", deezerSearchURL, url.QueryEscape(query), artistLimit)
 	GoLog("[Deezer] Fetching artists from: %s\n", artistURL)
 
@@ -259,7 +262,67 @@ func (c *DeezerClient) SearchAll(ctx context.Context, query string, trackLimit, 
 		GoLog("[Deezer] Artist search failed: %v\n", err)
 	}
 
-	GoLog("[Deezer] SearchAll complete: %d tracks, %d artists\n", len(result.Tracks), len(result.Artists))
+	// Search albums
+	albumURL := fmt.Sprintf("%s/album?q=%s&limit=%d", deezerSearchURL, url.QueryEscape(query), albumLimit)
+	GoLog("[Deezer] Fetching albums from: %s\n", albumURL)
+
+	var albumResp struct {
+		Data []struct {
+			ID          int64        `json:"id"`
+			Title       string       `json:"title"`
+			Cover       string       `json:"cover"`
+			CoverMedium string       `json:"cover_medium"`
+			CoverBig    string       `json:"cover_big"`
+			CoverXL     string       `json:"cover_xl"`
+			NbTracks    int          `json:"nb_tracks"`
+			ReleaseDate string       `json:"release_date"`
+			RecordType  string       `json:"record_type"`
+			Artist      deezerArtist `json:"artist"`
+		} `json:"data"`
+		Error *struct {
+			Type    string `json:"type"`
+			Message string `json:"message"`
+			Code    int    `json:"code"`
+		} `json:"error"`
+	}
+	if err := c.getJSON(ctx, albumURL, &albumResp); err == nil {
+		if albumResp.Error != nil {
+			GoLog("[Deezer] Album API error: type=%s, code=%d, message=%s\n", albumResp.Error.Type, albumResp.Error.Code, albumResp.Error.Message)
+		} else {
+			GoLog("[Deezer] Got %d albums from API\n", len(albumResp.Data))
+			for _, album := range albumResp.Data {
+				coverURL := album.CoverXL
+				if coverURL == "" {
+					coverURL = album.CoverBig
+				}
+				if coverURL == "" {
+					coverURL = album.CoverMedium
+				}
+				if coverURL == "" {
+					coverURL = album.Cover
+				}
+
+				albumType := album.RecordType
+				if albumType == "compile" {
+					albumType = "compilation"
+				}
+
+				result.Albums = append(result.Albums, SearchAlbumResult{
+					ID:          fmt.Sprintf("deezer:%d", album.ID),
+					Name:        album.Title,
+					Artists:     album.Artist.Name,
+					Images:      coverURL,
+					ReleaseDate: album.ReleaseDate,
+					TotalTracks: album.NbTracks,
+					AlbumType:   albumType,
+				})
+			}
+		}
+	} else {
+		GoLog("[Deezer] Album search failed: %v\n", err)
+	}
+
+	GoLog("[Deezer] SearchAll complete: %d tracks, %d artists, %d albums\n", len(result.Tracks), len(result.Artists), len(result.Albums))
 
 	c.cacheMu.Lock()
 	c.searchCache[cacheKey] = &cacheEntry{

@@ -466,6 +466,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
     
     final tracks = ref.watch(trackProvider.select((s) => s.tracks));
     final searchArtists = ref.watch(trackProvider.select((s) => s.searchArtists));
+    final searchAlbums = ref.watch(trackProvider.select((s) => s.searchAlbums));
     final isLoading = ref.watch(trackProvider.select((s) => s.isLoading));
     final error = ref.watch(trackProvider.select((s) => s.error));
     final hasSearchedBefore = ref.watch(settingsProvider.select((s) => s.hasSearchedBefore));
@@ -481,7 +482,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
     ));
     
     final colorScheme = Theme.of(context).colorScheme;
-    final hasActualResults = tracks.isNotEmpty || (searchArtists != null && searchArtists.isNotEmpty);
+    final hasActualResults = tracks.isNotEmpty || (searchArtists != null && searchArtists.isNotEmpty) || (searchAlbums != null && searchAlbums.isNotEmpty);
     final isShowingRecentAccess = ref.watch(trackProvider.select((s) => s.isShowingRecentAccess));
     final hasResults = isShowingRecentAccess || hasActualResults || isLoading;
     final mediaQuery = MediaQuery.of(context);
@@ -681,6 +682,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
           ..._buildSearchResults(
             tracks: tracks,
             searchArtists: searchArtists,
+            searchAlbums: searchAlbums,
             isLoading: isLoading,
             error: error,
             colorScheme: colorScheme,
@@ -1559,6 +1561,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
   List<Widget> _buildSearchResults({
     required List<Track> tracks,
     required List<SearchArtist>? searchArtists,
+    required List<SearchAlbum>? searchAlbums,
     required bool isLoading,
     required String? error,
     required ColorScheme colorScheme,
@@ -1601,9 +1604,42 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
       if (isLoading)
         const SliverToBoxAdapter(child: Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: LinearProgressIndicator())),
 
+      // Artists from default search (Deezer/Spotify) - now in vertical list style
       if (searchArtists != null && searchArtists.isNotEmpty)
-        SliverToBoxAdapter(child: _buildArtistSearchResults(searchArtists, colorScheme)),
+        SliverToBoxAdapter(child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          child: Text(context.l10n.searchArtists, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+        )),
+      if (searchArtists != null && searchArtists.isNotEmpty)
+        SliverToBoxAdapter(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Color.alphaBlend(Colors.white.withValues(alpha: 0.08), colorScheme.surface)
+                  : colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Material(
+              color: Colors.transparent,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (int i = 0; i < searchArtists.length; i++)
+                    _SearchArtistItemWidget(
+                      key: ValueKey('search-artist-${searchArtists[i].id}'),
+                      artist: searchArtists[i],
+                      showDivider: i < searchArtists.length - 1,
+                      onTap: () => _navigateToArtist(searchArtists[i].id, searchArtists[i].name, searchArtists[i].imageUrl),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
 
+      // Artists from extension search
       if (artistItems.isNotEmpty)
         SliverToBoxAdapter(child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -1638,6 +1674,42 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
           ),
         ),
 
+      // Albums from default search (Deezer/Spotify)
+      if (searchAlbums != null && searchAlbums.isNotEmpty)
+        SliverToBoxAdapter(child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          child: Text(context.l10n.searchAlbums, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+        )),
+      if (searchAlbums != null && searchAlbums.isNotEmpty)
+        SliverToBoxAdapter(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Color.alphaBlend(Colors.white.withValues(alpha: 0.08), colorScheme.surface)
+                  : colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Material(
+              color: Colors.transparent,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (int i = 0; i < searchAlbums.length; i++)
+                    _SearchAlbumItemWidget(
+                      key: ValueKey('search-album-${searchAlbums[i].id}'),
+                      album: searchAlbums[i],
+                      showDivider: i < searchAlbums.length - 1,
+                      onTap: () => _navigateToSearchAlbum(searchAlbums[i]),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+
+      // Albums from extension search
       if (albumItems.isNotEmpty)
         SliverToBoxAdapter(child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -1746,83 +1818,6 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
     ];
   }
 
-  Widget _buildArtistSearchResults(List<SearchArtist> artists, ColorScheme colorScheme) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-          child: Text(context.l10n.searchArtists, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
-        ),
-        SizedBox(
-          height: 160,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            itemCount: artists.length,
-            itemBuilder: (context, index) {
-              final artist = artists[index];
-              return KeyedSubtree(
-                key: ValueKey(artist.id),
-                child: _buildArtistCard(artist, colorScheme),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildArtistCard(SearchArtist artist, ColorScheme colorScheme) {
-    final hasValidImage = artist.imageUrl != null && 
-                          artist.imageUrl!.isNotEmpty &&
-                          Uri.tryParse(artist.imageUrl!)?.hasAuthority == true;
-    
-    return GestureDetector(
-      onTap: () => _navigateToArtist(artist.id, artist.name, artist.imageUrl),
-      child: Container(
-        width: 110,
-        margin: const EdgeInsets.symmetric(horizontal: 6),
-        child: Column(
-          children: [
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: colorScheme.surfaceContainerHighest,
-              ),
-              child: ClipOval(
-                child: hasValidImage
-? CachedNetworkImage(
-                        imageUrl: artist.imageUrl!,
-                        fit: BoxFit.cover,
-                        memCacheWidth: 200,
-                        memCacheHeight: 200,
-                        cacheManager: CoverCacheManager.instance,
-                        errorWidget: (context, url, error) => Icon(
-                          Icons.person,
-                          color: colorScheme.onSurfaceVariant,
-                          size: 44,
-                        ),
-                      )
-                    : Icon(Icons.person, color: colorScheme.onSurfaceVariant, size: 44),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              artist.name,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _navigateToArtist(String artistId, String artistName, String? imageUrl) {
     ref.read(settingsProvider.notifier).setHasSearchedBefore();
     
@@ -1831,6 +1826,33 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
         artistId: artistId,
         artistName: artistName,
         coverUrl: imageUrl,
+      ),
+    ));
+  }
+
+  void _navigateToSearchAlbum(SearchAlbum album) {
+    ref.read(settingsProvider.notifier).setHasSearchedBefore();
+    
+    // Extract the numeric ID from "deezer:123" format
+    String albumId = album.id;
+    if (albumId.startsWith('deezer:')) {
+      albumId = albumId.substring(7);
+    }
+    
+    ref.read(recentAccessProvider.notifier).recordAlbumAccess(
+      id: album.id,
+      name: album.name,
+      artistName: album.artists,
+      imageUrl: album.imageUrl,
+      providerId: 'deezer',
+    );
+    
+    Navigator.push(context, MaterialPageRoute(
+      builder: (context) => AlbumScreen(
+        albumId: albumId,
+        albumName: album.name,
+        coverUrl: album.imageUrl,
+        tracks: const [], // Will be fetched by AlbumScreen
       ),
     ));
   }
@@ -2580,6 +2602,198 @@ class _CollectionItemWidget extends StatelessWidget {
                         item.artistName.isNotEmpty 
                             ? item.artistName 
                             : (isPlaylist ? 'Playlist' : (isArtist ? 'Artist' : 'Album')),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: colorScheme.onSurfaceVariant,
+                  size: 24,
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (showDivider)
+          Divider(
+            height: 1,
+            thickness: 1,
+            indent: 80,
+            endIndent: 12,
+            color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+          ),
+      ],
+    );
+  }
+}
+
+/// Widget for displaying artist items from default search (Deezer/Spotify)
+class _SearchArtistItemWidget extends StatelessWidget {
+  final SearchArtist artist;
+  final bool showDivider;
+  final VoidCallback onTap;
+
+  const _SearchArtistItemWidget({
+    super.key,
+    required this.artist,
+    required this.showDivider,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final hasValidImage = artist.imageUrl != null && 
+                          artist.imageUrl!.isNotEmpty &&
+                          Uri.tryParse(artist.imageUrl!)?.hasAuthority == true;
+    
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        InkWell(
+          onTap: onTap,
+          splashColor: colorScheme.primary.withValues(alpha: 0.12),
+          highlightColor: colorScheme.primary.withValues(alpha: 0.08),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(28),
+                  child: hasValidImage
+                      ? CachedNetworkImage(
+                          imageUrl: artist.imageUrl!,
+                          width: 56,
+                          height: 56,
+                          fit: BoxFit.cover,
+                          memCacheWidth: 112,
+                          memCacheHeight: 112,
+                          cacheManager: CoverCacheManager.instance,
+                        )
+                      : Container(
+                          width: 56,
+                          height: 56,
+                          color: colorScheme.surfaceContainerHighest,
+                          child: Icon(
+                            Icons.person,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        artist.name,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Artist',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right,
+                  color: colorScheme.onSurfaceVariant,
+                  size: 24,
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (showDivider)
+          Divider(
+            height: 1,
+            thickness: 1,
+            indent: 80,
+            endIndent: 12,
+            color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+          ),
+      ],
+    );
+  }
+}
+
+/// Widget for displaying album items from default search (Deezer/Spotify)
+class _SearchAlbumItemWidget extends StatelessWidget {
+  final SearchAlbum album;
+  final bool showDivider;
+  final VoidCallback onTap;
+
+  const _SearchAlbumItemWidget({
+    super.key,
+    required this.album,
+    required this.showDivider,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final hasValidImage = album.imageUrl != null && 
+                          album.imageUrl!.isNotEmpty &&
+                          Uri.tryParse(album.imageUrl!)?.hasAuthority == true;
+    
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        InkWell(
+          onTap: onTap,
+          splashColor: colorScheme.primary.withValues(alpha: 0.12),
+          highlightColor: colorScheme.primary.withValues(alpha: 0.08),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: hasValidImage
+                      ? CachedNetworkImage(
+                          imageUrl: album.imageUrl!,
+                          width: 56,
+                          height: 56,
+                          fit: BoxFit.cover,
+                          memCacheWidth: 112,
+                          memCacheHeight: 112,
+                          cacheManager: CoverCacheManager.instance,
+                        )
+                      : Container(
+                          width: 56,
+                          height: 56,
+                          color: colorScheme.surfaceContainerHighest,
+                          child: Icon(
+                            Icons.album,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        album.name,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        album.artists.isNotEmpty ? album.artists : 'Album',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

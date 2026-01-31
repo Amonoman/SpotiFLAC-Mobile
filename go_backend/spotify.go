@@ -238,9 +238,20 @@ type SearchArtistResult struct {
 	Popularity int    `json:"popularity"`
 }
 
+type SearchAlbumResult struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Artists     string `json:"artists"`
+	Images      string `json:"images"`
+	ReleaseDate string `json:"release_date"`
+	TotalTracks int    `json:"total_tracks"`
+	AlbumType   string `json:"album_type"`
+}
+
 type SearchAllResult struct {
 	Tracks  []TrackMetadata      `json:"tracks"`
 	Artists []SearchArtistResult `json:"artists"`
+	Albums  []SearchAlbumResult  `json:"albums"`
 }
 
 type spotifyURI struct {
