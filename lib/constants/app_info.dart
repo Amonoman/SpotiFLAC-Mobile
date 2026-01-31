@@ -1,8 +1,8 @@
 /// App version and info constants
 /// Update version here only - all other files will reference this
 class AppInfo {
-static const String version = '3.2.2';
-  static const String buildNumber = '66';
+static const String version = '3.3.0';
+  static const String buildNumber = '67';
   static const String fullVersion = '$version+$buildNumber';
   
   
