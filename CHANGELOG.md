@@ -8,7 +8,7 @@
   - New "Enable Lossy Option" toggle in Settings > Download > Audio Quality
   - Choose between MP3 (320kbps) or Opus (256kbps) format
   - Downloads FLAC first, then converts using FFmpeg
-- **New Languages**: Turkish and Portuguese Portugal translations
+- **New Languages**: Turkish and Japanese translations
 
 ### Changed
 
