@@ -4,6 +4,16 @@
 
 ### Added
 
+- **Local Library Scanning**: Scan your existing music collection to detect duplicates when downloading
+  - Recursive folder scanning for audio files (FLAC, M4A, MP3, Opus, OGG)
+  - Reads metadata from file tags (ISRC, track name, artist, album, bit depth, sample rate)
+  - Fallback to filename parsing when tags unavailable ("Artist - Title" pattern)
+  - SQLite database for fast O(1) duplicate lookups
+  - Progress tracking with cancel option during scan
+  - Cleanup missing files and clear library actions
+- **Duplicate Detection in Search Results**: "In Library" badge shows on tracks that exist in your local library
+  - Matches by ISRC (exact match) or track name + artist (fuzzy match)
+  - Toggle indicator visibility in Settings > Local Library
 - **Cloud Upload with WebDAV & SFTP**: Automatically upload downloaded files to your NAS or cloud storage
   - Full WebDAV support (Synology DSM, Nextcloud, QNAP, ownCloud)
   - Full SFTP support (any SSH server with SFTP enabled)
@@ -11,11 +21,18 @@
   - Upload queue with progress tracking
   - Retry failed uploads and clear completed items
   - Recent uploads list in Cloud Save settings
+- **SFTP Host Key Security (TOFU)**: Verify host keys on connect and block mismatches
+- **Reset SFTP Host Keys**: Clear the saved host key for the current server or all servers
 
 ### Dependencies
 
 - Added `webdav_client: ^1.2.2` for WebDAV protocol support
 - Added `dartssh2: ^2.13.0` for SFTP protocol support
+- Added `flutter_secure_storage: ^9.2.2` for storing cloud passwords securely
+
+### Changed
+
+- Cloud upload passwords are now stored in secure storage instead of SharedPreferences
 
 ---
 

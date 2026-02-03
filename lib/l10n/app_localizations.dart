@@ -3832,6 +3832,72 @@ abstract class AppLocalizations {
   /// **'Recent Uploads'**
   String get cloudSettingsRecentUploads;
 
+  /// Button/title to reset SFTP host key for current server
+  ///
+  /// In en, this message translates to:
+  /// **'Reset SFTP Host Key'**
+  String get cloudSettingsResetSftpHostKey;
+
+  /// Button/title to reset all saved SFTP host keys
+  ///
+  /// In en, this message translates to:
+  /// **'Reset All SFTP Host Keys'**
+  String get cloudSettingsResetAllSftpHostKeys;
+
+  /// Dialog message for resetting SFTP host key
+  ///
+  /// In en, this message translates to:
+  /// **'This will forget the saved host key for this server. The next connection will save a new key.'**
+  String get cloudSettingsResetSftpHostKeyMessage;
+
+  /// Dialog message for resetting all SFTP host keys
+  ///
+  /// In en, this message translates to:
+  /// **'This will forget all saved SFTP host keys. Next connections will save new keys.'**
+  String get cloudSettingsResetAllSftpHostKeysMessage;
+
+  /// Dialog confirm button for reset action
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get cloudSettingsResetConfirm;
+
+  /// Dialog confirm button for reset all action
+  ///
+  /// In en, this message translates to:
+  /// **'Reset All'**
+  String get cloudSettingsResetAllConfirm;
+
+  /// Validation message when server URL is missing
+  ///
+  /// In en, this message translates to:
+  /// **'Server URL is required'**
+  String get cloudSettingsServerUrlRequired;
+
+  /// Snackbar after resetting SFTP host key
+  ///
+  /// In en, this message translates to:
+  /// **'SFTP host key reset. Connect again to save a new key.'**
+  String get cloudSettingsResetSftpHostKeySuccess;
+
+  /// Snackbar when no host key exists for the current server
+  ///
+  /// In en, this message translates to:
+  /// **'No stored host key found for this server.'**
+  String get cloudSettingsResetSftpHostKeyNotFound;
+
+  /// Snackbar after clearing all SFTP host keys
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Cleared 1 SFTP host key.} other{Cleared {count} SFTP host keys.}}'**
+  String cloudSettingsResetAllSftpHostKeysCleared(num count);
+
+  /// Snackbar when no SFTP host keys exist
+  ///
+  /// In en, this message translates to:
+  /// **'No stored SFTP host keys found.'**
+  String get cloudSettingsResetAllSftpHostKeysNone;
+
   /// Empty queue state title
   ///
   /// In en, this message translates to:
@@ -4185,6 +4251,210 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All Files Access disabled. The app will use limited storage access.'**
   String get allFilesAccessDisabledMessage;
+
+  /// Settings menu item - local library
+  ///
+  /// In en, this message translates to:
+  /// **'Local Library'**
+  String get settingsLocalLibrary;
+
+  /// Subtitle for local library settings
+  ///
+  /// In en, this message translates to:
+  /// **'Scan music & detect duplicates'**
+  String get settingsLocalLibrarySubtitle;
+
+  /// Library settings page title
+  ///
+  /// In en, this message translates to:
+  /// **'Local Library'**
+  String get libraryTitle;
+
+  /// Section header for library status
+  ///
+  /// In en, this message translates to:
+  /// **'Library Status'**
+  String get libraryStatus;
+
+  /// Section header for scan settings
+  ///
+  /// In en, this message translates to:
+  /// **'Scan Settings'**
+  String get libraryScanSettings;
+
+  /// Toggle to enable library scanning
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Local Library'**
+  String get libraryEnableLocalLibrary;
+
+  /// Subtitle for enable toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Scan and track your existing music'**
+  String get libraryEnableLocalLibrarySubtitle;
+
+  /// Folder selection setting
+  ///
+  /// In en, this message translates to:
+  /// **'Library Folder'**
+  String get libraryFolder;
+
+  /// Placeholder when no folder selected
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to select folder'**
+  String get libraryFolderHint;
+
+  /// Toggle for duplicate indicator in search
+  ///
+  /// In en, this message translates to:
+  /// **'Show Duplicate Indicator'**
+  String get libraryShowDuplicateIndicator;
+
+  /// Subtitle for duplicate indicator toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Show when searching for existing tracks'**
+  String get libraryShowDuplicateIndicatorSubtitle;
+
+  /// Section header for library actions
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get libraryActions;
+
+  /// Button to start library scan
+  ///
+  /// In en, this message translates to:
+  /// **'Scan Library'**
+  String get libraryScan;
+
+  /// Subtitle for scan button
+  ///
+  /// In en, this message translates to:
+  /// **'Scan for audio files'**
+  String get libraryScanSubtitle;
+
+  /// Message when trying to scan without folder
+  ///
+  /// In en, this message translates to:
+  /// **'Select a folder first'**
+  String get libraryScanSelectFolderFirst;
+
+  /// Button to remove entries for missing files
+  ///
+  /// In en, this message translates to:
+  /// **'Cleanup Missing Files'**
+  String get libraryCleanupMissingFiles;
+
+  /// Subtitle for cleanup button
+  ///
+  /// In en, this message translates to:
+  /// **'Remove entries for files that no longer exist'**
+  String get libraryCleanupMissingFilesSubtitle;
+
+  /// Button to clear all library entries
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Library'**
+  String get libraryClear;
+
+  /// Subtitle for clear button
+  ///
+  /// In en, this message translates to:
+  /// **'Remove all scanned tracks'**
+  String get libraryClearSubtitle;
+
+  /// Dialog title for clear confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Library'**
+  String get libraryClearConfirmTitle;
+
+  /// Dialog message for clear confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'This will remove all scanned tracks from your library. Your actual music files will not be deleted.'**
+  String get libraryClearConfirmMessage;
+
+  /// Section header for about info
+  ///
+  /// In en, this message translates to:
+  /// **'About Local Library'**
+  String get libraryAbout;
+
+  /// Description of local library feature
+  ///
+  /// In en, this message translates to:
+  /// **'Scans your existing music collection to detect duplicates when downloading. Supports FLAC, M4A, MP3, Opus, and OGG formats. Metadata is read from file tags when available.'**
+  String get libraryAboutDescription;
+
+  /// Track count in library
+  ///
+  /// In en, this message translates to:
+  /// **'{count} tracks'**
+  String libraryTracksCount(int count);
+
+  /// Last scan time display
+  ///
+  /// In en, this message translates to:
+  /// **'Last scanned: {time}'**
+  String libraryLastScanned(String time);
+
+  /// Shown when library has never been scanned
+  ///
+  /// In en, this message translates to:
+  /// **'Never'**
+  String get libraryLastScannedNever;
+
+  /// Status during scan
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning...'**
+  String get libraryScanning;
+
+  /// Scan progress display
+  ///
+  /// In en, this message translates to:
+  /// **'{progress}% of {total} files'**
+  String libraryScanProgress(String progress, int total);
+
+  /// Badge shown on tracks that exist in local library
+  ///
+  /// In en, this message translates to:
+  /// **'In Library'**
+  String get libraryInLibrary;
+
+  /// Snackbar after cleanup
+  ///
+  /// In en, this message translates to:
+  /// **'Removed {count} missing files from library'**
+  String libraryRemovedMissingFiles(int count);
+
+  /// Snackbar after clearing library
+  ///
+  /// In en, this message translates to:
+  /// **'Library cleared'**
+  String get libraryCleared;
+
+  /// Dialog title for storage permission
+  ///
+  /// In en, this message translates to:
+  /// **'Storage Access Required'**
+  String get libraryStorageAccessRequired;
+
+  /// Dialog message for storage permission
+  ///
+  /// In en, this message translates to:
+  /// **'SpotiFLAC needs storage access to scan your music library. Please grant permission in settings.'**
+  String get libraryStorageAccessMessage;
+
+  /// Error when folder doesn't exist
+  ///
+  /// In en, this message translates to:
+  /// **'Selected folder does not exist'**
+  String get libraryFolderNotExist;
 }
 
 class _AppLocalizationsDelegate

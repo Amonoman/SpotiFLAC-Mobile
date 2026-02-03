@@ -42,8 +42,13 @@ class AppSettings {
   final String cloudProvider; // 'none', 'webdav', 'sftp', 'gdrive'
   final String cloudServerUrl; // WebDAV/SFTP server URL
   final String cloudUsername; // Server username
-  final String cloudPassword; // Server password (encrypted)
+  final String cloudPassword; // Server password (stored securely)
   final String cloudRemotePath; // Remote folder path (e.g. /Music/SpotiFLAC)
+  
+  // Local Library Settings
+  final bool localLibraryEnabled; // Enable local library scanning
+  final String localLibraryPath; // Path to scan for audio files
+  final bool localLibraryShowDuplicates; // Show indicator when searching for existing tracks
 
   const AppSettings({
     this.defaultService = 'tidal',
@@ -85,6 +90,10 @@ class AppSettings {
     this.cloudUsername = '',
     this.cloudPassword = '',
     this.cloudRemotePath = '/Music/SpotiFLAC',
+    // Local Library defaults
+    this.localLibraryEnabled = false,
+    this.localLibraryPath = '',
+    this.localLibraryShowDuplicates = true,
   });
 
   AppSettings copyWith({
@@ -128,6 +137,10 @@ class AppSettings {
     String? cloudUsername,
     String? cloudPassword,
     String? cloudRemotePath,
+    // Local Library
+    bool? localLibraryEnabled,
+    String? localLibraryPath,
+    bool? localLibraryShowDuplicates,
   }) {
     return AppSettings(
       defaultService: defaultService ?? this.defaultService,
@@ -169,6 +182,10 @@ class AppSettings {
       cloudUsername: cloudUsername ?? this.cloudUsername,
       cloudPassword: cloudPassword ?? this.cloudPassword,
       cloudRemotePath: cloudRemotePath ?? this.cloudRemotePath,
+      // Local Library
+      localLibraryEnabled: localLibraryEnabled ?? this.localLibraryEnabled,
+      localLibraryPath: localLibraryPath ?? this.localLibraryPath,
+      localLibraryShowDuplicates: localLibraryShowDuplicates ?? this.localLibraryShowDuplicates,
     );
   }
 

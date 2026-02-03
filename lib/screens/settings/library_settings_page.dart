@@ -1,0 +1,572 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:spotiflac_android/l10n/l10n.dart';
+import 'package:spotiflac_android/providers/settings_provider.dart';
+import 'package:spotiflac_android/providers/local_library_provider.dart';
+import 'package:spotiflac_android/widgets/settings_group.dart';
+
+class LibrarySettingsPage extends ConsumerStatefulWidget {
+  const LibrarySettingsPage({super.key});
+
+  @override
+  ConsumerState<LibrarySettingsPage> createState() => _LibrarySettingsPageState();
+}
+
+class _LibrarySettingsPageState extends ConsumerState<LibrarySettingsPage> {
+  int _androidSdkVersion = 0;
+  bool _hasStoragePermission = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initDeviceInfo();
+  }
+
+  Future<void> _initDeviceInfo() async {
+    if (Platform.isAndroid) {
+      final deviceInfo = DeviceInfoPlugin();
+      final androidInfo = await deviceInfo.androidInfo;
+      final sdkVersion = androidInfo.version.sdkInt;
+      
+      // Check appropriate storage permission based on Android version
+      bool hasPermission;
+      if (sdkVersion >= 30) {
+        hasPermission = await Permission.manageExternalStorage.isGranted;
+      } else {
+        hasPermission = await Permission.storage.isGranted;
+      }
+      
+      if (mounted) {
+        setState(() {
+          _androidSdkVersion = sdkVersion;
+          _hasStoragePermission = hasPermission;
+        });
+      }
+    } else if (Platform.isIOS) {
+      // iOS doesn't need explicit storage permission for app documents
+      setState(() => _hasStoragePermission = true);
+    }
+  }
+
+  Future<bool> _requestStoragePermission() async {
+    if (Platform.isIOS) return true;
+    
+    PermissionStatus status;
+    if (_androidSdkVersion >= 30) {
+      status = await Permission.manageExternalStorage.request();
+    } else {
+      status = await Permission.storage.request();
+    }
+    
+    if (status.isGranted) {
+      setState(() => _hasStoragePermission = true);
+      return true;
+    } else if (status.isPermanentlyDenied) {
+      if (mounted) {
+        final shouldOpen = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(context.l10n.libraryStorageAccessRequired),
+            content: Text(context.l10n.libraryStorageAccessMessage),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(context.l10n.dialogCancel),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text(context.l10n.setupOpenSettings),
+              ),
+            ],
+          ),
+        );
+        if (shouldOpen == true) {
+          await openAppSettings();
+        }
+      }
+    }
+    return false;
+  }
+
+  Future<void> _pickLibraryFolder() async {
+    // Request permission first
+    if (!_hasStoragePermission) {
+      final granted = await _requestStoragePermission();
+      if (!granted) return;
+    }
+
+    final result = await FilePicker.platform.getDirectoryPath();
+    if (result != null) {
+      ref.read(settingsProvider.notifier).setLocalLibraryPath(result);
+    }
+  }
+
+  Future<void> _startScan() async {
+    final settings = ref.read(settingsProvider);
+    final libraryPath = settings.localLibraryPath;
+    
+    if (libraryPath.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.libraryScanSelectFolderFirst)),
+      );
+      return;
+    }
+
+    // Check if folder exists
+    if (!await Directory(libraryPath).exists()) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.libraryFolderNotExist)),
+        );
+      }
+      return;
+    }
+
+    await ref.read(localLibraryProvider.notifier).startScan(libraryPath);
+  }
+
+  Future<void> _cancelScan() async {
+    await ref.read(localLibraryProvider.notifier).cancelScan();
+  }
+
+  Future<void> _clearLibrary() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(context.l10n.libraryClearConfirmTitle),
+        content: Text(context.l10n.libraryClearConfirmMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(context.l10n.dialogCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: Text(context.l10n.dialogClear),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await ref.read(localLibraryProvider.notifier).clearLibrary();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.libraryCleared)),
+        );
+      }
+    }
+  }
+
+  Future<void> _cleanupMissingFiles() async {
+    final removed = await ref.read(localLibraryProvider.notifier).cleanupMissingFiles();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.libraryRemovedMissingFiles(removed))),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = ref.watch(settingsProvider);
+    final libraryState = ref.watch(localLibraryProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    final topPadding = MediaQuery.of(context).padding.top;
+
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 120 + topPadding,
+            collapsedHeight: kToolbarHeight,
+            floating: false,
+            pinned: true,
+            backgroundColor: colorScheme.surface,
+            surfaceTintColor: Colors.transparent,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.pop(context),
+            ),
+            flexibleSpace: LayoutBuilder(
+              builder: (context, constraints) {
+                final maxHeight = 120 + topPadding;
+                final minHeight = kToolbarHeight + topPadding;
+                final expandRatio = ((constraints.maxHeight - minHeight) /
+                        (maxHeight - minHeight))
+                    .clamp(0.0, 1.0);
+                final leftPadding = 56 - (32 * expandRatio);
+                return FlexibleSpaceBar(
+                  expandedTitleScale: 1.0,
+                  titlePadding: EdgeInsets.only(left: leftPadding, bottom: 16),
+                  title: Text(
+                    context.l10n.libraryTitle,
+                    style: TextStyle(
+                      fontSize: 20 + (8 * expandRatio),
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          // Library Status Section
+          SliverToBoxAdapter(
+            child: SettingsSectionHeader(title: context.l10n.libraryStatus),
+          ),
+          SliverToBoxAdapter(
+            child: SettingsGroup(
+              children: [
+                _LibraryStatusCard(
+                  itemCount: libraryState.items.length,
+                  isScanning: libraryState.isScanning,
+                  scanProgress: libraryState.scanProgress,
+                  scanCurrentFile: libraryState.scanCurrentFile,
+                  scanTotalFiles: libraryState.scanTotalFiles,
+                  lastScannedAt: libraryState.lastScannedAt,
+                ),
+              ],
+            ),
+          ),
+
+          // Scan Settings Section
+          SliverToBoxAdapter(
+            child: SettingsSectionHeader(title: context.l10n.libraryScanSettings),
+          ),
+          SliverToBoxAdapter(
+            child: SettingsGroup(
+              children: [
+                SettingsSwitchItem(
+                  icon: Icons.library_music_outlined,
+                  title: context.l10n.libraryEnableLocalLibrary,
+                  subtitle: settings.localLibraryEnabled
+                      ? context.l10n.libraryEnableLocalLibrarySubtitle
+                      : context.l10n.extensionsDisabled,
+                  value: settings.localLibraryEnabled,
+                  onChanged: (value) => ref
+                      .read(settingsProvider.notifier)
+                      .setLocalLibraryEnabled(value),
+                ),
+                Opacity(
+                  opacity: settings.localLibraryEnabled ? 1.0 : 0.5,
+                  child: SettingsItem(
+                    icon: Icons.folder_outlined,
+                    title: context.l10n.libraryFolder,
+                    subtitle: settings.localLibraryPath.isEmpty
+                        ? context.l10n.libraryFolderHint
+                        : settings.localLibraryPath,
+                    onTap: settings.localLibraryEnabled ? _pickLibraryFolder : null,
+                  ),
+                ),
+                SettingsSwitchItem(
+                  icon: Icons.content_copy_outlined,
+                  title: context.l10n.libraryShowDuplicateIndicator,
+                  subtitle: settings.localLibraryShowDuplicates
+                      ? context.l10n.libraryShowDuplicateIndicatorSubtitle
+                      : context.l10n.extensionsDisabled,
+                  value: settings.localLibraryShowDuplicates,
+                  enabled: settings.localLibraryEnabled,
+                  onChanged: (value) => ref
+                      .read(settingsProvider.notifier)
+                      .setLocalLibraryShowDuplicates(value),
+                  showDivider: false,
+                ),
+              ],
+            ),
+          ),
+
+          // Scan Actions Section
+          if (settings.localLibraryEnabled) ...[
+            SliverToBoxAdapter(
+              child: SettingsSectionHeader(title: context.l10n.libraryActions),
+            ),
+            SliverToBoxAdapter(
+              child: SettingsGroup(
+                children: [
+                  if (libraryState.isScanning)
+                    _ScanProgressTile(
+                      progress: libraryState.scanProgress,
+                      currentFile: libraryState.scanCurrentFile,
+                      totalFiles: libraryState.scanTotalFiles,
+                      onCancel: _cancelScan,
+                    )
+                  else
+                    Opacity(
+                      opacity: settings.localLibraryPath.isNotEmpty ? 1.0 : 0.5,
+                      child: SettingsItem(
+                        icon: Icons.refresh,
+                        title: context.l10n.libraryScan,
+                        subtitle: settings.localLibraryPath.isEmpty
+                            ? context.l10n.libraryScanSelectFolderFirst
+                            : context.l10n.libraryScanSubtitle,
+                        onTap: settings.localLibraryPath.isNotEmpty ? _startScan : null,
+                      ),
+                    ),
+                  Opacity(
+                    opacity: libraryState.items.isNotEmpty ? 1.0 : 0.5,
+                    child: SettingsItem(
+                      icon: Icons.cleaning_services_outlined,
+                      title: context.l10n.libraryCleanupMissingFiles,
+                      subtitle: context.l10n.libraryCleanupMissingFilesSubtitle,
+                      onTap: libraryState.items.isNotEmpty ? _cleanupMissingFiles : null,
+                    ),
+                  ),
+                  Opacity(
+                    opacity: libraryState.items.isNotEmpty ? 1.0 : 0.5,
+                    child: SettingsItem(
+                      icon: Icons.delete_outline,
+                      title: context.l10n.libraryClear,
+                      subtitle: context.l10n.libraryClearSubtitle,
+                      onTap: libraryState.items.isNotEmpty ? _clearLibrary : null,
+                      showDivider: false,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
+          // Info Section
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      size: 20,
+                      color: colorScheme.primary,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                        Text(
+                          context.l10n.libraryAbout,
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          context.l10n.libraryAboutDescription,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
+                          ),
+                        ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          const SliverToBoxAdapter(child: SizedBox(height: 32)),
+        ],
+      ),
+    );
+  }
+}
+
+class _LibraryStatusCard extends StatelessWidget {
+  final int itemCount;
+  final bool isScanning;
+  final double scanProgress;
+  final String? scanCurrentFile;
+  final int scanTotalFiles;
+  final DateTime? lastScannedAt;
+
+  const _LibraryStatusCard({
+    required this.itemCount,
+    required this.isScanning,
+    required this.scanProgress,
+    this.scanCurrentFile,
+    required this.scanTotalFiles,
+    this.lastScannedAt,
+  });
+
+  String _formatLastScanned(BuildContext context) {
+    if (lastScannedAt == null) return context.l10n.libraryLastScannedNever;
+    final now = DateTime.now();
+    final diff = now.difference(lastScannedAt!);
+    
+    if (diff.inMinutes < 1) return 'Just now';
+    if (diff.inHours < 1) return '${diff.inMinutes} minutes ago';
+    if (diff.inDays < 1) return '${diff.inHours} hours ago';
+    if (diff.inDays < 7) return context.l10n.dateDaysAgo(diff.inDays);
+    
+    return '${lastScannedAt!.day}/${lastScannedAt!.month}/${lastScannedAt!.year}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.library_music,
+                  color: colorScheme.onPrimaryContainer,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.l10n.libraryTracksCount(itemCount),
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      context.l10n.libraryLastScanned(_formatLastScanned(context)),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (isScanning)
+                SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    value: scanProgress / 100,
+                    color: colorScheme.primary,
+                  ),
+                ),
+            ],
+          ),
+          if (isScanning && scanCurrentFile != null) ...[
+            const SizedBox(height: 12),
+            LinearProgressIndicator(
+              value: scanProgress / 100,
+              backgroundColor: colorScheme.surfaceContainerHighest,
+              color: colorScheme.primary,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              scanCurrentFile!,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ScanProgressTile extends StatelessWidget {
+  final double progress;
+  final String? currentFile;
+  final int totalFiles;
+  final VoidCallback onCancel;
+
+  const _ScanProgressTile({
+    required this.progress,
+    this.currentFile,
+    required this.totalFiles,
+    required this.onCancel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.scanner, color: colorScheme.primary),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.l10n.libraryScanning,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      context.l10n.libraryScanProgress(progress.toStringAsFixed(0), totalFiles),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              TextButton(
+                onPressed: onCancel,
+                child: Text(context.l10n.actionCancel),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          LinearProgressIndicator(
+            value: progress / 100,
+            backgroundColor: colorScheme.surfaceContainerHighest,
+            color: colorScheme.primary,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          if (currentFile != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              currentFile!,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}

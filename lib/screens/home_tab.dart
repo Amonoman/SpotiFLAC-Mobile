@@ -13,6 +13,7 @@ import 'package:spotiflac_android/providers/settings_provider.dart';
 import 'package:spotiflac_android/providers/extension_provider.dart';
 import 'package:spotiflac_android/providers/recent_access_provider.dart';
 import 'package:spotiflac_android/providers/explore_provider.dart';
+import 'package:spotiflac_android/providers/local_library_provider.dart';
 import 'package:spotiflac_android/screens/track_metadata_screen.dart';
 import 'package:spotiflac_android/screens/album_screen.dart';
 import 'package:spotiflac_android/screens/artist_screen.dart';
@@ -2417,6 +2418,18 @@ class _TrackItemWithStatus extends ConsumerWidget {
       return state.isDownloaded(track.id);
     }));
     
+    // Check local library for duplicate detection
+    final settings = ref.watch(settingsProvider);
+    final showLocalLibraryIndicator = settings.localLibraryEnabled && settings.localLibraryShowDuplicates;
+    final isInLocalLibrary = showLocalLibraryIndicator 
+        ? ref.watch(localLibraryProvider.select((state) => 
+            state.existsInLibrary(
+              isrc: track.isrc,
+              trackName: track.name,
+              artistName: track.artistName,
+            )))
+        : false;
+    
     double thumbWidth = 56;
     double thumbHeight = 56;
     
@@ -2490,11 +2503,46 @@ class _TrackItemWithStatus extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
-                      Text(
-                        track.artistName,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              track.artistName,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (isInLocalLibrary) ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: colorScheme.tertiaryContainer,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.folder_outlined,
+                                    size: 10,
+                                    color: colorScheme.onTertiaryContainer,
+                                  ),
+                                  const SizedBox(width: 3),
+                                  Text(
+                                    context.l10n.libraryInLibrary,
+                                    style: TextStyle(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w500,
+                                      color: colorScheme.onTertiaryContainer,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ],
                   ),

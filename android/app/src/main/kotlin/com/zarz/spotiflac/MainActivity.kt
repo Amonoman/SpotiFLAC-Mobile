@@ -892,6 +892,33 @@ class MainActivity: FlutterActivity() {
                             }
                             result.success(response)
                         }
+                        // Local Library Scanning
+                        "scanLibraryFolder" -> {
+                            val folderPath = call.argument<String>("folder_path") ?: ""
+                            val response = withContext(Dispatchers.IO) {
+                                Gobackend.scanLibraryFolderJSON(folderPath)
+                            }
+                            result.success(response)
+                        }
+                        "getLibraryScanProgress" -> {
+                            val response = withContext(Dispatchers.IO) {
+                                Gobackend.getLibraryScanProgressJSON()
+                            }
+                            result.success(response)
+                        }
+                        "cancelLibraryScan" -> {
+                            withContext(Dispatchers.IO) {
+                                Gobackend.cancelLibraryScanJSON()
+                            }
+                            result.success(null)
+                        }
+                        "readAudioMetadata" -> {
+                            val filePath = call.argument<String>("file_path") ?: ""
+                            val response = withContext(Dispatchers.IO) {
+                                Gobackend.readAudioMetadataJSON(filePath)
+                            }
+                            result.success(response)
+                        }
                         else -> result.notImplemented()
                     }
                 } catch (e: Exception) {

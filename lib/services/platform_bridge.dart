@@ -821,6 +821,44 @@ static Future<Map<String, dynamic>> downloadWithExtensions({
     }
   }
 
+  // ==================== LOCAL LIBRARY SCANNING ====================
+
+  /// Scan a folder for audio files and read their metadata
+  /// Returns a list of track metadata
+  static Future<List<Map<String, dynamic>>> scanLibraryFolder(String folderPath) async {
+    _log.i('scanLibraryFolder: $folderPath');
+    final result = await _channel.invokeMethod('scanLibraryFolder', {
+      'folder_path': folderPath,
+    });
+    final list = jsonDecode(result as String) as List<dynamic>;
+    return list.map((e) => e as Map<String, dynamic>).toList();
+  }
+
+  /// Get current library scan progress
+  static Future<Map<String, dynamic>> getLibraryScanProgress() async {
+    final result = await _channel.invokeMethod('getLibraryScanProgress');
+    return jsonDecode(result as String) as Map<String, dynamic>;
+  }
+
+  /// Cancel ongoing library scan
+  static Future<void> cancelLibraryScan() async {
+    await _channel.invokeMethod('cancelLibraryScan');
+  }
+
+  /// Read metadata from a single audio file
+  static Future<Map<String, dynamic>?> readAudioMetadata(String filePath) async {
+    try {
+      final result = await _channel.invokeMethod('readAudioMetadata', {
+        'file_path': filePath,
+      });
+      if (result == null || result == '') return null;
+      return jsonDecode(result as String) as Map<String, dynamic>;
+    } catch (e) {
+      _log.w('Failed to read audio metadata: $e');
+      return null;
+    }
+  }
+
 
   static Future<Map<String, dynamic>> runPostProcessing(
     String filePath, {

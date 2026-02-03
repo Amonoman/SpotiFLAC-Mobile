@@ -1,0 +1,390 @@
+import 'dart:io';
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:spotiflac_android/utils/logger.dart';
+
+final _log = AppLogger('LibraryDatabase');
+
+/// Represents a track in the user's local music library
+class LocalLibraryItem {
+  final String id;
+  final String trackName;
+  final String artistName;
+  final String albumName;
+  final String? albumArtist;
+  final String filePath;
+  final DateTime scannedAt;
+  final String? isrc;
+  final int? trackNumber;
+  final int? discNumber;
+  final int? duration;
+  final String? releaseDate;
+  final int? bitDepth;
+  final int? sampleRate;
+  final String? genre;
+  final String? format; // flac, mp3, opus, m4a
+
+  const LocalLibraryItem({
+    required this.id,
+    required this.trackName,
+    required this.artistName,
+    required this.albumName,
+    this.albumArtist,
+    required this.filePath,
+    required this.scannedAt,
+    this.isrc,
+    this.trackNumber,
+    this.discNumber,
+    this.duration,
+    this.releaseDate,
+    this.bitDepth,
+    this.sampleRate,
+    this.genre,
+    this.format,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'trackName': trackName,
+    'artistName': artistName,
+    'albumName': albumName,
+    'albumArtist': albumArtist,
+    'filePath': filePath,
+    'scannedAt': scannedAt.toIso8601String(),
+    'isrc': isrc,
+    'trackNumber': trackNumber,
+    'discNumber': discNumber,
+    'duration': duration,
+    'releaseDate': releaseDate,
+    'bitDepth': bitDepth,
+    'sampleRate': sampleRate,
+    'genre': genre,
+    'format': format,
+  };
+
+  factory LocalLibraryItem.fromJson(Map<String, dynamic> json) =>
+      LocalLibraryItem(
+        id: json['id'] as String,
+        trackName: json['trackName'] as String,
+        artistName: json['artistName'] as String,
+        albumName: json['albumName'] as String,
+        albumArtist: json['albumArtist'] as String?,
+        filePath: json['filePath'] as String,
+        scannedAt: DateTime.parse(json['scannedAt'] as String),
+        isrc: json['isrc'] as String?,
+        trackNumber: json['trackNumber'] as int?,
+        discNumber: json['discNumber'] as int?,
+        duration: json['duration'] as int?,
+        releaseDate: json['releaseDate'] as String?,
+        bitDepth: json['bitDepth'] as int?,
+        sampleRate: json['sampleRate'] as int?,
+        genre: json['genre'] as String?,
+        format: json['format'] as String?,
+      );
+
+  /// Create a unique key for matching tracks
+  String get matchKey => '${trackName.toLowerCase()}|${artistName.toLowerCase()}';
+  String get albumKey => '${albumName.toLowerCase()}|${(albumArtist ?? artistName).toLowerCase()}';
+}
+
+/// SQLite database service for local library
+class LibraryDatabase {
+  static final LibraryDatabase instance = LibraryDatabase._init();
+  static Database? _database;
+  
+  LibraryDatabase._init();
+  
+  Future<Database> get database async {
+    if (_database != null) return _database!;
+    _database = await _initDB('local_library.db');
+    return _database!;
+  }
+  
+  Future<Database> _initDB(String fileName) async {
+    final dbPath = await getApplicationDocumentsDirectory();
+    final path = join(dbPath.path, fileName);
+    
+    _log.i('Initializing library database at: $path');
+    
+    return await openDatabase(
+      path,
+      version: 1,
+      onCreate: _createDB,
+      onUpgrade: _upgradeDB,
+    );
+  }
+  
+  Future<void> _createDB(Database db, int version) async {
+    _log.i('Creating library database schema v$version');
+    
+    await db.execute('''
+      CREATE TABLE library (
+        id TEXT PRIMARY KEY,
+        track_name TEXT NOT NULL,
+        artist_name TEXT NOT NULL,
+        album_name TEXT NOT NULL,
+        album_artist TEXT,
+        file_path TEXT NOT NULL UNIQUE,
+        scanned_at TEXT NOT NULL,
+        isrc TEXT,
+        track_number INTEGER,
+        disc_number INTEGER,
+        duration INTEGER,
+        release_date TEXT,
+        bit_depth INTEGER,
+        sample_rate INTEGER,
+        genre TEXT,
+        format TEXT
+      )
+    ''');
+    
+    // Indexes for fast lookups
+    await db.execute('CREATE INDEX idx_library_isrc ON library(isrc)');
+    await db.execute('CREATE INDEX idx_library_track_artist ON library(track_name, artist_name)');
+    await db.execute('CREATE INDEX idx_library_album ON library(album_name, album_artist)');
+    await db.execute('CREATE INDEX idx_library_file_path ON library(file_path)');
+    
+    _log.i('Library database schema created with indexes');
+  }
+  
+  Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    _log.i('Upgrading library database from v$oldVersion to v$newVersion');
+    // Future migrations go here
+  }
+  
+  /// Convert JSON format (camelCase) to DB row (snake_case)
+  Map<String, dynamic> _jsonToDbRow(Map<String, dynamic> json) {
+    return {
+      'id': json['id'],
+      'track_name': json['trackName'],
+      'artist_name': json['artistName'],
+      'album_name': json['albumName'],
+      'album_artist': json['albumArtist'],
+      'file_path': json['filePath'],
+      'scanned_at': json['scannedAt'],
+      'isrc': json['isrc'],
+      'track_number': json['trackNumber'],
+      'disc_number': json['discNumber'],
+      'duration': json['duration'],
+      'release_date': json['releaseDate'],
+      'bit_depth': json['bitDepth'],
+      'sample_rate': json['sampleRate'],
+      'genre': json['genre'],
+      'format': json['format'],
+    };
+  }
+  
+  /// Convert DB row (snake_case) to JSON format (camelCase)
+  Map<String, dynamic> _dbRowToJson(Map<String, dynamic> row) {
+    return {
+      'id': row['id'],
+      'trackName': row['track_name'],
+      'artistName': row['artist_name'],
+      'albumName': row['album_name'],
+      'albumArtist': row['album_artist'],
+      'filePath': row['file_path'],
+      'scannedAt': row['scanned_at'],
+      'isrc': row['isrc'],
+      'trackNumber': row['track_number'],
+      'discNumber': row['disc_number'],
+      'duration': row['duration'],
+      'releaseDate': row['release_date'],
+      'bitDepth': row['bit_depth'],
+      'sampleRate': row['sample_rate'],
+      'genre': row['genre'],
+      'format': row['format'],
+    };
+  }
+  
+  // ==================== CRUD Operations ====================
+  
+  /// Insert or update a library item
+  Future<void> upsert(Map<String, dynamic> json) async {
+    final db = await database;
+    await db.insert(
+      'library',
+      _jsonToDbRow(json),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+  
+  /// Batch insert multiple items
+  Future<void> upsertBatch(List<Map<String, dynamic>> items) async {
+    final db = await database;
+    final batch = db.batch();
+    
+    for (final json in items) {
+      batch.insert(
+        'library',
+        _jsonToDbRow(json),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+    
+    await batch.commit(noResult: true);
+    _log.i('Batch inserted ${items.length} items');
+  }
+  
+  /// Get all library items ordered by album/artist
+  Future<List<Map<String, dynamic>>> getAll({int? limit, int? offset}) async {
+    final db = await database;
+    final rows = await db.query(
+      'library',
+      orderBy: 'album_artist, album_name, disc_number, track_number',
+      limit: limit,
+      offset: offset,
+    );
+    return rows.map(_dbRowToJson).toList();
+  }
+  
+  /// Get item by ID
+  Future<Map<String, dynamic>?> getById(String id) async {
+    final db = await database;
+    final rows = await db.query(
+      'library',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return _dbRowToJson(rows.first);
+  }
+  
+  /// Get item by ISRC - O(1) with index
+  Future<Map<String, dynamic>?> getByIsrc(String isrc) async {
+    final db = await database;
+    final rows = await db.query(
+      'library',
+      where: 'isrc = ?',
+      whereArgs: [isrc],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return _dbRowToJson(rows.first);
+  }
+  
+  /// Check if ISRC exists - O(1) with index
+  Future<bool> existsByIsrc(String isrc) async {
+    final db = await database;
+    final result = await db.rawQuery(
+      'SELECT 1 FROM library WHERE isrc = ? LIMIT 1',
+      [isrc],
+    );
+    return result.isNotEmpty;
+  }
+  
+  /// Find by track name and artist (fuzzy match)
+  Future<List<Map<String, dynamic>>> findByTrackAndArtist(
+    String trackName,
+    String artistName,
+  ) async {
+    final db = await database;
+    final rows = await db.query(
+      'library',
+      where: 'LOWER(track_name) = ? AND LOWER(artist_name) = ?',
+      whereArgs: [trackName.toLowerCase(), artistName.toLowerCase()],
+    );
+    return rows.map(_dbRowToJson).toList();
+  }
+  
+  /// Check if track exists by name and artist
+  Future<Map<String, dynamic>?> findExisting({
+    String? isrc,
+    String? trackName,
+    String? artistName,
+  }) async {
+    // First try ISRC if available
+    if (isrc != null && isrc.isNotEmpty) {
+      final byIsrc = await getByIsrc(isrc);
+      if (byIsrc != null) return byIsrc;
+    }
+    
+    // Then try name matching
+    if (trackName != null && artistName != null) {
+      final matches = await findByTrackAndArtist(trackName, artistName);
+      if (matches.isNotEmpty) return matches.first;
+    }
+    
+    return null;
+  }
+  
+  /// Get all ISRCs as Set for fast in-memory lookup
+  Future<Set<String>> getAllIsrcs() async {
+    final db = await database;
+    final rows = await db.rawQuery(
+      'SELECT isrc FROM library WHERE isrc IS NOT NULL AND isrc != ""'
+    );
+    return rows.map((r) => r['isrc'] as String).toSet();
+  }
+  
+  /// Get all track keys (name|artist) for matching
+  Future<Set<String>> getAllTrackKeys() async {
+    final db = await database;
+    final rows = await db.rawQuery(
+      'SELECT LOWER(track_name) || "|" || LOWER(artist_name) as match_key FROM library'
+    );
+    return rows.map((r) => r['match_key'] as String).toSet();
+  }
+  
+  /// Delete by file path
+  Future<void> deleteByPath(String filePath) async {
+    final db = await database;
+    await db.delete('library', where: 'file_path = ?', whereArgs: [filePath]);
+  }
+  
+  /// Delete items where file no longer exists
+  Future<int> cleanupMissingFiles() async {
+    final db = await database;
+    final rows = await db.query('library', columns: ['id', 'file_path']);
+    
+    int removed = 0;
+    for (final row in rows) {
+      final filePath = row['file_path'] as String;
+      if (!await File(filePath).exists()) {
+        await db.delete('library', where: 'id = ?', whereArgs: [row['id']]);
+        removed++;
+      }
+    }
+    
+    if (removed > 0) {
+      _log.i('Cleaned up $removed missing files from library');
+    }
+    return removed;
+  }
+  
+  /// Clear all library data
+  Future<void> clearAll() async {
+    final db = await database;
+    await db.delete('library');
+    _log.i('Cleared all library data');
+  }
+  
+  /// Get total count
+  Future<int> getCount() async {
+    final db = await database;
+    final result = await db.rawQuery('SELECT COUNT(*) as count FROM library');
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
+  
+  /// Search library by query
+  Future<List<Map<String, dynamic>>> search(String query, {int limit = 50}) async {
+    final db = await database;
+    final searchQuery = '%${query.toLowerCase()}%';
+    final rows = await db.query(
+      'library',
+      where: 'LOWER(track_name) LIKE ? OR LOWER(artist_name) LIKE ? OR LOWER(album_name) LIKE ?',
+      whereArgs: [searchQuery, searchQuery, searchQuery],
+      orderBy: 'track_name',
+      limit: limit,
+    );
+    return rows.map(_dbRowToJson).toList();
+  }
+  
+  /// Close database
+  Future<void> close() async {
+    final db = await database;
+    await db.close();
+    _database = null;
+  }
+}

@@ -2089,3 +2089,25 @@ func GetExtensionHomeFeedJSON(extensionID string) (string, error) {
 func GetExtensionBrowseCategoriesJSON(extensionID string) (string, error) {
 	return callExtensionFunctionJSON(extensionID, "getBrowseCategories", 30*time.Second)
 }
+
+// ==================== LOCAL LIBRARY SCANNING ====================
+
+// ScanLibraryFolderJSON scans a folder for audio files and returns metadata
+func ScanLibraryFolderJSON(folderPath string) (string, error) {
+	return ScanLibraryFolder(folderPath)
+}
+
+// GetLibraryScanProgressJSON returns current scan progress
+func GetLibraryScanProgressJSON() string {
+	return GetLibraryScanProgress()
+}
+
+// CancelLibraryScanJSON cancels ongoing library scan
+func CancelLibraryScanJSON() {
+	CancelLibraryScan()
+}
+
+// ReadAudioMetadataJSON reads metadata from a single audio file
+func ReadAudioMetadataJSON(filePath string) (string, error) {
+	return ReadAudioMetadata(filePath)
+}

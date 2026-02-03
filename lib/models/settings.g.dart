@@ -48,6 +48,10 @@ AppSettings _$AppSettingsFromJson(Map<String, dynamic> json) => AppSettings(
   cloudUsername: json['cloudUsername'] as String? ?? '',
   cloudPassword: json['cloudPassword'] as String? ?? '',
   cloudRemotePath: json['cloudRemotePath'] as String? ?? '/Music/SpotiFLAC',
+  localLibraryEnabled: json['localLibraryEnabled'] as bool? ?? false,
+  localLibraryPath: json['localLibraryPath'] as String? ?? '',
+  localLibraryShowDuplicates:
+      json['localLibraryShowDuplicates'] as bool? ?? true,
 );
 
 Map<String, dynamic> _$AppSettingsToJson(AppSettings instance) =>
@@ -90,4 +94,7 @@ Map<String, dynamic> _$AppSettingsToJson(AppSettings instance) =>
       'cloudUsername': instance.cloudUsername,
       'cloudPassword': instance.cloudPassword,
       'cloudRemotePath': instance.cloudRemotePath,
+      'localLibraryEnabled': instance.localLibraryEnabled,
+      'localLibraryPath': instance.localLibraryPath,
+      'localLibraryShowDuplicates': instance.localLibraryShowDuplicates,
     };

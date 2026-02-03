@@ -5,6 +5,7 @@ import 'package:spotiflac_android/l10n/l10n.dart';
 import 'package:spotiflac_android/screens/settings/appearance_settings_page.dart';
 import 'package:spotiflac_android/screens/settings/download_settings_page.dart';
 import 'package:spotiflac_android/screens/settings/extensions_page.dart';
+import 'package:spotiflac_android/screens/settings/library_settings_page.dart';
 import 'package:spotiflac_android/screens/settings/options_settings_page.dart';
 import 'package:spotiflac_android/screens/settings/cloud_settings_page.dart';
 import 'package:spotiflac_android/screens/settings/about_page.dart';
@@ -79,6 +80,12 @@ class SettingsTab extends ConsumerWidget {
                     title: l10n.settingsCloudSave,
                     subtitle: l10n.settingsCloudSaveSubtitle,
                     onTap: () => _navigateTo(context, const CloudSettingsPage()),
+                  ),
+                  SettingsItem(
+                    icon: Icons.library_music_outlined,
+                    title: l10n.settingsLocalLibrary,
+                    subtitle: l10n.settingsLocalLibrarySubtitle,
+                    onTap: () => _navigateTo(context, const LibrarySettingsPage()),
                   ),
                   SettingsItem(
                     icon: Icons.tune_outlined,

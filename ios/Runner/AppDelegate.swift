@@ -687,6 +687,29 @@ import Gobackend  // Import Go framework
             if let error = error { throw error }
             return response
             
+        // Local Library Scanning
+        case "scanLibraryFolder":
+            let args = call.arguments as! [String: Any]
+            let folderPath = args["folder_path"] as! String
+            let response = GobackendScanLibraryFolderJSON(folderPath, &error)
+            if let error = error { throw error }
+            return response
+            
+        case "getLibraryScanProgress":
+            let response = GobackendGetLibraryScanProgressJSON()
+            return response
+            
+        case "cancelLibraryScan":
+            GobackendCancelLibraryScanJSON()
+            return nil
+            
+        case "readAudioMetadata":
+            let args = call.arguments as! [String: Any]
+            let filePath = args["file_path"] as! String
+            let response = GobackendReadAudioMetadataJSON(filePath, &error)
+            if let error = error { throw error }
+            return response
+            
         default:
             throw NSError(
                 domain: "SpotiFLAC",

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:spotiflac_android/models/settings.dart';
 import 'package:spotiflac_android/services/platform_bridge.dart';
 import 'package:spotiflac_android/utils/logger.dart';
@@ -8,9 +9,11 @@ import 'package:spotiflac_android/utils/logger.dart';
 const _settingsKey = 'app_settings';
 const _migrationVersionKey = 'settings_migration_version';
 const _currentMigrationVersion = 1;
+const _cloudPasswordKey = 'cloud_password';
 
 class SettingsNotifier extends Notifier<AppSettings> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   @override
   AppSettings build() {
@@ -25,11 +28,13 @@ class SettingsNotifier extends Notifier<AppSettings> {
       state = AppSettings.fromJson(jsonDecode(json));
       
       await _runMigrations(prefs);
-      
-      _applySpotifyCredentials();
-      
-      LogBuffer.loggingEnabled = state.enableLogging;
     }
+
+    await _loadCloudPassword(prefs);
+
+    _applySpotifyCredentials();
+    
+    LogBuffer.loggingEnabled = state.enableLogging;
   }
 
   Future<void> _runMigrations(SharedPreferences prefs) async {
@@ -49,7 +54,38 @@ class SettingsNotifier extends Notifier<AppSettings> {
 
   Future<void> _saveSettings() async {
     final prefs = await _prefs;
-    await prefs.setString(_settingsKey, jsonEncode(state.toJson()));
+    final settingsToSave = state.copyWith(cloudPassword: '');
+    await prefs.setString(_settingsKey, jsonEncode(settingsToSave.toJson()));
+  }
+
+  Future<void> _loadCloudPassword(SharedPreferences prefs) async {
+    final storedPassword = await _secureStorage.read(key: _cloudPasswordKey);
+    final prefsPassword = state.cloudPassword;
+
+    if ((storedPassword == null || storedPassword.isEmpty) &&
+        prefsPassword.isNotEmpty) {
+      await _secureStorage.write(key: _cloudPasswordKey, value: prefsPassword);
+    }
+
+    final effectivePassword = (storedPassword != null && storedPassword.isNotEmpty)
+        ? storedPassword
+        : (prefsPassword.isNotEmpty ? prefsPassword : '');
+
+    if (effectivePassword != state.cloudPassword) {
+      state = state.copyWith(cloudPassword: effectivePassword);
+    }
+
+    if (prefsPassword.isNotEmpty) {
+      await _saveSettings();
+    }
+  }
+
+  Future<void> _storeCloudPassword(String password) async {
+    if (password.isEmpty) {
+      await _secureStorage.delete(key: _cloudPasswordKey);
+    } else {
+      await _secureStorage.write(key: _cloudPasswordKey, value: password);
+    }
   }
 
   Future<void> _applySpotifyCredentials() async {
@@ -272,8 +308,9 @@ void setUseAllFilesAccess(bool enabled) {
     _saveSettings();
   }
 
-  void setCloudPassword(String password) {
+  Future<void> setCloudPassword(String password) async {
     state = state.copyWith(cloudPassword: password);
+    await _storeCloudPassword(password);
     _saveSettings();
   }
 
@@ -282,22 +319,42 @@ void setUseAllFilesAccess(bool enabled) {
     _saveSettings();
   }
 
-  void setCloudSettings({
+  Future<void> setCloudSettings({
     bool? enabled,
     String? provider,
     String? serverUrl,
     String? username,
     String? password,
     String? remotePath,
-  }) {
+  }) async {
+    final nextPassword = password ?? state.cloudPassword;
     state = state.copyWith(
       cloudUploadEnabled: enabled ?? state.cloudUploadEnabled,
       cloudProvider: provider ?? state.cloudProvider,
       cloudServerUrl: serverUrl ?? state.cloudServerUrl,
       cloudUsername: username ?? state.cloudUsername,
-      cloudPassword: password ?? state.cloudPassword,
+      cloudPassword: nextPassword,
       cloudRemotePath: remotePath ?? state.cloudRemotePath,
     );
+    if (password != null) {
+      await _storeCloudPassword(nextPassword);
+    }
+    _saveSettings();
+  }
+
+  // Local Library Settings
+  void setLocalLibraryEnabled(bool enabled) {
+    state = state.copyWith(localLibraryEnabled: enabled);
+    _saveSettings();
+  }
+
+  void setLocalLibraryPath(String path) {
+    state = state.copyWith(localLibraryPath: path);
+    _saveSettings();
+  }
+
+  void setLocalLibraryShowDuplicates(bool show) {
+    state = state.copyWith(localLibraryShowDuplicates: show);
     _saveSettings();
   }
 }

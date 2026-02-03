@@ -2087,6 +2087,52 @@ class AppLocalizationsFr extends AppLocalizations {
   String get cloudSettingsRecentUploads => 'Recent Uploads';
 
   @override
+  String get cloudSettingsResetSftpHostKey => 'Reset SFTP Host Key';
+
+  @override
+  String get cloudSettingsResetAllSftpHostKeys => 'Reset All SFTP Host Keys';
+
+  @override
+  String get cloudSettingsResetSftpHostKeyMessage =>
+      'This will forget the saved host key for this server. The next connection will save a new key.';
+
+  @override
+  String get cloudSettingsResetAllSftpHostKeysMessage =>
+      'This will forget all saved SFTP host keys. Next connections will save new keys.';
+
+  @override
+  String get cloudSettingsResetConfirm => 'Reset';
+
+  @override
+  String get cloudSettingsResetAllConfirm => 'Reset All';
+
+  @override
+  String get cloudSettingsServerUrlRequired => 'Server URL is required';
+
+  @override
+  String get cloudSettingsResetSftpHostKeySuccess =>
+      'SFTP host key reset. Connect again to save a new key.';
+
+  @override
+  String get cloudSettingsResetSftpHostKeyNotFound =>
+      'No stored host key found for this server.';
+
+  @override
+  String cloudSettingsResetAllSftpHostKeysCleared(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Cleared $count SFTP host keys.',
+      one: 'Cleared 1 SFTP host key.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get cloudSettingsResetAllSftpHostKeysNone =>
+      'No stored SFTP host keys found.';
+
+  @override
   String get queueEmpty => 'No downloads in queue';
 
   @override
@@ -2308,4 +2354,120 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get allFilesAccessDisabledMessage =>
       'All Files Access disabled. The app will use limited storage access.';
+
+  @override
+  String get settingsLocalLibrary => 'Local Library';
+
+  @override
+  String get settingsLocalLibrarySubtitle => 'Scan music & detect duplicates';
+
+  @override
+  String get libraryTitle => 'Local Library';
+
+  @override
+  String get libraryStatus => 'Library Status';
+
+  @override
+  String get libraryScanSettings => 'Scan Settings';
+
+  @override
+  String get libraryEnableLocalLibrary => 'Enable Local Library';
+
+  @override
+  String get libraryEnableLocalLibrarySubtitle =>
+      'Scan and track your existing music';
+
+  @override
+  String get libraryFolder => 'Library Folder';
+
+  @override
+  String get libraryFolderHint => 'Tap to select folder';
+
+  @override
+  String get libraryShowDuplicateIndicator => 'Show Duplicate Indicator';
+
+  @override
+  String get libraryShowDuplicateIndicatorSubtitle =>
+      'Show when searching for existing tracks';
+
+  @override
+  String get libraryActions => 'Actions';
+
+  @override
+  String get libraryScan => 'Scan Library';
+
+  @override
+  String get libraryScanSubtitle => 'Scan for audio files';
+
+  @override
+  String get libraryScanSelectFolderFirst => 'Select a folder first';
+
+  @override
+  String get libraryCleanupMissingFiles => 'Cleanup Missing Files';
+
+  @override
+  String get libraryCleanupMissingFilesSubtitle =>
+      'Remove entries for files that no longer exist';
+
+  @override
+  String get libraryClear => 'Clear Library';
+
+  @override
+  String get libraryClearSubtitle => 'Remove all scanned tracks';
+
+  @override
+  String get libraryClearConfirmTitle => 'Clear Library';
+
+  @override
+  String get libraryClearConfirmMessage =>
+      'This will remove all scanned tracks from your library. Your actual music files will not be deleted.';
+
+  @override
+  String get libraryAbout => 'About Local Library';
+
+  @override
+  String get libraryAboutDescription =>
+      'Scans your existing music collection to detect duplicates when downloading. Supports FLAC, M4A, MP3, Opus, and OGG formats. Metadata is read from file tags when available.';
+
+  @override
+  String libraryTracksCount(int count) {
+    return '$count tracks';
+  }
+
+  @override
+  String libraryLastScanned(String time) {
+    return 'Last scanned: $time';
+  }
+
+  @override
+  String get libraryLastScannedNever => 'Never';
+
+  @override
+  String get libraryScanning => 'Scanning...';
+
+  @override
+  String libraryScanProgress(String progress, int total) {
+    return '$progress% of $total files';
+  }
+
+  @override
+  String get libraryInLibrary => 'In Library';
+
+  @override
+  String libraryRemovedMissingFiles(int count) {
+    return 'Removed $count missing files from library';
+  }
+
+  @override
+  String get libraryCleared => 'Library cleared';
+
+  @override
+  String get libraryStorageAccessRequired => 'Storage Access Required';
+
+  @override
+  String get libraryStorageAccessMessage =>
+      'SpotiFLAC needs storage access to scan your music library. Please grant permission in settings.';
+
+  @override
+  String get libraryFolderNotExist => 'Selected folder does not exist';
 }
