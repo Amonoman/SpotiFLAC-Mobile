@@ -42,14 +42,6 @@ AppSettings _$AppSettingsFromJson(Map<String, dynamic> json) => AppSettings(
   autoExportFailedDownloads:
       json['autoExportFailedDownloads'] as bool? ?? false,
   downloadNetworkMode: json['downloadNetworkMode'] as String? ?? 'any',
-  cloudUploadEnabled: json['cloudUploadEnabled'] as bool? ?? false,
-  cloudProvider: json['cloudProvider'] as String? ?? 'none',
-  cloudServerUrl: json['cloudServerUrl'] as String? ?? '',
-  cloudUsername: json['cloudUsername'] as String? ?? '',
-  cloudPassword: json['cloudPassword'] as String? ?? '',
-  cloudRemotePath: json['cloudRemotePath'] as String? ?? '/Music/SpotiFLAC',
-  cloudAllowInsecureHttp:
-      json['cloudAllowInsecureHttp'] as bool? ?? false,
   localLibraryEnabled: json['localLibraryEnabled'] as bool? ?? false,
   localLibraryPath: json['localLibraryPath'] as String? ?? '',
   localLibraryShowDuplicates:
@@ -90,13 +82,6 @@ Map<String, dynamic> _$AppSettingsToJson(AppSettings instance) =>
       'useAllFilesAccess': instance.useAllFilesAccess,
       'autoExportFailedDownloads': instance.autoExportFailedDownloads,
       'downloadNetworkMode': instance.downloadNetworkMode,
-      'cloudUploadEnabled': instance.cloudUploadEnabled,
-      'cloudProvider': instance.cloudProvider,
-      'cloudServerUrl': instance.cloudServerUrl,
-      'cloudUsername': instance.cloudUsername,
-      'cloudPassword': instance.cloudPassword,
-      'cloudRemotePath': instance.cloudRemotePath,
-      'cloudAllowInsecureHttp': instance.cloudAllowInsecureHttp,
       'localLibraryEnabled': instance.localLibraryEnabled,
       'localLibraryPath': instance.localLibraryPath,
       'localLibraryShowDuplicates': instance.localLibraryShowDuplicates,

@@ -37,15 +37,6 @@ class AppSettings {
   final bool autoExportFailedDownloads; // Auto export failed downloads to TXT file
   final String downloadNetworkMode; // 'any' = WiFi + Mobile, 'wifi_only' = WiFi only
   
-  // Cloud Upload Settings
-  final bool cloudUploadEnabled; // Enable auto-upload after download
-  final String cloudProvider; // 'none', 'webdav', 'sftp', 'gdrive'
-  final String cloudServerUrl; // WebDAV/SFTP server URL
-  final String cloudUsername; // Server username
-  final String cloudPassword; // Server password (stored securely)
-  final String cloudRemotePath; // Remote folder path (e.g. /Music/SpotiFLAC)
-  final bool cloudAllowInsecureHttp; // Allow HTTP for WebDAV (insecure)
-  
   // Local Library Settings
   final bool localLibraryEnabled; // Enable local library scanning
   final String localLibraryPath; // Path to scan for audio files
@@ -84,14 +75,6 @@ class AppSettings {
     this.useAllFilesAccess = false,
     this.autoExportFailedDownloads = false,
     this.downloadNetworkMode = 'any',
-    // Cloud Upload defaults
-    this.cloudUploadEnabled = false,
-    this.cloudProvider = 'none',
-    this.cloudServerUrl = '',
-    this.cloudUsername = '',
-    this.cloudPassword = '',
-    this.cloudRemotePath = '/Music/SpotiFLAC',
-    this.cloudAllowInsecureHttp = false,
     // Local Library defaults
     this.localLibraryEnabled = false,
     this.localLibraryPath = '',
@@ -132,14 +115,6 @@ class AppSettings {
     bool? useAllFilesAccess,
     bool? autoExportFailedDownloads,
     String? downloadNetworkMode,
-    // Cloud Upload
-    bool? cloudUploadEnabled,
-    String? cloudProvider,
-    String? cloudServerUrl,
-    String? cloudUsername,
-    String? cloudPassword,
-    String? cloudRemotePath,
-    bool? cloudAllowInsecureHttp,
     // Local Library
     bool? localLibraryEnabled,
     String? localLibraryPath,
@@ -178,15 +153,6 @@ class AppSettings {
       useAllFilesAccess: useAllFilesAccess ?? this.useAllFilesAccess,
       autoExportFailedDownloads: autoExportFailedDownloads ?? this.autoExportFailedDownloads,
       downloadNetworkMode: downloadNetworkMode ?? this.downloadNetworkMode,
-      // Cloud Upload
-      cloudUploadEnabled: cloudUploadEnabled ?? this.cloudUploadEnabled,
-      cloudProvider: cloudProvider ?? this.cloudProvider,
-      cloudServerUrl: cloudServerUrl ?? this.cloudServerUrl,
-      cloudUsername: cloudUsername ?? this.cloudUsername,
-      cloudPassword: cloudPassword ?? this.cloudPassword,
-      cloudRemotePath: cloudRemotePath ?? this.cloudRemotePath,
-      cloudAllowInsecureHttp:
-          cloudAllowInsecureHttp ?? this.cloudAllowInsecureHttp,
       // Local Library
       localLibraryEnabled: localLibraryEnabled ?? this.localLibraryEnabled,
       localLibraryPath: localLibraryPath ?? this.localLibraryPath,

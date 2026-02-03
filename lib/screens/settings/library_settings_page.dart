@@ -13,7 +13,8 @@ class LibrarySettingsPage extends ConsumerStatefulWidget {
   const LibrarySettingsPage({super.key});
 
   @override
-  ConsumerState<LibrarySettingsPage> createState() => _LibrarySettingsPageState();
+  ConsumerState<LibrarySettingsPage> createState() =>
+      _LibrarySettingsPageState();
 }
 
 class _LibrarySettingsPageState extends ConsumerState<LibrarySettingsPage> {
@@ -31,7 +32,7 @@ class _LibrarySettingsPageState extends ConsumerState<LibrarySettingsPage> {
       final deviceInfo = DeviceInfoPlugin();
       final androidInfo = await deviceInfo.androidInfo;
       final sdkVersion = androidInfo.version.sdkInt;
-      
+
       // Check appropriate storage permission based on Android version
       bool hasPermission;
       if (sdkVersion >= 30) {
@@ -39,7 +40,7 @@ class _LibrarySettingsPageState extends ConsumerState<LibrarySettingsPage> {
       } else {
         hasPermission = await Permission.storage.isGranted;
       }
-      
+
       if (mounted) {
         setState(() {
           _androidSdkVersion = sdkVersion;
@@ -54,14 +55,14 @@ class _LibrarySettingsPageState extends ConsumerState<LibrarySettingsPage> {
 
   Future<bool> _requestStoragePermission() async {
     if (Platform.isIOS) return true;
-    
+
     PermissionStatus status;
     if (_androidSdkVersion >= 30) {
       status = await Permission.manageExternalStorage.request();
     } else {
       status = await Permission.storage.request();
     }
-    
+
     if (status.isGranted) {
       setState(() => _hasStoragePermission = true);
       return true;
@@ -108,7 +109,7 @@ class _LibrarySettingsPageState extends ConsumerState<LibrarySettingsPage> {
   Future<void> _startScan() async {
     final settings = ref.read(settingsProvider);
     final libraryPath = settings.localLibraryPath;
-    
+
     if (libraryPath.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.libraryScanSelectFolderFirst)),
@@ -158,18 +159,22 @@ class _LibrarySettingsPageState extends ConsumerState<LibrarySettingsPage> {
     if (confirmed == true) {
       await ref.read(localLibraryProvider.notifier).clearLibrary();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.libraryCleared)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(context.l10n.libraryCleared)));
       }
     }
   }
 
   Future<void> _cleanupMissingFiles() async {
-    final removed = await ref.read(localLibraryProvider.notifier).cleanupMissingFiles();
+    final removed = await ref
+        .read(localLibraryProvider.notifier)
+        .cleanupMissingFiles();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.libraryRemovedMissingFiles(removed))),
+        SnackBar(
+          content: Text(context.l10n.libraryRemovedMissingFiles(removed)),
+        ),
       );
     }
   }
@@ -199,9 +204,10 @@ class _LibrarySettingsPageState extends ConsumerState<LibrarySettingsPage> {
               builder: (context, constraints) {
                 final maxHeight = 120 + topPadding;
                 final minHeight = kToolbarHeight + topPadding;
-                final expandRatio = ((constraints.maxHeight - minHeight) /
-                        (maxHeight - minHeight))
-                    .clamp(0.0, 1.0);
+                final expandRatio =
+                    ((constraints.maxHeight - minHeight) /
+                            (maxHeight - minHeight))
+                        .clamp(0.0, 1.0);
                 final leftPadding = 56 - (32 * expandRatio);
                 return FlexibleSpaceBar(
                   expandedTitleScale: 1.0,
@@ -219,28 +225,22 @@ class _LibrarySettingsPageState extends ConsumerState<LibrarySettingsPage> {
             ),
           ),
 
-          // Library Status Section
           SliverToBoxAdapter(
-            child: SettingsSectionHeader(title: context.l10n.libraryStatus),
-          ),
-          SliverToBoxAdapter(
-            child: SettingsGroup(
-              children: [
-                _LibraryStatusCard(
-                  itemCount: libraryState.items.length,
-                  isScanning: libraryState.isScanning,
-                  scanProgress: libraryState.scanProgress,
-                  scanCurrentFile: libraryState.scanCurrentFile,
-                  scanTotalFiles: libraryState.scanTotalFiles,
-                  lastScannedAt: libraryState.lastScannedAt,
-                ),
-              ],
+            child: _LibraryHeroCard(
+              itemCount: libraryState.items.length,
+              isScanning: libraryState.isScanning,
+              scanProgress: libraryState.scanProgress,
+              scanCurrentFile: libraryState.scanCurrentFile,
+              scanTotalFiles: libraryState.scanTotalFiles,
+              lastScannedAt: libraryState.lastScannedAt,
             ),
           ),
 
           // Scan Settings Section
           SliverToBoxAdapter(
-            child: SettingsSectionHeader(title: context.l10n.libraryScanSettings),
+            child: SettingsSectionHeader(
+              title: context.l10n.libraryScanSettings,
+            ),
           ),
           SliverToBoxAdapter(
             child: SettingsGroup(
@@ -264,7 +264,9 @@ class _LibrarySettingsPageState extends ConsumerState<LibrarySettingsPage> {
                     subtitle: settings.localLibraryPath.isEmpty
                         ? context.l10n.libraryFolderHint
                         : settings.localLibraryPath,
-                    onTap: settings.localLibraryEnabled ? _pickLibraryFolder : null,
+                    onTap: settings.localLibraryEnabled
+                        ? _pickLibraryFolder
+                        : null,
                   ),
                 ),
                 SettingsSwitchItem(
@@ -308,7 +310,9 @@ class _LibrarySettingsPageState extends ConsumerState<LibrarySettingsPage> {
                         subtitle: settings.localLibraryPath.isEmpty
                             ? context.l10n.libraryScanSelectFolderFirst
                             : context.l10n.libraryScanSubtitle,
-                        onTap: settings.localLibraryPath.isNotEmpty ? _startScan : null,
+                        onTap: settings.localLibraryPath.isNotEmpty
+                            ? _startScan
+                            : null,
                       ),
                     ),
                   Opacity(
@@ -317,7 +321,9 @@ class _LibrarySettingsPageState extends ConsumerState<LibrarySettingsPage> {
                       icon: Icons.cleaning_services_outlined,
                       title: context.l10n.libraryCleanupMissingFiles,
                       subtitle: context.l10n.libraryCleanupMissingFilesSubtitle,
-                      onTap: libraryState.items.isNotEmpty ? _cleanupMissingFiles : null,
+                      onTap: libraryState.items.isNotEmpty
+                          ? _cleanupMissingFiles
+                          : null,
                     ),
                   ),
                   Opacity(
@@ -326,7 +332,9 @@ class _LibrarySettingsPageState extends ConsumerState<LibrarySettingsPage> {
                       icon: Icons.delete_outline,
                       title: context.l10n.libraryClear,
                       subtitle: context.l10n.libraryClearSubtitle,
-                      onTap: libraryState.items.isNotEmpty ? _clearLibrary : null,
+                      onTap: libraryState.items.isNotEmpty
+                          ? _clearLibrary
+                          : null,
                       showDivider: false,
                     ),
                   ),
@@ -358,20 +366,23 @@ class _LibrarySettingsPageState extends ConsumerState<LibrarySettingsPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                        Text(
-                          context.l10n.libraryAbout,
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.onPrimaryContainer,
+                          Text(
+                            context.l10n.libraryAbout,
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.onPrimaryContainer,
+                                ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          context.l10n.libraryAboutDescription,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
+                          const SizedBox(height: 4),
+                          Text(
+                            context.l10n.libraryAboutDescription,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: colorScheme.onPrimaryContainer
+                                      .withValues(alpha: 0.8),
+                                ),
                           ),
-                        ),
                         ],
                       ),
                     ),
@@ -388,7 +399,7 @@ class _LibrarySettingsPageState extends ConsumerState<LibrarySettingsPage> {
   }
 }
 
-class _LibraryStatusCard extends StatelessWidget {
+class _LibraryHeroCard extends StatelessWidget {
   final int itemCount;
   final bool isScanning;
   final double scanProgress;
@@ -396,7 +407,7 @@ class _LibraryStatusCard extends StatelessWidget {
   final int scanTotalFiles;
   final DateTime? lastScannedAt;
 
-  const _LibraryStatusCard({
+  const _LibraryHeroCard({
     required this.itemCount,
     required this.isScanning,
     required this.scanProgress,
@@ -409,87 +420,178 @@ class _LibraryStatusCard extends StatelessWidget {
     if (lastScannedAt == null) return context.l10n.libraryLastScannedNever;
     final now = DateTime.now();
     final diff = now.difference(lastScannedAt!);
-    
+
     if (diff.inMinutes < 1) return context.l10n.timeJustNow;
     if (diff.inHours < 1) return context.l10n.timeMinutesAgo(diff.inMinutes);
     if (diff.inDays < 1) return context.l10n.timeHoursAgo(diff.inHours);
     if (diff.inDays < 7) return context.l10n.dateDaysAgo(diff.inDays);
-    
+
     return '${lastScannedAt!.day}/${lastScannedAt!.month}/${lastScannedAt!.year}';
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      height: 220,
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          if (!isDark)
+            BoxShadow(
+              color: colorScheme.shadow.withOpacity(0.05),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+            ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.library_music,
-                  color: colorScheme.onPrimaryContainer,
-                  size: 28,
-                ),
+          // Background decorative elements
+          Positioned(
+            right: -20,
+            top: -20,
+            child: Icon(
+              Icons.library_music,
+              size: 200,
+              color: colorScheme.primary.withOpacity(0.05),
+            ),
+          ),
+          Positioned(
+            left: -40,
+            bottom: -40,
+            child: Container(
+              width: 150,
+              height: 150,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: colorScheme.secondaryContainer.withOpacity(0.3),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
+            ),
+          ),
+
+          // Content
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      context.l10n.libraryTracksCount(itemCount),
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Icon(
+                        isScanning ? Icons.sync : Icons.music_note,
+                        color: colorScheme.onPrimaryContainer,
+                        size: 32,
                       ),
                     ),
-                    Text(
-                      context.l10n.libraryLastScanned(_formatLastScanned(context)),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                    const Spacer(),
+                    if (isScanning)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              width: 12,
+                              height: 12,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: colorScheme.onPrimary,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Scanning...',
+                              style: TextStyle(
+                                color: colorScheme.onPrimary,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
                   ],
                 ),
-              ),
-              if (isScanning)
-                SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    value: scanProgress / 100,
-                    color: colorScheme.primary,
+                const Spacer(),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    itemCount.toString(),
+                    style: TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
+                      height: 1.0,
+                      letterSpacing: -2,
+                    ),
                   ),
                 ),
-            ],
+                const SizedBox(height: 4),
+                Text(
+                  context.l10n
+                      .libraryTracksCount(itemCount)
+                      .replaceAll(itemCount.toString(), '')
+                      .trim(), // Getting just the label part if possible, or just use the full string if not
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                if (isScanning && scanCurrentFile != null) ...[
+                  const SizedBox(height: 16),
+                  LinearProgressIndicator(
+                    value: scanProgress / 100,
+                    backgroundColor: colorScheme.surfaceContainerHighest,
+                    color: colorScheme.primary,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ] else ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.history,
+                        size: 14,
+                        color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        context.l10n.libraryLastScanned(
+                          _formatLastScanned(context),
+                        ),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
           ),
-          if (isScanning && scanCurrentFile != null) ...[
-            const SizedBox(height: 12),
-            LinearProgressIndicator(
-              value: scanProgress / 100,
-              backgroundColor: colorScheme.surfaceContainerHighest,
-              color: colorScheme.primary,
-              borderRadius: BorderRadius.circular(4),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              scanCurrentFile!,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
         ],
       ),
     );
@@ -533,7 +635,10 @@ class _ScanProgressTile extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      context.l10n.libraryScanProgress(progress.toStringAsFixed(0), totalFiles),
+                      context.l10n.libraryScanProgress(
+                        progress.toStringAsFixed(0),
+                        totalFiles,
+                      ),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),

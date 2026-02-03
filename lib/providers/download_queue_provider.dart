@@ -15,7 +15,6 @@ import 'package:spotiflac_android/services/platform_bridge.dart';
 import 'package:spotiflac_android/services/ffmpeg_service.dart';
 import 'package:spotiflac_android/services/notification_service.dart';
 import 'package:spotiflac_android/services/history_database.dart';
-import 'package:spotiflac_android/providers/upload_queue_provider.dart';
 import 'package:spotiflac_android/utils/logger.dart';
 
 final _log = AppLogger('DownloadQueue');
@@ -1018,35 +1017,6 @@ void removeItem(String id) {
     final items = state.items.where((item) => item.id != id).toList();
     state = state.copyWith(items: items);
     _saveQueueToStorage();
-  }
-
-  /// Trigger cloud upload for a completed download
-  void _triggerCloudUpload({
-    required String filePath,
-    required String trackName,
-    required String artistName,
-  }) {
-    final settings = ref.read(settingsProvider);
-    
-    // Check if cloud upload is enabled
-    if (!settings.cloudUploadEnabled || settings.cloudProvider == 'none') {
-      return;
-    }
-
-    // Check if server is configured
-    if (settings.cloudServerUrl.isEmpty) {
-      _log.w('Cloud upload enabled but server URL not configured');
-      return;
-    }
-
-    // Add to upload queue
-    ref.read(uploadQueueProvider.notifier).addToQueue(
-      localPath: filePath,
-      trackName: trackName,
-      artistName: artistName,
-    );
-
-    _log.d('Added to cloud upload queue: $trackName - $artistName');
   }
 
   /// Export failed downloads to a TXT file
@@ -2459,13 +2429,6 @@ result = await PlatformBridge.downloadWithExtensions(
               );
 
           removeItem(item.id);
-          
-          // Trigger cloud upload if enabled
-          _triggerCloudUpload(
-            filePath: filePath,
-            trackName: trackToDownload.name,
-            artistName: trackToDownload.artistName,
-          );
         }
       } else {
         final itemAfterFailure = state.items.firstWhere(

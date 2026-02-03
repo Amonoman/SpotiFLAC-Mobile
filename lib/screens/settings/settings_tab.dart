@@ -7,7 +7,6 @@ import 'package:spotiflac_android/screens/settings/download_settings_page.dart';
 import 'package:spotiflac_android/screens/settings/extensions_page.dart';
 import 'package:spotiflac_android/screens/settings/library_settings_page.dart';
 import 'package:spotiflac_android/screens/settings/options_settings_page.dart';
-import 'package:spotiflac_android/screens/settings/cloud_settings_page.dart';
 import 'package:spotiflac_android/screens/settings/about_page.dart';
 import 'package:spotiflac_android/screens/settings/log_screen.dart';
 import 'package:spotiflac_android/widgets/settings_group.dart';
@@ -74,12 +73,6 @@ class SettingsTab extends ConsumerWidget {
                     title: l10n.settingsDownload,
                     subtitle: l10n.settingsDownloadSubtitle,
                     onTap: () => _navigateTo(context, const DownloadSettingsPage()),
-                  ),
-                  SettingsItem(
-                    icon: Icons.cloud_upload_outlined,
-                    title: l10n.settingsCloudSave,
-                    subtitle: l10n.settingsCloudSaveSubtitle,
-                    onTap: () => _navigateTo(context, const CloudSettingsPage()),
                   ),
                   SettingsItem(
                     icon: Icons.library_music_outlined,

@@ -53,30 +53,16 @@
   - Shows "Already in Library" instead of "Download complete"
   - Skips adding duplicate entry if track already in download history
   - Reads actual quality from existing file (bit depth, sample rate)
-- **Cloud Upload with WebDAV & SFTP**: Automatically upload downloaded files to your NAS or cloud storage
-  - Full WebDAV support (Synology DSM, Nextcloud, QNAP, ownCloud)
-  - Full SFTP support (any SSH server with SFTP enabled)
-  - Connection test with detailed error messages
-  - Upload queue with progress tracking
-  - Retry failed uploads and clear completed items
-  - Recent uploads list in Cloud Save settings
-- **SFTP Host Key Security (TOFU)**: Verify host keys on connect and block mismatches
-- **Reset SFTP Host Keys**: Clear the saved host key for the current server or all servers
 
 ### Dependencies
 
-- Added `webdav_client: ^1.2.2` for WebDAV protocol support
-- Added `dartssh2: ^2.13.0` for SFTP protocol support
-- Added `flutter_secure_storage: ^9.2.2` for storing cloud passwords securely
+- Added `flutter_secure_storage: ^9.2.2` for storing secrets securely
 
 ### Changed
 
-- Cloud upload passwords are now stored in secure storage instead of SharedPreferences
 - Spotify client secrets are now stored in secure storage instead of SharedPreferences
 - Extension HTTP sandbox now enforces HTTPS and blocks private IPs resolved via DNS
 - Extension file sandbox now validates paths using boundary-safe checks
-- WebDAV now defaults to HTTPS; insecure HTTP requires explicit opt-in
-- WebDAV error messages are now localized in the UI
 - **Albums grid now unified**: Downloaded and local albums render in a single grid (no layout gaps)
 - **LocalAlbumScreen UI consistency**: Track items, disc separators, and selection bottom bar now match DownloadedAlbumScreen
 
@@ -106,12 +92,6 @@
   - New setting in Settings > Download > Download Network
   - Choose between "WiFi + Mobile Data" or "WiFi Only"
   - Downloads automatically pause on mobile data and resume on WiFi
-
-- **Cloud Save Settings**: New settings page for cloud/NAS upload configuration
-  - Settings > Cloud Save - configure auto-upload to NAS or cloud storage
-  - Support for WebDAV (Synology, Nextcloud, QNAP) and SFTP providers
-  - Server URL, username, password, and remote path configuration
-  - Test connection button (actual upload implementation coming in v3.4.0)
 
 ### Dependencies
 

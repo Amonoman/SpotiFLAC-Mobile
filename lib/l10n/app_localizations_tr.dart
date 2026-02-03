@@ -12,8 +12,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get appName => 'SpotiFLAC';
 
   @override
-  String get appDescription =>
-      'Spotify şarkılarını Tidal, Qobuz ve Amazon Music\'den yüksek kalitede indir.';
+  String get appDescription => 'Spotify şarkılarını Tidal, Qobuz ve Amazon Music\'den yüksek kalitede indir.';
 
   @override
   String get navHome => 'Ara';
@@ -45,8 +44,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get homeSubtitle => 'Spotify linki yapıştır veya isimle arat';
 
   @override
-  String get homeSupports =>
-      'Desteklenen linkler: Şarkı, Albüm, Çalma Listesi, Sanatçı linkleri';
+  String get homeSupports => 'Desteklenen linkler: Şarkı, Albüm, Çalma Listesi, Sanatçı linkleri';
 
   @override
   String get homeRecent => 'En son';
@@ -97,15 +95,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get historyNoDownloads => 'İndirme geçmişi yok';
 
   @override
-  String get historyNoDownloadsSubtitle =>
-      'İndirilen şarkılar burada gözükecek';
+  String get historyNoDownloadsSubtitle => 'İndirilen şarkılar burada gözükecek';
 
   @override
   String get historyNoAlbums => 'İndirilen albüm yok';
 
   @override
-  String get historyNoAlbumsSubtitle =>
-      'Albümleri burada görmek için bir albümden birden fazla şarkı indir';
+  String get historyNoAlbumsSubtitle => 'Albümleri burada görmek için bir albümden birden fazla şarkı indir';
 
   @override
   String get historyNoSingles => 'Single indirilmemiş';
@@ -141,8 +137,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get downloadLocation => 'İndirme Konumu';
 
   @override
-  String get downloadLocationSubtitle =>
-      'Dosyaları nereye kaydedeceğinizi seçin';
+  String get downloadLocationSubtitle => 'Dosyaları nereye kaydedeceğinizi seçin';
 
   @override
   String get downloadLocationDefault => 'Varsayılan dizin';
@@ -151,8 +146,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get downloadDefaultService => 'Varsayılan Hizmet';
 
   @override
-  String get downloadDefaultServiceSubtitle =>
-      'İndirmeler için kullanılan hizmet';
+  String get downloadDefaultServiceSubtitle => 'İndirmeler için kullanılan hizmet';
 
   @override
   String get downloadDefaultQuality => 'Varsayılan Kalite';
@@ -161,8 +155,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get downloadAskQuality => 'İndirmeden Önce Kaliteyi Sor';
 
   @override
-  String get downloadAskQualitySubtitle =>
-      'Her indirmeden önce kalite seçim ekranını göster';
+  String get downloadAskQualitySubtitle => 'Her indirmeden önce kalite seçim ekranını göster';
 
   @override
   String get downloadFilenameFormat => 'Dosya adı formatı';
@@ -174,8 +167,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get downloadSeparateSingles => 'Single\'ları Ayır';
 
   @override
-  String get downloadSeparateSinglesSubtitle =>
-      'Single şarkıları ayrı dosyaya koy';
+  String get downloadSeparateSinglesSubtitle => 'Single şarkıları ayrı dosyaya koy';
 
   @override
   String get qualityBest => 'Mevcut en iyi';
@@ -208,8 +200,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get appearanceDynamicColor => 'Dinamik Renk';
 
   @override
-  String get appearanceDynamicColorSubtitle =>
-      'Duvar kağıdının renklerini kullan';
+  String get appearanceDynamicColorSubtitle => 'Duvar kağıdının renklerini kullan';
 
   @override
   String get appearanceAccentColor => 'Vurgu Rengi';
@@ -233,8 +224,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get optionsPrimaryProvider => 'Ana Kaynek';
 
   @override
-  String get optionsPrimaryProviderSubtitle =>
-      'Şarkı ismi aratılırken kullanılan kaynak.';
+  String get optionsPrimaryProviderSubtitle => 'Şarkı ismi aratılırken kullanılan kaynak.';
 
   @override
   String optionsUsingExtension(String extensionName) {
@@ -242,15 +232,13 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get optionsSwitchBack =>
-      'Dahili kaynaklara dönmek için Deezer veya Spotify\'a tıkla';
+  String get optionsSwitchBack => 'Dahili kaynaklara dönmek için Deezer veya Spotify\'a tıkla';
 
   @override
   String get optionsAutoFallback => 'Diğerlerini dene';
 
   @override
-  String get optionsAutoFallbackSubtitle =>
-      'İndirme başarısız olursa diğer hizmetleri dene';
+  String get optionsAutoFallbackSubtitle => 'İndirme başarısız olursa diğer hizmetleri dene';
 
   @override
   String get optionsUseExtensionProviders => 'Eklenti sağlayıcılarını kullan';
@@ -259,22 +247,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get optionsUseExtensionProvidersOn => 'Eklentiler ilk denenecek';
 
   @override
-  String get optionsUseExtensionProvidersOff =>
-      'Sadece dahili sağlayıcıları kullan';
+  String get optionsUseExtensionProvidersOff => 'Sadece dahili sağlayıcıları kullan';
 
   @override
   String get optionsEmbedLyrics => 'Şarkı Sözlerini Göm';
 
   @override
-  String get optionsEmbedLyricsSubtitle =>
-      'Senkronize şarkı sözlerini FLAC dosyalarına göm';
+  String get optionsEmbedLyricsSubtitle => 'Senkronize şarkı sözlerini FLAC dosyalarına göm';
 
   @override
   String get optionsMaxQualityCover => 'En Yüksek Kapak Kalitesi';
 
   @override
-  String get optionsMaxQualityCoverSubtitle =>
-      'En yüksek kalitedeki albüm kapaklarını indir';
+  String get optionsMaxQualityCoverSubtitle => 'En yüksek kalitedeki albüm kapaklarını indir';
 
   @override
   String get optionsConcurrentDownloads => 'Eş Zamanlı İndirmeler';
@@ -288,8 +273,7 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get optionsConcurrentWarning =>
-      'Aynı anda birden fazla indirme sınırlamaya takılabilir';
+  String get optionsConcurrentWarning => 'Aynı anda birden fazla indirme sınırlamaya takılabilir';
 
   @override
   String get optionsExtensionStore => 'Eklenti Dükkanı';
@@ -313,15 +297,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get optionsUpdateChannelPreview => 'Önizleme sürümlerini al';
 
   @override
-  String get optionsUpdateChannelWarning =>
-      'Önizleme sürümleri hatalar veya tamamlanmamış özellikler içerebilir';
+  String get optionsUpdateChannelWarning => 'Önizleme sürümleri hatalar veya tamamlanmamış özellikler içerebilir';
 
   @override
   String get optionsClearHistory => 'İndirme Geçmişini Temizle';
 
   @override
-  String get optionsClearHistorySubtitle =>
-      'İndirilen bütün şarkıları geçmişten temizle';
+  String get optionsClearHistorySubtitle => 'İndirilen bütün şarkıları geçmişten temizle';
 
   @override
   String get optionsDetailedLogging => 'Detaylı Günlükleme';
@@ -341,12 +323,10 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get optionsSpotifyCredentialsRequired =>
-      'Zorunlu - değiştirmek için tıkla';
+  String get optionsSpotifyCredentialsRequired => 'Zorunlu - değiştirmek için tıkla';
 
   @override
-  String get optionsSpotifyWarning =>
-      'Spotify\'ın senin API kimlik bilgilerine ihtiyacı var. Onları developer.spotify.com\'dan alabilirsin';
+  String get optionsSpotifyWarning => 'Spotify\'ın senin API kimlik bilgilerine ihtiyacı var. Onları developer.spotify.com\'dan alabilirsin';
 
   @override
   String get extensionsTitle => 'Eklentiler';
@@ -410,8 +390,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get aboutOriginalCreator => 'Orijinal SpotiFLAC\'ın kurucusu';
 
   @override
-  String get aboutLogoArtist =>
-      'Uygulama logomuzu yaratmış yetenekli sanatçımız!';
+  String get aboutLogoArtist => 'Uygulama logomuzu yaratmış yetenekli sanatçımız!';
 
   @override
   String get aboutTranslators => 'Çevirmenler';
@@ -432,15 +411,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get aboutReportIssue => 'Sorun bildir';
 
   @override
-  String get aboutReportIssueSubtitle =>
-      'Karşılaştığın herhangi bir problemi bildir';
+  String get aboutReportIssueSubtitle => 'Karşılaştığın herhangi bir problemi bildir';
 
   @override
   String get aboutFeatureRequest => 'Özellik isteği';
 
   @override
-  String get aboutFeatureRequestSubtitle =>
-      'Uygulama için yeni özellikler isteyin';
+  String get aboutFeatureRequestSubtitle => 'Uygulama için yeni özellikler isteyin';
 
   @override
   String get aboutTelegramChannel => 'Telegram Kanalı';
@@ -473,34 +450,28 @@ class AppLocalizationsTr extends AppLocalizations {
   String get aboutVersion => 'Versiyon';
 
   @override
-  String get aboutBinimumDesc =>
-      'QQDL ve HiFi API\'ın kurucusu. Bu API olmadan, Tidal indirmeleri olmazdı!';
+  String get aboutBinimumDesc => 'QQDL ve HiFi API\'ın kurucusu. Bu API olmadan, Tidal indirmeleri olmazdı!';
 
   @override
-  String get aboutSachinsenalDesc =>
-      'Orijinal HiFi projesi kurucusu. Tidal entegrasyonun temeli!';
+  String get aboutSachinsenalDesc => 'Orijinal HiFi projesi kurucusu. Tidal entegrasyonun temeli!';
 
   @override
-  String get aboutSjdonadoDesc =>
-      'Creator of I Don\'t Have Spotify (IDHS). The fallback link resolver that saves the day!';
+  String get aboutSjdonadoDesc => 'Creator of I Don\'t Have Spotify (IDHS). The fallback link resolver that saves the day!';
 
   @override
   String get aboutDoubleDouble => 'DoubleDouble';
 
   @override
-  String get aboutDoubleDoubleDesc =>
-      'Amazom Music indirmeleri için harika bir API. Ücretsiz yaptığın için teşekkürler!';
+  String get aboutDoubleDoubleDesc => 'Amazom Music indirmeleri için harika bir API. Ücretsiz yaptığın için teşekkürler!';
 
   @override
   String get aboutDabMusic => 'DAB Music';
 
   @override
-  String get aboutDabMusicDesc =>
-      'En iyi Qobuz streaming API\'ı. Yüksek kalite indirmeler bunun sayesinde!';
+  String get aboutDabMusicDesc => 'En iyi Qobuz streaming API\'ı. Yüksek kalite indirmeler bunun sayesinde!';
 
   @override
-  String get aboutAppDescription =>
-      'Spotify şarkılarını Tidal, Qobuz ve Amazon Music\'den yüksek kalitede indir.';
+  String get aboutAppDescription => 'Spotify şarkılarını Tidal, Qobuz ve Amazon Music\'den yüksek kalitede indir.';
 
   @override
   String get albumTitle => 'Albüm';
@@ -605,8 +576,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get setupStoragePermission => 'Depolama İzni';
 
   @override
-  String get setupStoragePermissionSubtitle =>
-      'İndirilen dosyaları kaydetmek için gerekli';
+  String get setupStoragePermissionSubtitle => 'İndirilen dosyaları kaydetmek için gerekli';
 
   @override
   String get setupStoragePermissionGranted => 'İzin verildi';
@@ -633,19 +603,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get setupStorageAccessRequired => 'Depolama Erişimi Gerekli';
 
   @override
-  String get setupStorageAccessMessage =>
-      'SpotiFLAC\'ın şarkıları seçili klasörünüze kaydetmek için \"Bütün dosyalara eriş\" iznine ihtiyacı var.';
+  String get setupStorageAccessMessage => 'SpotiFLAC\'ın şarkıları seçili klasörünüze kaydetmek için \"Bütün dosyalara eriş\" iznine ihtiyacı var.';
 
   @override
-  String get setupStorageAccessMessageAndroid11 =>
-      'Android 11 ve sonrasında şarkıların seçili klasörünüze kaydedilebilmesi için \"Bütün dosyalara eriş\" iznine ihtiyaç var.';
+  String get setupStorageAccessMessageAndroid11 => 'Android 11 ve sonrasında şarkıların seçili klasörünüze kaydedilebilmesi için \"Bütün dosyalara eriş\" iznine ihtiyaç var.';
 
   @override
   String get setupOpenSettings => 'Ayarları Aç';
 
   @override
-  String get setupPermissionDeniedMessage =>
-      'İzin reddedildi. Devam etmek için lütfen bütün izinleri verin.';
+  String get setupPermissionDeniedMessage => 'İzin reddedildi. Devam etmek için lütfen bütün izinleri verin.';
 
   @override
   String setupPermissionRequired(String permissionType) {
@@ -664,8 +631,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get setupUseDefaultFolder => 'Varsayılan Klasörü Kullan?';
 
   @override
-  String get setupNoFolderSelected =>
-      'Klasör seçilmedi. Varsayılan \"Music\" klasörünü kullanmak ister misiniz?';
+  String get setupNoFolderSelected => 'Klasör seçilmedi. Varsayılan \"Music\" klasörünü kullanmak ister misiniz?';
 
   @override
   String get setupUseDefault => 'Varsayılanı Kullan';
@@ -674,15 +640,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get setupDownloadLocationTitle => 'İndirme Konumu';
 
   @override
-  String get setupDownloadLocationIosMessage =>
-      'iOS\'ta indirilenler uygulamanın \"Documents\" dosyasına kaydedilir. Onlara Dosyalar uygulamasından erişebilirsiniz.';
+  String get setupDownloadLocationIosMessage => 'iOS\'ta indirilenler uygulamanın \"Documents\" dosyasına kaydedilir. Onlara Dosyalar uygulamasından erişebilirsiniz.';
 
   @override
   String get setupAppDocumentsFolder => 'App Documents Folder';
 
   @override
-  String get setupAppDocumentsFolderSubtitle =>
-      'Tavsiye edilen - Dosyalar uygulamasından erişilebilir';
+  String get setupAppDocumentsFolderSubtitle => 'Tavsiye edilen - Dosyalar uygulamasından erişilebilir';
 
   @override
   String get setupChooseFromFiles => 'Dosyalar\'dan Seç';
@@ -691,12 +655,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get setupChooseFromFilesSubtitle => 'iCloud veya başka konum seç';
 
   @override
-  String get setupIosEmptyFolderWarning =>
-      'iOS\'un sınırlaması: Boş klasörler seçilemiyor. İçinde en az bir dosya bulunan bir klasör seçin.';
+  String get setupIosEmptyFolderWarning => 'iOS\'un sınırlaması: Boş klasörler seçilemiyor. İçinde en az bir dosya bulunan bir klasör seçin.';
 
   @override
-  String get setupIcloudNotSupported =>
-      'iCloud Drive is not supported. Please use the app Documents folder.';
+  String get setupIcloudNotSupported => 'iCloud Drive is not supported. Please use the app Documents folder.';
 
   @override
   String get setupDownloadInFlac => 'Spotify şarkılarını FLAC olarak indirin';
@@ -723,8 +685,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get setupStorageRequired => 'Depolama İzni Gerekli';
 
   @override
-  String get setupStorageDescription =>
-      'SpotiFLAC\'ın şarkılarınızı kaydetmek için depolama iznine ihtiyacı var.';
+  String get setupStorageDescription => 'SpotiFLAC\'ın şarkılarınızı kaydetmek için depolama iznine ihtiyacı var.';
 
   @override
   String get setupNotificationGranted => 'Bildirim İzni Verildi!';
@@ -733,8 +694,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get setupNotificationEnable => 'Bildirimleri Etkinleştir';
 
   @override
-  String get setupNotificationDescription =>
-      'İndirmeler bittiğinde veya bakılması gereken bir şey olduğunda haberdar olun.';
+  String get setupNotificationDescription => 'İndirmeler bittiğinde veya bakılması gereken bir şey olduğunda haberdar olun.';
 
   @override
   String get setupFolderSelected => 'İndirilecek Klasör Seçildi!';
@@ -743,8 +703,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get setupFolderChoose => 'İndirilecek Klasörü Seç';
 
   @override
-  String get setupFolderDescription =>
-      'İndirdiğin şarkıların kaydedileceği klasörü seç.';
+  String get setupFolderDescription => 'İndirdiğin şarkıların kaydedileceği klasörü seç.';
 
   @override
   String get setupChangeFolder => 'Klasörü Değiştir';
@@ -756,8 +715,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get setupSpotifyApiOptional => 'Spotify API (İsteğe Bağlı)';
 
   @override
-  String get setupSpotifyApiDescription =>
-      'Daha iyi arama sonuçları ve Spotify\'a özel içeriklere erişmek için Spotify API kimlik bilgilerini gir.';
+  String get setupSpotifyApiDescription => 'Daha iyi arama sonuçları ve Spotify\'a özel içeriklere erişmek için Spotify API kimlik bilgilerini gir.';
 
   @override
   String get setupUseSpotifyApi => 'Spotify API\'ı kullan';
@@ -775,8 +733,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get setupEnterClientSecret => 'Spotify Client Secret gir';
 
   @override
-  String get setupGetFreeCredentials =>
-      'Spotify Developer Dashboard\'tan API kimlik bilgilerini ücretsiz alın.';
+  String get setupGetFreeCredentials => 'Spotify Developer Dashboard\'tan API kimlik bilgilerini ücretsiz alın.';
 
   @override
   String get setupEnableNotifications => 'Bildirimleri Etkinleştir';
@@ -785,12 +742,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get setupProceedToNextStep => 'Bir sonraki adıma geçebilirsin.';
 
   @override
-  String get setupNotificationProgressDescription =>
-      'İndirme ilerlemelerinin bildirimlerini alacaksın.';
+  String get setupNotificationProgressDescription => 'İndirme ilerlemelerinin bildirimlerini alacaksın.';
 
   @override
-  String get setupNotificationBackgroundDescription =>
-      'İndirmelerin durumu hakkında bildirim al. Bunu açmak uygulama arka plandayken indirmelerinizi takip etmenizi sağlar.';
+  String get setupNotificationBackgroundDescription => 'İndirmelerin durumu hakkında bildirim al. Bunu açmak uygulama arka plandayken indirmelerinizi takip etmenizi sağlar.';
 
   @override
   String get setupSkipForNow => 'Şimdilik atla';
@@ -808,12 +763,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get setupSkipAndStart => 'Kurulumu atla';
 
   @override
-  String get setupAllowAccessToManageFiles =>
-      'Lütfen bir sonraki ekranda \"Bütün dosyalara eriş\" iznini sağlayın.';
+  String get setupAllowAccessToManageFiles => 'Lütfen bir sonraki ekranda \"Bütün dosyalara eriş\" iznini sağlayın.';
 
   @override
-  String get setupGetCredentialsFromSpotify =>
-      'Kimlik bilgilerini developer.spotify.com\'dan alın';
+  String get setupGetCredentialsFromSpotify => 'Kimlik bilgilerini developer.spotify.com\'dan alın';
 
   @override
   String get dialogCancel => 'İptal';
@@ -864,8 +817,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get dialogDiscardChanges => 'Değişiklikleri İptal Et?';
 
   @override
-  String get dialogUnsavedChanges =>
-      'Kaydedilmeyen değişiklikler mevcut. Bu değişiklikleri iptal etmek istiyor musunuz?';
+  String get dialogUnsavedChanges => 'Kaydedilmeyen değişiklikler mevcut. Bu değişiklikleri iptal etmek istiyor musunuz?';
 
   @override
   String get dialogDownloadFailed => 'İndirme Başarısız';
@@ -883,8 +835,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get dialogClearAll => 'Tümünü Temizle';
 
   @override
-  String get dialogClearAllDownloads =>
-      'Bütün indirmeleri temizlemek istediğinize emin misiniz?';
+  String get dialogClearAllDownloads => 'Bütün indirmeleri temizlemek istediğinize emin misiniz?';
 
   @override
   String get dialogRemoveFromDevice => 'Cihazdan kaldır?';
@@ -893,8 +844,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get dialogRemoveExtension => 'Eklentiyi Kaldır';
 
   @override
-  String get dialogRemoveExtensionMessage =>
-      'Bu eklentiyi kaldırmak istediğine emin misin? Bu işlem geri alınamaz.';
+  String get dialogRemoveExtensionMessage => 'Bu eklentiyi kaldırmak istediğine emin misin? Bu işlem geri alınamaz.';
 
   @override
   String get dialogUninstallExtension => 'Eklentiyi Kaldır?';
@@ -908,8 +858,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get dialogClearHistoryTitle => 'Geçmişi Temizle';
 
   @override
-  String get dialogClearHistoryMessage =>
-      'Tüm indirme geçmişini temizlemek istediğinizden emin misiniz? Bu işlem geri alınamaz.';
+  String get dialogClearHistoryMessage => 'Tüm indirme geçmişini temizlemek istediğinizden emin misiniz? Bu işlem geri alınamaz.';
 
   @override
   String get dialogDeleteSelectedTitle => 'Seçileni Sil';
@@ -1004,8 +953,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get snackbarProviderPrioritySaved => 'Sağlayıcı önceliği kaydedildi';
 
   @override
-  String get snackbarMetadataProviderSaved =>
-      'Metadata sağlayıcı önceliği kaydedildi';
+  String get snackbarMetadataProviderSaved => 'Metadata sağlayıcı önceliği kaydedildi';
 
   @override
   String snackbarExtensionInstalled(String extensionName) {
@@ -1027,8 +975,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errorRateLimited => 'Aşırı istek gönderildi';
 
   @override
-  String get errorRateLimitedMessage =>
-      'Çok fazla istek. Lütfen arama yapmadan önce biraz bekleyin.';
+  String get errorRateLimitedMessage => 'Çok fazla istek. Lütfen arama yapmadan önce biraz bekleyin.';
 
   @override
   String errorFailedToLoad(String item) {
@@ -1195,23 +1142,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get folderOrganizationByArtistAlbum => 'Sanatçı/Albüm';
 
   @override
-  String get folderOrganizationDescription =>
-      'İndirilenleri klasörlerle organize et';
+  String get folderOrganizationDescription => 'İndirilenleri klasörlerle organize et';
 
   @override
-  String get folderOrganizationNoneSubtitle =>
-      'Her şey indirilen dosyasına kaydedilecek';
+  String get folderOrganizationNoneSubtitle => 'Her şey indirilen dosyasına kaydedilecek';
 
   @override
-  String get folderOrganizationByArtistSubtitle =>
-      'Her sanatçı için ayrı klasör';
+  String get folderOrganizationByArtistSubtitle => 'Her sanatçı için ayrı klasör';
 
   @override
   String get folderOrganizationByAlbumSubtitle => 'Her albüm için ayrı klasör';
 
   @override
-  String get folderOrganizationByArtistAlbumSubtitle =>
-      'Sanatçı klasörlerinin içinde Albüm klasörleri';
+  String get folderOrganizationByArtistAlbumSubtitle => 'Sanatçı klasörlerinin içinde Albüm klasörleri';
 
   @override
   String get updateAvailable => 'Güncelleme Mevcut';
@@ -1264,19 +1207,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get providerPriority => 'İndirme hizmetleri öncelik sırası';
 
   @override
-  String get providerPrioritySubtitle =>
-      'İndirme hizmetlerini sıralamak için kaydır';
+  String get providerPrioritySubtitle => 'İndirme hizmetlerini sıralamak için kaydır';
 
   @override
   String get providerPriorityTitle => 'İndirme hizmetleri öncelik sırası';
 
   @override
-  String get providerPriorityDescription =>
-      'İndirme hizmetlerini sıralamak için kaydır. Uygulama şarkı indirirken hizmetleri yukarıdan aşağıya doğru deneyecektir.';
+  String get providerPriorityDescription => 'İndirme hizmetlerini sıralamak için kaydır. Uygulama şarkı indirirken hizmetleri yukarıdan aşağıya doğru deneyecektir.';
 
   @override
-  String get providerPriorityInfo =>
-      'Eğer bir şarkı ilk hizmette mevcut değilse uygulama otomatik olarak bir sonrakini deneyecektir.';
+  String get providerPriorityInfo => 'Eğer bir şarkı ilk hizmette mevcut değilse uygulama otomatik olarak bir sonrakini deneyecektir.';
 
   @override
   String get providerBuiltIn => 'Dahili';
@@ -1288,19 +1228,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get metadataProviderPriority => 'Metadata Sağlayıcı Önceliği';
 
   @override
-  String get metadataProviderPrioritySubtitle =>
-      'Şarkı metadata\'sı alınırken kullanılan sıra';
+  String get metadataProviderPrioritySubtitle => 'Şarkı metadata\'sı alınırken kullanılan sıra';
 
   @override
   String get metadataProviderPriorityTitle => 'Metadata Önceliği';
 
   @override
-  String get metadataProviderPriorityDescription =>
-      'Metadata sağlayıcılarını sıralamak için kaydır. Uygulama şarkı ararken ve metadata alırken sağlayıcıları yukarıdan aşağıya doğru deneyecektir.';
+  String get metadataProviderPriorityDescription => 'Metadata sağlayıcılarını sıralamak için kaydır. Uygulama şarkı ararken ve metadata alırken sağlayıcıları yukarıdan aşağıya doğru deneyecektir.';
 
   @override
-  String get metadataProviderPriorityInfo =>
-      'Deezer\'ın istek sınırı yok ve birincil olarak önerilir. Spotify çok fazla istekten sonra sınırlama yapabilir.';
+  String get metadataProviderPriorityInfo => 'Deezer\'ın istek sınırı yok ve birincil olarak önerilir. Spotify çok fazla istekten sonra sınırlama yapabilir.';
 
   @override
   String get metadataNoRateLimits => 'İstek sınırı yok';
@@ -1345,8 +1282,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get logClearLogsTitle => 'Kayıtları temizle';
 
   @override
-  String get logClearLogsMessage =>
-      'Tüm kayıtları temizlemek istediğinize emin misiniz?';
+  String get logClearLogsMessage => 'Tüm kayıtları temizlemek istediğinize emin misiniz?';
 
   @override
   String get logIspBlocking => 'ISP BLOCKING DETECTED';
@@ -1367,26 +1303,22 @@ class AppLocalizationsTr extends AppLocalizations {
   String get logNoLogsYet => 'Henüz kayıt yok';
 
   @override
-  String get logNoLogsYetSubtitle =>
-      'Uygulamayı kullandıkça kayıtlar burada görünecek';
+  String get logNoLogsYetSubtitle => 'Uygulamayı kullandıkça kayıtlar burada görünecek';
 
   @override
   String get logIssueSummary => 'Sorun Özeti';
 
   @override
-  String get logIspBlockingDescription =>
-      'İnternet sağlayıcınız indirme hizmetlerine erişimi engelliyor olabilir';
+  String get logIspBlockingDescription => 'İnternet sağlayıcınız indirme hizmetlerine erişimi engelliyor olabilir';
 
   @override
-  String get logIspBlockingSuggestion =>
-      'VPN kullanmayı veya DNS\'i 1.1.1.1 ya da 8.8.8.8 olarak değiştirmeyi deneyin';
+  String get logIspBlockingSuggestion => 'VPN kullanmayı veya DNS\'i 1.1.1.1 ya da 8.8.8.8 olarak değiştirmeyi deneyin';
 
   @override
   String get logRateLimitedDescription => 'Hizmete çok fazla istek gönderildi';
 
   @override
-  String get logRateLimitedSuggestion =>
-      'Tekrar denemeden önce birkaç dakika bekleyin';
+  String get logRateLimitedSuggestion => 'Tekrar denemeden önce birkaç dakika bekleyin';
 
   @override
   String get logNetworkErrorDescription => 'Bağlantı sorunları tespit edildi';
@@ -1395,12 +1327,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get logNetworkErrorSuggestion => 'İnternet bağlantınızı kontrol edin';
 
   @override
-  String get logTrackNotFoundDescription =>
-      'Bazı şarkılar indirme hizmetlerinde bulunamadı';
+  String get logTrackNotFoundDescription => 'Bazı şarkılar indirme hizmetlerinde bulunamadı';
 
   @override
-  String get logTrackNotFoundSuggestion =>
-      'Şarkı kayıpsız kalitede mevcut olmayabilir';
+  String get logTrackNotFoundSuggestion => 'Şarkı kayıpsız kalitede mevcut olmayabilir';
 
   @override
   String logTotalErrors(int count) {
@@ -1426,8 +1356,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get credentialsTitle => 'Spotify Kimlik Bilgileri';
 
   @override
-  String get credentialsDescription =>
-      'Kendi Spotify uygulama kotanızı kullanmak için Client ID ve Secret girin.';
+  String get credentialsDescription => 'Kendi Spotify uygulama kotanızı kullanmak için Client ID ve Secret girin.';
 
   @override
   String get credentialsClientId => 'Client ID';
@@ -1481,22 +1410,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get lyricsMode => 'Şarkı Sözü Modu';
 
   @override
-  String get lyricsModeDescription =>
-      'Şarkı sözlerinin indirmelerle nasıl kaydedileceğini seçin';
+  String get lyricsModeDescription => 'Şarkı sözlerinin indirmelerle nasıl kaydedileceğini seçin';
 
   @override
   String get lyricsModeEmbed => 'Dosyaya göm';
 
   @override
-  String get lyricsModeEmbedSubtitle =>
-      'Şarkı sözleri FLAC metadata içinde saklanır';
+  String get lyricsModeEmbedSubtitle => 'Şarkı sözleri FLAC metadata içinde saklanır';
 
   @override
   String get lyricsModeExternal => 'Harici .lrc dosyası';
 
   @override
-  String get lyricsModeExternalSubtitle =>
-      'Samsung Music gibi oynatıcılar için ayrı .lrc dosyası';
+  String get lyricsModeExternalSubtitle => 'Samsung Music gibi oynatıcılar için ayrı .lrc dosyası';
 
   @override
   String get lyricsModeBoth => 'Her ikisi';
@@ -1529,15 +1455,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsDownloadSubtitle => 'Hizmet, kalite, dosya adı formatı';
 
   @override
-  String get settingsOptionsSubtitle =>
-      'Yedek, şarkı sözleri, kapak resmi, güncellemeler';
+  String get settingsOptionsSubtitle => 'Yedek, şarkı sözleri, kapak resmi, güncellemeler';
 
   @override
   String get settingsExtensionsSubtitle => 'İndirme sağlayıcılarını yönet';
 
   @override
-  String get settingsLogsSubtitle =>
-      'Hata ayıklama için uygulama kayıtlarını görüntüle';
+  String get settingsLogsSubtitle => 'Hata ayıklama için uygulama kayıtlarını görüntüle';
 
   @override
   String get loadingSharedLink => 'Paylaşılan bağlantı yükleniyor...';
@@ -1637,8 +1561,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get trackLyricsNotAvailable => 'Bu şarkı için şarkı sözü mevcut değil';
 
   @override
-  String get trackLyricsTimeout =>
-      'İstek zaman aşımına uğradı. Daha sonra tekrar deneyin.';
+  String get trackLyricsTimeout => 'İstek zaman aşımına uğradı. Daha sonra tekrar deneyin.';
 
   @override
   String get trackLyricsLoadFailed => 'Şarkı sözleri yüklenemedi';
@@ -1659,8 +1582,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get trackDeleteConfirmTitle => 'Cihazdan kaldırılsın mı?';
 
   @override
-  String get trackDeleteConfirmMessage =>
-      'Bu işlem indirilen dosyayı kalıcı olarak silecek ve geçmişten kaldıracaktır.';
+  String get trackDeleteConfirmMessage => 'Bu işlem indirilen dosyayı kalıcı olarak silecek ve geçmişten kaldıracaktır.';
 
   @override
   String trackCannotOpen(String message) {
@@ -1812,15 +1734,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get extensionsNoExtensions => 'Yüklü eklenti yok';
 
   @override
-  String get extensionsNoExtensionsSubtitle =>
-      'Yeni sağlayıcılar eklemek için .spotiflac-ext dosyalarını yükleyin';
+  String get extensionsNoExtensionsSubtitle => 'Yeni sağlayıcılar eklemek için .spotiflac-ext dosyalarını yükleyin';
 
   @override
   String get extensionsInstallButton => 'Eklenti Yükle';
 
   @override
-  String get extensionsInfoTip =>
-      'Eklentiler yeni metadata ve indirme sağlayıcıları ekleyebilir. Sadece güvenilir kaynaklardan eklenti yükleyin.';
+  String get extensionsInfoTip => 'Eklentiler yeni metadata ve indirme sağlayıcıları ekleyebilir. Sadece güvenilir kaynaklardan eklenti yükleyin.';
 
   @override
   String get extensionsInstalledSuccess => 'Eklenti başarıyla yüklendi';
@@ -1829,23 +1749,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get extensionsDownloadPriority => 'İndirme Önceliği';
 
   @override
-  String get extensionsDownloadPrioritySubtitle =>
-      'İndirme hizmeti sırasını ayarla';
+  String get extensionsDownloadPrioritySubtitle => 'İndirme hizmeti sırasını ayarla';
 
   @override
-  String get extensionsNoDownloadProvider =>
-      'İndirme sağlayıcısı olan eklenti yok';
+  String get extensionsNoDownloadProvider => 'İndirme sağlayıcısı olan eklenti yok';
 
   @override
   String get extensionsMetadataPriority => 'Metadata Önceliği';
 
   @override
-  String get extensionsMetadataPrioritySubtitle =>
-      'Arama ve metadata kaynağı sırasını ayarla';
+  String get extensionsMetadataPrioritySubtitle => 'Arama ve metadata kaynağı sırasını ayarla';
 
   @override
-  String get extensionsNoMetadataProvider =>
-      'Metadata sağlayıcısı olan eklenti yok';
+  String get extensionsNoMetadataProvider => 'Metadata sağlayıcısı olan eklenti yok';
 
   @override
   String get extensionsSearchProvider => 'Arama Sağlayıcı';
@@ -1854,8 +1770,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get extensionsNoCustomSearch => 'Özel arama olan eklenti yok';
 
   @override
-  String get extensionsSearchProviderDescription =>
-      'Şarkı aramak için hangi hizmetin kullanılacağını seçin';
+  String get extensionsSearchProviderDescription => 'Şarkı aramak için hangi hizmetin kullanılacağını seçin';
 
   @override
   String get extensionsCustomSearch => 'Özel arama';
@@ -1897,8 +1812,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get enableLossyOptionSubtitleOn => 'Lossy quality option is available';
 
   @override
-  String get enableLossyOptionSubtitleOff =>
-      'Downloads FLAC then converts to lossy format';
+  String get enableLossyOptionSubtitleOff => 'Downloads FLAC then converts to lossy format';
 
   @override
   String get lossyFormat => 'Lossy Format';
@@ -1910,12 +1824,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get lossyFormatMp3Subtitle => '320kbps, best compatibility';
 
   @override
-  String get lossyFormatOpusSubtitle =>
-      '128kbps, better quality at smaller size';
+  String get lossyFormatOpusSubtitle => '128kbps, better quality at smaller size';
 
   @override
-  String get qualityNote =>
-      'Actual quality depends on track availability from the service';
+  String get qualityNote => 'Actual quality depends on track availability from the service';
 
   @override
   String get downloadAskBeforeDownload => 'Ask Before Download';
@@ -2005,15 +1917,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get queueClearAll => 'Clear All';
 
   @override
-  String get queueClearAllMessage =>
-      'Are you sure you want to clear all downloads?';
+  String get queueClearAllMessage => 'Are you sure you want to clear all downloads?';
 
   @override
   String get queueExportFailed => 'Export';
 
   @override
-  String get queueExportFailedSuccess =>
-      'Failed downloads exported to TXT file';
+  String get queueExportFailedSuccess => 'Failed downloads exported to TXT file';
 
   @override
   String get queueExportFailedClear => 'Clear Failed';
@@ -2025,8 +1935,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsAutoExportFailed => 'Auto-export failed downloads';
 
   @override
-  String get settingsAutoExportFailedSubtitle =>
-      'Save failed downloads to TXT file automatically';
+  String get settingsAutoExportFailedSubtitle => 'Save failed downloads to TXT file automatically';
 
   @override
   String get settingsDownloadNetwork => 'Download Network';
@@ -2038,170 +1947,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsDownloadNetworkWifiOnly => 'WiFi Only';
 
   @override
-  String get settingsDownloadNetworkSubtitle =>
-      'Choose which network to use for downloads. When set to WiFi Only, downloads will pause on mobile data.';
-
-  @override
-  String get settingsCloudSave => 'Cloud Save';
-
-  @override
-  String get settingsCloudSaveSubtitle => 'Auto-upload to NAS or cloud storage';
-
-  @override
-  String get cloudSettingsTitle => 'Cloud Save';
-
-  @override
-  String get cloudSettingsSectionGeneral => 'General';
-
-  @override
-  String get cloudSettingsEnable => 'Enable Cloud Upload';
-
-  @override
-  String get cloudSettingsEnableSubtitle =>
-      'Automatically upload files after download completes';
-
-  @override
-  String get cloudSettingsSectionProvider => 'Cloud Provider';
-
-  @override
-  String get cloudSettingsProvider => 'Provider';
-
-  @override
-  String get cloudSettingsProviderDescription =>
-      'Select where to upload your downloaded files';
-
-  @override
-  String get cloudSettingsSectionServer => 'Server Configuration';
-
-  @override
-  String get cloudSettingsServerUrl => 'Server URL';
-
-  @override
-  String get cloudSettingsUsername => 'Username';
-
-  @override
-  String get cloudSettingsPassword => 'Password';
-
-  @override
-  String get cloudSettingsRemotePath => 'Remote Folder Path';
-
-  @override
-  String get cloudSettingsTestConnection => 'Test Connection';
-
-  @override
-  String get cloudSettingsInfo =>
-      'Downloaded files will be automatically uploaded to your cloud storage after download completes. Original files are kept on your device.';
-
-  @override
-  String get cloudSettingsUploadQueue => 'Upload Queue';
-
-  @override
-  String get cloudSettingsRetryFailed => 'Retry Failed';
-
-  @override
-  String get cloudSettingsClearDone => 'Clear Done';
-
-  @override
-  String get cloudSettingsRecentUploads => 'Recent Uploads';
-
-  @override
-  String get cloudSettingsResetSftpHostKey => 'Reset SFTP Host Key';
-
-  @override
-  String get cloudSettingsResetAllSftpHostKeys => 'Reset All SFTP Host Keys';
-
-  @override
-  String get cloudSettingsResetSftpHostKeyMessage =>
-      'This will forget the saved host key for this server. The next connection will save a new key.';
-
-  @override
-  String get cloudSettingsResetAllSftpHostKeysMessage =>
-      'This will forget all saved SFTP host keys. Next connections will save new keys.';
-
-  @override
-  String get cloudSettingsResetConfirm => 'Reset';
-
-  @override
-  String get cloudSettingsResetAllConfirm => 'Reset All';
-
-  @override
-  String get cloudSettingsServerUrlRequired => 'Server URL is required';
-
-  @override
-  String get cloudSettingsResetSftpHostKeySuccess =>
-      'SFTP host key reset. Connect again to save a new key.';
-
-  @override
-  String get cloudSettingsResetSftpHostKeyNotFound =>
-      'No stored host key found for this server.';
-
-  @override
-  String cloudSettingsResetAllSftpHostKeysCleared(num count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Cleared $count SFTP host keys.',
-      one: 'Cleared 1 SFTP host key.',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get cloudSettingsResetAllSftpHostKeysNone =>
-      'No stored SFTP host keys found.';
-
-  @override
-  String get cloudSettingsAllowHttpTitle => 'Allow HTTP (Insecure)';
-
-  @override
-  String get cloudSettingsAllowHttpSubtitle =>
-      'Sends credentials without TLS. Not recommended.';
-
-  @override
-  String get cloudSettingsAllowHttpMessage =>
-      'HTTP does not encrypt your credentials. Only enable if you trust the network.';
-
-  @override
-  String get cloudSettingsAllowHttpConfirm => 'Allow HTTP';
-
-  @override
-  String get webdavErrorInvalidScheme => 'Invalid URL: scheme is required';
-
-  @override
-  String get webdavErrorHttpsRequired => 'WebDAV URL must use https';
-
-  @override
-  String get webdavErrorInvalidHost => 'Invalid URL: hostname is required';
-
-  @override
-  String get webdavErrorAuthFailed =>
-      'Authentication failed. Check username and password.';
-
-  @override
-  String get webdavErrorForbidden =>
-      'Access denied. Check permissions on the server.';
-
-  @override
-  String get webdavErrorNotFound => 'Server path not found. Check the URL.';
-
-  @override
-  String get webdavErrorConnectionFailed =>
-      'Cannot connect to server. Check URL and network.';
-
-  @override
-  String get webdavErrorTlsError =>
-      'SSL/TLS error. Server certificate may be invalid.';
-
-  @override
-  String get webdavErrorTimeout =>
-      'Connection timed out. Server may be unreachable.';
-
-  @override
-  String get webdavErrorInsufficientStorage =>
-      'Insufficient storage on server.';
-
-  @override
-  String get webdavErrorUnknown => 'Upload failed. Please try again.';
+  String get settingsDownloadNetworkSubtitle => 'Choose which network to use for downloads. When set to WiFi Only, downloads will pause on mobile data.';
 
   @override
   String get queueEmpty => 'No downloads in queue';
@@ -2237,8 +1983,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get albumFolderArtistYearAlbum => 'Artist / [Year] Album';
 
   @override
-  String get albumFolderArtistYearAlbumSubtitle =>
-      'Albums/Artist Name/[2005] Album Name/';
+  String get albumFolderArtistYearAlbumSubtitle => 'Albums/Artist Name/[2005] Album Name/';
 
   @override
   String get albumFolderAlbumOnly => 'Album Only';
@@ -2256,8 +2001,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get albumFolderArtistAlbumSingles => 'Artist / Album + Singles';
 
   @override
-  String get albumFolderArtistAlbumSinglesSubtitle =>
-      'Artist/Album/ and Artist/Singles/';
+  String get albumFolderArtistAlbumSinglesSubtitle => 'Artist/Album/ and Artist/Singles/';
 
   @override
   String get downloadedAlbumDeleteSelected => 'Delete Selected';
@@ -2367,8 +2111,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get discographySelectAlbums => 'Select Albums...';
 
   @override
-  String get discographySelectAlbumsSubtitle =>
-      'Choose specific albums or singles';
+  String get discographySelectAlbumsSubtitle => 'Choose specific albums or singles';
 
   @override
   String get discographyFetchingTracks => 'Fetching tracks...';
@@ -2415,16 +2158,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get allFilesAccessDisabledSubtitle => 'Limited to media folders only';
 
   @override
-  String get allFilesAccessDescription =>
-      'Enable this if you encounter write errors when saving to custom folders. Android 13+ restricts access to certain directories by default.';
+  String get allFilesAccessDescription => 'Enable this if you encounter write errors when saving to custom folders. Android 13+ restricts access to certain directories by default.';
 
   @override
-  String get allFilesAccessDeniedMessage =>
-      'Permission was denied. Please enable \'All files access\' manually in system settings.';
+  String get allFilesAccessDeniedMessage => 'Permission was denied. Please enable \'All files access\' manually in system settings.';
 
   @override
-  String get allFilesAccessDisabledMessage =>
-      'All Files Access disabled. The app will use limited storage access.';
+  String get allFilesAccessDisabledMessage => 'All Files Access disabled. The app will use limited storage access.';
 
   @override
   String get settingsLocalLibrary => 'Local Library';
@@ -2445,8 +2185,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get libraryEnableLocalLibrary => 'Enable Local Library';
 
   @override
-  String get libraryEnableLocalLibrarySubtitle =>
-      'Scan and track your existing music';
+  String get libraryEnableLocalLibrarySubtitle => 'Scan and track your existing music';
 
   @override
   String get libraryFolder => 'Library Folder';
@@ -2458,8 +2197,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get libraryShowDuplicateIndicator => 'Show Duplicate Indicator';
 
   @override
-  String get libraryShowDuplicateIndicatorSubtitle =>
-      'Show when searching for existing tracks';
+  String get libraryShowDuplicateIndicatorSubtitle => 'Show when searching for existing tracks';
 
   @override
   String get libraryActions => 'Actions';
@@ -2477,8 +2215,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get libraryCleanupMissingFiles => 'Cleanup Missing Files';
 
   @override
-  String get libraryCleanupMissingFilesSubtitle =>
-      'Remove entries for files that no longer exist';
+  String get libraryCleanupMissingFilesSubtitle => 'Remove entries for files that no longer exist';
 
   @override
   String get libraryClear => 'Clear Library';
@@ -2490,15 +2227,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get libraryClearConfirmTitle => 'Clear Library';
 
   @override
-  String get libraryClearConfirmMessage =>
-      'This will remove all scanned tracks from your library. Your actual music files will not be deleted.';
+  String get libraryClearConfirmMessage => 'This will remove all scanned tracks from your library. Your actual music files will not be deleted.';
 
   @override
   String get libraryAbout => 'About Local Library';
 
   @override
-  String get libraryAboutDescription =>
-      'Scans your existing music collection to detect duplicates when downloading. Supports FLAC, M4A, MP3, Opus, and OGG formats. Metadata is read from file tags when available.';
+  String get libraryAboutDescription => 'Scans your existing music collection to detect duplicates when downloading. Supports FLAC, M4A, MP3, Opus, and OGG formats. Metadata is read from file tags when available.';
 
   @override
   String libraryTracksCount(int count) {
@@ -2536,8 +2271,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get libraryStorageAccessRequired => 'Storage Access Required';
 
   @override
-  String get libraryStorageAccessMessage =>
-      'SpotiFLAC needs storage access to scan your music library. Please grant permission in settings.';
+  String get libraryStorageAccessMessage => 'SpotiFLAC needs storage access to scan your music library. Please grant permission in settings.';
 
   @override
   String get libraryFolderNotExist => 'Selected folder does not exist';
@@ -2628,81 +2362,4 @@ class AppLocalizationsTr extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get cloudProviderWebdav => 'WebDAV (Synology, Nextcloud, QNAP)';
-
-  @override
-  String get cloudProviderSftp => 'SFTP (SSH File Transfer)';
-
-  @override
-  String get cloudProviderNotConfigured => 'Not Configured';
-
-  @override
-  String get cloudProviderWebdavTitle => 'WebDAV';
-
-  @override
-  String get cloudProviderWebdavSubtitle =>
-      'Synology, Nextcloud, QNAP, ownCloud';
-
-  @override
-  String get cloudProviderSftpTitle => 'SFTP';
-
-  @override
-  String get cloudProviderSftpSubtitle => 'SSH File Transfer Protocol';
-
-  @override
-  String get cloudTestErrorServerUrlRequired => 'Server URL is required';
-
-  @override
-  String get cloudTestErrorCredentialsRequired =>
-      'Username and password are required';
-
-  @override
-  String get cloudTestSuccessWebdav => 'Connected to WebDAV server';
-
-  @override
-  String get cloudTestSuccessSftp => 'Connected to SFTP server';
-
-  @override
-  String get cloudTestErrorNoProvider => 'No provider selected';
-
-  @override
-  String connectionTestSuccess(String message) {
-    return 'Success: $message';
-  }
-
-  @override
-  String get uploadStatusPending => 'Pending';
-
-  @override
-  String get uploadStatusUploading => 'Uploading';
-
-  @override
-  String get uploadStatusDone => 'Done';
-
-  @override
-  String get uploadStatusFailed => 'Failed';
-
-  @override
-  String get cloudStatusDisabled => 'Cloud Save Off';
-
-  @override
-  String get cloudStatusDisabledSubtitle => 'Enable to auto-upload tracks';
-
-  @override
-  String get cloudStatusNoProvider => 'Select Provider';
-
-  @override
-  String get cloudStatusNoProviderSubtitle => 'Choose a cloud service';
-
-  @override
-  String get cloudStatusNotConfigured => 'Setup Required';
-
-  @override
-  String get cloudStatusNotConfiguredSubtitle =>
-      'Configure your server details';
-
-  @override
-  String get cloudStatusActive => 'Connected';
 }

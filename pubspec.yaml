@@ -33,8 +33,6 @@ dependencies:
   http: ^1.6.0
   dio: ^5.8.0
   connectivity_plus: ^6.0.3
-  webdav_client: ^1.2.2
-  dartssh2: ^2.13.0
 
   # UI Components
   cupertino_icons: ^1.0.8

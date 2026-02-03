@@ -73,8 +73,7 @@ import 'app_localizations_zh.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale)
-    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -82,8 +81,7 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -95,13 +93,12 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
-      <LocalizationsDelegate<dynamic>>[
-        delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+    delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+  ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
@@ -121,7 +118,7 @@ abstract class AppLocalizations {
     Locale('tr'),
     Locale('zh'),
     Locale('zh', 'CN'),
-    Locale('zh', 'TW'),
+    Locale('zh', 'TW')
   ];
 
   /// App name - DO NOT TRANSLATE
@@ -3718,282 +3715,6 @@ abstract class AppLocalizations {
   /// **'Choose which network to use for downloads. When set to WiFi Only, downloads will pause on mobile data.'**
   String get settingsDownloadNetworkSubtitle;
 
-  /// Settings menu item for cloud upload
-  ///
-  /// In en, this message translates to:
-  /// **'Cloud Save'**
-  String get settingsCloudSave;
-
-  /// Subtitle for cloud save menu item
-  ///
-  /// In en, this message translates to:
-  /// **'Auto-upload to NAS or cloud storage'**
-  String get settingsCloudSaveSubtitle;
-
-  /// Cloud settings page title
-  ///
-  /// In en, this message translates to:
-  /// **'Cloud Save'**
-  String get cloudSettingsTitle;
-
-  /// General section header
-  ///
-  /// In en, this message translates to:
-  /// **'General'**
-  String get cloudSettingsSectionGeneral;
-
-  /// Toggle to enable cloud upload
-  ///
-  /// In en, this message translates to:
-  /// **'Enable Cloud Upload'**
-  String get cloudSettingsEnable;
-
-  /// Subtitle for enable toggle
-  ///
-  /// In en, this message translates to:
-  /// **'Automatically upload files after download completes'**
-  String get cloudSettingsEnableSubtitle;
-
-  /// Provider section header
-  ///
-  /// In en, this message translates to:
-  /// **'Cloud Provider'**
-  String get cloudSettingsSectionProvider;
-
-  /// Provider selection setting
-  ///
-  /// In en, this message translates to:
-  /// **'Provider'**
-  String get cloudSettingsProvider;
-
-  /// Provider picker description
-  ///
-  /// In en, this message translates to:
-  /// **'Select where to upload your downloaded files'**
-  String get cloudSettingsProviderDescription;
-
-  /// Server config section header
-  ///
-  /// In en, this message translates to:
-  /// **'Server Configuration'**
-  String get cloudSettingsSectionServer;
-
-  /// Server URL field label
-  ///
-  /// In en, this message translates to:
-  /// **'Server URL'**
-  String get cloudSettingsServerUrl;
-
-  /// Username field label
-  ///
-  /// In en, this message translates to:
-  /// **'Username'**
-  String get cloudSettingsUsername;
-
-  /// Password field label
-  ///
-  /// In en, this message translates to:
-  /// **'Password'**
-  String get cloudSettingsPassword;
-
-  /// Remote path field label
-  ///
-  /// In en, this message translates to:
-  /// **'Remote Folder Path'**
-  String get cloudSettingsRemotePath;
-
-  /// Test connection button
-  ///
-  /// In en, this message translates to:
-  /// **'Test Connection'**
-  String get cloudSettingsTestConnection;
-
-  /// Info card explaining the feature
-  ///
-  /// In en, this message translates to:
-  /// **'Downloaded files will be automatically uploaded to your cloud storage after download completes. Original files are kept on your device.'**
-  String get cloudSettingsInfo;
-
-  /// Section header for upload queue status
-  ///
-  /// In en, this message translates to:
-  /// **'Upload Queue'**
-  String get cloudSettingsUploadQueue;
-
-  /// Button to retry failed uploads
-  ///
-  /// In en, this message translates to:
-  /// **'Retry Failed'**
-  String get cloudSettingsRetryFailed;
-
-  /// Button to clear completed uploads
-  ///
-  /// In en, this message translates to:
-  /// **'Clear Done'**
-  String get cloudSettingsClearDone;
-
-  /// Section header for recent uploads list
-  ///
-  /// In en, this message translates to:
-  /// **'Recent Uploads'**
-  String get cloudSettingsRecentUploads;
-
-  /// Button/title to reset SFTP host key for current server
-  ///
-  /// In en, this message translates to:
-  /// **'Reset SFTP Host Key'**
-  String get cloudSettingsResetSftpHostKey;
-
-  /// Button/title to reset all saved SFTP host keys
-  ///
-  /// In en, this message translates to:
-  /// **'Reset All SFTP Host Keys'**
-  String get cloudSettingsResetAllSftpHostKeys;
-
-  /// Dialog message for resetting SFTP host key
-  ///
-  /// In en, this message translates to:
-  /// **'This will forget the saved host key for this server. The next connection will save a new key.'**
-  String get cloudSettingsResetSftpHostKeyMessage;
-
-  /// Dialog message for resetting all SFTP host keys
-  ///
-  /// In en, this message translates to:
-  /// **'This will forget all saved SFTP host keys. Next connections will save new keys.'**
-  String get cloudSettingsResetAllSftpHostKeysMessage;
-
-  /// Dialog confirm button for reset action
-  ///
-  /// In en, this message translates to:
-  /// **'Reset'**
-  String get cloudSettingsResetConfirm;
-
-  /// Dialog confirm button for reset all action
-  ///
-  /// In en, this message translates to:
-  /// **'Reset All'**
-  String get cloudSettingsResetAllConfirm;
-
-  /// Validation message when server URL is missing
-  ///
-  /// In en, this message translates to:
-  /// **'Server URL is required'**
-  String get cloudSettingsServerUrlRequired;
-
-  /// Snackbar after resetting SFTP host key
-  ///
-  /// In en, this message translates to:
-  /// **'SFTP host key reset. Connect again to save a new key.'**
-  String get cloudSettingsResetSftpHostKeySuccess;
-
-  /// Snackbar when no host key exists for the current server
-  ///
-  /// In en, this message translates to:
-  /// **'No stored host key found for this server.'**
-  String get cloudSettingsResetSftpHostKeyNotFound;
-
-  /// Snackbar after clearing all SFTP host keys
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{Cleared 1 SFTP host key.} other{Cleared {count} SFTP host keys.}}'**
-  String cloudSettingsResetAllSftpHostKeysCleared(num count);
-
-  /// Snackbar when no SFTP host keys exist
-  ///
-  /// In en, this message translates to:
-  /// **'No stored SFTP host keys found.'**
-  String get cloudSettingsResetAllSftpHostKeysNone;
-
-  /// Toggle/title for allowing insecure HTTP WebDAV connections
-  ///
-  /// In en, this message translates to:
-  /// **'Allow HTTP (Insecure)'**
-  String get cloudSettingsAllowHttpTitle;
-
-  /// Subtitle warning for allowing insecure HTTP
-  ///
-  /// In en, this message translates to:
-  /// **'Sends credentials without TLS. Not recommended.'**
-  String get cloudSettingsAllowHttpSubtitle;
-
-  /// Dialog warning message for enabling insecure HTTP
-  ///
-  /// In en, this message translates to:
-  /// **'HTTP does not encrypt your credentials. Only enable if you trust the network.'**
-  String get cloudSettingsAllowHttpMessage;
-
-  /// Dialog confirm button for enabling insecure HTTP
-  ///
-  /// In en, this message translates to:
-  /// **'Allow HTTP'**
-  String get cloudSettingsAllowHttpConfirm;
-
-  /// WebDAV error when URL scheme is missing
-  ///
-  /// In en, this message translates to:
-  /// **'Invalid URL: scheme is required'**
-  String get webdavErrorInvalidScheme;
-
-  /// WebDAV error when HTTPS is required
-  ///
-  /// In en, this message translates to:
-  /// **'WebDAV URL must use https'**
-  String get webdavErrorHttpsRequired;
-
-  /// WebDAV error when hostname is missing
-  ///
-  /// In en, this message translates to:
-  /// **'Invalid URL: hostname is required'**
-  String get webdavErrorInvalidHost;
-
-  /// WebDAV error when authentication fails
-  ///
-  /// In en, this message translates to:
-  /// **'Authentication failed. Check username and password.'**
-  String get webdavErrorAuthFailed;
-
-  /// WebDAV error when access is forbidden
-  ///
-  /// In en, this message translates to:
-  /// **'Access denied. Check permissions on the server.'**
-  String get webdavErrorForbidden;
-
-  /// WebDAV error when path is not found
-  ///
-  /// In en, this message translates to:
-  /// **'Server path not found. Check the URL.'**
-  String get webdavErrorNotFound;
-
-  /// WebDAV error when connection fails
-  ///
-  /// In en, this message translates to:
-  /// **'Cannot connect to server. Check URL and network.'**
-  String get webdavErrorConnectionFailed;
-
-  /// WebDAV error for TLS issues
-  ///
-  /// In en, this message translates to:
-  /// **'SSL/TLS error. Server certificate may be invalid.'**
-  String get webdavErrorTlsError;
-
-  /// WebDAV error when connection times out
-  ///
-  /// In en, this message translates to:
-  /// **'Connection timed out. Server may be unreachable.'**
-  String get webdavErrorTimeout;
-
-  /// WebDAV error when server storage is full
-  ///
-  /// In en, this message translates to:
-  /// **'Insufficient storage on server.'**
-  String get webdavErrorInsufficientStorage;
-
-  /// WebDAV fallback error message
-  ///
-  /// In en, this message translates to:
-  /// **'Upload failed. Please try again.'**
-  String get webdavErrorUnknown;
-
   /// Empty queue state title
   ///
   /// In en, this message translates to:
@@ -4689,154 +4410,9 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 hour ago} other{{count} hours ago}}'**
   String timeHoursAgo(int count);
-
-  /// WebDAV provider option with examples
-  ///
-  /// In en, this message translates to:
-  /// **'WebDAV (Synology, Nextcloud, QNAP)'**
-  String get cloudProviderWebdav;
-
-  /// SFTP provider option
-  ///
-  /// In en, this message translates to:
-  /// **'SFTP (SSH File Transfer)'**
-  String get cloudProviderSftp;
-
-  /// No cloud provider selected
-  ///
-  /// In en, this message translates to:
-  /// **'Not Configured'**
-  String get cloudProviderNotConfigured;
-
-  /// WebDAV provider title in picker
-  ///
-  /// In en, this message translates to:
-  /// **'WebDAV'**
-  String get cloudProviderWebdavTitle;
-
-  /// WebDAV provider subtitle in picker
-  ///
-  /// In en, this message translates to:
-  /// **'Synology, Nextcloud, QNAP, ownCloud'**
-  String get cloudProviderWebdavSubtitle;
-
-  /// SFTP provider title in picker
-  ///
-  /// In en, this message translates to:
-  /// **'SFTP'**
-  String get cloudProviderSftpTitle;
-
-  /// SFTP provider subtitle in picker
-  ///
-  /// In en, this message translates to:
-  /// **'SSH File Transfer Protocol'**
-  String get cloudProviderSftpSubtitle;
-
-  /// Error when testing connection without server URL
-  ///
-  /// In en, this message translates to:
-  /// **'Server URL is required'**
-  String get cloudTestErrorServerUrlRequired;
-
-  /// Error when testing connection without credentials
-  ///
-  /// In en, this message translates to:
-  /// **'Username and password are required'**
-  String get cloudTestErrorCredentialsRequired;
-
-  /// Success message for WebDAV connection test
-  ///
-  /// In en, this message translates to:
-  /// **'Connected to WebDAV server'**
-  String get cloudTestSuccessWebdav;
-
-  /// Success message for SFTP connection test
-  ///
-  /// In en, this message translates to:
-  /// **'Connected to SFTP server'**
-  String get cloudTestSuccessSftp;
-
-  /// Error when testing connection without provider
-  ///
-  /// In en, this message translates to:
-  /// **'No provider selected'**
-  String get cloudTestErrorNoProvider;
-
-  /// Connection test success message
-  ///
-  /// In en, this message translates to:
-  /// **'Success: {message}'**
-  String connectionTestSuccess(String message);
-
-  /// Upload queue status - waiting
-  ///
-  /// In en, this message translates to:
-  /// **'Pending'**
-  String get uploadStatusPending;
-
-  /// Upload queue status - in progress
-  ///
-  /// In en, this message translates to:
-  /// **'Uploading'**
-  String get uploadStatusUploading;
-
-  /// Upload queue status - completed
-  ///
-  /// In en, this message translates to:
-  /// **'Done'**
-  String get uploadStatusDone;
-
-  /// Upload queue status - error
-  ///
-  /// In en, this message translates to:
-  /// **'Failed'**
-  String get uploadStatusFailed;
-
-  /// Status when cloud save is disabled
-  ///
-  /// In en, this message translates to:
-  /// **'Cloud Save Off'**
-  String get cloudStatusDisabled;
-
-  /// Subtitle when cloud save is disabled
-  ///
-  /// In en, this message translates to:
-  /// **'Enable to auto-upload tracks'**
-  String get cloudStatusDisabledSubtitle;
-
-  /// Status when no provider selected
-  ///
-  /// In en, this message translates to:
-  /// **'Select Provider'**
-  String get cloudStatusNoProvider;
-
-  /// Subtitle when no provider selected
-  ///
-  /// In en, this message translates to:
-  /// **'Choose a cloud service'**
-  String get cloudStatusNoProviderSubtitle;
-
-  /// Status when settings missing
-  ///
-  /// In en, this message translates to:
-  /// **'Setup Required'**
-  String get cloudStatusNotConfigured;
-
-  /// Subtitle when settings missing
-  ///
-  /// In en, this message translates to:
-  /// **'Configure your server details'**
-  String get cloudStatusNotConfiguredSubtitle;
-
-  /// Status when cloud save is active
-  ///
-  /// In en, this message translates to:
-  /// **'Connected'**
-  String get cloudStatusActive;
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -4845,91 +4421,58 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) => <String>[
-    'de',
-    'en',
-    'es',
-    'fr',
-    'hi',
-    'id',
-    'ja',
-    'ko',
-    'nl',
-    'pt',
-    'ru',
-    'tr',
-    'zh',
-  ].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['de', 'en', 'es', 'fr', 'hi', 'id', 'ja', 'ko', 'nl', 'pt', 'ru', 'tr', 'zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+
   // Lookup logic when language+country codes are specified.
   switch (locale.languageCode) {
-    case 'es':
-      {
-        switch (locale.countryCode) {
-          case 'ES':
-            return AppLocalizationsEsEs();
-        }
-        break;
-      }
-    case 'pt':
-      {
-        switch (locale.countryCode) {
-          case 'PT':
-            return AppLocalizationsPtPt();
-        }
-        break;
-      }
-    case 'zh':
-      {
-        switch (locale.countryCode) {
-          case 'CN':
-            return AppLocalizationsZhCn();
-          case 'TW':
-            return AppLocalizationsZhTw();
-        }
-        break;
-      }
+    case 'es': {
+  switch (locale.countryCode) {
+    case 'ES': return AppLocalizationsEsEs();
+   }
+  break;
+   }
+    case 'pt': {
+  switch (locale.countryCode) {
+    case 'PT': return AppLocalizationsPtPt();
+   }
+  break;
+   }
+    case 'zh': {
+  switch (locale.countryCode) {
+    case 'CN': return AppLocalizationsZhCn();
+case 'TW': return AppLocalizationsZhTw();
+   }
+  break;
+   }
   }
 
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'de':
-      return AppLocalizationsDe();
-    case 'en':
-      return AppLocalizationsEn();
-    case 'es':
-      return AppLocalizationsEs();
-    case 'fr':
-      return AppLocalizationsFr();
-    case 'hi':
-      return AppLocalizationsHi();
-    case 'id':
-      return AppLocalizationsId();
-    case 'ja':
-      return AppLocalizationsJa();
-    case 'ko':
-      return AppLocalizationsKo();
-    case 'nl':
-      return AppLocalizationsNl();
-    case 'pt':
-      return AppLocalizationsPt();
-    case 'ru':
-      return AppLocalizationsRu();
-    case 'tr':
-      return AppLocalizationsTr();
-    case 'zh':
-      return AppLocalizationsZh();
+    case 'de': return AppLocalizationsDe();
+    case 'en': return AppLocalizationsEn();
+    case 'es': return AppLocalizationsEs();
+    case 'fr': return AppLocalizationsFr();
+    case 'hi': return AppLocalizationsHi();
+    case 'id': return AppLocalizationsId();
+    case 'ja': return AppLocalizationsJa();
+    case 'ko': return AppLocalizationsKo();
+    case 'nl': return AppLocalizationsNl();
+    case 'pt': return AppLocalizationsPt();
+    case 'ru': return AppLocalizationsRu();
+    case 'tr': return AppLocalizationsTr();
+    case 'zh': return AppLocalizationsZh();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.',
+    'that was used.'
   );
 }

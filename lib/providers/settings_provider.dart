@@ -9,7 +9,6 @@ import 'package:spotiflac_android/utils/logger.dart';
 const _settingsKey = 'app_settings';
 const _migrationVersionKey = 'settings_migration_version';
 const _currentMigrationVersion = 1;
-const _cloudPasswordKey = 'cloud_password';
 const _spotifyClientSecretKey = 'spotify_client_secret';
 
 class SettingsNotifier extends Notifier<AppSettings> {
@@ -31,7 +30,6 @@ class SettingsNotifier extends Notifier<AppSettings> {
       await _runMigrations(prefs);
     }
 
-    await _loadCloudPassword(prefs);
     await _loadSpotifyClientSecret(prefs);
 
     _applySpotifyCredentials();
@@ -57,40 +55,9 @@ class SettingsNotifier extends Notifier<AppSettings> {
   Future<void> _saveSettings() async {
     final prefs = await _prefs;
     final settingsToSave = state.copyWith(
-      cloudPassword: '',
       spotifyClientSecret: '',
     );
     await prefs.setString(_settingsKey, jsonEncode(settingsToSave.toJson()));
-  }
-
-  Future<void> _loadCloudPassword(SharedPreferences prefs) async {
-    final storedPassword = await _secureStorage.read(key: _cloudPasswordKey);
-    final prefsPassword = state.cloudPassword;
-
-    if ((storedPassword == null || storedPassword.isEmpty) &&
-        prefsPassword.isNotEmpty) {
-      await _secureStorage.write(key: _cloudPasswordKey, value: prefsPassword);
-    }
-
-    final effectivePassword = (storedPassword != null && storedPassword.isNotEmpty)
-        ? storedPassword
-        : (prefsPassword.isNotEmpty ? prefsPassword : '');
-
-    if (effectivePassword != state.cloudPassword) {
-      state = state.copyWith(cloudPassword: effectivePassword);
-    }
-
-    if (prefsPassword.isNotEmpty) {
-      await _saveSettings();
-    }
-  }
-
-  Future<void> _storeCloudPassword(String password) async {
-    if (password.isEmpty) {
-      await _secureStorage.delete(key: _cloudPasswordKey);
-    } else {
-      await _secureStorage.write(key: _cloudPasswordKey, value: password);
-    }
   }
 
   Future<void> _loadSpotifyClientSecret(SharedPreferences prefs) async {
@@ -322,69 +289,6 @@ void setUseAllFilesAccess(bool enabled) {
 
   void setDownloadNetworkMode(String mode) {
     state = state.copyWith(downloadNetworkMode: mode);
-    _saveSettings();
-  }
-
-  // Cloud Upload Settings
-  void setCloudUploadEnabled(bool enabled) {
-    state = state.copyWith(cloudUploadEnabled: enabled);
-    _saveSettings();
-  }
-
-  void setCloudProvider(String provider) {
-    state = state.copyWith(cloudProvider: provider);
-    _saveSettings();
-  }
-
-  void setCloudServerUrl(String url) {
-    state = state.copyWith(cloudServerUrl: url);
-    _saveSettings();
-  }
-
-  void setCloudUsername(String username) {
-    state = state.copyWith(cloudUsername: username);
-    _saveSettings();
-  }
-
-  Future<void> setCloudPassword(String password) async {
-    state = state.copyWith(cloudPassword: password);
-    await _storeCloudPassword(password);
-    _saveSettings();
-  }
-
-  void setCloudRemotePath(String path) {
-    state = state.copyWith(cloudRemotePath: path);
-    _saveSettings();
-  }
-
-  void setCloudAllowInsecureHttp(bool allowed) {
-    state = state.copyWith(cloudAllowInsecureHttp: allowed);
-    _saveSettings();
-  }
-
-  Future<void> setCloudSettings({
-    bool? enabled,
-    String? provider,
-    String? serverUrl,
-    String? username,
-    String? password,
-    String? remotePath,
-    bool? allowInsecureHttp,
-  }) async {
-    final nextPassword = password ?? state.cloudPassword;
-    state = state.copyWith(
-      cloudUploadEnabled: enabled ?? state.cloudUploadEnabled,
-      cloudProvider: provider ?? state.cloudProvider,
-      cloudServerUrl: serverUrl ?? state.cloudServerUrl,
-      cloudUsername: username ?? state.cloudUsername,
-      cloudPassword: nextPassword,
-      cloudRemotePath: remotePath ?? state.cloudRemotePath,
-      cloudAllowInsecureHttp:
-          allowInsecureHttp ?? state.cloudAllowInsecureHttp,
-    );
-    if (password != null) {
-      await _storeCloudPassword(nextPassword);
-    }
     _saveSettings();
   }
 
