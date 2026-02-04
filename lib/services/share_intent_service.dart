@@ -65,16 +65,22 @@ class ShareIntentService {
 
   void _handleSharedMedia(List<SharedMediaFile> files, {bool isInitial = false}) {
     for (final file in files) {
-      final textToCheck = file.path;
+      // Check both path and message - apps may share URL in either field
+      final textsToCheck = [
+        file.path,
+        if (file.message != null) file.message!,
+      ];
       
-      final url = _extractMusicUrl(textToCheck);
-      if (url != null) {
-        _log.i('Received music URL: $url (initial: $isInitial)');
-        if (isInitial) {
-          _pendingUrl = url;
+      for (final textToCheck in textsToCheck) {
+        final url = _extractMusicUrl(textToCheck);
+        if (url != null) {
+          _log.i('Received music URL: $url (initial: $isInitial)');
+          if (isInitial) {
+            _pendingUrl = url;
+          }
+          _sharedUrlController.add(url);
+          return;
         }
-        _sharedUrlController.add(url);
-        return;
       }
     }
   }

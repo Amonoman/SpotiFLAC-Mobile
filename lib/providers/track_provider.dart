@@ -197,8 +197,30 @@ class TrackNotifier extends Notifier<TrackState> {
       final extensionHandler = await PlatformBridge.findURLHandler(url);
       if (extensionHandler != null) {
         _log.i('Found extension URL handler: $extensionHandler for URL: $url');
-        final result = await PlatformBridge.handleURLWithExtension(url);
-        if (!_isRequestValid(requestId)) return;
+        
+        // Retry logic for extension URL handlers (up to 3 attempts)
+        Map<String, dynamic>? result;
+        for (int attempt = 1; attempt <= 3; attempt++) {
+          result = await PlatformBridge.handleURLWithExtension(url);
+          if (!_isRequestValid(requestId)) return;
+          
+          // Check if we got valid data
+          if (result != null && result['type'] == 'track' && result['track'] != null) {
+            final trackData = result['track'] as Map<String, dynamic>;
+            final name = trackData['name']?.toString() ?? '';
+            if (name.isNotEmpty) {
+              break;
+            }
+          } else if (result != null && (result['type'] == 'album' || result['type'] == 'playlist')) {
+            break;
+          } else if (result != null && result['type'] == 'artist') {
+            break;
+          }
+          
+          if (attempt < 3) {
+            await Future.delayed(const Duration(milliseconds: 500));
+          }
+        }
         
         if (result != null) {
           final type = result['type'] as String?;
@@ -207,6 +229,15 @@ class TrackNotifier extends Notifier<TrackState> {
           if (type == 'track' && result['track'] != null) {
             final trackData = result['track'] as Map<String, dynamic>;
             final track = _parseSearchTrack(trackData, source: extensionId);
+            
+            if (track.name.isEmpty) {
+              state = TrackState(
+                isLoading: false,
+                error: 'Failed to load track metadata from extension',
+              );
+              return;
+            }
+            
             state = TrackState(
               tracks: [track],
               isLoading: false,

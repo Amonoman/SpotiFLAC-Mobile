@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spotiflac_android/l10n/l10n.dart';
 import 'package:spotiflac_android/providers/download_queue_provider.dart';
+import 'package:spotiflac_android/providers/extension_provider.dart';
 import 'package:spotiflac_android/providers/settings_provider.dart';
 import 'package:spotiflac_android/providers/store_provider.dart';
 import 'package:spotiflac_android/providers/track_provider.dart';
@@ -61,7 +62,24 @@ class _MainShellState extends ConsumerState<MainShell> {
     );
   }
 
-  void _handleSharedUrl(String url) {
+  Future<void> _handleSharedUrl(String url) async {
+    // Wait for extensions to be initialized before handling URL
+    final extState = ref.read(extensionProvider);
+    if (!extState.isInitialized) {
+      _log.d('Waiting for extensions to initialize before handling URL...');
+      // Wait up to 5 seconds for extensions to initialize
+      for (int i = 0; i < 50; i++) {
+        await Future.delayed(const Duration(milliseconds: 100));
+        if (!mounted) return;
+        if (ref.read(extensionProvider).isInitialized) {
+          _log.d('Extensions initialized, proceeding with URL handling');
+          break;
+        }
+      }
+    }
+    
+    if (!mounted) return;
+    
     Navigator.of(context).popUntil((route) => route.isFirst);
 
     if (_currentIndex != 0) {
