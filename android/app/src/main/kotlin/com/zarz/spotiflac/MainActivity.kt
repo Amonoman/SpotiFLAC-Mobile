@@ -62,7 +62,35 @@ class MainActivity: FlutterFragmentActivity() {
 
         val payload = JSONObject()
         payload.put("tree_uri", uri.toString())
+        payload.put("display_name", resolveSafDisplayPath(uri))
         result.success(payload.toString())
+    }
+
+    /**
+     * Resolve a SAF tree URI to a human-readable path.
+     * e.g. "content://...tree/primary%3AMusic" -> "/storage/emulated/0/Music"
+     *      "content://...tree/1234-5678%3AMusic" -> "SD Card/Music"
+     */
+    private fun resolveSafDisplayPath(treeUri: Uri): String {
+        try {
+            val docId = android.provider.DocumentsContract.getTreeDocumentId(treeUri)
+            if (docId.isNullOrEmpty()) return treeUri.toString()
+
+            val parts = docId.split(":", limit = 2)
+            val storageId = parts.getOrNull(0) ?: return docId
+            val subPath = parts.getOrNull(1) ?: ""
+
+            val prefix = if (storageId == "primary") {
+                "/storage/emulated/0"
+            } else {
+                "SD Card"
+            }
+
+            return if (subPath.isEmpty()) prefix else "$prefix/$subPath"
+        } catch (e: Exception) {
+            android.util.Log.w("SpotiFLAC", "Failed to resolve SAF display path: ${e.message}")
+            return treeUri.toString()
+        }
     }
 
     data class SafScanProgress(

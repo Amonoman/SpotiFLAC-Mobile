@@ -495,7 +495,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
         : null;
     
     final hasExploreContent = exploreSections.isNotEmpty;
-    final showExplore = !hasActualResults && !isLoading && !showRecentAccess && hasHomeFeedExtension && hasExploreContent;
+    final showExplore = !hasActualResults && !isLoading && !showRecentAccess && (hasHomeFeedExtension || hasExploreContent) && hasExploreContent;
     
     // Get current search extension and its filters
     final settings = ref.watch(settingsProvider);

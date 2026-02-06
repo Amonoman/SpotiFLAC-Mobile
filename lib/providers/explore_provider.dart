@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:spotiflac_android/services/platform_bridge.dart';
 import 'package:spotiflac_android/utils/logger.dart';
 import 'package:spotiflac_android/providers/extension_provider.dart';
@@ -47,6 +49,20 @@ class ExploreItem {
       durationMs: json['duration_ms'] as int? ?? 0,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'uri': uri,
+    'type': type,
+    'name': name,
+    'artists': artists,
+    'description': description,
+    'cover_url': coverUrl,
+    'provider_id': providerId,
+    'album_id': albumId,
+    'album_name': albumName,
+    'duration_ms': durationMs,
+  };
 }
 
 class ExploreSection {
@@ -75,6 +91,12 @@ class ExploreSection {
       isYTMusicQuickPicks: isQuickPicks,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'uri': uri,
+    'title': title,
+    'items': items.map((i) => i.toJson()).toList(),
+  };
 }
 
 class ExploreState {
@@ -136,20 +158,71 @@ bool _isYTMusicQuickPicksItems(List<ExploreItem> items) {
 }
 
 class ExploreNotifier extends Notifier<ExploreState> {
+  static const _cacheKey = 'explore_home_feed_cache';
+  static const _cacheTsKey = 'explore_home_feed_ts';
+
   @override
   ExploreState build() {
+    _restoreFromCache();
     return const ExploreState();
+  }
+
+  /// Restore cached home feed from SharedPreferences immediately on startup
+  Future<void> _restoreFromCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cached = prefs.getString(_cacheKey);
+      final cachedTs = prefs.getInt(_cacheTsKey);
+      if (cached == null || cached.isEmpty) return;
+
+      final data = jsonDecode(cached) as Map<String, dynamic>;
+      final sectionsData = data['sections'] as List<dynamic>? ?? [];
+      final sections = sectionsData
+          .map((s) => ExploreSection.fromJson(s as Map<String, dynamic>))
+          .toList();
+
+      if (sections.isEmpty) return;
+
+      final lastFetched = cachedTs != null
+          ? DateTime.fromMillisecondsSinceEpoch(cachedTs)
+          : null;
+
+      _log.i('Restored ${sections.length} cached explore sections');
+      state = ExploreState(
+        greeting: _getLocalGreeting(),
+        sections: sections,
+        lastFetched: lastFetched,
+      );
+    } catch (e) {
+      _log.w('Failed to restore explore cache: $e');
+    }
+  }
+
+  /// Save home feed to SharedPreferences for instant restore on next launch
+  Future<void> _saveToCache(List<ExploreSection> sections) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final data = {
+        'sections': sections.map((s) => s.toJson()).toList(),
+      };
+      await prefs.setString(_cacheKey, jsonEncode(data));
+      await prefs.setInt(_cacheTsKey, DateTime.now().millisecondsSinceEpoch);
+      _log.d('Saved ${sections.length} explore sections to cache');
+    } catch (e) {
+      _log.w('Failed to save explore cache: $e');
+    }
   }
 
   /// Fetch home feed from spotify-web extension
   Future<void> fetchHomeFeed({bool forceRefresh = false}) async {
     _log.i('fetchHomeFeed called, forceRefresh=$forceRefresh');
     
+    // If we have cached content and it's fresh enough, skip network fetch
     if (!forceRefresh && 
         state.hasContent && 
         state.lastFetched != null &&
         DateTime.now().difference(state.lastFetched!).inMinutes < 5) {
-      _log.d('Using cached home feed');
+      _log.d('Using cached home feed (fresh enough)');
       return;
     }
     
@@ -158,7 +231,9 @@ class ExploreNotifier extends Notifier<ExploreState> {
       return;
     }
 
-    state = state.copyWith(isLoading: true, error: null);
+    // Only show loading spinner if we have no cached content to display
+    final showLoading = !state.hasContent;
+    state = state.copyWith(isLoading: showLoading, error: null);
 
     try {
       final extState = ref.read(extensionProvider);
@@ -231,6 +306,9 @@ class ExploreNotifier extends Notifier<ExploreState> {
         sections: sections,
         lastFetched: DateTime.now(),
       );
+
+      // Save to disk cache for instant restore on next app launch
+      _saveToCache(sections);
     } catch (e, stack) {
       _log.e('Error fetching home feed: $e', e, stack);
       state = state.copyWith(

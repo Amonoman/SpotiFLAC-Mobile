@@ -3,7 +3,6 @@
 ## [3.5.0] - 2026-02-06
 
 ### Highlights
-
 - **SAF Storage (Android 10+)**: Proper Storage Access Framework support for download destination (content URIs)
   - Select download folder via SAF tree picker
   - Downloads now write to SAF file descriptors (`/proc/self/fd/*`) instead of raw filesystem paths
@@ -11,6 +10,8 @@
 
 ### Added
 
+- Home feed disk caching via SharedPreferences for instant restore on app startup
+- SAF display path resolver in native Android layer (converts tree URIs to readable paths)
 - New settings fields for storage mode + SAF tree URI
 - SAF platform bridge methods: pick tree, stat/exists/delete, open content URI, copy to temp, write back to SAF
 - SAF library scan mode (DocumentFile traversal + metadata read)

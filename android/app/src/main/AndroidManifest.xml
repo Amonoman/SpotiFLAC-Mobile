@@ -21,7 +21,8 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="false"
-        android:enableOnBackInvokedCallback="true">
+        android:enableOnBackInvokedCallback="true"
+        android:localeConfig="@xml/locale_config">
 
         <activity
             android:name=".MainActivity"
