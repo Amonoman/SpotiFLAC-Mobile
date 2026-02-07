@@ -24,15 +24,6 @@ Download music in true lossless FLAC from Tidal, Qobuz & Amazon Music — no acc
   <img src="assets/images/4.jpg?v=2" width="200" />
 </p>
 
-## Search Source
-
-SpotiFLAC supports multiple search sources for finding music metadata:
-
-| Source | Setup |
-|--------|-------|
-| **Deezer** (Default) | No setup required |
-| **Extensions** | Install additional search providers from the Store |
-
 ## Extensions
 
 Extensions allow the community to add new music sources and features without waiting for app updates. When a streaming service API changes or a new source becomes available, extensions can be updated independently.
@@ -54,15 +45,8 @@ Download music in true lossless FLAC from Tidal, Qobuz & Amazon Music for Window
 
 ## Telegram
 
-<p align="center">
-  <a href="https://t.me/spotiflac">
-    <img src="https://img.shields.io/badge/Telegram-Channel-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram Channel">
-  </a>
-
-  <a href="https://t.me/spotiflac_chat">
-    <img src="https://img.shields.io/badge/Telegram-Community-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram Community">
-  </a>
-</p>
+[![Telegram Channel](https://img.shields.io/badge/CHANNEL-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/spotiflac)
+[![Telegram Community](https://img.shields.io/badge/COMMUNITY-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/spotiflac_chat)
 
 ## FAQ
 
