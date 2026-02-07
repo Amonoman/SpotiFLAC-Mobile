@@ -385,7 +385,7 @@ jobs:
           cat /tmp/release_body.txt
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.get-version.outputs.version }}
           name: SpotiFLAC ${{ needs.get-version.outputs.version }}
