@@ -2,6 +2,19 @@
 
 ## [3.5.2] - 2026-02-08
 
+### Performance
+
+- Home tab search result sections are now virtualized with `SliverList` (lazy item build) instead of eager `Column` rendering, reducing frame drops on large result sets
+- Home tab now narrows Riverpod subscriptions using field-level `select(...)` for search/provider state to reduce unnecessary full-tab rebuilds
+- Search provider dropdown now watches only required fields (`searchProvider`, `metadataSource`, `extensions`) instead of full provider states
+- Track row rendering in Home search now receives precomputed thumbnail sizing/local-library flags from parent to avoid repeated per-item provider watches
+- Removed thumbnail `debugPrint` calls inside track row `build()` to reduce runtime overhead during scrolling/rebuilds
+- Queue tab root subscription no longer watches full queue item list; it now watches only queue presence (`items.isNotEmpty`) to avoid full Library UI rebuilds on every progress tick
+- Queue download header/list rendering has been isolated into dedicated `Consumer` slivers; header now watches only queue length (`items.length`) while item list watches queue item updates
+- Queue filter/sort computations are now centralized and memoized per filter mode within a build pass (`all`/`albums`/`singles`), reducing repeated list transforms for chip counts and page content
+- Selection bottom bar content is now computed only when selection mode is active, removing hidden-state heavy list preparation
+- File existence checks in queue/library rows now use per-path `ValueNotifier` + `ValueListenableBuilder` updates instead of triggering global `setState`, reducing unnecessary whole-tab repaints
+
 ### Changed
 
 - Replaced date range filter with sorting options in Library tab: Latest, Oldest, A-Z, Z-A

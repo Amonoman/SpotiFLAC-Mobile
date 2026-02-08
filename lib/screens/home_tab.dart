@@ -43,7 +43,8 @@ class _RecentAccessView {
   });
 }
 
-class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
+class _HomeTabState extends ConsumerState<HomeTab>
+    with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
   final _urlController = TextEditingController();
   bool _isTyping = false;
   final FocusNode _searchFocusNode = FocusNode();
@@ -51,7 +52,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
   late final ProviderSubscription<TrackState> _trackStateSub;
   late final ProviderSubscription<bool> _extensionInitSub;
   late final ProviderSubscription<bool> _homeFeedExtSub;
-  
+
   Timer? _liveSearchDebounce;
   bool _isLiveSearchInProgress = false;
   String? _pendingLiveSearchQuery;
@@ -62,23 +63,29 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
   List<RecentAccessItem>? _recentAccessItemsCache;
   Set<String>? _recentAccessHiddenIdsCache;
   _RecentAccessView? _recentAccessViewCache;
-  
+
   @override
   bool get wantKeepAlive => true;
-  
+
   @override
   void initState() {
     super.initState();
     _urlController.addListener(_onSearchChanged);
     _searchFocusNode.addListener(_onSearchFocusChanged);
-    
-    _trackStateSub = ref.listenManual<TrackState>(trackProvider, (previous, next) {
+
+    _trackStateSub = ref.listenManual<TrackState>(trackProvider, (
+      previous,
+      next,
+    ) {
       _onTrackStateChanged(previous, next);
-      if (previous != null && previous.isLoading && !next.isLoading && next.error == null) {
+      if (previous != null &&
+          previous.isLoading &&
+          !next.isLoading &&
+          next.error == null) {
         _navigateToDetailIfNeeded();
       }
     });
-    
+
     _extensionInitSub = ref.listenManual<bool>(
       extensionProvider.select((s) => s.isInitialized),
       (previous, next) {
@@ -89,33 +96,39 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
         }
       },
     );
-    
+
     // Watch for new homeFeed extension being installed/enabled after init
     _homeFeedExtSub = ref.listenManual<bool>(
-      extensionProvider.select((s) => s.extensions.any((e) => e.enabled && e.hasHomeFeed)),
+      extensionProvider.select(
+        (s) => s.extensions.any((e) => e.enabled && e.hasHomeFeed),
+      ),
       (previous, next) {
         if (next == true && previous != true) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
-              ref.read(exploreProvider.notifier).fetchHomeFeed(forceRefresh: true);
+              ref
+                  .read(exploreProvider.notifier)
+                  .fetchHomeFeed(forceRefresh: true);
             }
           });
         }
       },
     );
   }
-  
+
   void _fetchExploreIfNeeded() {
     final extState = ref.read(extensionProvider);
     final exploreState = ref.read(exploreProvider);
     final hasHomeFeedExtension = extState.extensions.any(
       (e) => e.enabled && e.hasHomeFeed,
     );
-    if (hasHomeFeedExtension && !exploreState.hasContent && !exploreState.isLoading) {
+    if (hasHomeFeedExtension &&
+        !exploreState.hasContent &&
+        !exploreState.isLoading) {
       ref.read(exploreProvider.notifier).fetchHomeFeed();
     }
   }
-  
+
   @override
   void dispose() {
     _liveSearchDebounce?.cancel();
@@ -136,9 +149,9 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
   }
 
   void _onTrackStateChanged(TrackState? previous, TrackState next) {
-    if (previous != null && 
-        !next.hasContent && 
-        !next.hasSearchText && 
+    if (previous != null &&
+        !next.hasContent &&
+        !next.hasSearchText &&
         !next.isLoading &&
         _urlController.text.isNotEmpty &&
         !_searchFocusNode.hasFocus) {
@@ -146,24 +159,26 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
       setState(() => _isTyping = false);
     }
   }
-  
+
   /// Check if live search is available (extension is set as search provider)
   bool _isLiveSearchEnabled() {
     final settings = ref.read(settingsProvider);
     final extState = ref.read(extensionProvider);
     final searchProvider = settings.searchProvider;
-    
+
     if (searchProvider == null || searchProvider.isEmpty) return false;
-    
-    final extension = extState.extensions.where((e) => e.id == searchProvider && e.enabled).firstOrNull;
+
+    final extension = extState.extensions
+        .where((e) => e.id == searchProvider && e.enabled)
+        .firstOrNull;
     return extension != null;
   }
-  
+
   void _onSearchChanged() {
     final text = _urlController.text.trim();
-    
+
     ref.read(trackProvider.notifier).setSearchText(text.isNotEmpty);
-    
+
     if (text.isNotEmpty && !_isTyping) {
       setState(() => _isTyping = true);
     } else if (text.isEmpty && _isTyping) {
@@ -171,10 +186,10 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
       _liveSearchDebounce?.cancel();
       return;
     }
-    
+
     if (_isLiveSearchEnabled() && text.length >= _minLiveSearchChars) {
       if (text.startsWith('http') || text.startsWith('spotify:')) return;
-      
+
       _liveSearchDebounce?.cancel();
       _liveSearchDebounce = Timer(_liveSearchDelay, () {
         if (mounted && _urlController.text.trim() == text) {
@@ -183,27 +198,27 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
       });
     }
   }
-  
+
   Future<void> _executeLiveSearch(String query) async {
     if (_isLiveSearchInProgress) {
       _pendingLiveSearchQuery = query;
       return;
     }
-    
+
     _isLiveSearchInProgress = true;
     _pendingLiveSearchQuery = null;
-    
+
     try {
       await _performSearch(query);
     } finally {
       _isLiveSearchInProgress = false;
-      
+
       final pending = _pendingLiveSearchQuery;
       _pendingLiveSearchQuery = null;
-      
-      if (pending != null && 
-          pending != query && 
-          mounted && 
+
+      if (pending != null &&
+          pending != query &&
+          mounted &&
           _urlController.text.trim() == pending) {
         await Future.delayed(const Duration(milliseconds: 100));
         if (mounted && _urlController.text.trim() == pending) {
@@ -218,28 +233,41 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
     final extState = ref.read(extensionProvider);
     final searchProvider = settings.searchProvider;
     // Use filterOverride if provided, otherwise read from state
-    final selectedFilter = filterOverride ?? ref.read(trackProvider).selectedSearchFilter;
-    
-    final searchKey = '${searchProvider ?? 'default'}:$query:${selectedFilter ?? 'all'}';
+    final selectedFilter =
+        filterOverride ?? ref.read(trackProvider).selectedSearchFilter;
+
+    final searchKey =
+        '${searchProvider ?? 'default'}:$query:${selectedFilter ?? 'all'}';
     if (_lastSearchQuery == searchKey) return;
     _lastSearchQuery = searchKey;
-    
-    final isExtensionEnabled = searchProvider != null && 
+
+    final isExtensionEnabled =
+        searchProvider != null &&
         searchProvider.isNotEmpty &&
         extState.extensions.any((e) => e.id == searchProvider && e.enabled);
-    
+
     if (isExtensionEnabled) {
       // Build options with filter if selected
       Map<String, dynamic>? options;
       if (selectedFilter != null) {
         options = {'filter': selectedFilter};
       }
-      await ref.read(trackProvider.notifier).customSearch(searchProvider, query, options: options);
+      await ref
+          .read(trackProvider.notifier)
+          .customSearch(searchProvider, query, options: options);
     } else {
-      if (searchProvider != null && searchProvider.isNotEmpty && !isExtensionEnabled) {
+      if (searchProvider != null &&
+          searchProvider.isNotEmpty &&
+          !isExtensionEnabled) {
         ref.read(settingsProvider.notifier).setSearchProvider(null);
       }
-      await ref.read(trackProvider.notifier).search(query, metadataSource: settings.metadataSource, filterOverride: selectedFilter);
+      await ref
+          .read(trackProvider.notifier)
+          .search(
+            query,
+            metadataSource: settings.metadataSource,
+            filterOverride: selectedFilter,
+          );
     }
     ref.read(settingsProvider.notifier).setHasSearchedBefore();
   }
@@ -273,53 +301,76 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
       _navigateToDetailIfNeeded();
     } else {
       final settings = ref.read(settingsProvider);
-      await ref.read(trackProvider.notifier).search(url, metadataSource: settings.metadataSource);
+      await ref
+          .read(trackProvider.notifier)
+          .search(url, metadataSource: settings.metadataSource);
     }
     ref.read(settingsProvider.notifier).setHasSearchedBefore();
   }
 
   void _navigateToDetailIfNeeded() {
     final trackState = ref.read(trackProvider);
-    
-    if (trackState.albumId != null && trackState.albumName != null && trackState.tracks.isNotEmpty) {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => AlbumScreen(
-        albumId: trackState.albumId!,
-        albumName: trackState.albumName!,
-        coverUrl: trackState.coverUrl,
-        tracks: trackState.tracks,
-      )));
-      ref.read(trackProvider.notifier).clear();
-      _urlController.clear();
-      setState(() => _isTyping = false);
-      return;
-    }
-    
-    if (trackState.playlistName != null && trackState.tracks.isNotEmpty) {
-      ref.read(recentAccessProvider.notifier).recordPlaylistAccess(
-        id: trackState.playlistName!,
-        name: trackState.playlistName!,
-        imageUrl: trackState.coverUrl,
-        providerId: 'spotify',
+
+    if (trackState.albumId != null &&
+        trackState.albumName != null &&
+        trackState.tracks.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AlbumScreen(
+            albumId: trackState.albumId!,
+            albumName: trackState.albumName!,
+            coverUrl: trackState.coverUrl,
+            tracks: trackState.tracks,
+          ),
+        ),
       );
-      
-      Navigator.push(context, MaterialPageRoute(builder: (context) => PlaylistScreen(
-        playlistName: trackState.playlistName!,
-        coverUrl: trackState.coverUrl,
-        tracks: trackState.tracks,
-      )));
       ref.read(trackProvider.notifier).clear();
       _urlController.clear();
       setState(() => _isTyping = false);
       return;
     }
-    
-    if (trackState.artistId != null && trackState.artistName != null && trackState.artistAlbums != null) {
-      Navigator.push(context, MaterialPageRoute(builder: (context) => ArtistScreen(
-        artistId: trackState.artistId!,
-        artistName: trackState.artistName!,
-        coverUrl: trackState.coverUrl,
-        albums: trackState.artistAlbums!,
-      )));
+
+    if (trackState.playlistName != null && trackState.tracks.isNotEmpty) {
+      ref
+          .read(recentAccessProvider.notifier)
+          .recordPlaylistAccess(
+            id: trackState.playlistName!,
+            name: trackState.playlistName!,
+            imageUrl: trackState.coverUrl,
+            providerId: 'spotify',
+          );
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PlaylistScreen(
+            playlistName: trackState.playlistName!,
+            coverUrl: trackState.coverUrl,
+            tracks: trackState.tracks,
+          ),
+        ),
+      );
+      ref.read(trackProvider.notifier).clear();
+      _urlController.clear();
+      setState(() => _isTyping = false);
+      return;
+    }
+
+    if (trackState.artistId != null &&
+        trackState.artistName != null &&
+        trackState.artistAlbums != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ArtistScreen(
+            artistId: trackState.artistId!,
+            artistName: trackState.artistName!,
+            coverUrl: trackState.coverUrl,
+            albums: trackState.artistAlbums!,
+          ),
+        ),
+      );
       ref.read(trackProvider.notifier).clear();
       _urlController.clear();
       setState(() => _isTyping = false);
@@ -332,7 +383,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
     if (index >= 0 && index < trackState.tracks.length) {
       final track = trackState.tracks[index];
       final settings = ref.read(settingsProvider);
-      
+
       if (settings.askQualityBeforeDownload) {
         DownloadServicePicker.show(
           context,
@@ -340,13 +391,25 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
           artistName: track.artistName,
           coverUrl: track.coverUrl,
           onSelect: (quality, service) {
-            ref.read(downloadQueueProvider.notifier).addToQueue(track, service, qualityOverride: quality);
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.snackbarAddedToQueue(track.name))));
+            ref
+                .read(downloadQueueProvider.notifier)
+                .addToQueue(track, service, qualityOverride: quality);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(context.l10n.snackbarAddedToQueue(track.name)),
+              ),
+            );
           },
         );
       } else {
-        ref.read(downloadQueueProvider.notifier).addToQueue(track, settings.defaultService);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.snackbarAddedToQueue(track.name))));
+        ref
+            .read(downloadQueueProvider.notifier)
+            .addToQueue(track, settings.defaultService);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.snackbarAddedToQueue(track.name)),
+          ),
+        );
       }
     }
   }
@@ -354,10 +417,10 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
   Future<void> _importCsv(BuildContext context, WidgetRef ref) async {
     int currentProgress = 0;
     int totalTracks = 0;
-    
+
     bool dialogShown = false;
     StateSetter? setDialogState;
-    
+
     void showProgressDialog() {
       if (dialogShown || !mounted) return;
       dialogShown = true;
@@ -374,8 +437,11 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
                   const CircularProgressIndicator(),
                   const SizedBox(height: 16),
                   Text(
-                    totalTracks > 0 
-                        ? context.l10n.progressFetchingMetadata(currentProgress, totalTracks)
+                    totalTracks > 0
+                        ? context.l10n.progressFetchingMetadata(
+                            currentProgress,
+                            totalTracks,
+                          )
                         : context.l10n.progressReadingCsv,
                   ),
                 ],
@@ -385,7 +451,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
         ),
       );
     }
-    
+
     final tracks = await CsvImportService.pickAndParseCsv(
       onProgress: (current, total) {
         currentProgress = current;
@@ -396,30 +462,28 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
         setDialogState?.call(() {});
       },
     );
-    
+
     if (dialogShown && mounted) {
       Navigator.of(this.context).pop();
     }
-    
+
     if (tracks.isNotEmpty) {
       final settings = ref.read(settingsProvider);
-      
+
       if (!mounted) return;
-      
+
       // ignore: use_build_context_synchronously
       final l10n = context.l10n;
-      
+
       if (settings.askQualityBeforeDownload) {
         DownloadServicePicker.show(
           this.context,
           trackName: l10n.csvImportTracks(tracks.length),
           artistName: l10n.dialogImportPlaylistTitle,
           onSelect: (quality, service) {
-            ref.read(downloadQueueProvider.notifier).addMultipleToQueue(
-              tracks, 
-              service, 
-              qualityOverride: quality,
-            );
+            ref
+                .read(downloadQueueProvider.notifier)
+                .addMultipleToQueue(tracks, service, qualityOverride: quality);
             if (mounted) {
               ScaffoldMessenger.of(this.context).showSnackBar(
                 SnackBar(
@@ -453,7 +517,9 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
         );
 
         if (confirmed == true) {
-          ref.read(downloadQueueProvider.notifier).addMultipleToQueue(tracks, settings.defaultService);
+          ref
+              .read(downloadQueueProvider.notifier)
+              .addMultipleToQueue(tracks, settings.defaultService);
           if (mounted) {
             ScaffoldMessenger.of(this.context).showSnackBar(
               SnackBar(
@@ -473,60 +539,119 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    
+
     final tracks = ref.watch(trackProvider.select((s) => s.tracks));
-    final searchArtists = ref.watch(trackProvider.select((s) => s.searchArtists));
+    final searchArtists = ref.watch(
+      trackProvider.select((s) => s.searchArtists),
+    );
     final searchAlbums = ref.watch(trackProvider.select((s) => s.searchAlbums));
-    final searchPlaylists = ref.watch(trackProvider.select((s) => s.searchPlaylists));
+    final searchPlaylists = ref.watch(
+      trackProvider.select((s) => s.searchPlaylists),
+    );
     final isLoading = ref.watch(trackProvider.select((s) => s.isLoading));
     final error = ref.watch(trackProvider.select((s) => s.error));
-    final hasSearchedBefore = ref.watch(settingsProvider.select((s) => s.hasSearchedBefore));
-    
-    final exploreSections =
-        ref.watch(exploreProvider.select((s) => s.sections));
-    final exploreGreeting =
-        ref.watch(exploreProvider.select((s) => s.greeting));
-    final exploreLoading =
-        ref.watch(exploreProvider.select((s) => s.isLoading));
-    final hasHomeFeedExtension = ref.watch(extensionProvider.select((s) => 
-      s.extensions.any((e) => e.enabled && e.hasHomeFeed)
-    ));
-    
+    final hasSearchedBefore = ref.watch(
+      settingsProvider.select((s) => s.hasSearchedBefore),
+    );
+
+    final exploreSections = ref.watch(
+      exploreProvider.select((s) => s.sections),
+    );
+    final exploreGreeting = ref.watch(
+      exploreProvider.select((s) => s.greeting),
+    );
+    final exploreLoading = ref.watch(
+      exploreProvider.select((s) => s.isLoading),
+    );
+    final hasHomeFeedExtension = ref.watch(
+      extensionProvider.select(
+        (s) => s.extensions.any((e) => e.enabled && e.hasHomeFeed),
+      ),
+    );
+
     final colorScheme = Theme.of(context).colorScheme;
-    final hasActualResults = tracks.isNotEmpty || (searchArtists != null && searchArtists.isNotEmpty) || (searchAlbums != null && searchAlbums.isNotEmpty) || (searchPlaylists != null && searchPlaylists.isNotEmpty);
-    final isShowingRecentAccess = ref.watch(trackProvider.select((s) => s.isShowingRecentAccess));
+    final hasActualResults =
+        tracks.isNotEmpty ||
+        (searchArtists != null && searchArtists.isNotEmpty) ||
+        (searchAlbums != null && searchAlbums.isNotEmpty) ||
+        (searchPlaylists != null && searchPlaylists.isNotEmpty);
+    final isShowingRecentAccess = ref.watch(
+      trackProvider.select((s) => s.isShowingRecentAccess),
+    );
     final hasResults = isShowingRecentAccess || hasActualResults || isLoading;
     final mediaQuery = MediaQuery.of(context);
     final screenHeight = mediaQuery.size.height;
     final topPadding = mediaQuery.padding.top;
-    final historyItems = ref.watch(downloadHistoryProvider.select((s) => s.items));
-    final recentAccessItems = ref.watch(recentAccessProvider.select((s) => s.items));
-    final hiddenDownloadIds =
-        ref.watch(recentAccessProvider.select((s) => s.hiddenDownloadIds));
-    
-    final hasRecentItems = recentAccessItems.isNotEmpty || historyItems.isNotEmpty;
-    final showRecentAccess = isShowingRecentAccess && hasRecentItems && !hasActualResults && !isLoading;
+    final historyItems = ref.watch(
+      downloadHistoryProvider.select((s) => s.items),
+    );
+    final recentAccessItems = ref.watch(
+      recentAccessProvider.select((s) => s.items),
+    );
+    final hiddenDownloadIds = ref.watch(
+      recentAccessProvider.select((s) => s.hiddenDownloadIds),
+    );
+
+    final hasRecentItems =
+        recentAccessItems.isNotEmpty || historyItems.isNotEmpty;
+    final showRecentAccess =
+        isShowingRecentAccess &&
+        hasRecentItems &&
+        !hasActualResults &&
+        !isLoading;
     final recentAccessView = showRecentAccess
-        ? _getRecentAccessView(recentAccessItems, historyItems, hiddenDownloadIds)
+        ? _getRecentAccessView(
+            recentAccessItems,
+            historyItems,
+            hiddenDownloadIds,
+          )
         : null;
-    
+
     final hasExploreContent = exploreSections.isNotEmpty;
-    final showExplore = !hasActualResults && !isLoading && !showRecentAccess && (hasHomeFeedExtension || hasExploreContent) && hasExploreContent;
-    
+    final showExplore =
+        !hasActualResults &&
+        !isLoading &&
+        !showRecentAccess &&
+        (hasHomeFeedExtension || hasExploreContent) &&
+        hasExploreContent;
+
     // Get current search extension and its filters
-    final settings = ref.watch(settingsProvider);
-    final extState = ref.watch(extensionProvider);
-    final currentSearchProvider = settings.searchProvider;
-    final selectedSearchFilter = ref.watch(trackProvider.select((s) => s.selectedSearchFilter));
+    final currentSearchProvider = ref.watch(
+      settingsProvider.select((s) => s.searchProvider),
+    );
+    final extensions = ref.watch(extensionProvider.select((s) => s.extensions));
+    final selectedSearchFilter = ref.watch(
+      trackProvider.select((s) => s.selectedSearchFilter),
+    );
+    final searchExtensionId = ref.watch(
+      trackProvider.select((s) => s.searchExtensionId),
+    );
+    final localLibrarySettings = ref.watch(
+      settingsProvider.select(
+        (s) => (s.localLibraryEnabled, s.localLibraryShowDuplicates),
+      ),
+    );
+    final showLocalLibraryIndicator =
+        localLibrarySettings.$1 && localLibrarySettings.$2;
+    final thumbnailSizesByExtensionId = <String, (double, double)>{
+      for (final extension in extensions)
+        if (extension.searchBehavior != null)
+          extension.id: extension.searchBehavior!.getThumbnailSize(
+            defaultSize: 56,
+          ),
+    };
     Extension? currentSearchExtension;
     List<SearchFilter> searchFilters = [];
-    
-    final isUsingExtensionSearch = currentSearchProvider != null && 
+
+    final isUsingExtensionSearch =
+        currentSearchProvider != null &&
         currentSearchProvider.isNotEmpty &&
-        extState.extensions.any((e) => e.id == currentSearchProvider && e.enabled);
-    
+        extensions.any((e) => e.id == currentSearchProvider && e.enabled);
+
     if (isUsingExtensionSearch) {
-      currentSearchExtension = extState.extensions.where((e) => e.id == currentSearchProvider && e.enabled).firstOrNull;
+      currentSearchExtension = extensions
+          .where((e) => e.id == currentSearchProvider && e.enabled)
+          .firstOrNull;
       if (currentSearchExtension?.searchBehavior?.filters.isNotEmpty == true) {
         searchFilters = currentSearchExtension!.searchBehavior!.filters;
       }
@@ -539,10 +664,12 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
         SearchFilter(id: 'playlist', label: 'Playlists', icon: 'playlist'),
       ];
     }
-    
+
     if (hasActualResults && isShowingRecentAccess) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) ref.read(trackProvider.notifier).setShowingRecentAccess(false);
+        if (mounted) {
+          ref.read(trackProvider.notifier).setShowingRecentAccess(false);
+        }
       });
     }
 
@@ -560,169 +687,199 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
           child: CustomScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
-            SliverAppBar(
-              expandedHeight: 120 + topPadding,
-              collapsedHeight: kToolbarHeight,
-              floating: false,
-              pinned: true,
-              backgroundColor: colorScheme.surface,
-              surfaceTintColor: Colors.transparent,
-              automaticallyImplyLeading: false,
-              flexibleSpace: LayoutBuilder(
-                builder: (context, constraints) {
-                  final maxHeight = 120 + topPadding;
-                  final minHeight = kToolbarHeight + topPadding;
-                  final expandRatio = ((constraints.maxHeight - minHeight) / (maxHeight - minHeight)).clamp(0.0, 1.0);
-                  
-                  return FlexibleSpaceBar(
-                    expandedTitleScale: 1.0,
-                    titlePadding: const EdgeInsets.only(left: 24, bottom: 16),
-                    title: Text(
-                      context.l10n.homeTitle,
-                      style: TextStyle(
-                        fontSize: 20 + (14 * expandRatio), // 20 -> 34
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.onSurface,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          
-          SliverToBoxAdapter(
-            child: AnimatedSize(
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeOut,
-              child: (hasResults || showExplore)
-                  ? const SizedBox.shrink()
-                  : Column(
-                      children: [
-                        SizedBox(height: screenHeight * 0.06),
-                        Container(
-                          width: 96,
-                          height: 96,
-                          decoration: BoxDecoration(
-                            color: colorScheme.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Image.asset(
-                            'assets/images/logo-transparant.png',
-                            color: colorScheme.onPrimary,
-                            fit: BoxFit.contain,
-                            errorBuilder: (_, _, _) => ClipRRect(
-                              borderRadius: BorderRadius.circular(24),
+              SliverAppBar(
+                expandedHeight: 120 + topPadding,
+                collapsedHeight: kToolbarHeight,
+                floating: false,
+                pinned: true,
+                backgroundColor: colorScheme.surface,
+                surfaceTintColor: Colors.transparent,
+                automaticallyImplyLeading: false,
+                flexibleSpace: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final maxHeight = 120 + topPadding;
+                    final minHeight = kToolbarHeight + topPadding;
+                    final expandRatio =
+                        ((constraints.maxHeight - minHeight) /
+                                (maxHeight - minHeight))
+                            .clamp(0.0, 1.0);
+
+                    return FlexibleSpaceBar(
+                      expandedTitleScale: 1.0,
+                      titlePadding: const EdgeInsets.only(left: 24, bottom: 16),
+                      title: Text(
+                        context.l10n.homeTitle,
+                        style: TextStyle(
+                          fontSize: 20 + (14 * expandRatio), // 20 -> 34
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+              SliverToBoxAdapter(
+                child: AnimatedSize(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOut,
+                  child: (hasResults || showExplore)
+                      ? const SizedBox.shrink()
+                      : Column(
+                          children: [
+                            SizedBox(height: screenHeight * 0.06),
+                            Container(
+                              width: 96,
+                              height: 96,
+                              decoration: BoxDecoration(
+                                color: colorScheme.primary,
+                                shape: BoxShape.circle,
+                              ),
                               child: Image.asset(
-                                'assets/images/logo.png',
-                                width: 96,
-                                height: 96,
-                                fit: BoxFit.cover,
+                                'assets/images/logo-transparant.png',
+                                color: colorScheme.onPrimary,
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, _, _) => ClipRRect(
+                                  borderRadius: BorderRadius.circular(24),
+                                  child: Image.asset(
+                                    'assets/images/logo.png',
+                                    width: 96,
+                                    height: 96,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'SpotiFLAC',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          context.l10n.homeSubtitle,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-            ),
-          ),
-          
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(16, (hasResults || showExplore) ? 8 : 32, 16, (hasResults || showExplore) ? 8 : 16),
-              child: _buildSearchBar(colorScheme),
-            ),
-          ),
-          
-          // Search filter bar (only shown when has search results)
-          if (searchFilters.isNotEmpty && hasActualResults)
-            SliverToBoxAdapter(
-              child: _buildSearchFilterBar(
-                searchFilters,
-                selectedSearchFilter,
-                colorScheme,
-              ),
-            ),
-          
-          if (showRecentAccess)
-            SliverToBoxAdapter(
-              child: _buildRecentAccess(recentAccessView!, colorScheme),
-            ),
-          
-          SliverToBoxAdapter(
-            child: AnimatedSize(
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeOut,
-              child: (hasResults || showRecentAccess || showExplore)
-                  ? const SizedBox.shrink()
-                  : Column(
-                      children: [
-                        if (!hasSearchedBefore)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Text(
-                              context.l10n.homeSupports,
+                            const SizedBox(height: 16),
+                            Text(
+                              'SpotiFLAC',
+                              style: Theme.of(context).textTheme.headlineSmall
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              context.l10n.homeSubtitle,
                               textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
                             ),
-                          ),
-                        if (historyItems.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
-                            child: _buildRecentDownloads(historyItems, colorScheme),
-                          ),
-                      ],
-                    ),
-            ),
-          ),
-          
-          if (showExplore)
-            ..._buildExploreSections(exploreSections, exploreGreeting, colorScheme),
-          
-          if (hasHomeFeedExtension && !hasActualResults && !isLoading && exploreLoading)
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.all(32),
-                child: Center(child: CircularProgressIndicator()),
+                          ],
+                        ),
+                ),
               ),
-            ),
-          
-          ..._buildSearchResults(
-            tracks: tracks,
-            searchArtists: searchArtists,
-            searchAlbums: searchAlbums,
-            searchPlaylists: searchPlaylists,
-            isLoading: isLoading,
-            error: error,
-            colorScheme: colorScheme,
-            hasResults: hasResults,
+
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    16,
+                    (hasResults || showExplore) ? 8 : 32,
+                    16,
+                    (hasResults || showExplore) ? 8 : 16,
+                  ),
+                  child: _buildSearchBar(colorScheme),
+                ),
+              ),
+
+              // Search filter bar (only shown when has search results)
+              if (searchFilters.isNotEmpty && hasActualResults)
+                SliverToBoxAdapter(
+                  child: _buildSearchFilterBar(
+                    searchFilters,
+                    selectedSearchFilter,
+                    colorScheme,
+                  ),
+                ),
+
+              if (showRecentAccess)
+                SliverToBoxAdapter(
+                  child: _buildRecentAccess(recentAccessView!, colorScheme),
+                ),
+
+              SliverToBoxAdapter(
+                child: AnimatedSize(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOut,
+                  child: (hasResults || showRecentAccess || showExplore)
+                      ? const SizedBox.shrink()
+                      : Column(
+                          children: [
+                            if (!hasSearchedBefore)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: Text(
+                                  context.l10n.homeSupports,
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
+                                ),
+                              ),
+                            if (historyItems.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  24,
+                                  32,
+                                  24,
+                                  24,
+                                ),
+                                child: _buildRecentDownloads(
+                                  historyItems,
+                                  colorScheme,
+                                ),
+                              ),
+                          ],
+                        ),
+                ),
+              ),
+
+              if (showExplore)
+                ..._buildExploreSections(
+                  exploreSections,
+                  exploreGreeting,
+                  colorScheme,
+                ),
+
+              if (hasHomeFeedExtension &&
+                  !hasActualResults &&
+                  !isLoading &&
+                  exploreLoading)
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.all(32),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                ),
+
+              ..._buildSearchResults(
+                tracks: tracks,
+                searchArtists: searchArtists,
+                searchAlbums: searchAlbums,
+                searchPlaylists: searchPlaylists,
+                isLoading: isLoading,
+                error: error,
+                colorScheme: colorScheme,
+                hasResults: hasResults,
+                searchExtensionId: searchExtensionId,
+                showLocalLibraryIndicator: showLocalLibraryIndicator,
+                thumbnailSizesByExtensionId: thumbnailSizesByExtensionId,
+              ),
+            ],
           ),
-        ],
-      ),
-    ),  // Close RefreshIndicator
-    ),  // Close GestureDetector
-  );
+        ), // Close RefreshIndicator
+      ), // Close GestureDetector
+    );
   }
 
-  Widget _buildRecentDownloads(List<DownloadHistoryItem> items, ColorScheme colorScheme) {
+  Widget _buildRecentDownloads(
+    List<DownloadHistoryItem> items,
+    ColorScheme colorScheme,
+  ) {
     final itemCount = items.length < 10 ? items.length : 10;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -754,7 +911,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
                         ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: item.coverUrl != null
-? CachedNetworkImage(
+                              ? CachedNetworkImage(
                                   imageUrl: item.coverUrl!,
                                   width: 100,
                                   height: 100,
@@ -767,15 +924,18 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
                                   width: 100,
                                   height: 100,
                                   color: colorScheme.surfaceContainerHighest,
-                                  child: Icon(Icons.music_note, color: colorScheme.onSurfaceVariant, size: 32),
+                                  child: Icon(
+                                    Icons.music_note,
+                                    color: colorScheme.onSurfaceVariant,
+                                    size: 32,
+                                  ),
                                 ),
                         ),
                         const SizedBox(height: 6),
                         Text(
                           item.trackName,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: colorScheme.onSurfaceVariant),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.center,
@@ -807,10 +967,9 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
 
     final albumGroups = <String, List<DownloadHistoryItem>>{};
     for (final h in historyItems) {
-      final artistForKey =
-          (h.albumArtist != null && h.albumArtist!.isNotEmpty)
-              ? h.albumArtist!
-              : h.artistName;
+      final artistForKey = (h.albumArtist != null && h.albumArtist!.isNotEmpty)
+          ? h.albumArtist!
+          : h.artistName;
       final albumKey = '${h.albumName}|$artistForKey';
       albumGroups.putIfAbsent(albumKey, () => []).add(h);
     }
@@ -823,8 +982,8 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
       );
       final artistForKey =
           (mostRecent.albumArtist != null && mostRecent.albumArtist!.isNotEmpty)
-              ? mostRecent.albumArtist!
-              : mostRecent.artistName;
+          ? mostRecent.albumArtist!
+          : mostRecent.artistName;
 
       if (tracks.length == 1) {
         downloadItems.add(
@@ -865,10 +1024,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
       }
     }
 
-    final allItems = <RecentAccessItem>[
-      ...items,
-      ...visibleDownloads,
-    ];
+    final allItems = <RecentAccessItem>[...items, ...visibleDownloads];
     allItems.sort((a, b) => b.accessedAt.compareTo(a.accessedAt));
 
     final seen = <String>{};
@@ -905,42 +1061,39 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
     final hasGreeting = greeting != null && greeting.isNotEmpty;
     final sectionOffset = hasGreeting ? 1 : 0;
     final totalCount = sections.length + sectionOffset + 1; // + bottom padding
-    
+
     return [
       SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            if (hasGreeting && index == 0) {
-              return Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                child: Text(
-                  greeting,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+        delegate: SliverChildBuilderDelegate((context, index) {
+          if (hasGreeting && index == 0) {
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: Text(
+                greeting,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
-              );
-            }
-            
-            final sectionIndex = index - sectionOffset;
-            if (sectionIndex < sections.length) {
-              return _buildExploreSection(sections[sectionIndex], colorScheme);
-            }
-            
-            // Bottom padding
-            return const SizedBox(height: 16);
-          },
-          childCount: totalCount,
-        ),
+              ),
+            );
+          }
+
+          final sectionIndex = index - sectionOffset;
+          if (sectionIndex < sections.length) {
+            return _buildExploreSection(sections[sectionIndex], colorScheme);
+          }
+
+          // Bottom padding
+          return const SizedBox(height: 16);
+        }, childCount: totalCount),
       ),
     ];
   }
-  
+
   Widget _buildExploreSection(ExploreSection section, ColorScheme colorScheme) {
     if (section.isYTMusicQuickPicks) {
       return _buildYTMusicQuickPicksSection(section, colorScheme);
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -948,9 +1101,9 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
           child: Text(
             section.title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         SizedBox(
@@ -968,12 +1121,15 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
       ],
     );
   }
-  
+
   /// Build YT Music "Quick picks" style swipeable pages section
-  Widget _buildYTMusicQuickPicksSection(ExploreSection section, ColorScheme colorScheme) {
+  Widget _buildYTMusicQuickPicksSection(
+    ExploreSection section,
+    ColorScheme colorScheme,
+  ) {
     const itemsPerPage = 5;
     final totalPages = (section.items.length / itemsPerPage).ceil();
-    
+
     return _QuickPicksPageView(
       section: section,
       colorScheme: colorScheme,
@@ -983,10 +1139,10 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
       onItemMenu: _showTrackBottomSheet,
     );
   }
-  
+
   Widget _buildExploreItem(ExploreItem item, ColorScheme colorScheme) {
     final isArtist = item.type == 'artist';
-    
+
     return GestureDetector(
       onTap: () => _navigateToExploreItem(item),
       child: SizedBox(
@@ -994,7 +1150,9 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 6),
           child: Column(
-            crossAxisAlignment: isArtist ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+            crossAxisAlignment: isArtist
+                ? CrossAxisAlignment.center
+                : CrossAxisAlignment.start,
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(isArtist ? 60 : 8),
@@ -1056,7 +1214,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
       ),
     );
   }
-  
+
   IconData _getIconForType(String type) {
     switch (type) {
       case 'track':
@@ -1073,55 +1231,64 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
         return Icons.music_note;
     }
   }
-  
+
   void _navigateToExploreItem(ExploreItem item) async {
     final extensionId = item.providerId ?? 'spotify-web';
-    
+
     switch (item.type) {
       case 'track':
         _showTrackBottomSheet(item);
         return;
       case 'album':
-        Navigator.push(context, MaterialPageRoute(
-          builder: (context) => ExtensionAlbumScreen(
-            extensionId: extensionId,
-            albumId: item.id,
-            albumName: item.name,
-            coverUrl: item.coverUrl,
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ExtensionAlbumScreen(
+              extensionId: extensionId,
+              albumId: item.id,
+              albumName: item.name,
+              coverUrl: item.coverUrl,
+            ),
           ),
-        ));
+        );
         return;
       case 'playlist':
-        Navigator.push(context, MaterialPageRoute(
-          builder: (context) => ExtensionPlaylistScreen(
-            extensionId: extensionId,
-            playlistId: item.id,
-            playlistName: item.name,
-            coverUrl: item.coverUrl,
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ExtensionPlaylistScreen(
+              extensionId: extensionId,
+              playlistId: item.id,
+              playlistName: item.name,
+              coverUrl: item.coverUrl,
+            ),
           ),
-        ));
+        );
         return;
       case 'artist':
-        Navigator.push(context, MaterialPageRoute(
-          builder: (context) => ExtensionArtistScreen(
-            extensionId: extensionId,
-            artistId: item.id,
-            artistName: item.name,
-            coverUrl: item.coverUrl,
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ExtensionArtistScreen(
+              extensionId: extensionId,
+              artistId: item.id,
+              artistName: item.name,
+              coverUrl: item.coverUrl,
+            ),
           ),
-        ));
+        );
         return;
       default:
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${item.type}: ${item.name}')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('${item.type}: ${item.name}')));
         return;
     }
   }
 
   void _showTrackBottomSheet(ExploreItem item) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     showModalBottomSheet(
       context: context,
       backgroundColor: colorScheme.surface,
@@ -1160,7 +1327,10 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
                             width: 64,
                             height: 64,
                             color: colorScheme.surfaceContainerHighest,
-                            child: Icon(Icons.music_note, color: colorScheme.onSurfaceVariant),
+                            child: Icon(
+                              Icons.music_note,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
                           ),
                   ),
                   const SizedBox(width: 16),
@@ -1170,18 +1340,16 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
                       children: [
                         Text(
                           item.name,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
                         Text(
                           item.artists,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: colorScheme.onSurfaceVariant),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -1217,7 +1385,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
 
   Future<void> _downloadExploreTrack(ExploreItem item) async {
     final settings = ref.read(settingsProvider);
-    
+
     final track = Track(
       id: item.id,
       name: item.name,
@@ -1231,7 +1399,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
       coverUrl: item.coverUrl,
       source: item.providerId ?? 'spotify-web',
     );
-    
+
     if (settings.askQualityBeforeDownload) {
       DownloadServicePicker.show(
         context,
@@ -1239,14 +1407,20 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
         artistName: track.artistName,
         coverUrl: track.coverUrl,
         onSelect: (quality, service) {
-          ref.read(downloadQueueProvider.notifier).addToQueue(track, service, qualityOverride: quality);
+          ref
+              .read(downloadQueueProvider.notifier)
+              .addToQueue(track, service, qualityOverride: quality);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.l10n.snackbarAddedToQueue(track.name))),
+            SnackBar(
+              content: Text(context.l10n.snackbarAddedToQueue(track.name)),
+            ),
           );
         },
       );
     } else {
-      ref.read(downloadQueueProvider.notifier).addToQueue(track, settings.defaultService);
+      ref
+          .read(downloadQueueProvider.notifier)
+          .addToQueue(track, settings.defaultService);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.snackbarAddedToQueue(track.name))),
       );
@@ -1255,18 +1429,21 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
 
   Future<void> _navigateToTrackAlbum(ExploreItem item) async {
     if (item.albumId != null && item.albumId!.isNotEmpty) {
-      Navigator.push(context, MaterialPageRoute(
-        builder: (context) => ExtensionAlbumScreen(
-          extensionId: item.providerId ?? 'spotify-web',
-          albumId: item.albumId!,
-          albumName: item.albumName ?? 'Album',
-          coverUrl: item.coverUrl,
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ExtensionAlbumScreen(
+            extensionId: item.providerId ?? 'spotify-web',
+            albumId: item.albumId!,
+            albumName: item.albumName ?? 'Album',
+            coverUrl: item.coverUrl,
+          ),
         ),
-      ));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Album info not available')),
       );
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Album info not available')));
     }
   }
 
@@ -1274,7 +1451,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
     final uniqueItems = view.uniqueItems;
     final downloadItems = view.downloadItems;
     final hasHiddenDownloads = view.hasHiddenDownloads;
-    
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       child: Column(
@@ -1293,7 +1470,9 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
                 TextButton(
                   onPressed: () {
                     for (final item in downloadItems) {
-                      ref.read(recentAccessProvider.notifier).hideDownloadFromRecents(item.id);
+                      ref
+                          .read(recentAccessProvider.notifier)
+                          .hideDownloadFromRecents(item.id);
                     }
                     ref.read(recentAccessProvider.notifier).clearHistory();
                   },
@@ -1311,7 +1490,13 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
                 padding: const EdgeInsets.symmetric(vertical: 24),
                 child: Column(
                   children: [
-                    Icon(Icons.visibility_off, size: 48, color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                    Icon(
+                      Icons.visibility_off,
+                      size: 48,
+                      color: colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.5,
+                      ),
+                    ),
                     const SizedBox(height: 12),
                     Text(
                       'No recent items',
@@ -1322,7 +1507,9 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
                     const SizedBox(height: 16),
                     OutlinedButton.icon(
                       onPressed: () {
-                        ref.read(recentAccessProvider.notifier).clearHiddenDownloads();
+                        ref
+                            .read(recentAccessProvider.notifier)
+                            .clearHiddenDownloads();
                       },
                       icon: const Icon(Icons.visibility, size: 18),
                       label: const Text('Show All Downloads'),
@@ -1332,17 +1519,22 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
               ),
             )
           else
-            ...uniqueItems.map((item) => _buildRecentAccessItem(item, colorScheme)),
+            ...uniqueItems.map(
+              (item) => _buildRecentAccessItem(item, colorScheme),
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildRecentAccessItem(RecentAccessItem item, ColorScheme colorScheme) {
+  Widget _buildRecentAccessItem(
+    RecentAccessItem item,
+    ColorScheme colorScheme,
+  ) {
     IconData typeIcon;
     String typeLabel;
     final isDownloaded = item.providerId == 'download';
-    
+
     switch (item.type) {
       case RecentAccessType.artist:
         typeIcon = Icons.person;
@@ -1357,7 +1549,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
         typeIcon = Icons.playlist_play;
         typeLabel = context.l10n.recentTypePlaylist;
     }
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: InkWell(
@@ -1368,9 +1560,11 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
           child: Row(
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(item.type == RecentAccessType.artist ? 28 : 4),
+                borderRadius: BorderRadius.circular(
+                  item.type == RecentAccessType.artist ? 28 : 4,
+                ),
                 child: item.imageUrl != null && item.imageUrl!.isNotEmpty
-? CachedNetworkImage(
+                    ? CachedNetworkImage(
                         imageUrl: item.imageUrl!,
                         width: 56,
                         height: 56,
@@ -1381,14 +1575,20 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
                           width: 56,
                           height: 56,
                           color: colorScheme.surfaceContainerHighest,
-                          child: Icon(typeIcon, color: colorScheme.onSurfaceVariant),
+                          child: Icon(
+                            typeIcon,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
                         ),
                       )
                     : Container(
                         width: 56,
                         height: 56,
                         color: colorScheme.surfaceContainerHighest,
-                        child: Icon(typeIcon, color: colorScheme.onSurfaceVariant),
+                        child: Icon(
+                          typeIcon,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                       ),
               ),
               const SizedBox(width: 12),
@@ -1406,23 +1606,35 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      isDownloaded 
-                          ? (item.subtitle != null ? '${context.l10n.recentTypeSong} • ${item.subtitle}' : context.l10n.recentTypeSong)
-                          : (item.subtitle != null ? '$typeLabel • ${item.subtitle}' : typeLabel),
+                      isDownloaded
+                          ? (item.subtitle != null
+                                ? '${context.l10n.recentTypeSong} • ${item.subtitle}'
+                                : context.l10n.recentTypeSong)
+                          : (item.subtitle != null
+                                ? '$typeLabel • ${item.subtitle}'
+                                : typeLabel),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: isDownloaded ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                        color: isDownloaded
+                            ? colorScheme.primary
+                            : colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
                 ),
               ),
               IconButton(
-                icon: Icon(Icons.close, size: 20, color: colorScheme.onSurfaceVariant),
+                icon: Icon(
+                  Icons.close,
+                  size: 20,
+                  color: colorScheme.onSurfaceVariant,
+                ),
                 onPressed: () {
                   if (item.providerId == 'download') {
-                    ref.read(recentAccessProvider.notifier).hideDownloadFromRecents(item.id);
+                    ref
+                        .read(recentAccessProvider.notifier)
+                        .hideDownloadFromRecents(item.id);
                   } else {
                     ref.read(recentAccessProvider.notifier).removeItem(item);
                   }
@@ -1437,62 +1649,85 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
 
   void _navigateToRecentItem(RecentAccessItem item) {
     _searchFocusNode.unfocus();
-    
+
     switch (item.type) {
       case RecentAccessType.artist:
-        if (item.providerId != null && item.providerId!.isNotEmpty && item.providerId != 'deezer' && item.providerId != 'spotify') {
-          Navigator.push(context, MaterialPageRoute(
-            builder: (context) => ExtensionArtistScreen(
-              extensionId: item.providerId!,
-              artistId: item.id,
-              artistName: item.name,
-              coverUrl: item.imageUrl,
+        if (item.providerId != null &&
+            item.providerId!.isNotEmpty &&
+            item.providerId != 'deezer' &&
+            item.providerId != 'spotify') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ExtensionArtistScreen(
+                extensionId: item.providerId!,
+                artistId: item.id,
+                artistName: item.name,
+                coverUrl: item.imageUrl,
+              ),
             ),
-          ));
+          );
         } else {
-          Navigator.push(context, MaterialPageRoute(
-            builder: (context) => ArtistScreen(
-              artistId: item.id,
-              artistName: item.name,
-              coverUrl: item.imageUrl,
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ArtistScreen(
+                artistId: item.id,
+                artistName: item.name,
+                coverUrl: item.imageUrl,
+              ),
             ),
-          ));
+          );
         }
       case RecentAccessType.album:
         if (item.providerId == 'download') {
-          Navigator.push(context, MaterialPageRoute(
-            builder: (context) => DownloadedAlbumScreen(
-              albumName: item.name,
-              artistName: item.subtitle ?? '',
-              coverUrl: item.imageUrl,
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DownloadedAlbumScreen(
+                albumName: item.name,
+                artistName: item.subtitle ?? '',
+                coverUrl: item.imageUrl,
+              ),
             ),
-          ));
-        } else if (item.providerId != null && item.providerId!.isNotEmpty && item.providerId != 'deezer' && item.providerId != 'spotify') {
-          Navigator.push(context, MaterialPageRoute(
-            builder: (context) => ExtensionAlbumScreen(
-              extensionId: item.providerId!,
-              albumId: item.id,
-              albumName: item.name,
-              coverUrl: item.imageUrl,
+          );
+        } else if (item.providerId != null &&
+            item.providerId!.isNotEmpty &&
+            item.providerId != 'deezer' &&
+            item.providerId != 'spotify') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ExtensionAlbumScreen(
+                extensionId: item.providerId!,
+                albumId: item.id,
+                albumName: item.name,
+                coverUrl: item.imageUrl,
+              ),
             ),
-          ));
+          );
         } else {
-          Navigator.push(context, MaterialPageRoute(
-            builder: (context) => AlbumScreen(
-              albumId: item.id,
-              albumName: item.name,
-              coverUrl: item.imageUrl,
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AlbumScreen(
+                albumId: item.id,
+                albumName: item.name,
+                coverUrl: item.imageUrl,
+              ),
             ),
-          ));
+          );
         }
       case RecentAccessType.track:
-        final historyItem = ref.read(downloadHistoryProvider.notifier).getBySpotifyId(item.id);
+        final historyItem = ref
+            .read(downloadHistoryProvider.notifier)
+            .getBySpotifyId(item.id);
         if (historyItem != null) {
           _navigateToMetadataScreen(historyItem);
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(item.name)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(item.name)));
         }
       case RecentAccessType.playlist:
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1503,12 +1738,17 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
 
   void _navigateToMetadataScreen(DownloadHistoryItem item) {
     _precacheCover(item.coverUrl);
-    Navigator.push(context, PageRouteBuilder(
-      transitionDuration: const Duration(milliseconds: 300),
-      reverseTransitionDuration: const Duration(milliseconds: 250),
-      pageBuilder: (context, animation, secondaryAnimation) => TrackMetadataScreen(item: item),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) => FadeTransition(opacity: animation, child: child),
-    ));
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 300),
+        reverseTransitionDuration: const Duration(milliseconds: 250),
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            TrackMetadataScreen(item: item),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+            FadeTransition(opacity: animation, child: child),
+      ),
+    );
   }
 
   void _precacheCover(String? url) {
@@ -1523,10 +1763,11 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
   }
 
   Widget _buildErrorWidget(String error, ColorScheme colorScheme) {
-    final isRateLimit = error.contains('429') || 
-                        error.toLowerCase().contains('rate limit') ||
-                        error.toLowerCase().contains('too many requests');
-    
+    final isRateLimit =
+        error.contains('429') ||
+        error.toLowerCase().contains('rate limit') ||
+        error.toLowerCase().contains('too many requests');
+
     if (isRateLimit) {
       return Card(
         elevation: 0,
@@ -1565,7 +1806,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
         ),
       );
     }
-    
+
     return Card(
       elevation: 0,
       color: colorScheme.errorContainer.withValues(alpha: 0.5),
@@ -1576,7 +1817,9 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
           children: [
             Icon(Icons.error_outline, color: colorScheme.error),
             const SizedBox(width: 12),
-            Expanded(child: Text(error, style: TextStyle(color: colorScheme.error))),
+            Expanded(
+              child: Text(error, style: TextStyle(color: colorScheme.error)),
+            ),
           ],
         ),
       ),
@@ -1592,17 +1835,20 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
     required String? error,
     required ColorScheme colorScheme,
     required bool hasResults,
+    required String? searchExtensionId,
+    required bool showLocalLibraryIndicator,
+    required Map<String, (double, double)> thumbnailSizesByExtensionId,
   }) {
     if (!hasResults) {
       return [const SliverToBoxAdapter(child: SizedBox.shrink())];
     }
-    
+
     final realTracks = <Track>[];
     final realTrackIndexes = <int>[];
     final albumItems = <Track>[];
     final playlistItems = <Track>[];
     final artistItems = <Track>[];
-    
+
     for (int i = 0; i < tracks.length; i++) {
       final track = tracks[i];
       if (!track.isCollection) {
@@ -1619,420 +1865,386 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
         artistItems.add(track);
       }
     }
-    
-    return [
+
+    final slivers = <Widget>[
       if (error != null)
-        SliverToBoxAdapter(child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: _buildErrorWidget(error, colorScheme),
-        )),
-
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _buildErrorWidget(error, colorScheme),
+          ),
+        ),
       if (isLoading)
-        const SliverToBoxAdapter(child: Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: LinearProgressIndicator())),
+        const SliverToBoxAdapter(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: LinearProgressIndicator(),
+          ),
+        ),
+    ];
 
-      // Artists from default search (Deezer/Spotify) - now in vertical list style
-      if (searchArtists != null && searchArtists.isNotEmpty)
-        SliverToBoxAdapter(child: Padding(
+    if (searchArtists != null && searchArtists.isNotEmpty) {
+      slivers.addAll(
+        _buildVirtualizedResultSection(
+          title: context.l10n.searchArtists,
+          itemCount: searchArtists.length,
+          colorScheme: colorScheme,
+          itemBuilder: (index, showDivider) => _SearchArtistItemWidget(
+            key: ValueKey('search-artist-${searchArtists[index].id}'),
+            artist: searchArtists[index],
+            showDivider: showDivider,
+            onTap: () => _navigateToArtist(
+              searchArtists[index].id,
+              searchArtists[index].name,
+              searchArtists[index].imageUrl,
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (artistItems.isNotEmpty) {
+      slivers.addAll(
+        _buildVirtualizedResultSection(
+          title: context.l10n.searchArtists,
+          itemCount: artistItems.length,
+          colorScheme: colorScheme,
+          itemBuilder: (index, showDivider) => _CollectionItemWidget(
+            key: ValueKey('artist-${artistItems[index].id}'),
+            item: artistItems[index],
+            showDivider: showDivider,
+            onTap: () => _navigateToExtensionArtist(artistItems[index]),
+          ),
+        ),
+      );
+    }
+
+    if (searchAlbums != null && searchAlbums.isNotEmpty) {
+      slivers.addAll(
+        _buildVirtualizedResultSection(
+          title: context.l10n.searchAlbums,
+          itemCount: searchAlbums.length,
+          colorScheme: colorScheme,
+          itemBuilder: (index, showDivider) => _SearchAlbumItemWidget(
+            key: ValueKey('search-album-${searchAlbums[index].id}'),
+            album: searchAlbums[index],
+            showDivider: showDivider,
+            onTap: () => _navigateToSearchAlbum(searchAlbums[index]),
+          ),
+        ),
+      );
+    }
+
+    if (albumItems.isNotEmpty) {
+      slivers.addAll(
+        _buildVirtualizedResultSection(
+          title: context.l10n.searchAlbums,
+          itemCount: albumItems.length,
+          colorScheme: colorScheme,
+          itemBuilder: (index, showDivider) => _CollectionItemWidget(
+            key: ValueKey('album-${albumItems[index].id}'),
+            item: albumItems[index],
+            showDivider: showDivider,
+            onTap: () => _navigateToExtensionAlbum(albumItems[index]),
+          ),
+        ),
+      );
+    }
+
+    if (searchPlaylists != null && searchPlaylists.isNotEmpty) {
+      slivers.addAll(
+        _buildVirtualizedResultSection(
+          title: context.l10n.searchPlaylists,
+          itemCount: searchPlaylists.length,
+          colorScheme: colorScheme,
+          itemBuilder: (index, showDivider) => _SearchPlaylistItemWidget(
+            key: ValueKey('search-playlist-${searchPlaylists[index].id}'),
+            playlist: searchPlaylists[index],
+            showDivider: showDivider,
+            onTap: () => _navigateToSearchPlaylist(searchPlaylists[index]),
+          ),
+        ),
+      );
+    }
+
+    if (playlistItems.isNotEmpty) {
+      slivers.addAll(
+        _buildVirtualizedResultSection(
+          title: context.l10n.searchPlaylists,
+          itemCount: playlistItems.length,
+          colorScheme: colorScheme,
+          itemBuilder: (index, showDivider) => _CollectionItemWidget(
+            key: ValueKey('playlist-${playlistItems[index].id}'),
+            item: playlistItems[index],
+            showDivider: showDivider,
+            onTap: () => _navigateToExtensionPlaylist(playlistItems[index]),
+          ),
+        ),
+      );
+    }
+
+    if (realTracks.isNotEmpty) {
+      slivers.addAll(
+        _buildVirtualizedResultSection(
+          title: context.l10n.searchSongs,
+          itemCount: realTracks.length,
+          colorScheme: colorScheme,
+          itemBuilder: (index, showDivider) => _TrackItemWithStatus(
+            key: ValueKey(realTracks[index].id),
+            track: realTracks[index],
+            index: realTrackIndexes[index],
+            showDivider: showDivider,
+            onDownload: () => _downloadTrack(realTrackIndexes[index]),
+            searchExtensionId: searchExtensionId,
+            showLocalLibraryIndicator: showLocalLibraryIndicator,
+            thumbnailSizesByExtensionId: thumbnailSizesByExtensionId,
+          ),
+        ),
+      );
+    }
+
+    slivers.add(const SliverToBoxAdapter(child: SizedBox(height: 16)));
+    return slivers;
+  }
+
+  List<Widget> _buildVirtualizedResultSection({
+    required String title,
+    required int itemCount,
+    required ColorScheme colorScheme,
+    required Widget Function(int index, bool showDivider) itemBuilder,
+  }) {
+    final sectionColor = Theme.of(context).brightness == Brightness.dark
+        ? Color.alphaBlend(
+            Colors.white.withValues(alpha: 0.08),
+            colorScheme.surface,
+          )
+        : colorScheme.surfaceContainerHighest;
+
+    return [
+      SliverToBoxAdapter(
+        child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-          child: Text(context.l10n.searchArtists, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
-        )),
-      if (searchArtists != null && searchArtists.isNotEmpty)
-        SliverToBoxAdapter(
-          child: Container(
+          child: Text(
+            title,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      ),
+      SliverList(
+        delegate: SliverChildBuilderDelegate((context, index) {
+          final isFirst = index == 0;
+          final isLast = index == itemCount - 1;
+          return Container(
             margin: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Color.alphaBlend(Colors.white.withValues(alpha: 0.08), colorScheme.surface)
-                  : colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(20),
+              color: sectionColor,
+              borderRadius: BorderRadius.vertical(
+                top: isFirst ? const Radius.circular(20) : Radius.zero,
+                bottom: isLast ? const Radius.circular(20) : Radius.zero,
+              ),
             ),
             clipBehavior: Clip.antiAlias,
             child: Material(
               color: Colors.transparent,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (int i = 0; i < searchArtists.length; i++)
-                    _SearchArtistItemWidget(
-                      key: ValueKey('search-artist-${searchArtists[i].id}'),
-                      artist: searchArtists[i],
-                      showDivider: i < searchArtists.length - 1,
-                      onTap: () => _navigateToArtist(searchArtists[i].id, searchArtists[i].name, searchArtists[i].imageUrl),
-                    ),
-                ],
-              ),
+              child: itemBuilder(index, !isLast),
             ),
-          ),
-        ),
-
-      // Artists from extension search
-      if (artistItems.isNotEmpty)
-        SliverToBoxAdapter(child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-          child: Text(context.l10n.searchArtists, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
-        )),
-      if (artistItems.isNotEmpty)
-        SliverToBoxAdapter(
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Color.alphaBlend(Colors.white.withValues(alpha: 0.08), colorScheme.surface)
-                  : colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Material(
-              color: Colors.transparent,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (int i = 0; i < artistItems.length; i++)
-                    _CollectionItemWidget(
-                      key: ValueKey('artist-${artistItems[i].id}'),
-                      item: artistItems[i],
-                      showDivider: i < artistItems.length - 1,
-                      onTap: () => _navigateToExtensionArtist(artistItems[i]),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-
-      // Albums from default search (Deezer/Spotify)
-      if (searchAlbums != null && searchAlbums.isNotEmpty)
-        SliverToBoxAdapter(child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-          child: Text(context.l10n.searchAlbums, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
-        )),
-      if (searchAlbums != null && searchAlbums.isNotEmpty)
-        SliverToBoxAdapter(
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Color.alphaBlend(Colors.white.withValues(alpha: 0.08), colorScheme.surface)
-                  : colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Material(
-              color: Colors.transparent,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (int i = 0; i < searchAlbums.length; i++)
-                    _SearchAlbumItemWidget(
-                      key: ValueKey('search-album-${searchAlbums[i].id}'),
-                      album: searchAlbums[i],
-                      showDivider: i < searchAlbums.length - 1,
-                      onTap: () => _navigateToSearchAlbum(searchAlbums[i]),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-
-      // Albums from extension search
-      if (albumItems.isNotEmpty)
-        SliverToBoxAdapter(child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-          child: Text(context.l10n.searchAlbums, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
-        )),
-      if (albumItems.isNotEmpty)
-        SliverToBoxAdapter(
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Color.alphaBlend(Colors.white.withValues(alpha: 0.08), colorScheme.surface)
-                  : colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Material(
-              color: Colors.transparent,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (int i = 0; i < albumItems.length; i++)
-                    _CollectionItemWidget(
-                      key: ValueKey('album-${albumItems[i].id}'),
-                      item: albumItems[i],
-                      showDivider: i < albumItems.length - 1,
-                      onTap: () => _navigateToExtensionAlbum(albumItems[i]),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-
-      // Playlists from default search (Deezer/Spotify)
-      if (searchPlaylists != null && searchPlaylists.isNotEmpty)
-        SliverToBoxAdapter(child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-          child: Text(context.l10n.searchPlaylists, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
-        )),
-      if (searchPlaylists != null && searchPlaylists.isNotEmpty)
-        SliverToBoxAdapter(
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Color.alphaBlend(Colors.white.withValues(alpha: 0.08), colorScheme.surface)
-                  : colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Material(
-              color: Colors.transparent,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (int i = 0; i < searchPlaylists.length; i++)
-                    _SearchPlaylistItemWidget(
-                      key: ValueKey('search-playlist-${searchPlaylists[i].id}'),
-                      playlist: searchPlaylists[i],
-                      showDivider: i < searchPlaylists.length - 1,
-                      onTap: () => _navigateToSearchPlaylist(searchPlaylists[i]),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-
-      // Playlists from extension search
-      if (playlistItems.isNotEmpty)
-        SliverToBoxAdapter(child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-          child: Text(context.l10n.searchPlaylists, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
-        )),
-      if (playlistItems.isNotEmpty)
-        SliverToBoxAdapter(
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Color.alphaBlend(Colors.white.withValues(alpha: 0.08), colorScheme.surface)
-                  : colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Material(
-              color: Colors.transparent,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (int i = 0; i < playlistItems.length; i++)
-                    _CollectionItemWidget(
-                      key: ValueKey('playlist-${playlistItems[i].id}'),
-                      item: playlistItems[i],
-                      showDivider: i < playlistItems.length - 1,
-                      onTap: () => _navigateToExtensionPlaylist(playlistItems[i]),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-
-      if (realTracks.isNotEmpty)
-        SliverToBoxAdapter(child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-          child: Text(context.l10n.searchSongs, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: colorScheme.onSurfaceVariant)),
-        )),
-
-      if (realTracks.isNotEmpty)
-        SliverToBoxAdapter(
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Color.alphaBlend(Colors.white.withValues(alpha: 0.08), colorScheme.surface)
-                  : colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Material(
-              color: Colors.transparent,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (int i = 0; i < realTracks.length; i++)
-                    _TrackItemWithStatus(
-                      key: ValueKey(realTracks[i].id),
-                      track: realTracks[i],
-                      index: realTrackIndexes[i],
-                      showDivider: i < realTracks.length - 1,
-                      onDownload: () => _downloadTrack(realTrackIndexes[i]),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-
-      const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          );
+        }, childCount: itemCount),
+      ),
     ];
   }
 
   void _navigateToArtist(String artistId, String artistName, String? imageUrl) {
     ref.read(settingsProvider.notifier).setHasSearchedBefore();
-    
-    Navigator.push(context, MaterialPageRoute(
-      builder: (context) => ArtistScreen(
-        artistId: artistId,
-        artistName: artistName,
-        coverUrl: imageUrl,
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ArtistScreen(
+          artistId: artistId,
+          artistName: artistName,
+          coverUrl: imageUrl,
+        ),
       ),
-    ));
+    );
   }
 
   void _navigateToSearchAlbum(SearchAlbum album) {
     ref.read(settingsProvider.notifier).setHasSearchedBefore();
-    
-    ref.read(recentAccessProvider.notifier).recordAlbumAccess(
-      id: album.id,
-      name: album.name,
-      artistName: album.artists,
-      imageUrl: album.imageUrl,
-      providerId: 'deezer',
-    );
-    
+
+    ref
+        .read(recentAccessProvider.notifier)
+        .recordAlbumAccess(
+          id: album.id,
+          name: album.name,
+          artistName: album.artists,
+          imageUrl: album.imageUrl,
+          providerId: 'deezer',
+        );
+
     // Keep the full ID with prefix (e.g., "deezer:123") for AlbumScreen to detect source
-    Navigator.push(context, MaterialPageRoute(
-      builder: (context) => AlbumScreen(
-        albumId: album.id,
-        albumName: album.name,
-        coverUrl: album.imageUrl,
-        tracks: const [], // Will be fetched by AlbumScreen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AlbumScreen(
+          albumId: album.id,
+          albumName: album.name,
+          coverUrl: album.imageUrl,
+          tracks: const [], // Will be fetched by AlbumScreen
+        ),
       ),
-    ));
+    );
   }
 
   void _navigateToSearchPlaylist(SearchPlaylist playlist) {
     ref.read(settingsProvider.notifier).setHasSearchedBefore();
-    
-    ref.read(recentAccessProvider.notifier).recordPlaylistAccess(
-      id: playlist.id,
-      name: playlist.name,
-      ownerName: playlist.owner,
-      imageUrl: playlist.imageUrl,
-      providerId: 'deezer',
-    );
-    
+
+    ref
+        .read(recentAccessProvider.notifier)
+        .recordPlaylistAccess(
+          id: playlist.id,
+          name: playlist.name,
+          ownerName: playlist.owner,
+          imageUrl: playlist.imageUrl,
+          providerId: 'deezer',
+        );
+
     // Keep the full ID with prefix (e.g., "deezer:123") for PlaylistScreen to detect source
-    Navigator.push(context, MaterialPageRoute(
-      builder: (context) => PlaylistScreen(
-        playlistName: playlist.name,
-        coverUrl: playlist.imageUrl,
-        tracks: const [], // Will be fetched
-        playlistId: playlist.id,
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PlaylistScreen(
+          playlistName: playlist.name,
+          coverUrl: playlist.imageUrl,
+          tracks: const [], // Will be fetched
+          playlistId: playlist.id,
+        ),
       ),
-    ));
+    );
   }
 
   void _navigateToExtensionAlbum(Track albumItem) async {
     final extensionId = albumItem.source;
     if (extensionId == null || extensionId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.errorMissingExtensionSource('album'))),
+        SnackBar(
+          content: Text(context.l10n.errorMissingExtensionSource('album')),
+        ),
       );
       return;
     }
-    
+
     ref.read(settingsProvider.notifier).setHasSearchedBefore();
-    
-    ref.read(recentAccessProvider.notifier).recordAlbumAccess(
-      id: albumItem.id,
-      name: albumItem.name,
-      artistName: albumItem.artistName,
-      imageUrl: albumItem.coverUrl,
-      providerId: extensionId,
-    );
-    
-    Navigator.push(context, MaterialPageRoute(
-      builder: (context) => ExtensionAlbumScreen(
-        extensionId: extensionId,
-        albumId: albumItem.id,
-        albumName: albumItem.name,
-        coverUrl: albumItem.coverUrl,
+
+    ref
+        .read(recentAccessProvider.notifier)
+        .recordAlbumAccess(
+          id: albumItem.id,
+          name: albumItem.name,
+          artistName: albumItem.artistName,
+          imageUrl: albumItem.coverUrl,
+          providerId: extensionId,
+        );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ExtensionAlbumScreen(
+          extensionId: extensionId,
+          albumId: albumItem.id,
+          albumName: albumItem.name,
+          coverUrl: albumItem.coverUrl,
+        ),
       ),
-    ));
+    );
   }
 
   void _navigateToExtensionPlaylist(Track playlistItem) async {
     final extensionId = playlistItem.source;
     if (extensionId == null || extensionId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.errorMissingExtensionSource('playlist'))),
+        SnackBar(
+          content: Text(context.l10n.errorMissingExtensionSource('playlist')),
+        ),
       );
       return;
     }
-    
+
     ref.read(settingsProvider.notifier).setHasSearchedBefore();
-    
-    ref.read(recentAccessProvider.notifier).recordPlaylistAccess(
-      id: playlistItem.id,
-      name: playlistItem.name,
-      ownerName: playlistItem.artistName,
-      imageUrl: playlistItem.coverUrl,
-      providerId: extensionId,
-    );
-    
-    Navigator.push(context, MaterialPageRoute(
-      builder: (context) => ExtensionPlaylistScreen(
-        extensionId: extensionId,
-        playlistId: playlistItem.id,
-        playlistName: playlistItem.name,
-        coverUrl: playlistItem.coverUrl,
+
+    ref
+        .read(recentAccessProvider.notifier)
+        .recordPlaylistAccess(
+          id: playlistItem.id,
+          name: playlistItem.name,
+          ownerName: playlistItem.artistName,
+          imageUrl: playlistItem.coverUrl,
+          providerId: extensionId,
+        );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ExtensionPlaylistScreen(
+          extensionId: extensionId,
+          playlistId: playlistItem.id,
+          playlistName: playlistItem.name,
+          coverUrl: playlistItem.coverUrl,
+        ),
       ),
-    ));
+    );
   }
 
   void _navigateToExtensionArtist(Track artistItem) {
     final extensionId = artistItem.source;
     if (extensionId == null || extensionId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.errorMissingExtensionSource('artist'))),
+        SnackBar(
+          content: Text(context.l10n.errorMissingExtensionSource('artist')),
+        ),
       );
       return;
     }
-    
+
     ref.read(settingsProvider.notifier).setHasSearchedBefore();
-    
-    ref.read(recentAccessProvider.notifier).recordArtistAccess(
-      id: artistItem.id,
-      name: artistItem.name,
-      imageUrl: artistItem.coverUrl,
-      providerId: extensionId,
-    );
-    
-    Navigator.push(context, MaterialPageRoute(
-      builder: (context) => ExtensionArtistScreen(
-        extensionId: extensionId,
-        artistId: artistItem.id,
-        artistName: artistItem.name,
-        coverUrl: artistItem.coverUrl,
+
+    ref
+        .read(recentAccessProvider.notifier)
+        .recordArtistAccess(
+          id: artistItem.id,
+          name: artistItem.name,
+          imageUrl: artistItem.coverUrl,
+          providerId: extensionId,
+        );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ExtensionArtistScreen(
+          extensionId: extensionId,
+          artistId: artistItem.id,
+          artistName: artistItem.name,
+          coverUrl: artistItem.coverUrl,
+        ),
       ),
-    ));
+    );
   }
 
   String _getSearchHint() {
     final settings = ref.read(settingsProvider);
     final searchProvider = settings.searchProvider;
     final extState = ref.read(extensionProvider);
-    
+
     if (!extState.isInitialized) {
       return 'Paste Spotify URL or search...';
     }
-    
+
     if (searchProvider != null && searchProvider.isNotEmpty) {
-      final ext = extState.extensions.where((e) => e.id == searchProvider).firstOrNull;
+      final ext = extState.extensions
+          .where((e) => e.id == searchProvider)
+          .firstOrNull;
       if (ext != null && ext.enabled) {
         if (ext.searchBehavior?.placeholder != null) {
           return ext.searchBehavior!.placeholder!;
@@ -2071,7 +2283,9 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
                   color: selectedFilter == null
                       ? colorScheme.onPrimaryContainer
                       : colorScheme.onSurfaceVariant,
-                  fontWeight: selectedFilter == null ? FontWeight.w600 : FontWeight.normal,
+                  fontWeight: selectedFilter == null
+                      ? FontWeight.w600
+                      : FontWeight.normal,
                 ),
               ),
             ),
@@ -2094,15 +2308,19 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
                     color: isSelected
                         ? colorScheme.onPrimaryContainer
                         : colorScheme.onSurfaceVariant,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    fontWeight: isSelected
+                        ? FontWeight.w600
+                        : FontWeight.normal,
                   ),
-                  avatar: filter.icon != null ? Icon(
-                    _getFilterIcon(filter.icon!),
-                    size: 18,
-                    color: isSelected
-                        ? colorScheme.onPrimaryContainer
-                        : colorScheme.onSurfaceVariant,
-                  ) : null,
+                  avatar: filter.icon != null
+                      ? Icon(
+                          _getFilterIcon(filter.icon!),
+                          size: 18,
+                          color: isSelected
+                              ? colorScheme.onPrimaryContainer
+                              : colorScheme.onSurfaceVariant,
+                        )
+                      : null,
                 ),
               );
             }),
@@ -2137,7 +2355,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
     final text = _urlController.text.trim();
     if (text.isEmpty || text.length < _minLiveSearchChars) return;
     if (text.startsWith('http') || text.startsWith('spotify:')) return;
-    
+
     // Reset last search query to force new search
     _lastSearchQuery = null;
     _performSearch(text, filterOverride: filter);
@@ -2145,7 +2363,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
 
   Widget _buildSearchBar(ColorScheme colorScheme) {
     final hasText = _urlController.text.isNotEmpty;
-    
+
     return TextField(
       controller: _urlController,
       focusNode: _searchFocusNode,
@@ -2156,11 +2374,15 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
         fillColor: colorScheme.surfaceContainerHighest,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(28),
-          borderSide: BorderSide(color: colorScheme.outline.withValues(alpha: 0.5)),
+          borderSide: BorderSide(
+            color: colorScheme.outline.withValues(alpha: 0.5),
+          ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(28),
-          borderSide: BorderSide(color: colorScheme.outline.withValues(alpha: 0.5)),
+          borderSide: BorderSide(
+            color: colorScheme.outline.withValues(alpha: 0.5),
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(28),
@@ -2201,7 +2423,10 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
             ],
           ],
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 16,
+        ),
       ),
       onSubmitted: (_) => _onSearchSubmitted(),
     );
@@ -2210,22 +2435,21 @@ class _HomeTabState extends ConsumerState<HomeTab> with AutomaticKeepAliveClient
   void _onSearchSubmitted() {
     _liveSearchDebounce?.cancel();
     _pendingLiveSearchQuery = null;
-    
+
     final text = _urlController.text.trim();
     if (text.isEmpty) return;
-    
+
     if (text.startsWith('http') || text.startsWith('spotify:')) {
       _fetchMetadata();
       _searchFocusNode.unfocus();
       return;
     }
-    
+
     if (text.length >= 2) {
       _performSearch(text);
     }
     _searchFocusNode.unfocus();
   }
-
 }
 
 /// Dropdown widget for quick search provider switching
@@ -2236,20 +2460,26 @@ class _SearchProviderDropdown extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(settingsProvider);
-    final extState = ref.watch(extensionProvider);
+    final currentProvider = ref.watch(
+      settingsProvider.select((s) => s.searchProvider),
+    );
+    final metadataSource = ref.watch(
+      settingsProvider.select((s) => s.metadataSource),
+    );
+    final extensions = ref.watch(extensionProvider.select((s) => s.extensions));
     final colorScheme = Theme.of(context).colorScheme;
-    
-    final currentProvider = settings.searchProvider;
-    final searchProviders = extState.extensions
+
+    final searchProviders = extensions
         .where((ext) => ext.enabled && ext.hasCustomSearch)
         .toList();
-    
+
     Extension? currentExt;
     if (currentProvider != null && currentProvider.isNotEmpty) {
-      currentExt = searchProviders.where((e) => e.id == currentProvider).firstOrNull;
+      currentExt = searchProviders
+          .where((e) => e.id == currentProvider)
+          .firstOrNull;
     }
-    
+
     IconData displayIcon = Icons.search;
     String? iconPath;
     if (currentExt != null) {
@@ -2258,11 +2488,11 @@ class _SearchProviderDropdown extends ConsumerWidget {
         displayIcon = _getIconFromName(currentExt.searchBehavior!.icon!);
       }
     }
-    
+
     if (searchProviders.isEmpty) {
       return const Icon(Icons.search);
     }
-    
+
     return Padding(
       padding: const EdgeInsets.only(left: 8),
       child: PopupMenuButton<String>(
@@ -2294,89 +2524,92 @@ class _SearchProviderDropdown extends ConsumerWidget {
         offset: const Offset(0, 40),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         onSelected: (String providerId) {
-        final provider = providerId.isEmpty ? null : providerId;
-        ref.read(settingsProvider.notifier).setSearchProvider(provider);
-        onProviderChanged?.call();
-      },
-      itemBuilder: (context) => [
-        PopupMenuItem<String>(
-          value: '',
-          child: Row(
-            children: [
-              Icon(
-                Icons.music_note,
-                size: 20,
-                color: currentProvider == null || currentProvider.isEmpty
-                    ? colorScheme.primary
-                    : colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  settings.metadataSource == 'spotify' ? 'Spotify' : 'Deezer',
-                  style: TextStyle(
-                    fontWeight: currentProvider == null || currentProvider.isEmpty
-                        ? FontWeight.w600
-                        : FontWeight.normal,
+          final provider = providerId.isEmpty ? null : providerId;
+          ref.read(settingsProvider.notifier).setSearchProvider(provider);
+          onProviderChanged?.call();
+        },
+        itemBuilder: (context) => [
+          PopupMenuItem<String>(
+            value: '',
+            child: Row(
+              children: [
+                Icon(
+                  Icons.music_note,
+                  size: 20,
+                  color: currentProvider == null || currentProvider.isEmpty
+                      ? colorScheme.primary
+                      : colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    metadataSource == 'spotify' ? 'Spotify' : 'Deezer',
+                    style: TextStyle(
+                      fontWeight:
+                          currentProvider == null || currentProvider.isEmpty
+                          ? FontWeight.w600
+                          : FontWeight.normal,
+                    ),
                   ),
                 ),
-              ),
-              if (currentProvider == null || currentProvider.isEmpty)
-                Icon(Icons.check, size: 18, color: colorScheme.primary),
-            ],
+                if (currentProvider == null || currentProvider.isEmpty)
+                  Icon(Icons.check, size: 18, color: colorScheme.primary),
+              ],
+            ),
           ),
-        ),
-        if (searchProviders.isNotEmpty) const PopupMenuDivider(),
-        ...searchProviders.map((ext) => PopupMenuItem<String>(
-          value: ext.id,
-          child: Row(
-            children: [
-              if (ext.iconPath != null && ext.iconPath!.isNotEmpty)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: Image.file(
-                    File(ext.iconPath!),
-                    width: 20,
-                    height: 20,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, e, st) => Icon(
+          if (searchProviders.isNotEmpty) const PopupMenuDivider(),
+          ...searchProviders.map(
+            (ext) => PopupMenuItem<String>(
+              value: ext.id,
+              child: Row(
+                children: [
+                  if (ext.iconPath != null && ext.iconPath!.isNotEmpty)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: Image.file(
+                        File(ext.iconPath!),
+                        width: 20,
+                        height: 20,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, e, st) => Icon(
+                          _getIconFromName(ext.searchBehavior?.icon),
+                          size: 20,
+                          color: currentProvider == ext.id
+                              ? colorScheme.primary
+                              : colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    )
+                  else
+                    Icon(
                       _getIconFromName(ext.searchBehavior?.icon),
                       size: 20,
                       color: currentProvider == ext.id
                           ? colorScheme.primary
                           : colorScheme.onSurfaceVariant,
                     ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      ext.displayName,
+                      style: TextStyle(
+                        fontWeight: currentProvider == ext.id
+                            ? FontWeight.w600
+                            : FontWeight.normal,
+                      ),
+                    ),
                   ),
-                )
-              else
-                Icon(
-                  _getIconFromName(ext.searchBehavior?.icon),
-                  size: 20,
-                  color: currentProvider == ext.id
-                      ? colorScheme.primary
-                      : colorScheme.onSurfaceVariant,
-                ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  ext.displayName,
-                  style: TextStyle(
-                    fontWeight: currentProvider == ext.id
-                        ? FontWeight.w600
-                        : FontWeight.normal,
-                  ),
-                ),
+                  if (currentProvider == ext.id)
+                    Icon(Icons.check, size: 18, color: colorScheme.primary),
+                ],
               ),
-              if (currentProvider == ext.id)
-                Icon(Icons.check, size: 18, color: colorScheme.primary),
-            ],
+            ),
           ),
-        )),
-      ],
+        ],
       ),
     );
   }
-  
+
   IconData _getIconFromName(String? iconName) {
     switch (iconName) {
       case 'video':
@@ -2404,6 +2637,9 @@ class _TrackItemWithStatus extends ConsumerWidget {
   final int index;
   final bool showDivider;
   final VoidCallback onDownload;
+  final String? searchExtensionId;
+  final bool showLocalLibraryIndicator;
+  final Map<String, (double, double)> thumbnailSizesByExtensionId;
 
   const _TrackItemWithStatus({
     super.key,
@@ -2411,68 +2647,71 @@ class _TrackItemWithStatus extends ConsumerWidget {
     required this.index,
     required this.showDivider,
     required this.onDownload,
+    required this.searchExtensionId,
+    required this.showLocalLibraryIndicator,
+    required this.thumbnailSizesByExtensionId,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     final queueItem = ref.watch(
-      downloadQueueLookupProvider.select((lookup) => lookup.byTrackId[track.id]),
+      downloadQueueLookupProvider.select(
+        (lookup) => lookup.byTrackId[track.id],
+      ),
     );
-    
-    final isInHistory = ref.watch(downloadHistoryProvider.select((state) {
-      return state.isDownloaded(track.id);
-    }));
-    
-    // Check local library for duplicate detection
-    final settings = ref.watch(settingsProvider);
-    final showLocalLibraryIndicator = settings.localLibraryEnabled && settings.localLibraryShowDuplicates;
-    final isInLocalLibrary = showLocalLibraryIndicator 
-        ? ref.watch(localLibraryProvider.select((state) => 
-            state.existsInLibrary(
-              isrc: track.isrc,
-              trackName: track.name,
-              artistName: track.artistName,
-            )))
+
+    final isInHistory = ref.watch(
+      downloadHistoryProvider.select((state) {
+        return state.isDownloaded(track.id);
+      }),
+    );
+
+    final isInLocalLibrary = showLocalLibraryIndicator
+        ? ref.watch(
+            localLibraryProvider.select(
+              (state) => state.existsInLibrary(
+                isrc: track.isrc,
+                trackName: track.name,
+                artistName: track.artistName,
+              ),
+            ),
+          )
         : false;
-    
+
     double thumbWidth = 56;
     double thumbHeight = 56;
-    
-    final searchExtensionId =
-        ref.watch(trackProvider.select((s) => s.searchExtensionId));
+
     final extensionId = track.source ?? searchExtensionId;
-    
-    if (extensionId != null && extensionId.isNotEmpty) {
-      final extension = ref.watch(
-        extensionProvider.select(
-          (s) => s.extensions.where((e) => e.id == extensionId).firstOrNull,
-        ),
-      );
-      if (extension?.searchBehavior != null) {
-        final size = extension!.searchBehavior!.getThumbnailSize(defaultSize: 56);
-        thumbWidth = size.$1;
-        thumbHeight = size.$2;
-        if (thumbWidth != 56 || thumbHeight != 56) {
-          debugPrint('[Thumbnail] ${track.name}: using ${thumbWidth.toInt()}x${thumbHeight.toInt()} from ${extension.id}');
-        }
-      }
+    final thumbSize = extensionId == null
+        ? null
+        : thumbnailSizesByExtensionId[extensionId];
+    if (thumbSize != null) {
+      thumbWidth = thumbSize.$1;
+      thumbHeight = thumbSize.$2;
     }
-    
+
     final isQueued = queueItem != null;
     final isDownloading = queueItem?.status == DownloadStatus.downloading;
     final isFinalizing = queueItem?.status == DownloadStatus.finalizing;
     final isCompleted = queueItem?.status == DownloadStatus.completed;
     final progress = queueItem?.progress ?? 0.0;
-    
-    final showAsDownloaded = isCompleted || (!isQueued && isInHistory) || isInLocalLibrary;
+
+    final showAsDownloaded =
+        isCompleted || (!isQueued && isInHistory) || isInLocalLibrary;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         InkWell(
-          onTap: () => _handleTap(context, ref, isQueued: isQueued, isInHistory: isInHistory, isInLocalLibrary: isInLocalLibrary),
+          onTap: () => _handleTap(
+            context,
+            ref,
+            isQueued: isQueued,
+            isInHistory: isInHistory,
+            isInLocalLibrary: isInLocalLibrary,
+          ),
           splashColor: colorScheme.primary.withValues(alpha: 0.12),
           highlightColor: colorScheme.primary.withValues(alpha: 0.08),
           child: Padding(
@@ -2482,7 +2721,7 @@ class _TrackItemWithStatus extends ConsumerWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: track.coverUrl != null
-? CachedNetworkImage(
+                      ? CachedNetworkImage(
                           imageUrl: track.coverUrl!,
                           width: thumbWidth,
                           height: thumbHeight,
@@ -2495,7 +2734,10 @@ class _TrackItemWithStatus extends ConsumerWidget {
                           width: thumbWidth,
                           height: thumbHeight,
                           color: colorScheme.surfaceContainerHighest,
-                          child: Icon(Icons.music_note, color: colorScheme.onSurfaceVariant),
+                          child: Icon(
+                            Icons.music_note,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
                         ),
                 ),
                 const SizedBox(width: 12),
@@ -2505,7 +2747,9 @@ class _TrackItemWithStatus extends ConsumerWidget {
                     children: [
                       Text(
                         track.name,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -2515,7 +2759,10 @@ class _TrackItemWithStatus extends ConsumerWidget {
                           Flexible(
                             child: Text(
                               track.artistName,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -2523,7 +2770,10 @@ class _TrackItemWithStatus extends ConsumerWidget {
                           if (isInLocalLibrary) ...[
                             const SizedBox(width: 6),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: colorScheme.tertiaryContainer,
                                 borderRadius: BorderRadius.circular(4),
@@ -2554,7 +2804,18 @@ class _TrackItemWithStatus extends ConsumerWidget {
                     ],
                   ),
                 ),
-                _buildDownloadButton(context, ref, colorScheme, isQueued: isQueued, isDownloading: isDownloading, isFinalizing: isFinalizing, showAsDownloaded: showAsDownloaded, isInHistory: isInHistory, isInLocalLibrary: isInLocalLibrary, progress: progress),
+                _buildDownloadButton(
+                  context,
+                  ref,
+                  colorScheme,
+                  isQueued: isQueued,
+                  isDownloading: isDownloading,
+                  isFinalizing: isFinalizing,
+                  showAsDownloaded: showAsDownloaded,
+                  isInHistory: isInHistory,
+                  isInLocalLibrary: isInLocalLibrary,
+                  progress: progress,
+                ),
               ],
             ),
           ),
@@ -2563,7 +2824,9 @@ class _TrackItemWithStatus extends ConsumerWidget {
           Divider(
             height: 1,
             thickness: 1,
-            indent: thumbWidth + 24, // Adjust divider indent based on thumbnail width
+            indent:
+                thumbWidth +
+                24, // Adjust divider indent based on thumbnail width
             endIndent: 12,
             color: colorScheme.outlineVariant.withValues(alpha: 0.3),
           ),
@@ -2571,39 +2834,58 @@ class _TrackItemWithStatus extends ConsumerWidget {
     );
   }
 
-  void _handleTap(BuildContext context, WidgetRef ref, {required bool isQueued, required bool isInHistory, required bool isInLocalLibrary}) async {
+  void _handleTap(
+    BuildContext context,
+    WidgetRef ref, {
+    required bool isQueued,
+    required bool isInHistory,
+    required bool isInLocalLibrary,
+  }) async {
     if (isQueued) return;
-    
+
     if (isInLocalLibrary) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.snackbarAlreadyInLibrary(track.name))),
+          SnackBar(
+            content: Text(context.l10n.snackbarAlreadyInLibrary(track.name)),
+          ),
         );
       }
       return;
     }
-    
+
     if (isInHistory) {
-      final historyItem = ref.read(downloadHistoryProvider.notifier).getBySpotifyId(track.id);
+      final historyItem = ref
+          .read(downloadHistoryProvider.notifier)
+          .getBySpotifyId(track.id);
       if (historyItem != null) {
         final exists = await fileExists(historyItem.filePath);
         if (exists) {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(context.l10n.snackbarAlreadyDownloaded(track.name))),
+              SnackBar(
+                content: Text(
+                  context.l10n.snackbarAlreadyDownloaded(track.name),
+                ),
+              ),
             );
           }
           return;
         } else {
-          ref.read(downloadHistoryProvider.notifier).removeBySpotifyId(track.id);
+          ref
+              .read(downloadHistoryProvider.notifier)
+              .removeBySpotifyId(track.id);
         }
       }
     }
-    
+
     onDownload();
   }
 
-  Widget _buildDownloadButton(BuildContext context, WidgetRef ref, ColorScheme colorScheme, {
+  Widget _buildDownloadButton(
+    BuildContext context,
+    WidgetRef ref,
+    ColorScheme colorScheme, {
     required bool isQueued,
     required bool isDownloading,
     required bool isFinalizing,
@@ -2614,15 +2896,28 @@ class _TrackItemWithStatus extends ConsumerWidget {
   }) {
     const double size = 44.0;
     const double iconSize = 20.0;
-    
+
     if (showAsDownloaded) {
       return GestureDetector(
-        onTap: () => _handleTap(context, ref, isQueued: isQueued, isInHistory: isInHistory, isInLocalLibrary: isInLocalLibrary),
+        onTap: () => _handleTap(
+          context,
+          ref,
+          isQueued: isQueued,
+          isInHistory: isInHistory,
+          isInLocalLibrary: isInLocalLibrary,
+        ),
         child: Container(
           width: size,
           height: size,
-          decoration: BoxDecoration(color: colorScheme.primaryContainer, shape: BoxShape.circle),
-          child: Icon(Icons.check, color: colorScheme.onPrimaryContainer, size: iconSize),
+          decoration: BoxDecoration(
+            color: colorScheme.primaryContainer,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            Icons.check,
+            color: colorScheme.onPrimaryContainer,
+            size: iconSize,
+          ),
         ),
       );
     } else if (isFinalizing) {
@@ -2632,7 +2927,11 @@ class _TrackItemWithStatus extends ConsumerWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            CircularProgressIndicator(strokeWidth: 3, color: colorScheme.tertiary, backgroundColor: colorScheme.surfaceContainerHighest),
+            CircularProgressIndicator(
+              strokeWidth: 3,
+              color: colorScheme.tertiary,
+              backgroundColor: colorScheme.surfaceContainerHighest,
+            ),
             Icon(Icons.edit_note, color: colorScheme.tertiary, size: 16),
           ],
         ),
@@ -2644,8 +2943,21 @@ class _TrackItemWithStatus extends ConsumerWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            CircularProgressIndicator(value: progress > 0 ? progress : null, strokeWidth: 3, color: colorScheme.primary, backgroundColor: colorScheme.surfaceContainerHighest),
-            if (progress > 0) Text('${(progress * 100).toInt()}', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: colorScheme.primary)),
+            CircularProgressIndicator(
+              value: progress > 0 ? progress : null,
+              strokeWidth: 3,
+              color: colorScheme.primary,
+              backgroundColor: colorScheme.surfaceContainerHighest,
+            ),
+            if (progress > 0)
+              Text(
+                '${(progress * 100).toInt()}',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.primary,
+                ),
+              ),
           ],
         ),
       );
@@ -2653,8 +2965,15 @@ class _TrackItemWithStatus extends ConsumerWidget {
       return Container(
         width: size,
         height: size,
-        decoration: BoxDecoration(color: colorScheme.surfaceContainerHighest, shape: BoxShape.circle),
-        child: Icon(Icons.hourglass_empty, color: colorScheme.onSurfaceVariant, size: iconSize),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHighest,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          Icons.hourglass_empty,
+          color: colorScheme.onSurfaceVariant,
+          size: iconSize,
+        ),
       );
     } else {
       return GestureDetector(
@@ -2662,8 +2981,15 @@ class _TrackItemWithStatus extends ConsumerWidget {
         child: Container(
           width: size,
           height: size,
-          decoration: BoxDecoration(color: colorScheme.secondaryContainer, shape: BoxShape.circle),
-          child: Icon(Icons.download, color: colorScheme.onSecondaryContainer, size: iconSize),
+          decoration: BoxDecoration(
+            color: colorScheme.secondaryContainer,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            Icons.download,
+            color: colorScheme.onSecondaryContainer,
+            size: iconSize,
+          ),
         ),
       );
     }
@@ -2688,11 +3014,11 @@ class _CollectionItemWidget extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final isPlaylist = item.isPlaylistItem;
     final isArtist = item.isArtistItem;
-    
+
     IconData placeholderIcon = Icons.album;
     if (isPlaylist) placeholderIcon = Icons.playlist_play;
     if (isArtist) placeholderIcon = Icons.person;
-    
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -2707,7 +3033,7 @@ class _CollectionItemWidget extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(isArtist ? 28 : 10),
                   child: item.coverUrl != null && item.coverUrl!.isNotEmpty
-? CachedNetworkImage(
+                      ? CachedNetworkImage(
                           imageUrl: item.coverUrl!,
                           width: 56,
                           height: 56,
@@ -2733,16 +3059,22 @@ class _CollectionItemWidget extends StatelessWidget {
                     children: [
                       Text(
                         item.name,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        item.artistName.isNotEmpty 
-                            ? item.artistName 
-                            : (isPlaylist ? 'Playlist' : (isArtist ? 'Artist' : 'Album')),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                        item.artistName.isNotEmpty
+                            ? item.artistName
+                            : (isPlaylist
+                                  ? 'Playlist'
+                                  : (isArtist ? 'Artist' : 'Album')),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -2787,10 +3119,11 @@ class _SearchArtistItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final hasValidImage = artist.imageUrl != null && 
-                          artist.imageUrl!.isNotEmpty &&
-                          Uri.tryParse(artist.imageUrl!)?.hasAuthority == true;
-    
+    final hasValidImage =
+        artist.imageUrl != null &&
+        artist.imageUrl!.isNotEmpty &&
+        Uri.tryParse(artist.imageUrl!)?.hasAuthority == true;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -2831,14 +3164,18 @@ class _SearchArtistItemWidget extends StatelessWidget {
                     children: [
                       Text(
                         artist.name,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
                       Text(
                         'Artist',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -2883,10 +3220,11 @@ class _SearchAlbumItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final hasValidImage = album.imageUrl != null && 
-                          album.imageUrl!.isNotEmpty &&
-                          Uri.tryParse(album.imageUrl!)?.hasAuthority == true;
-    
+    final hasValidImage =
+        album.imageUrl != null &&
+        album.imageUrl!.isNotEmpty &&
+        Uri.tryParse(album.imageUrl!)?.hasAuthority == true;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -2927,14 +3265,18 @@ class _SearchAlbumItemWidget extends StatelessWidget {
                     children: [
                       Text(
                         album.name,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
                       Text(
                         album.artists.isNotEmpty ? album.artists : 'Album',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -2979,10 +3321,11 @@ class _SearchPlaylistItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final hasValidImage = playlist.imageUrl != null && 
-                          playlist.imageUrl!.isNotEmpty &&
-                          Uri.tryParse(playlist.imageUrl!)?.hasAuthority == true;
-    
+    final hasValidImage =
+        playlist.imageUrl != null &&
+        playlist.imageUrl!.isNotEmpty &&
+        Uri.tryParse(playlist.imageUrl!)?.hasAuthority == true;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -3023,14 +3366,18 @@ class _SearchPlaylistItemWidget extends StatelessWidget {
                     children: [
                       Text(
                         playlist.name,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 2),
                       Text(
                         playlist.owner.isNotEmpty ? playlist.owner : 'Playlist',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -3074,7 +3421,8 @@ class ExtensionAlbumScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<ExtensionAlbumScreen> createState() => _ExtensionAlbumScreenState();
+  ConsumerState<ExtensionAlbumScreen> createState() =>
+      _ExtensionAlbumScreenState();
 }
 
 class _ExtensionAlbumScreenState extends ConsumerState<ExtensionAlbumScreen> {
@@ -3095,14 +3443,14 @@ class _ExtensionAlbumScreenState extends ConsumerState<ExtensionAlbumScreen> {
       _isLoading = true;
       _error = null;
     });
-    
+
     try {
       final result = await PlatformBridge.getAlbumWithExtension(
         widget.extensionId,
         widget.albumId,
       );
       if (!mounted) return;
-      
+
       if (result == null) {
         setState(() {
           _error = 'Failed to load album';
@@ -3110,7 +3458,7 @@ class _ExtensionAlbumScreenState extends ConsumerState<ExtensionAlbumScreen> {
         });
         return;
       }
-      
+
       final trackList = result['tracks'] as List<dynamic>?;
       if (trackList == null) {
         setState(() {
@@ -3119,13 +3467,15 @@ class _ExtensionAlbumScreenState extends ConsumerState<ExtensionAlbumScreen> {
         });
         return;
       }
-      
-      final tracks = trackList.map((t) => _parseTrack(t as Map<String, dynamic>)).toList();
-      
+
+      final tracks = trackList
+          .map((t) => _parseTrack(t as Map<String, dynamic>))
+          .toList();
+
       // Extract artist info from album response
       final artistId = result['artist_id'] as String?;
       final artistName = result['artists'] as String?;
-      
+
       setState(() {
         _tracks = tracks;
         _artistId = artistId;
@@ -3149,20 +3499,23 @@ class _ExtensionAlbumScreenState extends ConsumerState<ExtensionAlbumScreen> {
     } else if (durationValue is double) {
       durationMs = durationValue.toInt();
     }
-    
+
     return Track(
       id: (data['id'] ?? '').toString(),
       name: (data['name'] ?? '').toString(),
       artistName: (data['artists'] ?? data['artist'] ?? '').toString(),
       albumName: (data['album_name'] ?? widget.albumName).toString(),
-      coverUrl: _resolveCoverUrl(data['cover_url']?.toString(), widget.coverUrl),
+      coverUrl: _resolveCoverUrl(
+        data['cover_url']?.toString(),
+        widget.coverUrl,
+      ),
       isrc: data['isrc']?.toString(),
       duration: (durationMs / 1000).round(),
       trackNumber: data['track_number'] as int?,
       source: widget.extensionId,
     );
   }
-  
+
   String? _resolveCoverUrl(String? trackCover, String? albumCover) {
     if (trackCover != null && trackCover.isNotEmpty) return trackCover;
     return albumCover;
@@ -3176,7 +3529,7 @@ class _ExtensionAlbumScreenState extends ConsumerState<ExtensionAlbumScreen> {
         body: const Center(child: CircularProgressIndicator()),
       );
     }
-    
+
     if (_error != null) {
       return Scaffold(
         appBar: AppBar(title: Text(widget.albumName)),
@@ -3184,15 +3537,21 @@ class _ExtensionAlbumScreenState extends ConsumerState<ExtensionAlbumScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              Text(
+                _error!,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
               const SizedBox(height: 16),
-              ElevatedButton(onPressed: _fetchTracks, child: Text(context.l10n.dialogRetry)),
+              ElevatedButton(
+                onPressed: _fetchTracks,
+                child: Text(context.l10n.dialogRetry),
+              ),
             ],
           ),
         ),
       );
     }
-    
+
     return AlbumScreen(
       albumId: widget.albumId,
       albumName: widget.albumName,
@@ -3221,10 +3580,12 @@ class ExtensionPlaylistScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<ExtensionPlaylistScreen> createState() => _ExtensionPlaylistScreenState();
+  ConsumerState<ExtensionPlaylistScreen> createState() =>
+      _ExtensionPlaylistScreenState();
 }
 
-class _ExtensionPlaylistScreenState extends ConsumerState<ExtensionPlaylistScreen> {
+class _ExtensionPlaylistScreenState
+    extends ConsumerState<ExtensionPlaylistScreen> {
   List<Track>? _tracks;
   bool _isLoading = true;
   String? _error;
@@ -3240,14 +3601,14 @@ class _ExtensionPlaylistScreenState extends ConsumerState<ExtensionPlaylistScree
       _isLoading = true;
       _error = null;
     });
-    
+
     try {
       final result = await PlatformBridge.getPlaylistWithExtension(
         widget.extensionId,
         widget.playlistId,
       );
       if (!mounted) return;
-      
+
       if (result == null) {
         setState(() {
           _error = 'Failed to load playlist';
@@ -3255,7 +3616,7 @@ class _ExtensionPlaylistScreenState extends ConsumerState<ExtensionPlaylistScree
         });
         return;
       }
-      
+
       final trackList = result['tracks'] as List<dynamic>?;
       if (trackList == null) {
         setState(() {
@@ -3264,9 +3625,11 @@ class _ExtensionPlaylistScreenState extends ConsumerState<ExtensionPlaylistScree
         });
         return;
       }
-      
-      final tracks = trackList.map((t) => _parseTrack(t as Map<String, dynamic>)).toList();
-      
+
+      final tracks = trackList
+          .map((t) => _parseTrack(t as Map<String, dynamic>))
+          .toList();
+
       setState(() {
         _tracks = tracks;
         _isLoading = false;
@@ -3288,20 +3651,23 @@ class _ExtensionPlaylistScreenState extends ConsumerState<ExtensionPlaylistScree
     } else if (durationValue is double) {
       durationMs = durationValue.toInt();
     }
-    
+
     return Track(
       id: (data['id'] ?? '').toString(),
       name: (data['name'] ?? '').toString(),
       artistName: (data['artists'] ?? data['artist'] ?? '').toString(),
       albumName: (data['album_name'] ?? '').toString(),
-      coverUrl: _resolveCoverUrl(data['cover_url']?.toString(), widget.coverUrl),
+      coverUrl: _resolveCoverUrl(
+        data['cover_url']?.toString(),
+        widget.coverUrl,
+      ),
       isrc: data['isrc']?.toString(),
       duration: (durationMs / 1000).round(),
       trackNumber: data['track_number'] as int?,
       source: widget.extensionId,
     );
   }
-  
+
   String? _resolveCoverUrl(String? trackCover, String? playlistCover) {
     if (trackCover != null && trackCover.isNotEmpty) return trackCover;
     return playlistCover;
@@ -3315,7 +3681,7 @@ class _ExtensionPlaylistScreenState extends ConsumerState<ExtensionPlaylistScree
         body: const Center(child: CircularProgressIndicator()),
       );
     }
-    
+
     if (_error != null) {
       return Scaffold(
         appBar: AppBar(title: Text(widget.playlistName)),
@@ -3323,15 +3689,21 @@ class _ExtensionPlaylistScreenState extends ConsumerState<ExtensionPlaylistScree
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              Text(
+                _error!,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
               const SizedBox(height: 16),
-              ElevatedButton(onPressed: _fetchTracks, child: Text(context.l10n.dialogRetry)),
+              ElevatedButton(
+                onPressed: _fetchTracks,
+                child: Text(context.l10n.dialogRetry),
+              ),
             ],
           ),
         ),
       );
     }
-    
+
     return PlaylistScreen(
       playlistName: widget.playlistName,
       coverUrl: widget.coverUrl,
@@ -3355,7 +3727,8 @@ class ExtensionArtistScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<ExtensionArtistScreen> createState() => _ExtensionArtistScreenState();
+  ConsumerState<ExtensionArtistScreen> createState() =>
+      _ExtensionArtistScreenState();
 }
 
 class _ExtensionArtistScreenState extends ConsumerState<ExtensionArtistScreen> {
@@ -3377,14 +3750,14 @@ class _ExtensionArtistScreenState extends ConsumerState<ExtensionArtistScreen> {
       _isLoading = true;
       _error = null;
     });
-    
+
     try {
       final result = await PlatformBridge.getArtistWithExtension(
         widget.extensionId,
         widget.artistId,
       );
       if (!mounted) return;
-      
+
       if (result == null) {
         setState(() {
           _error = 'Failed to load artist';
@@ -3392,19 +3765,25 @@ class _ExtensionArtistScreenState extends ConsumerState<ExtensionArtistScreen> {
         });
         return;
       }
-      
+
       final albumList = result['albums'] as List<dynamic>?;
-      final albums = albumList?.map((a) => _parseAlbum(a as Map<String, dynamic>)).toList() ?? [];
-      
+      final albums =
+          albumList
+              ?.map((a) => _parseAlbum(a as Map<String, dynamic>))
+              .toList() ??
+          [];
+
       final topTracksList = result['top_tracks'] as List<dynamic>?;
       List<Track>? topTracks;
       if (topTracksList != null && topTracksList.isNotEmpty) {
-        topTracks = topTracksList.map((t) => _parseTrack(t as Map<String, dynamic>)).toList();
+        topTracks = topTracksList
+            .map((t) => _parseTrack(t as Map<String, dynamic>))
+            .toList();
       }
-      
+
       final headerImage = result['header_image'] as String?;
       final listeners = result['listeners'] as int?;
-      
+
       setState(() {
         _albums = albums;
         _topTracks = topTracks;
@@ -3442,7 +3821,7 @@ class _ExtensionArtistScreenState extends ConsumerState<ExtensionArtistScreen> {
     } else if (durationValue is double) {
       durationMs = durationValue.toInt();
     }
-    
+
     return Track(
       id: (data['id'] ?? data['spotify_id'] ?? '').toString(),
       name: (data['name'] ?? '').toString(),
@@ -3467,7 +3846,7 @@ class _ExtensionArtistScreenState extends ConsumerState<ExtensionArtistScreen> {
         body: const Center(child: CircularProgressIndicator()),
       );
     }
-    
+
     if (_error != null) {
       return Scaffold(
         appBar: AppBar(title: Text(widget.artistName)),
@@ -3475,15 +3854,21 @@ class _ExtensionArtistScreenState extends ConsumerState<ExtensionArtistScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+              Text(
+                _error!,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
               const SizedBox(height: 16),
-              ElevatedButton(onPressed: _fetchArtist, child: Text(context.l10n.dialogRetry)),
+              ElevatedButton(
+                onPressed: _fetchArtist,
+                child: Text(context.l10n.dialogRetry),
+              ),
             ],
           ),
         ),
       );
     }
-    
+
     return ArtistScreen(
       artistId: widget.artistId,
       artistName: widget.artistName,
@@ -3544,9 +3929,9 @@ class _QuickPicksPageViewState extends State<_QuickPicksPageView> {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Text(
             widget.section.title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         SizedBox(
@@ -3559,10 +3944,12 @@ class _QuickPicksPageViewState extends State<_QuickPicksPageView> {
             },
             itemBuilder: (context, pageIndex) {
               final startIndex = pageIndex * widget.itemsPerPage;
-              final endIndex =
-                  (startIndex + widget.itemsPerPage).clamp(0, widget.section.items.length);
+              final endIndex = (startIndex + widget.itemsPerPage).clamp(
+                0,
+                widget.section.items.length,
+              );
               final pageItemCount = endIndex - startIndex;
-              
+
               return Column(
                 children: List.generate(pageItemCount, (index) {
                   final item = widget.section.items[startIndex + index];
@@ -3586,9 +3973,11 @@ class _QuickPicksPageViewState extends State<_QuickPicksPageView> {
                   margin: const EdgeInsets.symmetric(horizontal: 3),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isActive 
-                        ? widget.colorScheme.primary 
-                        : widget.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+                    color: isActive
+                        ? widget.colorScheme.primary
+                        : widget.colorScheme.onSurfaceVariant.withValues(
+                            alpha: 0.3,
+                          ),
                   ),
                 );
               }),
@@ -3601,11 +3990,11 @@ class _QuickPicksPageViewState extends State<_QuickPicksPageView> {
   Widget _buildQuickPickItem(ExploreItem item) {
     return InkWell(
       onTap: () => widget.onItemTap(item),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            children: [
-              ClipRRect(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          children: [
+            ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: item.coverUrl != null && item.coverUrl!.isNotEmpty
                   ? CachedNetworkImage(

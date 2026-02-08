@@ -168,6 +168,28 @@ class _HistoryStats {
   int get totalSingleTracks => singleTracks + localSingleTracks;
 }
 
+class _FilterContentData {
+  final List<DownloadHistoryItem> historyItems;
+  final List<UnifiedLibraryItem> unifiedItems;
+  final List<UnifiedLibraryItem> filteredUnifiedItems;
+  final List<_GroupedAlbum> filteredGroupedAlbums;
+  final List<_GroupedLocalAlbum> filteredGroupedLocalAlbums;
+  final bool showFilteringIndicator;
+
+  const _FilterContentData({
+    required this.historyItems,
+    required this.unifiedItems,
+    required this.filteredUnifiedItems,
+    required this.filteredGroupedAlbums,
+    required this.filteredGroupedLocalAlbums,
+    required this.showFilteringIndicator,
+  });
+
+  int get totalTrackCount => filteredUnifiedItems.length;
+  int get totalAlbumCount =>
+      filteredGroupedAlbums.length + filteredGroupedLocalAlbums.length;
+}
+
 class _UnifiedCacheEntry {
   final List<DownloadHistoryItem> historyItems;
   final List<LocalLibraryItem> localItems;
@@ -232,9 +254,10 @@ class QueueTab extends ConsumerStatefulWidget {
 
 class _QueueTabState extends ConsumerState<QueueTab> {
   final Map<String, bool> _fileExistsCache = {};
+  final Map<String, ValueNotifier<bool>> _fileExistsNotifiers = {};
+  final ValueNotifier<bool> _alwaysMissingFileNotifier = ValueNotifier(false);
   final Set<String> _pendingChecks = {};
   static const int _maxCacheSize = 500;
-  bool _fileExistsUpdateScheduled = false;
 
   bool _isSelectionMode = false;
   final Set<String> _selectedIds = {};
@@ -300,6 +323,11 @@ class _QueueTabState extends ConsumerState<QueueTab> {
 
   @override
   void dispose() {
+    for (final notifier in _fileExistsNotifiers.values) {
+      notifier.dispose();
+    }
+    _fileExistsNotifiers.clear();
+    _alwaysMissingFileNotifier.dispose();
     _filterPageController?.dispose();
     _searchController.dispose();
     _searchFocusNode.dispose();
@@ -689,42 +717,57 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     return filePath;
   }
 
-  bool _checkFileExists(String? filePath) {
-    if (filePath == null) return false;
+  ValueListenable<bool> _fileExistsListenable(String? filePath) {
+    if (filePath == null) return _alwaysMissingFileNotifier;
     final cleanPath = _cleanFilePath(filePath);
-    if (cleanPath.isEmpty) return false;
-    if (_fileExistsCache.containsKey(cleanPath)) {
-      return _fileExistsCache[cleanPath]!;
+    if (cleanPath.isEmpty) return _alwaysMissingFileNotifier;
+
+    final existingNotifier = _fileExistsNotifiers[cleanPath];
+    if (existingNotifier != null) {
+      final cached = _fileExistsCache[cleanPath];
+      if (cached != null && existingNotifier.value != cached) {
+        existingNotifier.value = cached;
+      } else if (cached == null) {
+        _startFileExistsCheck(cleanPath);
+      }
+      return existingNotifier;
     }
+
+    if (_fileExistsNotifiers.length >= _maxCacheSize) {
+      final oldestKey = _fileExistsNotifiers.keys.first;
+      _fileExistsNotifiers.remove(oldestKey)?.dispose();
+      _fileExistsCache.remove(oldestKey);
+    }
+
+    final notifier = ValueNotifier<bool>(_fileExistsCache[cleanPath] ?? true);
+    _fileExistsNotifiers[cleanPath] = notifier;
+    _startFileExistsCheck(cleanPath);
+    return notifier;
+  }
+
+  void _startFileExistsCheck(String cleanPath) {
     if (_pendingChecks.contains(cleanPath)) {
-      return true;
+      return;
     }
-    if (_fileExistsCache.length >= _maxCacheSize) {
-      _fileExistsCache.remove(_fileExistsCache.keys.first);
+
+    final cached = _fileExistsCache[cleanPath];
+    if (cached != null) {
+      final notifier = _fileExistsNotifiers[cleanPath];
+      if (notifier != null && notifier.value != cached) {
+        notifier.value = cached;
+      }
+      return;
     }
+
     _pendingChecks.add(cleanPath);
     Future.microtask(() async {
       final exists = await fileExists(cleanPath);
       _pendingChecks.remove(cleanPath);
-      final previous = _fileExistsCache[cleanPath];
       _fileExistsCache[cleanPath] = exists;
-      if (mounted && previous != exists) {
-        _scheduleFileExistsUpdate();
+      final notifier = _fileExistsNotifiers[cleanPath];
+      if (notifier != null && notifier.value != exists) {
+        notifier.value = exists;
       }
-    });
-    return true;
-  }
-
-  void _scheduleFileExistsUpdate() {
-    if (_fileExistsUpdateScheduled) return;
-    _fileExistsUpdateScheduled = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) {
-        _fileExistsUpdateScheduled = false;
-        return;
-      }
-      _fileExistsUpdateScheduled = false;
-      setState(() {});
     });
   }
 
@@ -798,15 +841,23 @@ class _QueueTabState extends ConsumerState<QueueTab> {
 
   /// Apply current sort mode to a list of unified items
   List<UnifiedLibraryItem> _applySorting(List<UnifiedLibraryItem> items) {
-    if (_sortMode == 'latest') return items; // Already sorted newest first from _getUnifiedItems
+    if (_sortMode == 'latest') {
+      return items; // Already sorted newest first from _getUnifiedItems
+    }
     final sorted = List<UnifiedLibraryItem>.of(items);
     switch (_sortMode) {
       case 'oldest':
         sorted.sort((a, b) => a.addedAt.compareTo(b.addedAt));
       case 'a-z':
-        sorted.sort((a, b) => a.trackName.toLowerCase().compareTo(b.trackName.toLowerCase()));
+        sorted.sort(
+          (a, b) =>
+              a.trackName.toLowerCase().compareTo(b.trackName.toLowerCase()),
+        );
       case 'z-a':
-        sorted.sort((a, b) => b.trackName.toLowerCase().compareTo(a.trackName.toLowerCase()));
+        sorted.sort(
+          (a, b) =>
+              b.trackName.toLowerCase().compareTo(a.trackName.toLowerCase()),
+        );
     }
     return sorted;
   }
@@ -839,7 +890,11 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     List<_GroupedAlbum> albums,
     String searchQuery,
   ) {
-    if (_activeFilterCount == 0 && searchQuery.isEmpty && _sortMode == 'latest') return albums;
+    if (_activeFilterCount == 0 &&
+        searchQuery.isEmpty &&
+        _sortMode == 'latest') {
+      return albums;
+    }
 
     // Source filter: if filtering local only, hide all download albums
     if (_filterSource == 'local') return const [];
@@ -852,11 +907,13 @@ class _QueueTabState extends ConsumerState<QueueTab> {
 
       // Filter tracks within the album by advanced filters
       if (_filterQuality != null || _filterFormat != null) {
-        final filteredTracks = album.tracks.where((track) {
-          if (!_passesQualityFilter(track.quality)) return false;
-          if (!_passesFormatFilter(track.filePath)) return false;
-          return true;
-        }).toList(growable: false);
+        final filteredTracks = album.tracks
+            .where((track) {
+              if (!_passesQualityFilter(track.quality)) return false;
+              if (!_passesFormatFilter(track.filePath)) return false;
+              return true;
+            })
+            .toList(growable: false);
 
         if (filteredTracks.isEmpty) continue;
       }
@@ -869,9 +926,15 @@ class _QueueTabState extends ConsumerState<QueueTab> {
       case 'oldest':
         result.sort((a, b) => a.latestDownload.compareTo(b.latestDownload));
       case 'a-z':
-        result.sort((a, b) => a.albumName.toLowerCase().compareTo(b.albumName.toLowerCase()));
+        result.sort(
+          (a, b) =>
+              a.albumName.toLowerCase().compareTo(b.albumName.toLowerCase()),
+        );
       case 'z-a':
-        result.sort((a, b) => b.albumName.toLowerCase().compareTo(a.albumName.toLowerCase()));
+        result.sort(
+          (a, b) =>
+              b.albumName.toLowerCase().compareTo(a.albumName.toLowerCase()),
+        );
       default: // 'latest' - already sorted
         break;
     }
@@ -884,7 +947,11 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     List<_GroupedLocalAlbum> albums,
     String searchQuery,
   ) {
-    if (_activeFilterCount == 0 && searchQuery.isEmpty && _sortMode == 'latest') return albums;
+    if (_activeFilterCount == 0 &&
+        searchQuery.isEmpty &&
+        _sortMode == 'latest') {
+      return albums;
+    }
 
     // Source filter: if filtering downloaded only, hide all local albums
     if (_filterSource == 'downloaded') return const [];
@@ -897,16 +964,18 @@ class _QueueTabState extends ConsumerState<QueueTab> {
 
       // Filter tracks within the album by advanced filters
       if (_filterQuality != null || _filterFormat != null) {
-        final filteredTracks = album.tracks.where((track) {
-          String? quality;
-          if (track.bitDepth != null && track.sampleRate != null) {
-            quality =
-                '${track.bitDepth}bit/${(track.sampleRate! / 1000).toStringAsFixed(1)}kHz';
-          }
-          if (!_passesQualityFilter(quality)) return false;
-          if (!_passesFormatFilter(track.filePath)) return false;
-          return true;
-        }).toList(growable: false);
+        final filteredTracks = album.tracks
+            .where((track) {
+              String? quality;
+              if (track.bitDepth != null && track.sampleRate != null) {
+                quality =
+                    '${track.bitDepth}bit/${(track.sampleRate! / 1000).toStringAsFixed(1)}kHz';
+              }
+              if (!_passesQualityFilter(quality)) return false;
+              if (!_passesFormatFilter(track.filePath)) return false;
+              return true;
+            })
+            .toList(growable: false);
 
         if (filteredTracks.isEmpty) continue;
       }
@@ -919,9 +988,15 @@ class _QueueTabState extends ConsumerState<QueueTab> {
       case 'oldest':
         result.sort((a, b) => a.latestScanned.compareTo(b.latestScanned));
       case 'a-z':
-        result.sort((a, b) => a.albumName.toLowerCase().compareTo(b.albumName.toLowerCase()));
+        result.sort(
+          (a, b) =>
+              a.albumName.toLowerCase().compareTo(b.albumName.toLowerCase()),
+        );
       case 'z-a':
-        result.sort((a, b) => b.albumName.toLowerCase().compareTo(a.albumName.toLowerCase()));
+        result.sort(
+          (a, b) =>
+              b.albumName.toLowerCase().compareTo(a.albumName.toLowerCase()),
+        );
       default: // 'latest' - already sorted
         break;
     }
@@ -1453,7 +1528,9 @@ class _QueueTabState extends ConsumerState<QueueTab> {
   Widget build(BuildContext context) {
     _initializePageController();
 
-    final queueItems = ref.watch(downloadQueueProvider.select((s) => s.items));
+    final hasQueueItems = ref.watch(
+      downloadQueueProvider.select((s) => s.items.isNotEmpty),
+    );
     final allHistoryItems = ref.watch(
       downloadHistoryProvider.select((s) => s.items),
     );
@@ -1482,6 +1559,22 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     final groupedLocalAlbums = historyStats.groupedLocalAlbums;
     final albumCount = historyStats.totalAlbumCount;
     final singleCount = historyStats.totalSingleTracks;
+    final filterDataCache = <String, _FilterContentData>{};
+
+    _FilterContentData getFilterData(String filterMode) {
+      return filterDataCache.putIfAbsent(
+        filterMode,
+        () => _computeFilterContentData(
+          filterMode: filterMode,
+          allHistoryItems: allHistoryItems,
+          groupedAlbums: groupedAlbums,
+          groupedLocalAlbums: groupedLocalAlbums,
+          albumCounts: historyStats.albumCounts,
+          localAlbumCounts: historyStats.localAlbumCounts,
+          localLibraryItems: localLibraryItems,
+        ),
+      );
+    }
 
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
@@ -1539,7 +1632,7 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                 ),
 
                 // Search bar - always at top
-                if (allHistoryItems.isNotEmpty || queueItems.isNotEmpty)
+                if (allHistoryItems.isNotEmpty || hasQueueItems)
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -1600,36 +1693,10 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                     ),
                   ),
 
-                if (queueItems.isNotEmpty)
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                      child: Row(
-                        children: [
-                          Text(
-                            'Downloading (${queueItems.length})',
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          const Spacer(),
-                          _buildPauseResumeButton(context, ref, colorScheme),
-                          const SizedBox(width: 4),
-                          _buildClearAllButton(context, ref, colorScheme),
-                        ],
-                      ),
-                    ),
-                  ),
+                if (hasQueueItems)
+                  _buildQueueHeaderSliver(context, colorScheme),
 
-                if (queueItems.isNotEmpty)
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      final item = queueItems[index];
-                      return KeyedSubtree(
-                        key: ValueKey(item.id),
-                        child: _buildQueueItem(context, item, colorScheme),
-                      );
-                    }, childCount: queueItems.length),
-                  ),
+                if (hasQueueItems) _buildQueueItemsSliver(context, colorScheme),
 
                 if (allHistoryItems.isNotEmpty || localLibraryItems.isNotEmpty)
                   SliverToBoxAdapter(
@@ -1643,36 +1710,18 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                           int filteredSingleCount;
 
                           if (_activeFilterCount == 0 && _searchQuery.isEmpty) {
-                            filteredAllCount = allHistoryItems.length + localLibraryItems.length;
+                            filteredAllCount =
+                                allHistoryItems.length +
+                                localLibraryItems.length;
                             filteredAlbumCount = albumCount;
                             filteredSingleCount = singleCount;
                           } else {
-                            // All tab: use unified items with advanced filters
-                            final allUnified = _getUnifiedItems(
-                              filterMode: 'all',
-                              historyItems: allHistoryItems,
-                              localLibraryItems: localLibraryItems,
-                              localAlbumCounts: historyStats.localAlbumCounts,
-                            );
-                            filteredAllCount = _applyAdvancedFilters(allUnified).length;
-
-                            // Albums tab: count filtered albums
-                            final filteredDlAlbums = _filterGroupedAlbums(groupedAlbums, _searchQuery);
-                            final filteredLocAlbums = _filterGroupedLocalAlbums(groupedLocalAlbums, _searchQuery);
-                            filteredAlbumCount = filteredDlAlbums.length + filteredLocAlbums.length;
-
-                            // Singles tab: use unified items for singles with advanced filters
-                            final singlesUnified = _getUnifiedItems(
-                              filterMode: 'singles',
-                              historyItems: _resolveHistoryItems(
-                                filterMode: 'singles',
-                                allHistoryItems: allHistoryItems,
-                                albumCounts: historyStats.albumCounts,
-                              ),
-                              localLibraryItems: localLibraryItems,
-                              localAlbumCounts: historyStats.localAlbumCounts,
-                            );
-                            filteredSingleCount = _applyAdvancedFilters(singlesUnified).length;
+                            final allData = getFilterData('all');
+                            final albumsData = getFilterData('albums');
+                            final singlesData = getFilterData('singles');
+                            filteredAllCount = allData.totalTrackCount;
+                            filteredAlbumCount = albumsData.totalAlbumCount;
+                            filteredSingleCount = singlesData.totalTrackCount;
                           }
 
                           return SingleChildScrollView(
@@ -1785,17 +1834,14 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                   itemCount: _filterModes.length,
                   itemBuilder: (context, index) {
                     final filterMode = _filterModes[index];
+                    final filterData = getFilterData(filterMode);
                     return _buildFilterContent(
                       context: context,
                       colorScheme: colorScheme,
                       filterMode: filterMode,
-                      allHistoryItems: allHistoryItems,
                       historyViewMode: historyViewMode,
-                      queueItems: queueItems,
-                      groupedAlbums: groupedAlbums,
-                      groupedLocalAlbums: groupedLocalAlbums,
-                      albumCounts: historyStats.albumCounts,
-                      localAlbumCounts: historyStats.localAlbumCounts,
+                      hasQueueItems: hasQueueItems,
+                      filterData: filterData,
                       localLibraryItems: localLibraryItems,
                     );
                   },
@@ -1810,18 +1856,20 @@ class _QueueTabState extends ConsumerState<QueueTab> {
             left: 0,
             right: 0,
             bottom: _isSelectionMode ? 0 : -(200 + bottomPadding),
-            child: _buildSelectionBottomBar(
-              context,
-              colorScheme,
-              _buildUnifiedItemsForSelection(
-                filterMode: historyFilterMode,
-                allHistoryItems: allHistoryItems,
-                albumCounts: historyStats.albumCounts,
-                localLibraryItems: localLibraryItems,
-                localAlbumCounts: historyStats.localAlbumCounts,
-              ),
-              bottomPadding,
-            ),
+            child: _isSelectionMode
+                ? _buildSelectionBottomBar(
+                    context,
+                    colorScheme,
+                    _buildUnifiedItemsForSelection(
+                      filterMode: historyFilterMode,
+                      allHistoryItems: allHistoryItems,
+                      albumCounts: historyStats.albumCounts,
+                      localLibraryItems: localLibraryItems,
+                      localAlbumCounts: historyStats.localAlbumCounts,
+                    ),
+                    bottomPadding,
+                  )
+                : const SizedBox.shrink(),
           ),
         ],
       ),
@@ -1906,13 +1954,9 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     return merged;
   }
 
-  Widget _buildFilterContent({
-    required BuildContext context,
-    required ColorScheme colorScheme,
+  _FilterContentData _computeFilterContentData({
     required String filterMode,
     required List<DownloadHistoryItem> allHistoryItems,
-    required String historyViewMode,
-    required List<DownloadItem> queueItems,
     required List<_GroupedAlbum> groupedAlbums,
     required List<_GroupedLocalAlbum> groupedLocalAlbums,
     required Map<String, int> albumCounts,
@@ -1929,22 +1973,15 @@ class _QueueTabState extends ConsumerState<QueueTab> {
       filterMode: filterMode,
     );
 
-    // Filter grouped albums based on search query + advanced filters
     final searchQuery = _searchQuery;
     final filteredGroupedAlbums = _filterGroupedAlbums(
       groupedAlbums,
       searchQuery,
     );
-
-    // Filter local library albums based on search query + advanced filters
     final filteredGroupedLocalAlbums = _filterGroupedLocalAlbums(
       groupedLocalAlbums,
       searchQuery,
     );
-
-    // Total album count for display
-    final totalAlbumCount =
-        filteredGroupedAlbums.length + filteredGroupedLocalAlbums.length;
 
     final unifiedItems = _getUnifiedItems(
       filterMode: filterMode,
@@ -1952,16 +1989,96 @@ class _QueueTabState extends ConsumerState<QueueTab> {
       localLibraryItems: localLibraryItems,
       localAlbumCounts: localAlbumCounts,
     );
-
-    // Apply advanced filters
     final filteredUnifiedItems = _applyAdvancedFilters(unifiedItems);
 
-    // Total count for display
-    final totalTrackCount = filteredUnifiedItems.length;
+    return _FilterContentData(
+      historyItems: historyItems,
+      unifiedItems: unifiedItems,
+      filteredUnifiedItems: filteredUnifiedItems,
+      filteredGroupedAlbums: filteredGroupedAlbums,
+      filteredGroupedLocalAlbums: filteredGroupedLocalAlbums,
+      showFilteringIndicator: showFilteringIndicator,
+    );
+  }
+
+  Widget _buildQueueHeaderSliver(
+    BuildContext context,
+    ColorScheme colorScheme,
+  ) {
+    return Consumer(
+      builder: (context, ref, child) {
+        final queueCount = ref.watch(
+          downloadQueueProvider.select((s) => s.items.length),
+        );
+        if (queueCount == 0) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
+        return SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: Row(
+              children: [
+                Text(
+                  'Downloading ($queueCount)',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                _buildPauseResumeButton(context, ref, colorScheme),
+                const SizedBox(width: 4),
+                _buildClearAllButton(context, ref, colorScheme),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildQueueItemsSliver(BuildContext context, ColorScheme colorScheme) {
+    return Consumer(
+      builder: (context, ref, child) {
+        final queueItems = ref.watch(
+          downloadQueueProvider.select((s) => s.items),
+        );
+        if (queueItems.isEmpty) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
+        return SliverList(
+          delegate: SliverChildBuilderDelegate((context, index) {
+            final item = queueItems[index];
+            return KeyedSubtree(
+              key: ValueKey(item.id),
+              child: _buildQueueItem(context, item, colorScheme),
+            );
+          }, childCount: queueItems.length),
+        );
+      },
+    );
+  }
+
+  Widget _buildFilterContent({
+    required BuildContext context,
+    required ColorScheme colorScheme,
+    required String filterMode,
+    required String historyViewMode,
+    required bool hasQueueItems,
+    required _FilterContentData filterData,
+    required List<LocalLibraryItem> localLibraryItems,
+  }) {
+    final historyItems = filterData.historyItems;
+    final showFilteringIndicator = filterData.showFilteringIndicator;
+    final filteredGroupedAlbums = filterData.filteredGroupedAlbums;
+    final filteredGroupedLocalAlbums = filterData.filteredGroupedLocalAlbums;
+    final unifiedItems = filterData.unifiedItems;
+    final filteredUnifiedItems = filterData.filteredUnifiedItems;
+    final totalTrackCount = filterData.totalTrackCount;
+    final totalAlbumCount = filterData.totalAlbumCount;
 
     return CustomScrollView(
       slivers: [
-        if (totalTrackCount > 0 && queueItems.isEmpty && filterMode == 'all')
+        if (totalTrackCount > 0 && !hasQueueItems && filterMode == 'all')
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -2011,7 +2128,7 @@ class _QueueTabState extends ConsumerState<QueueTab> {
 
         if ((filteredGroupedAlbums.isNotEmpty ||
                 filteredGroupedLocalAlbums.isNotEmpty) &&
-            queueItems.isEmpty &&
+            !hasQueueItems &&
             filterMode == 'albums')
           SliverToBoxAdapter(
             child: Padding(
@@ -2026,12 +2143,9 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                   ),
                   const Spacer(),
                   GestureDetector(
-                    onLongPress: _activeFilterCount > 0
-                        ? _resetFilters
-                        : null,
+                    onLongPress: _activeFilterCount > 0 ? _resetFilters : null,
                     child: TextButton.icon(
-                      onPressed: () =>
-                          _showFilterSheet(context, unifiedItems),
+                      onPressed: () => _showFilterSheet(context, unifiedItems),
                       icon: Badge(
                         isLabelVisible: _activeFilterCount > 0,
                         label: Text('$_activeFilterCount'),
@@ -2051,7 +2165,7 @@ class _QueueTabState extends ConsumerState<QueueTab> {
         // Albums empty state with filter button
         if (filteredGroupedAlbums.isEmpty &&
             filteredGroupedLocalAlbums.isEmpty &&
-            queueItems.isEmpty &&
+            !hasQueueItems &&
             filterMode == 'albums' &&
             (historyItems.isNotEmpty || localLibraryItems.isNotEmpty))
           SliverToBoxAdapter(
@@ -2061,12 +2175,9 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                 children: [
                   const Spacer(),
                   GestureDetector(
-                    onLongPress: _activeFilterCount > 0
-                        ? _resetFilters
-                        : null,
+                    onLongPress: _activeFilterCount > 0 ? _resetFilters : null,
                     child: TextButton.icon(
-                      onPressed: () =>
-                          _showFilterSheet(context, unifiedItems),
+                      onPressed: () => _showFilterSheet(context, unifiedItems),
                       icon: Badge(
                         isLabelVisible: _activeFilterCount > 0,
                         label: Text('$_activeFilterCount'),
@@ -2083,7 +2194,7 @@ class _QueueTabState extends ConsumerState<QueueTab> {
             ),
           ),
 
-        if (historyItems.isNotEmpty && queueItems.isNotEmpty)
+        if (historyItems.isNotEmpty && hasQueueItems)
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
@@ -2205,7 +2316,7 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                 ),
 
         // Singles filter - show unified items (downloaded + local singles)
-        if (filterMode == 'singles' && queueItems.isEmpty)
+        if (filterMode == 'singles' && !hasQueueItems)
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -2291,7 +2402,7 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                   }, childCount: filteredUnifiedItems.length),
                 ),
 
-        if (queueItems.isEmpty &&
+        if (!hasQueueItems &&
             totalTrackCount == 0 &&
             (filterMode != 'albums' ||
                 (filteredGroupedAlbums.isEmpty &&
@@ -2918,37 +3029,41 @@ class _QueueTabState extends ConsumerState<QueueTab> {
           ),
         );
       case DownloadStatus.completed:
-        final fileExists = _checkFileExists(item.filePath);
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (fileExists)
-              IconButton(
-                onPressed: () => _openFile(item.filePath!),
-                icon: Icon(Icons.play_arrow, color: colorScheme.primary),
-                tooltip: 'Play',
-                style: IconButton.styleFrom(
-                  backgroundColor: colorScheme.primaryContainer.withValues(
-                    alpha: 0.3,
+        return ValueListenableBuilder<bool>(
+          valueListenable: _fileExistsListenable(item.filePath),
+          builder: (context, fileExists, child) {
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (fileExists)
+                  IconButton(
+                    onPressed: () => _openFile(item.filePath!),
+                    icon: Icon(Icons.play_arrow, color: colorScheme.primary),
+                    tooltip: 'Play',
+                    style: IconButton.styleFrom(
+                      backgroundColor: colorScheme.primaryContainer.withValues(
+                        alpha: 0.3,
+                      ),
+                    ),
+                  )
+                else
+                  Icon(Icons.error_outline, color: colorScheme.error, size: 20),
+                const SizedBox(width: 4),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primaryContainer,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.check,
+                    color: colorScheme.onPrimaryContainer,
+                    size: 20,
                   ),
                 ),
-              )
-            else
-              Icon(Icons.error_outline, color: colorScheme.error, size: 20),
-            const SizedBox(width: 4),
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: colorScheme.primaryContainer,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.check,
-                color: colorScheme.onPrimaryContainer,
-                size: 20,
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         );
       case DownloadStatus.failed:
       case DownloadStatus.skipped:
@@ -3155,7 +3270,7 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     UnifiedLibraryItem item,
     ColorScheme colorScheme,
   ) {
-    final fileExists = _checkFileExists(item.filePath);
+    final fileExistsListenable = _fileExistsListenable(item.filePath);
     final isSelected = _selectedIds.contains(item.id);
     final date = item.addedAt;
     final dateStr =
@@ -3312,29 +3427,34 @@ class _QueueTabState extends ConsumerState<QueueTab> {
               const SizedBox(width: 8),
 
               if (!_isSelectionMode)
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (fileExists)
-                      IconButton(
-                        onPressed: () => _openFile(item.filePath),
-                        icon: Icon(
-                          Icons.play_arrow,
-                          color: colorScheme.primary,
-                        ),
-                        tooltip: context.l10n.tooltipPlay,
-                        style: IconButton.styleFrom(
-                          backgroundColor: colorScheme.primaryContainer
-                              .withValues(alpha: 0.3),
-                        ),
-                      )
-                    else
-                      Icon(
-                        Icons.error_outline,
-                        color: colorScheme.error,
-                        size: 20,
-                      ),
-                  ],
+                ValueListenableBuilder<bool>(
+                  valueListenable: fileExistsListenable,
+                  builder: (context, fileExists, child) {
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (fileExists)
+                          IconButton(
+                            onPressed: () => _openFile(item.filePath),
+                            icon: Icon(
+                              Icons.play_arrow,
+                              color: colorScheme.primary,
+                            ),
+                            tooltip: context.l10n.tooltipPlay,
+                            style: IconButton.styleFrom(
+                              backgroundColor: colorScheme.primaryContainer
+                                  .withValues(alpha: 0.3),
+                            ),
+                          )
+                        else
+                          Icon(
+                            Icons.error_outline,
+                            color: colorScheme.error,
+                            size: 20,
+                          ),
+                      ],
+                    );
+                  },
                 ),
             ],
           ),
@@ -3349,7 +3469,7 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     UnifiedLibraryItem item,
     ColorScheme colorScheme,
   ) {
-    final fileExists = _checkFileExists(item.filePath);
+    final fileExistsListenable = _fileExistsListenable(item.filePath);
     final isSelected = _selectedIds.contains(item.id);
     final isDownloaded = item.source == LibraryItemSource.downloaded;
 
@@ -3426,41 +3546,42 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                         ),
                       ),
                     ),
-                  if (fileExists && !_isSelectionMode)
+                  if (!_isSelectionMode)
                     Positioned(
                       right: 4,
                       bottom: 4,
-                      child: GestureDetector(
-                        onTap: () => _openFile(item.filePath),
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: colorScheme.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.play_arrow,
-                            color: colorScheme.onPrimary,
-                            size: 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                  if (!fileExists && !_isSelectionMode)
-                    Positioned(
-                      right: 4,
-                      bottom: 4,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: colorScheme.errorContainer,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.error_outline,
-                          color: colorScheme.error,
-                          size: 14,
-                        ),
+                      child: ValueListenableBuilder<bool>(
+                        valueListenable: fileExistsListenable,
+                        builder: (context, fileExists, child) {
+                          return fileExists
+                              ? GestureDetector(
+                                  onTap: () => _openFile(item.filePath),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.primary,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.play_arrow,
+                                      color: colorScheme.onPrimary,
+                                      size: 16,
+                                    ),
+                                  ),
+                                )
+                              : Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.errorContainer,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.error_outline,
+                                    color: colorScheme.error,
+                                    size: 14,
+                                  ),
+                                );
+                        },
                       ),
                     ),
                   if (_isSelectionMode)
