@@ -43,6 +43,16 @@ class _RecentAccessView {
   });
 }
 
+class _CsvImportOptions {
+  final bool confirmed;
+  final bool skipDownloaded;
+
+  const _CsvImportOptions({
+    required this.confirmed,
+    required this.skipDownloaded,
+  });
+}
+
 class _HomeTabState extends ConsumerState<HomeTab>
     with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
   final _urlController = TextEditingController();
@@ -475,19 +485,116 @@ class _HomeTabState extends ConsumerState<HomeTab>
       // ignore: use_build_context_synchronously
       final l10n = context.l10n;
 
+      final options = await showDialog<_CsvImportOptions>(
+        context: this.context,
+        builder: (dialogCtx) {
+          var skipDownloaded = true;
+          return StatefulBuilder(
+            builder: (dialogCtx, setDialogState) => AlertDialog(
+              title: Text(l10n.dialogImportPlaylistTitle),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l10n.dialogImportPlaylistMessage(tracks.length)),
+                  const SizedBox(height: 12),
+                  CheckboxListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Skip already downloaded songs'),
+                    value: skipDownloaded,
+                    onChanged: (value) {
+                      setDialogState(() {
+                        skipDownloaded = value ?? true;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(
+                    dialogCtx,
+                    const _CsvImportOptions(
+                      confirmed: false,
+                      skipDownloaded: true,
+                    ),
+                  ),
+                  child: Text(l10n.dialogCancel),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(
+                    dialogCtx,
+                    _CsvImportOptions(
+                      confirmed: true,
+                      skipDownloaded: skipDownloaded,
+                    ),
+                  ),
+                  child: Text(l10n.dialogImport),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+
+      if (options == null || !options.confirmed) return;
+
+      var tracksToQueue = tracks;
+      var skippedDownloadedCount = 0;
+
+      if (options.skipDownloaded) {
+        final historyState = ref.read(downloadHistoryProvider);
+        tracksToQueue = [];
+        for (final track in tracks) {
+          final isDownloaded =
+              historyState.isDownloaded(track.id) ||
+              (track.isrc != null &&
+                  historyState.getByIsrc(track.isrc!) != null);
+          if (isDownloaded) {
+            skippedDownloadedCount++;
+            continue;
+          }
+          tracksToQueue.add(track);
+        }
+      }
+
+      if (tracksToQueue.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(this.context).showSnackBar(
+            SnackBar(
+              content: Text(
+                l10n.discographySkippedDownloaded(0, skippedDownloadedCount),
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
+      final queueSnackbarMessage = skippedDownloadedCount > 0
+          ? l10n.discographySkippedDownloaded(
+              tracksToQueue.length,
+              skippedDownloadedCount,
+            )
+          : l10n.snackbarAddedTracksToQueue(tracksToQueue.length);
+
+      if (!mounted) return;
+
       if (settings.askQualityBeforeDownload) {
         DownloadServicePicker.show(
           this.context,
-          trackName: l10n.csvImportTracks(tracks.length),
+          trackName: l10n.csvImportTracks(tracksToQueue.length),
           artistName: l10n.dialogImportPlaylistTitle,
           onSelect: (quality, service) {
-            ref
-                .read(downloadQueueProvider.notifier)
-                .addMultipleToQueue(tracks, service, qualityOverride: quality);
+            ref.read(downloadQueueProvider.notifier).addMultipleToQueue(
+                  tracksToQueue,
+                  service,
+                  qualityOverride: quality,
+                );
             if (mounted) {
               ScaffoldMessenger.of(this.context).showSnackBar(
                 SnackBar(
-                  content: Text(l10n.snackbarAddedTracksToQueue(tracks.length)),
+                  content: Text(queueSnackbarMessage),
                   action: SnackBarAction(
                     label: l10n.snackbarViewQueue,
                     onPressed: () {},
@@ -498,39 +605,19 @@ class _HomeTabState extends ConsumerState<HomeTab>
           },
         );
       } else {
-        final confirmed = await showDialog<bool>(
-          context: this.context,
-          builder: (dialogCtx) => AlertDialog(
-            title: Text(l10n.dialogImportPlaylistTitle),
-            content: Text(l10n.dialogImportPlaylistMessage(tracks.length)),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogCtx, false),
-                child: Text(l10n.dialogCancel),
+        ref
+            .read(downloadQueueProvider.notifier)
+            .addMultipleToQueue(tracksToQueue, settings.defaultService);
+        if (mounted) {
+          ScaffoldMessenger.of(this.context).showSnackBar(
+            SnackBar(
+              content: Text(queueSnackbarMessage),
+              action: SnackBarAction(
+                label: l10n.snackbarViewQueue,
+                onPressed: () {},
               ),
-              FilledButton(
-                onPressed: () => Navigator.pop(dialogCtx, true),
-                child: Text(l10n.dialogImport),
-              ),
-            ],
-          ),
-        );
-
-        if (confirmed == true) {
-          ref
-              .read(downloadQueueProvider.notifier)
-              .addMultipleToQueue(tracks, settings.defaultService);
-          if (mounted) {
-            ScaffoldMessenger.of(this.context).showSnackBar(
-              SnackBar(
-                content: Text(l10n.snackbarAddedTracksToQueue(tracks.length)),
-                action: SnackBarAction(
-                  label: l10n.snackbarViewQueue,
-                  onPressed: () {},
-                ),
-              ),
-            );
-          }
+            ),
+          );
         }
       }
     }
