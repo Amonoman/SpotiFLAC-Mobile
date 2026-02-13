@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Partners & Services - SpotiFLAC Mobile</title>
+  <meta name="description" content="The APIs and services that power SpotiFLAC Mobile. Giving credit to the platforms that make lossless music downloads possible.">
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="icon" href="icon.png" type="image/png">
+
+  <!-- Google Sans Flex -->
+  <style>
+    @font-face { font-family: 'Google Sans Flex'; font-style: normal; font-display: swap; font-weight: 400; src: url(https://cdn.jsdelivr.net/fontsource/fonts/google-sans-flex@latest/latin-400-normal.woff2) format('woff2'); }
+    @font-face { font-family: 'Google Sans Flex'; font-style: normal; font-display: swap; font-weight: 500; src: url(https://cdn.jsdelivr.net/fontsource/fonts/google-sans-flex@latest/latin-500-normal.woff2) format('woff2'); }
+    @font-face { font-family: 'Google Sans Flex'; font-style: normal; font-display: swap; font-weight: 600; src: url(https://cdn.jsdelivr.net/fontsource/fonts/google-sans-flex@latest/latin-600-normal.woff2) format('woff2'); }
+    @font-face { font-family: 'Google Sans Flex'; font-style: normal; font-display: swap; font-weight: 700; src: url(https://cdn.jsdelivr.net/fontsource/fonts/google-sans-flex@latest/latin-700-normal.woff2) format('woff2'); }
+    @font-face { font-family: 'Google Sans Flex'; font-style: normal; font-display: swap; font-weight: 800; src: url(https://cdn.jsdelivr.net/fontsource/fonts/google-sans-flex@latest/latin-800-normal.woff2) format('woff2'); }
+  </style>
+
+  <style>
+    /* ── M3 AMOLED surface ramp ── */
+    :root {
+      --green: #1DB954;
+      --green-dim: #1aa34a;
+      --bg: #0a0a0a;
+      --bg-card: #1a1a1a;
+      --bg-card-hover: #222222;
+      --surface: #121212;
+      --text: #e8e8e8;
+      --text-dim: #999;
+      --max-w: 1100px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Google Sans Flex', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--green); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(18,18,18,.78);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    .nav-inner {
+      max-width: var(--max-w); margin: auto;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; height: 64px;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.1rem; color: var(--text); }
+    .nav-brand img { width: 32px; height: 32px; border-radius: 50%; }
+    .nav-links { display: flex; gap: 24px; list-style: none; }
+    .nav-links a { color: var(--text-dim); font-size: .9rem; transition: color .2s; }
+    .nav-links a:hover { color: var(--text); text-decoration: none; }
+    .nav-links a.active { color: var(--text); font-weight: 600; }
+    .nav-links .nav-icon { display: flex; align-items: center; opacity: .6; transition: opacity .2s; margin-left: -12px; }
+    .nav-links .nav-icon:hover { opacity: 1; }
+    .nav-links .nav-icon svg { width: 24px; height: 24px; fill: currentColor; }
+    .nav-links .nav-divider { width: 1px; height: 20px; background: rgba(255,255,255,.15); margin-left: -4px; }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      padding: 100px 24px 40px; text-align: center;
+    }
+    .page-header h1 { font-size: 2rem; font-weight: 800; margin-bottom: 8px; }
+    .page-header p { color: var(--text-dim); font-size: 1rem; max-width: 560px; margin: 0 auto; }
+
+    /* ── SECTIONS ── */
+    section { padding: 40px 24px 60px; }
+    .section-inner { max-width: var(--max-w); margin: auto; }
+    .section-label {
+      font-size: .85rem; font-weight: 600;
+      color: var(--green); margin-bottom: 8px;
+    }
+    .section-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
+    .section-sub { color: var(--text-dim); font-size: .95rem; margin-bottom: 32px; max-width: 600px; }
+
+    /* ── INFRA CARDS ── */
+    .infra-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 12px;
+    }
+    .infra-card {
+      background: var(--bg-card);
+      border-radius: 20px;
+      padding: 24px;
+      display: flex; align-items: flex-start; gap: 16px;
+      transition: background .2s;
+    }
+    .infra-card:hover { background: var(--bg-card-hover); }
+    .infra-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .infra-icon svg { width: 24px; height: 24px; fill: currentColor; }
+    .infra-info { flex: 1; min-width: 0; }
+    .infra-name { font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; }
+    .infra-desc { color: var(--text-dim); font-size: .88rem; line-height: 1.6; margin-bottom: 10px; }
+    .infra-link {
+      font-size: .82rem; font-weight: 600; color: var(--text-dim);
+      display: inline-flex; align-items: center; gap: 5px;
+      transition: color .2s;
+    }
+    .infra-link:hover { color: var(--text); text-decoration: none; }
+    .infra-link svg { width: 13px; height: 13px; fill: currentColor; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--surface);
+      padding: 40px 24px; text-align: center;
+    }
+    .footer-inner { max-width: var(--max-w); margin: auto; }
+    .footer-links { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+    .footer-links a { color: var(--text-dim); font-size: .9rem; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { color: #555; font-size: .8rem; }
+
+    /* ── DISCLAIMER ── */
+    .disclaimer {
+      max-width: var(--max-w); margin: 0 auto; padding: 0 24px 60px;
+      text-align: center;
+    }
+    .disclaimer p {
+      color: #555; font-size: .8rem; line-height: 1.6;
+      max-width: 600px; margin: 0 auto;
+      padding: 20px; border-radius: 16px;
+      background: var(--surface);
+    }
+
+    /* ── MOBILE MENU ── */
+    .nav-burger {
+      display: none; width: 40px; height: 40px; border-radius: 12px;
+      background: none; border: none; cursor: pointer;
+      align-items: center; justify-content: center; flex-shrink: 0;
+      position: relative;
+    }
+    .nav-burger .bar {
+      display: block; width: 20px; height: 2px; background: var(--text);
+      border-radius: 2px; transition: transform .3s cubic-bezier(.4,0,.2,1), opacity .2s;
+      position: absolute; left: 10px;
+    }
+    .nav-burger .bar:nth-child(1) { top: 12px; }
+    .nav-burger .bar:nth-child(2) { top: 19px; }
+    .nav-burger .bar:nth-child(3) { top: 26px; }
+    .nav-burger.active .bar:nth-child(1) { top: 19px; transform: rotate(45deg); }
+    .nav-burger.active .bar:nth-child(2) { opacity: 0; }
+    .nav-burger.active .bar:nth-child(3) { top: 19px; transform: rotate(-45deg); }
+    .mobile-overlay {
+      position: fixed; top: 64px; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,.5); z-index: 98;
+      opacity: 0; pointer-events: none;
+      transition: opacity .3s cubic-bezier(.4,0,.2,1);
+    }
+    .mobile-overlay.open { opacity: 1; pointer-events: auto; }
+    .mobile-menu {
+      position: fixed; top: 64px; left: 0; right: 0;
+      background: rgba(18,18,18,.95); padding: 8px 16px 16px; z-index: 99;
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      transform: translateY(-8px); opacity: 0; pointer-events: none;
+      transition: transform .3s cubic-bezier(.4,0,.2,1), opacity .3s cubic-bezier(.4,0,.2,1);
+    }
+    .mobile-menu.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+    .mobile-menu a {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px; border-radius: 12px;
+      color: var(--text-dim); font-size: .95rem; font-weight: 500;
+      transition: background .2s; opacity: 0; transform: translateY(-6px);
+    }
+    .mobile-menu.open a {
+      opacity: 1; transform: translateY(0);
+      transition: background .2s, opacity .3s cubic-bezier(.4,0,.2,1), transform .3s cubic-bezier(.4,0,.2,1);
+    }
+    .mobile-menu.open a:nth-child(1) { transition-delay: .03s; }
+    .mobile-menu.open a:nth-child(2) { transition-delay: .06s; }
+    .mobile-menu.open a:nth-child(3) { transition-delay: .09s; }
+    .mobile-menu.open a:nth-child(4) { transition-delay: .12s; }
+    .mobile-menu.open a:nth-child(5) { transition-delay: .15s; }
+    .mobile-menu a:hover { background: var(--bg-card); color: var(--text); text-decoration: none; }
+    .mobile-menu a.active { color: var(--text); font-weight: 600; background: var(--bg-card); }
+    .mobile-menu .mobile-divider {
+      height: 1px; background: rgba(255,255,255,.06); margin: 4px 0;
+      opacity: 0; transition: opacity .3s .15s;
+    }
+    .mobile-menu.open .mobile-divider { opacity: 1; }
+    .mobile-menu .mobile-icons {
+      display: flex; gap: 8px; padding: 8px 16px 0;
+      opacity: 0; transform: translateY(-6px);
+      transition: opacity .3s cubic-bezier(.4,0,.2,1) .18s, transform .3s cubic-bezier(.4,0,.2,1) .18s;
+    }
+    .mobile-menu.open .mobile-icons { opacity: 1; transform: translateY(0); }
+    .mobile-menu .mobile-icons a {
+      padding: 10px; border-radius: 12px; background: var(--bg-card);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 1; transform: none;
+    }
+    .mobile-menu .mobile-icons a svg { width: 20px; height: 20px; fill: currentColor; }
+
+    /* ── MOBILE ── */
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .nav-burger { display: flex; }
+      .page-header { padding: 80px 16px 32px; }
+      section { padding: 32px 16px 48px; }
+      .infra-grid { grid-template-columns: 1fr; }
+      .disclaimer { padding: 0 16px 48px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-brand" href="index.html">
+      <img src="icon.png" alt="SpotiFLAC">
+      SpotiFLAC
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#features">Features</a></li>
+      <li><a href="downloads.html">Downloads</a></li>
+      <li><a href="index.html#faq">FAQ</a></li>
+      <li><a href="partners.html" class="active">Partners</a></li>
+      <li><a href="https://zarz.moe/docs" target="_blank">Docs</a></li>
+      <li class="nav-divider"></li>
+      <li><a href="https://github.com/zarzet/SpotiFLAC-Mobile" target="_blank" class="nav-icon" aria-label="GitHub"><svg viewBox="0 0 24 24"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.82-.26.82-.57L9 20.86c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6.02 0c2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22l-.01 3.29c0 .31.21.69.82.57A12 12 0 0 0 12 .3"/></svg></a></li>
+      <li><a href="https://t.me/spotiflac" target="_blank" class="nav-icon" aria-label="Telegram"><svg viewBox="0 0 24 24"><path d="M11.94 24c6.6 0 12-5.4 12-12s-5.4-12-12-12-12 5.4-12 12 5.4 12 12 12zm-3.2-8.69l-.37-3.04 8.52-5.18c.38-.23.73.09.45.35l-6.96 6.4-.29 2.97c-.04.35-.48.43-.64.12l-1.64-3.33-3.6-1.17c-.78-.24-.8-.78-.02-1.14l14.04-5.4c.65-.25 1.25.15 1.04.83l-2.39 11.28c-.18.81-.7 1.01-1.42.63l-3.92-2.89-1.89 1.82c-.21.2-.39.38-.65.38l.28-3.06z"/></svg></a></li>
+    </ul>
+    <button class="nav-burger" onclick="toggleMenu()" aria-label="Menu">
+      <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+    </button>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-overlay" id="mobileOverlay" onclick="toggleMenu()"></div>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html#features">Features</a>
+  <a href="downloads.html">Downloads</a>
+  <a href="index.html#faq">FAQ</a>
+  <a href="partners.html" class="active">Partners</a>
+  <a href="https://zarz.moe/docs" target="_blank">Docs</a>
+  <div class="mobile-divider"></div>
+  <div class="mobile-icons">
+    <a href="https://github.com/zarzet/SpotiFLAC-Mobile" target="_blank" aria-label="GitHub">
+      <svg viewBox="0 0 24 24"><path d="M12 .3a12 12 0 00-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.5-1.4-1.3-1.8-1.3-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.3 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.4 1.2a11.5 11.5 0 016 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.3 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0012 .3z"/></svg>
+    </a>
+    <a href="https://t.me/spotiflac" target="_blank" aria-label="Telegram">
+      <svg viewBox="0 0 24 24"><path d="M11.94 24c6.6 0 12-5.4 12-12s-5.4-12-12-12-12 5.4-12 12 5.4 12 12 12zm-3.2-8.69l-.37-3.04 8.52-5.18c.38-.23.73.09.45.35l-6.96 6.4-.29 2.97c-.04.35-.48.43-.64.12l-1.64-3.33-3.6-1.17c-.78-.24-.8-.78-.02-1.14l14.04-5.4c.65-.25 1.25.15 1.04.83l-2.39 11.28c-.18.81-.7 1.01-1.42.63l-3.92-2.89-1.89 1.82c-.21.2-.39.38-.65.38l.28-3.06z"/></svg>
+    </a>
+  </div>
+</div>
+
+<div class="page-header">
+  <h1>Partners & Services</h1>
+  <p>The behind-the-scenes APIs and tools that power SpotiFLAC Mobile. We appreciate every one of them.</p>
+</div>
+
+<!-- INFRASTRUCTURE -->
+<section>
+  <div class="section-inner">
+    <div class="section-label">Infrastructure</div>
+    <h2 class="section-title">APIs & Tools</h2>
+    <p class="section-sub">The services that handle link resolution, lyrics, audio extraction, and more.</p>
+
+    <div class="infra-grid">
+
+      <!-- === TRACK LINKING === -->
+
+      <!-- Odesli / song.link (no GitHub — globe) -->
+      <div class="infra-card">
+        <div class="infra-icon" style="background: rgba(99,102,241,.1); color: #6366f1;">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        </div>
+        <div class="infra-info">
+          <div class="infra-name">Odesli / song.link</div>
+          <div class="infra-desc">Cross-platform link resolution. Translates any Spotify, Deezer, or streaming URL into matching Tidal, Qobuz, Amazon, and YouTube IDs &mdash; enabling SpotiFLAC to find the best lossless source for every track.</div>
+          <a class="infra-link" href="https://odesli.co" target="_blank">
+            odesli.co
+            <svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- I Don't Have Spotify (GitHub) -->
+      <div class="infra-card">
+        <div class="infra-icon" style="background: rgba(255,255,255,.08); color: #e8e8e8;">
+          <svg viewBox="0 0 24 24"><path d="M12 .3a12 12 0 00-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.5-1.4-1.3-1.8-1.3-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.3 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.4 1.2a11.5 11.5 0 016 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.3 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0012 .3z"/></svg>
+        </div>
+        <div class="infra-info">
+          <div class="infra-name">I Don't Have Spotify</div>
+          <div class="infra-desc">Fallback link resolution service. When Odesli is rate-limited or unavailable, IDHS provides an alternative way to match Spotify links to Tidal, Qobuz, and other streaming platforms.</div>
+          <a class="infra-link" href="https://github.com/sjdonado/idonthavespotify" target="_blank">
+            sjdonado/idonthavespotify
+            <svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- LRCLIB (GitHub) -->
+      <div class="infra-card">
+        <div class="infra-icon" style="background: rgba(255,255,255,.08); color: #e8e8e8;">
+          <svg viewBox="0 0 24 24"><path d="M12 .3a12 12 0 00-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.5-1.4-1.3-1.8-1.3-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.3 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.4 1.2a11.5 11.5 0 016 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.3 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0012 .3z"/></svg>
+        </div>
+        <div class="infra-info">
+          <div class="infra-name">LRCLIB</div>
+          <div class="infra-desc">Open synced lyrics database. Provides time-stamped lyrics that get embedded directly into downloaded FLAC files, so your music player can display lyrics in sync with the music.</div>
+          <a class="infra-link" href="https://github.com/tranxuanthang/lrclib" target="_blank">
+            tranxuanthang/lrclib
+            <svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- === TIDAL STREAM APIs === -->
+
+      <!-- hifi-api / Binimum (GitHub) -->
+      <div class="infra-card">
+        <div class="infra-icon" style="background: rgba(255,255,255,.08); color: #e8e8e8;">
+          <svg viewBox="0 0 24 24"><path d="M12 .3a12 12 0 00-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.5-1.4-1.3-1.8-1.3-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.3 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.4 1.2a11.5 11.5 0 016 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.3 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0012 .3z"/></svg>
+        </div>
+        <div class="infra-info">
+          <div class="infra-name">hifi-api / Binimum</div>
+          <div class="infra-desc">Primary Tidal lossless stream API. Accepts a track ID and quality parameter, returns hi-res download URLs and DASH manifests. Also deployed at music.binimum.org.</div>
+          <a class="infra-link" href="https://github.com/binimum/hifi-api" target="_blank">
+            binimum/hifi-api
+            <svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- QQDL (no GitHub — globe) -->
+      <div class="infra-card">
+        <div class="infra-icon" style="background: rgba(244,63,94,.1); color: #f43f5e;">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        </div>
+        <div class="infra-info">
+          <div class="infra-name">QQDL</div>
+          <div class="infra-desc">Redundant Tidal API mirror cluster. Operates five parallel endpoints (vogel, maus, hund, katze, wolf) for high-availability lossless track downloads across the API pool.</div>
+          <a class="infra-link" href="https://qqdl.site" target="_blank">
+            qqdl.site
+            <svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Squid (no GitHub — globe) -->
+      <div class="infra-card">
+        <div class="infra-icon" style="background: rgba(6,182,212,.1); color: #06b6d4;">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        </div>
+        <div class="infra-info">
+          <div class="infra-name">Squid</div>
+          <div class="infra-desc">Dual-purpose download API serving both Tidal and Qobuz streams. Supports multi-region retrieval (US/FR fallback for Qobuz) to maximize track availability across catalogs.</div>
+          <a class="infra-link" href="https://squid.wtf" target="_blank">
+            squid.wtf
+            <svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- SpotiSaver (no GitHub — globe) -->
+      <div class="infra-card">
+        <div class="infra-icon" style="background: rgba(245,158,11,.1); color: #f59e0b;">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        </div>
+        <div class="infra-info">
+          <div class="infra-name">SpotiSaver</div>
+          <div class="infra-desc">Tidal hi-fi download endpoints. Hosts two parallel instances (hifi-one, hifi-two) that provide additional redundancy in the 10-API parallel race pool.</div>
+          <a class="infra-link" href="https://spotisaver.net" target="_blank">
+            spotisaver.net
+            <svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- === QOBUZ STREAM APIs === -->
+
+      <!-- DabMusic (no GitHub — globe) -->
+      <div class="infra-card">
+        <div class="infra-icon" style="background: rgba(139,92,246,.1); color: #8b5cf6;">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        </div>
+        <div class="infra-info">
+          <div class="infra-name">DabMusic</div>
+          <div class="infra-desc">Primary Qobuz lossless stream API. Provides direct download URLs for FLAC audio at up to 24-bit/192kHz quality. Queried in parallel alongside squid.wtf for fastest response.</div>
+          <a class="infra-link" href="https://dabmusic.xyz" target="_blank">
+            dabmusic.xyz
+            <svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Jumo DL (no GitHub — globe) -->
+      <div class="infra-card">
+        <div class="infra-icon" style="background: rgba(56,189,248,.1); color: #38bdf8;">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        </div>
+        <div class="infra-info">
+          <div class="infra-name">Jumo DL</div>
+          <div class="infra-desc">Qobuz final fallback. A Cloudflare Pages worker tried after all standard Qobuz APIs fail, with automatic quality downgrade cascade (hi-res &rarr; CD &rarr; MP3) to maximize success rate.</div>
+          <a class="infra-link" href="https://jumo-dl.pages.dev" target="_blank">
+            jumo-dl.pages.dev
+            <svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- === AMAZON === -->
+
+      <!-- AfkarXYZ (GitHub) -->
+      <div class="infra-card">
+        <div class="infra-icon" style="background: rgba(255,255,255,.08); color: #e8e8e8;">
+          <svg viewBox="0 0 24 24"><path d="M12 .3a12 12 0 00-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.5-1.4-1.3-1.8-1.3-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.3 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.4 1.2a11.5 11.5 0 016 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.3 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0012 .3z"/></svg>
+        </div>
+        <div class="infra-info">
+          <div class="infra-name">AfkarXYZ</div>
+          <div class="infra-desc">Sole Amazon Music download API with stream decryption support. Also provides a SpotFetch-compatible Spotify metadata proxy used when direct API access is blocked.</div>
+          <a class="infra-link" href="https://github.com/afkarxyz" target="_blank">
+            afkarxyz
+            <svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- === YOUTUBE AUDIO === -->
+
+      <!-- Cobalt (GitHub) -->
+      <div class="infra-card">
+        <div class="infra-icon" style="background: rgba(255,255,255,.08); color: #e8e8e8;">
+          <svg viewBox="0 0 24 24"><path d="M12 .3a12 12 0 00-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.5-1.4-1.3-1.8-1.3-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.3 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.4 1.2a11.5 11.5 0 016 0c2.3-1.5 3.3-1.2 3.3-1.2.7 1.7.3 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0012 .3z"/></svg>
+        </div>
+        <div class="infra-info">
+          <div class="infra-name">Cobalt</div>
+          <div class="infra-desc">Privacy-focused media extraction tool. The core engine behind YouTube Music downloads &mdash; accepts a video URL and returns a tunnel URL to the audio stream in opus or mp3 format.</div>
+          <a class="infra-link" href="https://github.com/imputnet/cobalt" target="_blank">
+            imputnet/cobalt
+            <svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Qwkuns (no GitHub — globe) -->
+      <div class="infra-card">
+        <div class="infra-icon" style="background: rgba(16,185,129,.1); color: #10b981;">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        </div>
+        <div class="infra-info">
+          <div class="infra-name">Qwkuns</div>
+          <div class="infra-desc">Cobalt-compatible API for YouTube audio extraction. Serves as the fallback download engine when the primary SpotubeDL proxy is unavailable, using the standard Cobalt protocol.</div>
+          <a class="infra-link" href="https://qwkuns.me" target="_blank">
+            qwkuns.me
+            <svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- SpotubeDL (no GitHub — globe) -->
+      <div class="infra-card">
+        <div class="infra-icon" style="background: rgba(244,63,94,.1); color: #f43f5e;">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        </div>
+        <div class="infra-info">
+          <div class="infra-name">SpotubeDL</div>
+          <div class="infra-desc">Primary YouTube download proxy. Handles authentication to Cobalt download instances and serves as the first-choice engine for YouTube Music audio extraction.</div>
+          <a class="infra-link" href="https://spotubedl.com" target="_blank">
+            spotubedl.com
+            <svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- DISCLAIMER -->
+<div class="disclaimer">
+  <p>SpotiFLAC Mobile is not affiliated with, endorsed by, or connected to any of the services listed above. All trademarks and logos belong to their respective owners. This page is meant to acknowledge and appreciate the platforms that make this project possible.</p>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="downloads.html">Downloads</a>
+      <a href="https://zarz.moe/docs" target="_blank">Documentation</a>
+      <a href="https://github.com/zarzet/SpotiFLAC-Mobile" target="_blank">GitHub</a>
+      <a href="https://t.me/spotiflac" target="_blank">Telegram</a>
+      <a href="https://ko-fi.com/zarzet" target="_blank">Support / Ko-fi</a>
+    </div>
+    <p class="footer-copy">SpotiFLAC is for educational and private use only. Not affiliated with any streaming service.</p>
+  </div>
+</footer>
+
+<script>
+function toggleMenu() {
+  document.getElementById('mobileMenu').classList.toggle('open');
+  document.getElementById('mobileOverlay').classList.toggle('open');
+  document.querySelector('.nav-burger').classList.toggle('active');
+}
+document.getElementById('mobileMenu').addEventListener('click', function(e) {
+  if (e.target.closest('a')) toggleMenu();
+});
+</script>
+
+</body>
+</html>

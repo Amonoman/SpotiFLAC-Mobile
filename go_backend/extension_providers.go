@@ -1136,8 +1136,13 @@ func buildOutputPath(req DownloadRequest) string {
 		"artist":       req.ArtistName,
 		"album":        req.AlbumName,
 		"album_artist": req.AlbumArtist,
+		"track":        req.TrackNumber,
 		"track_number": req.TrackNumber,
+		"disc":         req.DiscNumber,
 		"disc_number":  req.DiscNumber,
+		"year":         extractYear(req.ReleaseDate),
+		"date":         req.ReleaseDate,
+		"release_date": req.ReleaseDate,
 		"isrc":         req.ISRC,
 	}
 

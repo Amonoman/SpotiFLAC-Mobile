@@ -3114,7 +3114,7 @@
   "@libraryAboutDescription": {
     "description": "Description of local library feature"
   },
-  "libraryTracksCount": "{count} {count, plural, one {трек} few {трека} many {треков} =1{трек} other{треков}}",
+  "libraryTracksCount": "{count} {count, plural, one {трек} few {трека} many {треков} other{треков}}",
   "@libraryTracksCount": {
     "description": "Track count in library",
     "placeholders": {
@@ -3156,7 +3156,7 @@
   "@libraryInLibrary": {
     "description": "Badge shown on tracks that exist in local library"
   },
-  "libraryRemovedMissingFiles": "Удалено {count} {count, plural, one {отсутствующий файл} few {трека} many {отсутствующих файлов} =1{отсутствующий файл} other{отсутствующих файлов}} в библиотеке",
+  "libraryRemovedMissingFiles": "Удалено {count} {count, plural, one {отсутствующий файл} few {трека} many {отсутствующих файлов} other{отсутствующих файлов}} в библиотеке",
   "@libraryRemovedMissingFiles": {
     "description": "Snackbar after cleanup",
     "placeholders": {
@@ -3282,7 +3282,7 @@
   "@timeJustNow": {
     "description": "Relative time - less than a minute ago"
   },
-  "timeMinutesAgo": "{count, plural, one {{count} минуту} few {{count} минуты} many {{count} минут} =1 {1 минуту} other {{count} минут}} назад",
+  "timeMinutesAgo": "{count, plural, one {{count} минуту} few {{count} минуты} many {{count} минут} other {{count} минут}} назад",
   "@timeMinutesAgo": {
     "description": "Relative time - minutes ago",
     "placeholders": {
@@ -3291,7 +3291,7 @@
       }
     }
   },
-  "timeHoursAgo": "{count, plural, one {{count} час} few {{count} часа} many {{count} часов} =1 {1 час} other {{count} часов}} назад",
+  "timeHoursAgo": "{count, plural, one {{count} час} few {{count} часа} many {{count} часов} other {{count} часов}} назад",
   "@timeHoursAgo": {
     "description": "Relative time - hours ago",
     "placeholders": {
@@ -3324,7 +3324,7 @@
   "@storageSwitchExistingDownloads": {
     "description": "Section header for existing downloads info"
   },
-  "storageSwitchExistingDownloadsInfo": "{count, plural, one {{count} трек} few {{count} трека} many {{count} треков} =1 {1 трек} other {{count} треков}} в {mode} хранилище",
+  "storageSwitchExistingDownloadsInfo": "{count, plural, one {{count} трек} few {{count} трека} many {{count} треков} other {{count} треков}} в {mode} хранилище",
   "@storageSwitchExistingDownloadsInfo": {
     "description": "Info about existing downloads count",
     "placeholders": {
@@ -3378,7 +3378,7 @@
   "@storageStatsTitle": {
     "description": "Section title for storage stats"
   },
-  "storageStatsAppCount": "{count, plural, one {{count} трек} few {{count} трека} many {{count} треков} =1 {1 трек} other {{count} треков}} в хранилище приложения",
+  "storageStatsAppCount": "{count, plural, one {{count} трек} few {{count} трека} many {{count} треков} other {{count} треков}} в хранилище приложения",
   "@storageStatsAppCount": {
     "description": "Count of tracks in app storage",
     "placeholders": {
@@ -3387,7 +3387,7 @@
       }
     }
   },
-  "storageStatsSafCount": "{count, plural, one {{count} трек} few {{count} трека} many {{count} треков} =1 {1 трек} other {{count} треков}} в вашей папке в SAF",
+  "storageStatsSafCount": "{count, plural, one {{count} трек} few {{count} трека} many {{count} треков} other {{count} треков}} в вашей папке в SAF",
   "@storageStatsSafCount": {
     "description": "Count of tracks in SAF storage",
     "placeholders": {

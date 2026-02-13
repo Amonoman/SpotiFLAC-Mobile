@@ -1190,6 +1190,13 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get filenameShowAdvancedTags => 'Show advanced tags';
+
+  @override
+  String get filenameShowAdvancedTagsDescription =>
+      'Enable formatted tags for track padding and date patterns';
+
+  @override
   String get folderOrganization => 'Klasör Organizasyonu';
 
   @override

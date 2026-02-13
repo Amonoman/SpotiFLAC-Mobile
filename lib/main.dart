@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
@@ -11,19 +12,68 @@ import 'package:spotiflac_android/services/cover_cache_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  _configureImageCache();
+  final runtimeProfile = await _resolveRuntimeProfile();
+  _configureImageCache(runtimeProfile);
 
   runApp(
-    ProviderScope(child: const _EagerInitialization(child: SpotiFLACApp())),
+    ProviderScope(
+      child: _EagerInitialization(
+        child: SpotiFLACApp(
+          disableOverscrollEffects: runtimeProfile.disableOverscrollEffects,
+        ),
+      ),
+    ),
   );
 }
 
-void _configureImageCache() {
+Future<_RuntimeProfile> _resolveRuntimeProfile() async {
+  const defaults = _RuntimeProfile(
+    imageCacheMaximumSize: 240,
+    imageCacheMaximumSizeBytes: 60 << 20,
+    disableOverscrollEffects: false,
+  );
+
+  if (!Platform.isAndroid) return defaults;
+
+  try {
+    final androidInfo = await DeviceInfoPlugin().androidInfo;
+    final isArm32Only = androidInfo.supported64BitAbis.isEmpty;
+    final isLowRamDevice =
+        androidInfo.isLowRamDevice || androidInfo.physicalRamSize <= 2500;
+
+    if (!isArm32Only && !isLowRamDevice) {
+      return defaults;
+    }
+
+    return _RuntimeProfile(
+      imageCacheMaximumSize: 120,
+      imageCacheMaximumSizeBytes: 24 << 20,
+      disableOverscrollEffects: true,
+    );
+  } catch (e) {
+    debugPrint('Failed to resolve runtime profile: $e');
+    return defaults;
+  }
+}
+
+void _configureImageCache(_RuntimeProfile runtimeProfile) {
   final imageCache = PaintingBinding.instance.imageCache;
   // Keep memory cache bounded so cover-heavy pages don't retain too many
   // full-resolution images simultaneously.
-  imageCache.maximumSize = 240;
-  imageCache.maximumSizeBytes = 60 << 20; // 60 MiB
+  imageCache.maximumSize = runtimeProfile.imageCacheMaximumSize;
+  imageCache.maximumSizeBytes = runtimeProfile.imageCacheMaximumSizeBytes;
+}
+
+class _RuntimeProfile {
+  final int imageCacheMaximumSize;
+  final int imageCacheMaximumSizeBytes;
+  final bool disableOverscrollEffects;
+
+  const _RuntimeProfile({
+    required this.imageCacheMaximumSize,
+    required this.imageCacheMaximumSizeBytes,
+    required this.disableOverscrollEffects,
+  });
 }
 
 /// Widget to eagerly initialize providers that need to load data on startup

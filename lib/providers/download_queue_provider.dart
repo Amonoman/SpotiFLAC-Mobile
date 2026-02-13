@@ -1304,7 +1304,7 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
   }
 
   static final _featuredArtistPattern = RegExp(
-    r'\s*[,;&]\s*|\s+(?:feat\.?|ft\.?|featuring|with|x)\s+',
+    r'\s*[,;]\s*|\s+(?:feat\.?|ft\.?|featuring|with|x)\s+',
     caseSensitive: false,
   );
 
@@ -2813,6 +2813,7 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
               'track': trackToDownload.trackNumber ?? 0,
               'disc': trackToDownload.discNumber ?? 0,
               'year': _extractYear(trackToDownload.releaseDate) ?? '',
+              'date': trackToDownload.releaseDate ?? '',
             });
         final sanitized = await PlatformBridge.sanitizeFilename(baseName);
         safBaseName = sanitized;

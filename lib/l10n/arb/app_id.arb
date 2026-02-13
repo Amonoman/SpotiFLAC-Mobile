@@ -1532,6 +1532,14 @@
   "@filenameHint": {
     "description": "Default filename format hint"
   },
+  "filenameShowAdvancedTags": "Tampilkan tag lanjutan",
+  "@filenameShowAdvancedTags": {
+    "description": "Toggle label for showing advanced filename tags"
+  },
+  "filenameShowAdvancedTagsDescription": "Aktifkan tag format untuk padding nomor lagu dan pola tanggal",
+  "@filenameShowAdvancedTagsDescription": {
+    "description": "Description for advanced filename tag toggle"
+  },
   "folderOrganization": "Organisasi Folder",
   "@folderOrganization": {
     "description": "Setting title - folder structure"

@@ -2152,6 +2152,18 @@ abstract class AppLocalizations {
   /// **'{artist} - {title}'**
   String filenameHint(Object artist, Object title);
 
+  /// Toggle label for showing advanced filename tags
+  ///
+  /// In en, this message translates to:
+  /// **'Show advanced tags'**
+  String get filenameShowAdvancedTags;
+
+  /// Description for advanced filename tag toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Enable formatted tags for track padding and date patterns'**
+  String get filenameShowAdvancedTagsDescription;
+
   /// Setting title - folder structure
   ///
   /// In en, this message translates to:

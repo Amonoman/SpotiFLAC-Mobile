@@ -1152,7 +1152,7 @@
   "@dialogDeleteSelectedTitle": {
     "description": "Dialog title - delete selected items"
   },
-  "dialogDeleteSelectedMessage": "Lösche {count} {count, plural, one {}=1{Track} other{Tracks}} aus dem Verlauf?\n\nDies löscht auch die Dateien aus dem Speicher.",
+  "dialogDeleteSelectedMessage": "Lösche {count} {count, plural, one {Track} other{Tracks}} aus dem Verlauf?\n\nDies löscht auch die Dateien aus dem Speicher.",
   "@dialogDeleteSelectedMessage": {
     "description": "Dialog message - delete selected tracks",
     "placeholders": {
@@ -1231,7 +1231,7 @@
   "@snackbarCredentialsCleared": {
     "description": "Snackbar - Spotify credentials removed"
   },
-  "snackbarDeletedTracks": "{count} {count, plural, one {}=1{Titel} other{Titel}}",
+  "snackbarDeletedTracks": "{count} {count, plural, one {Titel} other{Titel}}",
   "@snackbarDeletedTracks": {
     "description": "Snackbar - tracks deleted",
     "placeholders": {
@@ -1438,7 +1438,7 @@
   "@selectionTapToSelect": {
     "description": "Hint - how to select items"
   },
-  "selectionDeleteTracks": "Lösche {count} {count, plural, one {}=1{Titel}other{Titel}}",
+  "selectionDeleteTracks": "Lösche {count} {count, plural, one {Titel}other{Titel}}",
   "@selectionDeleteTracks": {
     "description": "Delete button with count",
     "placeholders": {

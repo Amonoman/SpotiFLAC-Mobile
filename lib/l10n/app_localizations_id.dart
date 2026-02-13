@@ -349,7 +349,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get optionsSpotifyDeprecationWarning =>
-      'Pencarian Spotify akan dihentikan pada 3 Maret 2026 karena perubahan API Spotify. Silakan beralih ke Deezer.';
+      'Spotify search will be deprecated on March 3, 2026 due to Spotify API changes. Please switch to Deezer.';
 
   @override
   String get extensionsTitle => 'Ekstensi';
@@ -1189,6 +1189,13 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String get filenameShowAdvancedTags => 'Tampilkan tag lanjutan';
+
+  @override
+  String get filenameShowAdvancedTagsDescription =>
+      'Aktifkan tag format untuk padding nomor lagu dan pola tanggal';
+
+  @override
   String get folderOrganization => 'Organisasi Folder';
 
   @override
@@ -1941,27 +1948,26 @@ class AppLocalizationsId extends AppLocalizations {
   String get downloadAlbumFolderStructure => 'Struktur Folder Album';
 
   @override
-  String get downloadUseAlbumArtistForFolders =>
-      'Gunakan Album Artist untuk folder';
+  String get downloadUseAlbumArtistForFolders => 'Use Album Artist for folders';
 
   @override
   String get downloadUseAlbumArtistForFoldersAlbumSubtitle =>
-      'Folder artis memakai Album Artist jika tersedia';
+      'Artist folders use Album Artist when available';
 
   @override
   String get downloadUseAlbumArtistForFoldersTrackSubtitle =>
-      'Folder artis hanya memakai Track Artist';
+      'Artist folders use Track Artist only';
 
   @override
-  String get downloadUsePrimaryArtistOnly => 'Hanya artis utama untuk folder';
+  String get downloadUsePrimaryArtistOnly => 'Primary artist only for folders';
 
   @override
   String get downloadUsePrimaryArtistOnlyEnabled =>
-      'Featured artist dihapus dari nama folder (misal Justin Bieber, Quavo → Justin Bieber)';
+      'Featured artists removed from folder name (e.g. Justin Bieber, Quavo → Justin Bieber)';
 
   @override
   String get downloadUsePrimaryArtistOnlyDisabled =>
-      'Nama artis lengkap dipakai untuk folder';
+      'Full artist string used for folder name';
 
   @override
   String get downloadSaveFormat => 'Simpan Format';
@@ -2200,10 +2206,10 @@ class AppLocalizationsId extends AppLocalizations {
   String get recentTypePlaylist => 'Playlist';
 
   @override
-  String get recentEmpty => 'Belum ada item terbaru';
+  String get recentEmpty => 'No recent items yet';
 
   @override
-  String get recentShowAllDownloads => 'Tampilkan Semua Download';
+  String get recentShowAllDownloads => 'Show All Downloads';
 
   @override
   String recentPlaylistInfo(String name) {
@@ -2312,10 +2318,10 @@ class AppLocalizationsId extends AppLocalizations {
   String get settingsLocalLibrarySubtitle => 'Scan music & detect duplicates';
 
   @override
-  String get settingsCache => 'Penyimpanan & Cache';
+  String get settingsCache => 'Storage & Cache';
 
   @override
-  String get settingsCacheSubtitle => 'Lihat ukuran dan bersihkan data cache';
+  String get settingsCacheSubtitle => 'View size and clear cached data';
 
   @override
   String get libraryTitle => 'Local Library';
@@ -2590,221 +2596,219 @@ class AppLocalizationsId extends AppLocalizations {
   String get storageModeInfo => 'Your files are stored in multiple locations';
 
   @override
-  String get tutorialWelcomeTitle => 'Selamat Datang di SpotiFLAC!';
+  String get tutorialWelcomeTitle => 'Welcome to SpotiFLAC!';
 
   @override
   String get tutorialWelcomeDesc =>
-      'Mari pelajari cara mengunduh musik favorit Anda dalam kualitas lossless. Tutorial singkat ini akan menunjukkan dasar-dasarnya.';
+      'Let\'s learn how to download your favorite music in lossless quality. This quick tutorial will show you the basics.';
 
   @override
   String get tutorialWelcomeTip1 =>
-      'Unduh musik dari Spotify, Deezer, atau tempel URL yang didukung';
+      'Download music from Spotify, Deezer, or paste any supported URL';
 
   @override
   String get tutorialWelcomeTip2 =>
-      'Dapatkan audio kualitas FLAC dari Tidal, Qobuz, atau Amazon Music';
+      'Get FLAC quality audio from Tidal, Qobuz, or Amazon Music';
 
   @override
   String get tutorialWelcomeTip3 =>
-      'Metadata, cover art, dan lirik otomatis tertanam';
+      'Automatic metadata, cover art, and lyrics embedding';
 
   @override
-  String get tutorialSearchTitle => 'Mencari Musik';
+  String get tutorialSearchTitle => 'Finding Music';
 
   @override
   String get tutorialSearchDesc =>
-      'Ada dua cara mudah untuk menemukan musik yang ingin Anda unduh.';
+      'There are two easy ways to find music you want to download.';
 
   @override
   String get tutorialSearchTip1 =>
-      'Tempel URL Spotify atau Deezer langsung di kotak pencarian';
+      'Paste a Spotify or Deezer URL directly in the search box';
 
   @override
   String get tutorialSearchTip2 =>
-      'Atau ketik nama lagu, artis, atau album untuk mencari';
+      'Or type the song name, artist, or album to search';
 
   @override
   String get tutorialSearchTip3 =>
-      'Mendukung lagu, album, playlist, dan halaman artis';
+      'Supports tracks, albums, playlists, and artist pages';
 
   @override
-  String get tutorialDownloadTitle => 'Mengunduh Musik';
+  String get tutorialDownloadTitle => 'Downloading Music';
 
   @override
   String get tutorialDownloadDesc =>
-      'Mengunduh musik itu mudah dan cepat. Begini caranya.';
+      'Downloading music is simple and fast. Here\'s how it works.';
 
   @override
   String get tutorialDownloadTip1 =>
-      'Ketuk tombol unduh di samping lagu mana pun untuk mulai mengunduh';
+      'Tap the download button next to any track to start downloading';
 
   @override
   String get tutorialDownloadTip2 =>
-      'Pilih kualitas yang Anda inginkan (FLAC, Hi-Res, atau MP3)';
+      'Choose your preferred quality (FLAC, Hi-Res, or MP3)';
 
   @override
   String get tutorialDownloadTip3 =>
-      'Unduh seluruh album atau playlist dengan satu ketukan';
+      'Download entire albums or playlists with one tap';
 
   @override
-  String get tutorialLibraryTitle => 'Perpustakaan Anda';
+  String get tutorialLibraryTitle => 'Your Library';
 
   @override
   String get tutorialLibraryDesc =>
-      'Semua musik yang Anda unduh terorganisir di tab Perpustakaan.';
+      'All your downloaded music is organized in the Library tab.';
 
   @override
   String get tutorialLibraryTip1 =>
-      'Lihat progres unduhan dan antrian di tab Perpustakaan';
+      'View download progress and queue in the Library tab';
 
   @override
   String get tutorialLibraryTip2 =>
-      'Ketuk lagu mana pun untuk memutarnya dengan pemutar musik';
+      'Tap any track to play it with your music player';
 
   @override
   String get tutorialLibraryTip3 =>
-      'Beralih antara tampilan daftar dan grid untuk penjelajahan lebih baik';
+      'Switch between list and grid view for better browsing';
 
   @override
-  String get tutorialExtensionsTitle => 'Ekstensi';
+  String get tutorialExtensionsTitle => 'Extensions';
 
   @override
   String get tutorialExtensionsDesc =>
-      'Tingkatkan kemampuan aplikasi dengan ekstensi komunitas.';
+      'Extend the app\'s capabilities with community extensions.';
 
   @override
   String get tutorialExtensionsTip1 =>
-      'Jelajahi tab Toko untuk menemukan ekstensi berguna';
+      'Browse the Store tab to discover useful extensions';
 
   @override
   String get tutorialExtensionsTip2 =>
-      'Tambahkan provider unduhan atau sumber pencarian baru';
+      'Add new download providers or search sources';
 
   @override
   String get tutorialExtensionsTip3 =>
-      'Dapatkan lirik, metadata lebih baik, dan fitur lainnya';
+      'Get lyrics, enhanced metadata, and more features';
 
   @override
-  String get tutorialSettingsTitle => 'Sesuaikan Pengalaman Anda';
+  String get tutorialSettingsTitle => 'Customize Your Experience';
 
   @override
   String get tutorialSettingsDesc =>
-      'Personalisasi aplikasi di Pengaturan sesuai preferensi Anda.';
+      'Personalize the app in Settings to match your preferences.';
 
   @override
   String get tutorialSettingsTip1 =>
-      'Ubah lokasi unduhan dan organisasi folder';
+      'Change download location and folder organization';
 
   @override
   String get tutorialSettingsTip2 =>
-      'Atur kualitas audio dan preferensi format default';
+      'Set default audio quality and format preferences';
 
   @override
-  String get tutorialSettingsTip3 => 'Sesuaikan tema dan tampilan aplikasi';
+  String get tutorialSettingsTip3 => 'Customize app theme and appearance';
 
   @override
   String get tutorialReadyMessage =>
-      'Anda siap! Mulai unduh musik favorit Anda sekarang.';
+      'You\'re all set! Start downloading your favorite music now.';
 
   @override
-  String get tutorialExample => 'CONTOH';
+  String get tutorialExample => 'EXAMPLE';
 
   @override
-  String get libraryForceFullScan => 'Pindai Ulang Penuh';
+  String get libraryForceFullScan => 'Force Full Scan';
 
   @override
-  String get libraryForceFullScanSubtitle =>
-      'Pindai ulang semua file, abaikan cache';
+  String get libraryForceFullScanSubtitle => 'Rescan all files, ignoring cache';
 
   @override
-  String get cleanupOrphanedDownloads => 'Bersihkan Entri Unduhan Tidak Valid';
+  String get cleanupOrphanedDownloads => 'Cleanup Orphaned Downloads';
 
   @override
   String get cleanupOrphanedDownloadsSubtitle =>
-      'Hapus entri riwayat untuk file yang tidak ada lagi';
+      'Remove history entries for files that no longer exist';
 
   @override
   String cleanupOrphanedDownloadsResult(int count) {
-    return 'Menghapus $count entri unduhan tidak valid dari riwayat';
+    return 'Removed $count orphaned entries from history';
   }
 
   @override
-  String get cleanupOrphanedDownloadsNone =>
-      'Tidak ada entri unduhan tidak valid';
+  String get cleanupOrphanedDownloadsNone => 'No orphaned entries found';
 
   @override
-  String get cacheTitle => 'Penyimpanan & Cache';
+  String get cacheTitle => 'Storage & Cache';
 
   @override
-  String get cacheSummaryTitle => 'Ringkasan cache';
+  String get cacheSummaryTitle => 'Cache overview';
 
   @override
   String get cacheSummarySubtitle =>
-      'Membersihkan cache tidak akan menghapus file musik yang sudah diunduh.';
+      'Clearing cache will not remove downloaded music files.';
 
   @override
   String cacheEstimatedTotal(String size) {
-    return 'Estimasi penggunaan cache: $size';
+    return 'Estimated cache usage: $size';
   }
 
   @override
-  String get cacheSectionStorage => 'Data Cache';
+  String get cacheSectionStorage => 'Cached Data';
 
   @override
-  String get cacheSectionMaintenance => 'Perawatan';
+  String get cacheSectionMaintenance => 'Maintenance';
 
   @override
-  String get cacheAppDirectory => 'Direktori cache aplikasi';
+  String get cacheAppDirectory => 'App cache directory';
 
   @override
   String get cacheAppDirectoryDesc =>
-      'Respons HTTP, data WebView, dan data sementara aplikasi.';
+      'HTTP responses, WebView data, and other temporary app data.';
 
   @override
-  String get cacheTempDirectory => 'Direktori sementara';
+  String get cacheTempDirectory => 'Temporary directory';
 
   @override
   String get cacheTempDirectoryDesc =>
-      'File sementara dari proses download dan konversi audio.';
+      'Temporary files from downloads and audio conversion.';
 
   @override
-  String get cacheCoverImage => 'Cache gambar cover';
+  String get cacheCoverImage => 'Cover image cache';
 
   @override
   String get cacheCoverImageDesc =>
-      'Gambar cover album dan lagu yang diunduh. Akan diunduh ulang saat dilihat.';
+      'Downloaded album and track cover art. Will re-download when viewed.';
 
   @override
-  String get cacheLibraryCover => 'Cache cover library';
+  String get cacheLibraryCover => 'Library cover cache';
 
   @override
   String get cacheLibraryCoverDesc =>
-      'Cover dari file musik lokal. Akan diekstrak ulang saat scan berikutnya.';
+      'Cover art extracted from local music files. Will re-extract on next scan.';
 
   @override
-  String get cacheExploreFeed => 'Cache feed Explore';
+  String get cacheExploreFeed => 'Explore feed cache';
 
   @override
   String get cacheExploreFeedDesc =>
-      'Konten tab Explore (rilis baru, trending). Akan dimuat ulang saat dikunjungi.';
+      'Explore tab content (new releases, trending). Will refresh on next visit.';
 
   @override
-  String get cacheTrackLookup => 'Cache pencocokan lagu';
+  String get cacheTrackLookup => 'Track lookup cache';
 
   @override
   String get cacheTrackLookupDesc =>
-      'Cache pencarian ID lagu Spotify/Deezer. Menghapus mungkin memperlambat beberapa pencarian.';
+      'Spotify/Deezer track ID lookups. Clearing may slow next few searches.';
 
   @override
   String get cacheCleanupUnusedDesc =>
-      'Hapus entri riwayat download dan library yang filenya sudah tidak ada.';
+      'Remove orphaned download history and library entries for missing files.';
 
   @override
-  String get cacheNoData => 'Tidak ada data cache';
+  String get cacheNoData => 'No cached data';
 
   @override
   String cacheSizeWithFiles(String size, int count) {
-    return '$size dalam $count file';
+    return '$size in $count files';
   }
 
   @override
@@ -2814,126 +2818,123 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String cacheEntries(int count) {
-    return '$count entri';
+    return '$count entries';
   }
 
   @override
   String cacheClearSuccess(String target) {
-    return 'Berhasil dibersihkan: $target';
+    return 'Cleared: $target';
   }
 
   @override
-  String get cacheClearConfirmTitle => 'Bersihkan cache?';
+  String get cacheClearConfirmTitle => 'Clear cache?';
 
   @override
   String cacheClearConfirmMessage(String target) {
-    return 'Ini akan membersihkan data cache untuk $target. File musik yang sudah diunduh tidak akan dihapus.';
+    return 'This will clear cached data for $target. Downloaded music files will not be deleted.';
   }
 
   @override
-  String get cacheClearAllConfirmTitle => 'Bersihkan semua cache?';
+  String get cacheClearAllConfirmTitle => 'Clear all cache?';
 
   @override
   String get cacheClearAllConfirmMessage =>
-      'Ini akan membersihkan semua kategori cache di halaman ini. File musik yang sudah diunduh tidak akan dihapus.';
+      'This will clear all cache categories on this page. Downloaded music files will not be deleted.';
 
   @override
-  String get cacheClearAll => 'Bersihkan semua cache';
+  String get cacheClearAll => 'Clear all cache';
 
   @override
-  String get cacheCleanupUnused => 'Bersihkan data tidak terpakai';
+  String get cacheCleanupUnused => 'Cleanup unused data';
 
   @override
   String get cacheCleanupUnusedSubtitle =>
-      'Hapus riwayat unduhan yatim dan entri library yang file-nya hilang';
+      'Remove orphaned download history and missing library entries';
 
   @override
   String cacheCleanupResult(int downloadCount, int libraryCount) {
-    return 'Pembersihan selesai: $downloadCount unduhan yatim, $libraryCount entri library hilang';
+    return 'Cleanup completed: $downloadCount orphaned downloads, $libraryCount missing library entries';
   }
 
   @override
-  String get cacheRefreshStats => 'Segarkan statistik';
+  String get cacheRefreshStats => 'Refresh stats';
 
   @override
-  String get trackSaveCoverArt => 'Simpan Cover Art';
+  String get trackSaveCoverArt => 'Save Cover Art';
 
   @override
-  String get trackSaveCoverArtSubtitle =>
-      'Simpan cover album sebagai file .jpg';
+  String get trackSaveCoverArtSubtitle => 'Save album art as .jpg file';
 
   @override
-  String get trackSaveLyrics => 'Simpan Lirik (.lrc)';
+  String get trackSaveLyrics => 'Save Lyrics (.lrc)';
 
   @override
-  String get trackSaveLyricsSubtitle =>
-      'Ambil dan simpan lirik sebagai file .lrc';
+  String get trackSaveLyricsSubtitle => 'Fetch and save lyrics as .lrc file';
 
   @override
-  String get trackSaveLyricsProgress => 'Menyimpan lirik...';
+  String get trackSaveLyricsProgress => 'Saving lyrics...';
 
   @override
-  String get trackReEnrich => 'Perkaya Ulang Metadata';
+  String get trackReEnrich => 'Re-enrich Metadata';
 
   @override
   String get trackReEnrichSubtitle =>
-      'Tanamkan ulang metadata tanpa mengunduh ulang';
+      'Re-embed metadata without re-downloading';
 
   @override
   String get trackReEnrichOnlineSubtitle =>
-      'Cari metadata dari internet dan tanamkan ke file';
+      'Search metadata online and embed into file';
 
   @override
   String get trackEditMetadata => 'Edit Metadata';
 
   @override
   String trackCoverSaved(String fileName) {
-    return 'Cover art disimpan ke $fileName';
+    return 'Cover art saved to $fileName';
   }
 
   @override
-  String get trackCoverNoSource => 'Tidak ada sumber cover art';
+  String get trackCoverNoSource => 'No cover art source available';
 
   @override
   String trackLyricsSaved(String fileName) {
-    return 'Lirik disimpan ke $fileName';
+    return 'Lyrics saved to $fileName';
   }
 
   @override
-  String get trackReEnrichProgress => 'Memperkaya ulang metadata...';
+  String get trackReEnrichProgress => 'Re-enriching metadata...';
 
   @override
-  String get trackReEnrichSearching => 'Mencari metadata dari internet...';
+  String get trackReEnrichSearching => 'Searching metadata online...';
 
   @override
-  String get trackReEnrichSuccess => 'Metadata berhasil diperkaya ulang';
+  String get trackReEnrichSuccess => 'Metadata re-enriched successfully';
 
   @override
-  String get trackReEnrichFfmpegFailed =>
-      'Gagal menanamkan metadata via FFmpeg';
+  String get trackReEnrichFfmpegFailed => 'FFmpeg metadata embed failed';
 
   @override
   String trackSaveFailed(String error) {
-    return 'Gagal: $error';
+    return 'Failed: $error';
   }
 
   @override
-  String get trackConvertFormat => 'Konversi Format';
+  String get trackConvertFormat => 'Convert Format';
 
   @override
-  String get trackConvertFormatSubtitle => 'Konversi ke MP3 atau Opus';
+  String get trackConvertFormatSubtitle => 'Convert to MP3 or Opus';
 
   @override
-  String get trackConvertTitle => 'Konversi Audio';
+  String get trackConvertTitle => 'Convert Audio';
 
   @override
-  String get trackConvertTargetFormat => 'Format Tujuan';
+  String get trackConvertTargetFormat => 'Target Format';
 
   @override
   String get trackConvertBitrate => 'Bitrate';
 
   @override
-  String get trackConvertConfirmTitle => 'Konfirmasi Konversi';
+  String get trackConvertConfirmTitle => 'Confirm Conversion';
 
   @override
   String trackConvertConfirmMessage(
@@ -2941,17 +2942,17 @@ class AppLocalizationsId extends AppLocalizations {
     String targetFormat,
     String bitrate,
   ) {
-    return 'Konversi dari $sourceFormat ke $targetFormat pada $bitrate?\n\nFile asli akan dihapus setelah konversi.';
+    return 'Convert from $sourceFormat to $targetFormat at $bitrate?\n\nThe original file will be deleted after conversion.';
   }
 
   @override
-  String get trackConvertConverting => 'Mengkonversi audio...';
+  String get trackConvertConverting => 'Converting audio...';
 
   @override
   String trackConvertSuccess(String format) {
-    return 'Berhasil dikonversi ke $format';
+    return 'Converted to $format successfully';
   }
 
   @override
-  String get trackConvertFailed => 'Konversi gagal';
+  String get trackConvertFailed => 'Conversion failed';
 }

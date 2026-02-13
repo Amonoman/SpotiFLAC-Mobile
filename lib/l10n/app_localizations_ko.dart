@@ -13,7 +13,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get appDescription =>
-      'Download Spotify tracks in lossless quality from Tidal, Qobuz, and Amazon Music.';
+      'Spotify 트랙을 Tidal, Qobuz, Amazon Music에서 무손실 음질로 다운로드하세요.';
 
   @override
   String get navHome => 'Home';
@@ -34,32 +34,32 @@ class AppLocalizationsKo extends AppLocalizations {
   String get homeTitle => 'Home';
 
   @override
-  String get homeSearchHint => 'Paste Spotify URL or search...';
+  String get homeSearchHint => 'Spotify URL을 붙여 넣거나 검색';
 
   @override
   String homeSearchHintExtension(String extensionName) {
-    return 'Search with $extensionName...';
+    return '$extensionName에서 검색';
   }
 
   @override
-  String get homeSubtitle => 'Paste a Spotify link or search by name';
+  String get homeSubtitle => 'Spotify URL을 붙여 넣거나 검색';
 
   @override
-  String get homeSupports => 'Supports: Track, Album, Playlist, Artist URLs';
+  String get homeSupports => '지원 항목: 트랙, 앨범, 플레이리스트, 아티스트 URLs';
 
   @override
-  String get homeRecent => 'Recent';
+  String get homeRecent => '최근 기록';
 
   @override
-  String get historyTitle => 'History';
+  String get historyTitle => '기록';
 
   @override
   String historyDownloading(int count) {
-    return 'Downloading ($count)';
+    return '다운로드 중... $count';
   }
 
   @override
-  String get historyDownloaded => 'Downloaded';
+  String get historyDownloaded => '다운로드 목록';
 
   @override
   String get historyFilterAll => 'All';
@@ -75,7 +75,7 @@ class AppLocalizationsKo extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count tracks',
+      other: '${count}tracks',
       one: '1 track',
     );
     return '$_temp0';
@@ -245,14 +245,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get optionsAutoFallback => 'Auto Fallback';
 
   @override
-  String get optionsAutoFallbackSubtitle =>
-      'Try other services if download fails';
+  String get optionsAutoFallbackSubtitle => '다운로드가 실패한 경우, 다른 서비스로 재시도';
 
   @override
   String get optionsUseExtensionProviders => 'Use Extension Providers';
 
   @override
-  String get optionsUseExtensionProvidersOn => 'Extensions will be tried first';
+  String get optionsUseExtensionProvidersOn => '확장 기능을 우선적으로 사용합니다';
 
   @override
   String get optionsUseExtensionProvidersOff => 'Using built-in providers only';
@@ -1181,6 +1180,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String filenameHint(Object artist, Object title) {
     return '$artist - $title';
   }
+
+  @override
+  String get filenameShowAdvancedTags => 'Show advanced tags';
+
+  @override
+  String get filenameShowAdvancedTagsDescription =>
+      'Enable formatted tags for track padding and date patterns';
 
   @override
   String get folderOrganization => 'Folder Organization';

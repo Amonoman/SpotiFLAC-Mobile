@@ -490,6 +490,9 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
       0,
       (sum, a) => sum + a.totalTracks,
     );
+    final textScale = MediaQuery.textScalerOf(context).scale(1.0);
+    final compactLayout =
+        MediaQuery.sizeOf(context).width < 430 || textScale > 1.15;
 
     return Positioned(
       left: 0,
@@ -510,53 +513,145 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
           top: false,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                IconButton(
-                  onPressed: _exitSelectionMode,
-                  icon: const Icon(Icons.close),
-                  tooltip: context.l10n.dialogCancel,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            child: compactLayout
+                ? Column(
                     mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        context.l10n.discographySelectedCount(selectedCount),
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w600),
+                      Row(
+                        children: [
+                          IconButton(
+                            onPressed: _exitSelectionMode,
+                            icon: const Icon(Icons.close),
+                            tooltip: context.l10n.dialogCancel,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  context.l10n.discographySelectedCount(
+                                    selectedCount,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(fontWeight: FontWeight.w600),
+                                ),
+                                if (selectedCount > 0)
+                                  Text(
+                                    context.l10n.tracksCount(totalTracks),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(
+                                          color: colorScheme.onSurfaceVariant,
+                                        ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      if (selectedCount > 0)
-                        Text(
-                          context.l10n.tracksCount(totalTracks),
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: colorScheme.onSurfaceVariant),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: allSelected
+                                  ? _deselectAll
+                                  : () => _selectAll(allAlbums),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  allSelected
+                                      ? context.l10n.actionDeselect
+                                      : context.l10n.actionSelectAll,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: FilledButton(
+                              onPressed: selectedCount > 0
+                                  ? () => _downloadSelectedAlbums(
+                                      context,
+                                      selectedAlbums,
+                                    )
+                                  : null,
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  context.l10n.discographyDownloadSelected,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      IconButton(
+                        onPressed: _exitSelectionMode,
+                        icon: const Icon(Icons.close),
+                        tooltip: context.l10n.dialogCancel,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              context.l10n.discographySelectedCount(
+                                selectedCount,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w600),
+                            ),
+                            if (selectedCount > 0)
+                              Text(
+                                context.l10n.tracksCount(totalTracks),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                              ),
+                          ],
                         ),
+                      ),
+                      TextButton(
+                        onPressed: allSelected
+                            ? _deselectAll
+                            : () => _selectAll(allAlbums),
+                        child: Text(
+                          allSelected
+                              ? context.l10n.actionDeselect
+                              : context.l10n.actionSelectAll,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton.icon(
+                        onPressed: selectedCount > 0
+                            ? () => _downloadSelectedAlbums(
+                                context,
+                                selectedAlbums,
+                              )
+                            : null,
+                        icon: const Icon(Icons.download, size: 18),
+                        label: Text(context.l10n.discographyDownloadSelected),
+                      ),
                     ],
                   ),
-                ),
-                TextButton(
-                  onPressed: allSelected
-                      ? _deselectAll
-                      : () => _selectAll(allAlbums),
-                  child: Text(
-                    allSelected
-                        ? context.l10n.actionDeselect
-                        : context.l10n.actionSelectAll,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                FilledButton.icon(
-                  onPressed: selectedCount > 0
-                      ? () => _downloadSelectedAlbums(context, selectedAlbums)
-                      : null,
-                  icon: const Icon(Icons.download, size: 18),
-                  label: Text(context.l10n.discographyDownloadSelected),
-                ),
-              ],
-            ),
           ),
         ),
       ),
@@ -1427,15 +1522,31 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
   void _downloadTrack(Track track) {
     final settings = ref.read(settingsProvider);
     ref.read(settingsProvider.notifier).setHasSearchedBefore();
-    ref
-        .read(downloadQueueProvider.notifier)
-        .addToQueue(track, settings.defaultService);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.snackbarAddedToQueue(track.name)),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+
+    void enqueue(String service, {String? quality}) {
+      ref
+          .read(downloadQueueProvider.notifier)
+          .addToQueue(track, service, qualityOverride: quality);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.snackbarAddedToQueue(track.name)),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+
+    if (settings.askQualityBeforeDownload) {
+      DownloadServicePicker.show(
+        context,
+        onSelect: (quality, service) {
+          if (!mounted) return;
+          enqueue(service, quality: quality);
+        },
+      );
+      return;
+    }
+
+    enqueue(settings.defaultService);
   }
 
   Widget _buildAlbumSection(
@@ -1468,7 +1579,12 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
               final album = albums[index];
               return KeyedSubtree(
                 key: ValueKey(album.id),
-                child: _buildAlbumCard(album, colorScheme, tileSize: tileSize, sectionHeight: sectionHeight),
+                child: _buildAlbumCard(
+                  album,
+                  colorScheme,
+                  tileSize: tileSize,
+                  sectionHeight: sectionHeight,
+                ),
               );
             },
           ),
@@ -1601,9 +1717,9 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
                   Flexible(
                     child: Text(
                       album.name,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),

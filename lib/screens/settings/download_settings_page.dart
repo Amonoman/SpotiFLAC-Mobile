@@ -620,14 +620,28 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
     final controller = TextEditingController(text: current);
     final colorScheme = Theme.of(context).colorScheme;
 
-    final tags = [
+    final basicTags = [
       '{artist}',
       '{title}',
       '{album}',
       '{track}',
       '{year}',
+      '{date}',
       '{disc}',
     ];
+    final advancedTags = [
+      '{track_raw}',
+      '{track:02}',
+      '{track:1}',
+      '{date:%Y}',
+      '{date:%Y-%m-%d}',
+      '{disc_raw}',
+      '{disc:02}',
+    ];
+    var showAdvancedTags = RegExp(
+      r'\{(?:track_raw|disc_raw|track:\d+|disc:\d+|date:[^}]+)\}',
+      caseSensitive: false,
+    ).hasMatch(current);
 
     void insertTag(String tag) {
       final text = controller.text;
@@ -659,130 +673,164 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: SingleChildScrollView(
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 32,
-                      height: 4,
-                      margin: const EdgeInsets.only(bottom: 24),
-                      decoration: BoxDecoration(
-                        color: colorScheme.outlineVariant,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  Text(
-                    context.l10n.filenameFormat,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Customize how your files are named.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-
-                  TextField(
-                    controller: controller,
-                    decoration: InputDecoration(
-                      hintText: '{artist} - {title}',
-                      filled: true,
-                      fillColor: colorScheme.surfaceContainerHighest.withValues(
-                        alpha: 0.3,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                    autofocus: true,
-                  ),
-                  const SizedBox(height: 24),
-
-                  Text(
-                    'Tap to insert tag:',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: tags.map((tag) {
-                      return ActionChip(
-                        label: Text(tag),
-                        onPressed: () => insertTag(tag),
-                        backgroundColor: colorScheme.surfaceContainerHighest
-                            .withValues(alpha: 0.5),
-                        side: BorderSide.none,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: SingleChildScrollView(
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 32,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 24),
+                        decoration: BoxDecoration(
+                          color: colorScheme.outlineVariant,
+                          borderRadius: BorderRadius.circular(2),
                         ),
-                        labelStyle: TextStyle(
-                          color: colorScheme.onSurface,
-                          fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      context.l10n.filenameFormat,
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Customize how your files are named.',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+
+                    TextField(
+                      controller: controller,
+                      decoration: InputDecoration(
+                        hintText: '{artist} - {title}',
+                        filled: true,
+                        fillColor: colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.3),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
                         ),
-                      );
-                    }).toList(),
-                  ),
+                      ),
+                      autofocus: true,
+                    ),
+                    const SizedBox(height: 24),
 
-                  const SizedBox(height: 32),
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
+                    Text(
+                      'Tap to insert tag:',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: basicTags.map((tag) {
+                        return ActionChip(
+                          label: Text(tag),
+                          onPressed: () => insertTag(tag),
+                          backgroundColor: colorScheme.surfaceContainerHighest
+                              .withValues(alpha: 0.5),
+                          side: BorderSide.none,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Text(context.l10n.dialogCancel),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        flex: 2,
-                        child: FilledButton(
-                          onPressed: () {
-                            ref
-                                .read(settingsProvider.notifier)
-                                .setFilenameFormat(controller.text);
-                            Navigator.pop(context);
-                          },
-                          style: FilledButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
+                          labelStyle: TextStyle(
+                            color: colorScheme.onSurface,
+                            fontWeight: FontWeight.w500,
                           ),
-                          child: Text(context.l10n.dialogSave),
-                        ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 12),
+                    SwitchListTile(
+                      value: showAdvancedTags,
+                      onChanged: (value) =>
+                          setModalState(() => showAdvancedTags = value),
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(context.l10n.filenameShowAdvancedTags),
+                      subtitle: Text(
+                        context.l10n.filenameShowAdvancedTagsDescription,
+                      ),
+                    ),
+                    if (showAdvancedTags) ...[
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: advancedTags.map((tag) {
+                          return ActionChip(
+                            label: Text(tag),
+                            onPressed: () => insertTag(tag),
+                            backgroundColor: colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.5),
+                            side: BorderSide.none,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            labelStyle: TextStyle(
+                              color: colorScheme.onSurface,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          );
+                        }).toList(),
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 8),
-                ],
+
+                    const SizedBox(height: 32),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            child: Text(context.l10n.dialogCancel),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          flex: 2,
+                          child: FilledButton(
+                            onPressed: () {
+                              ref
+                                  .read(settingsProvider.notifier)
+                                  .setFilenameFormat(controller.text);
+                              Navigator.pop(context);
+                            },
+                            style: FilledButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            child: Text(context.l10n.dialogSave),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
               ),
             ),
           ),

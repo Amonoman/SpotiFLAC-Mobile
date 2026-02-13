@@ -1609,6 +1609,7 @@ func downloadFromTidal(req DownloadRequest) (TidalDownloadResult, error) {
 		"album":  req.AlbumName,
 		"track":  req.TrackNumber,
 		"year":   extractYear(req.ReleaseDate),
+		"date":   req.ReleaseDate,
 		"disc":   req.DiscNumber,
 	})
 

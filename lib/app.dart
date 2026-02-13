@@ -10,9 +10,13 @@ import 'package:spotiflac_android/theme/dynamic_color_wrapper.dart';
 import 'package:spotiflac_android/l10n/app_localizations.dart';
 
 final _routerProvider = Provider<GoRouter>((ref) {
-  final isFirstLaunch = ref.watch(settingsProvider.select((s) => s.isFirstLaunch));
-  final hasCompletedTutorial = ref.watch(settingsProvider.select((s) => s.hasCompletedTutorial));
-  
+  final isFirstLaunch = ref.watch(
+    settingsProvider.select((s) => s.isFirstLaunch),
+  );
+  final hasCompletedTutorial = ref.watch(
+    settingsProvider.select((s) => s.hasCompletedTutorial),
+  );
+
   // Determine initial location based on app state
   String initialLocation;
   if (isFirstLaunch) {
@@ -22,18 +26,12 @@ final _routerProvider = Provider<GoRouter>((ref) {
   } else {
     initialLocation = '/';
   }
-  
+
   return GoRouter(
     initialLocation: initialLocation,
     routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) => const MainShell(),
-      ),
-      GoRoute(
-        path: '/setup',
-        builder: (context, state) => const SetupScreen(),
-      ),
+      GoRoute(path: '/', builder: (context, state) => const MainShell()),
+      GoRoute(path: '/setup', builder: (context, state) => const SetupScreen()),
       GoRoute(
         path: '/tutorial',
         builder: (context, state) => const TutorialScreen(),
@@ -43,13 +41,18 @@ final _routerProvider = Provider<GoRouter>((ref) {
 });
 
 class SpotiFLACApp extends ConsumerWidget {
-  const SpotiFLACApp({super.key});
+  final bool disableOverscrollEffects;
+
+  const SpotiFLACApp({super.key, this.disableOverscrollEffects = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(_routerProvider);
     final localeString = ref.watch(settingsProvider.select((s) => s.locale));
-    
+    final scrollBehavior = disableOverscrollEffects
+        ? const MaterialScrollBehavior().copyWith(overscroll: false)
+        : null;
+
     Locale? locale;
     if (localeString != 'system') {
       if (localeString.contains('_')) {
@@ -59,7 +62,7 @@ class SpotiFLACApp extends ConsumerWidget {
         locale = Locale(localeString);
       }
     }
-    
+
     return DynamicColorWrapper(
       builder: (lightTheme, darkTheme, themeMode) {
         return MaterialApp.router(
@@ -68,6 +71,7 @@ class SpotiFLACApp extends ConsumerWidget {
           theme: lightTheme,
           darkTheme: darkTheme,
           themeMode: themeMode,
+          scrollBehavior: scrollBehavior,
           themeAnimationDuration: const Duration(milliseconds: 300),
           themeAnimationCurve: Curves.easeInOut,
           routerConfig: router,

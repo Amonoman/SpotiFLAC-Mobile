@@ -89,7 +89,7 @@
   "@historyFilterSingles": {
     "description": "Filter chip - show singles only"
   },
-  "historyTracksCount": "{count, plural, one {}=1{1 faixa} other{{count} faixas}}",
+  "historyTracksCount": "{count, plural, one {1 faixa} other{{count} faixas}}",
   "@historyTracksCount": {
     "description": "Track count with plural form",
     "placeholders": {
@@ -98,7 +98,7 @@
       }
     }
   },
-  "historyAlbumsCount": "{count, plural, one {}=1{1 álbum} other{{count} álbuns}}",
+  "historyAlbumsCount": "{count, plural, one {1 álbum} other{{count} álbuns}}",
   "@historyAlbumsCount": {
     "description": "Album count with plural form",
     "placeholders": {
@@ -636,7 +636,7 @@
   "@albumTitle": {
     "description": "Album screen title"
   },
-  "albumTracks": "{count, plural, one {}=1{1 faixa} other{{count} faixas}}",
+  "albumTracks": "{count, plural, one {1 faixa} other{{count} faixas}}",
   "@albumTracks": {
     "description": "Album track count",
     "placeholders": {
@@ -673,7 +673,7 @@
   "@artistCompilations": {
     "description": "Section header for compilations"
   },
-  "artistReleases": "{count, plural, one {}=1{1 lançamento} other{{count} lançamentos}}",
+  "artistReleases": "{count, plural, one {1 lançamento} other{{count} lançamentos}}",
   "@artistReleases": {
     "description": "Artist release count",
     "placeholders": {
@@ -1152,7 +1152,7 @@
   "@dialogDeleteSelectedTitle": {
     "description": "Dialog title - delete selected items"
   },
-  "dialogDeleteSelectedMessage": "Apagar {count} {count, plural, one {}=1{faixa} other{faixas}} do histórico?\n\nIsso também apagará os arquivos do armazenamento.",
+  "dialogDeleteSelectedMessage": "Apagar {count} {count, plural, one {faixa} other{faixas}} do histórico?\n\nIsso também apagará os arquivos do armazenamento.",
   "@dialogDeleteSelectedMessage": {
     "description": "Dialog message - delete selected tracks",
     "placeholders": {
@@ -1231,7 +1231,7 @@
   "@snackbarCredentialsCleared": {
     "description": "Snackbar - Spotify credentials removed"
   },
-  "snackbarDeletedTracks": "{count} {count, plural, one {}=1{faixa apagada} other{faixas apagadas}}",
+  "snackbarDeletedTracks": "{count} {count, plural, one {faixa apagada} other{faixas apagadas}}",
   "@snackbarDeletedTracks": {
     "description": "Snackbar - tracks deleted",
     "placeholders": {
@@ -1438,7 +1438,7 @@
   "@selectionTapToSelect": {
     "description": "Hint - how to select items"
   },
-  "selectionDeleteTracks": "Apagar {count} {count, plural, one {}=1{faixa} other{faixas}}",
+  "selectionDeleteTracks": "Apagar {count} {count, plural, one {faixa} other{faixas}}",
   "@selectionDeleteTracks": {
     "description": "Delete button with count",
     "placeholders": {
@@ -2014,7 +2014,7 @@
       }
     }
   },
-  "tracksCount": "{count, plural, one {}=1{1 faixa} other{{count} faixas}}",
+  "tracksCount": "{count, plural, one {1 faixa} other{{count} faixas}}",
   "@tracksCount": {
     "description": "Track count display",
     "placeholders": {
@@ -2758,7 +2758,7 @@
   "@downloadedAlbumDeleteSelected": {
     "description": "Button - delete selected tracks"
   },
-  "downloadedAlbumDeleteMessage": "Excluir {count} {count, plural, one {}=1{faixa} other{faixas}} deste álbum?\n\nIsso também excluirá os arquivos do armazenamento.",
+  "downloadedAlbumDeleteMessage": "Excluir {count} {count, plural, one {faixa} other{faixas}} deste álbum?\n\nIsso também excluirá os arquivos do armazenamento.",
   "@downloadedAlbumDeleteMessage": {
     "description": "Delete confirmation with count",
     "placeholders": {
@@ -2797,7 +2797,7 @@
   "@downloadedAlbumTapToSelect": {
     "description": "Selection hint"
   },
-  "downloadedAlbumDeleteCount": "Apagar {count} {count, plural, one {}=1{faixa} other{faixas}}",
+  "downloadedAlbumDeleteCount": "Apagar {count} {count, plural, one {faixa} other{faixas}}",
   "@downloadedAlbumDeleteCount": {
     "description": "Delete button text with count",
     "placeholders": {
