@@ -3239,7 +3239,7 @@
       }
     }
   },
-  "libraryTracksUnit": "{count, plural, =1{track} other{tracks}}",
+  "libraryTracksUnit": "{count, plural, =1{1 Titel} other{{count} Titel}}",
   "@libraryTracksUnit": {
     "description": "Unit label for tracks count (without the number itself)",
     "placeholders": {
@@ -4479,47 +4479,47 @@
   "@whatsNewContextMenuTip1": {
     "description": "What's New tip: context menu add to playlist"
   },
-  "whatsNewContextMenuTip2": "Share or convert with one tap",
+  "whatsNewContextMenuTip2": "Mit einem Klick teilen oder konvertieren",
   "@whatsNewContextMenuTip2": {
     "description": "What's New tip: context menu share/convert"
   },
-  "whatsNewContextMenuTip3": "Re-enrich metadata when needed",
+  "whatsNewContextMenuTip3": "Metadaten bei Bedarf neu anreichern",
   "@whatsNewContextMenuTip3": {
     "description": "What's New tip: context menu re-enrich"
   },
-  "whatsNewBatchToolsTip1": "Share multiple tracks at once",
+  "whatsNewBatchToolsTip1": "Mehrere Titel gleichzeitig teilen",
   "@whatsNewBatchToolsTip1": {
     "description": "What's New tip: batch share"
   },
-  "whatsNewBatchToolsTip2": "Batch convert to MP3 or Opus format",
+  "whatsNewBatchToolsTip2": "Batch-Konvertierung in MP3 oder Opus Format",
   "@whatsNewBatchToolsTip2": {
     "description": "What's New tip: batch convert"
   },
-  "whatsNewBatchToolsTip3": "Re-enrich metadata across your library",
+  "whatsNewBatchToolsTip3": "Metadaten in Ihrer Bibliothek neu anreichern",
   "@whatsNewBatchToolsTip3": {
     "description": "What's New tip: batch re-enrich"
   },
-  "whatsNewPerformanceTip1": "Faster app startup time",
+  "whatsNewPerformanceTip1": "Schnellere App Startzeit",
   "@whatsNewPerformanceTip1": {
     "description": "What's New tip: performance startup"
   },
-  "whatsNewPerformanceTip2": "Reduced memory usage during playback",
+  "whatsNewPerformanceTip2": "Verringerte Speicherauslastung während der Wiedergabe",
   "@whatsNewPerformanceTip2": {
     "description": "What's New tip: performance memory"
   },
-  "whatsNewPerformanceTip3": "SQLite-backed storage for reliability",
+  "whatsNewPerformanceTip3": "SQLite-gesicherter Speicher für Zuverlässigkeit",
   "@whatsNewPerformanceTip3": {
     "description": "What's New tip: performance SQLite"
   },
-  "whatsNewReadyMessage": "You're all set — enjoy the new SpotiFLAC!",
+  "whatsNewReadyMessage": "Alles ist bereit, viel Spaß mit dem neuen SpotiFLAC!",
   "@whatsNewReadyMessage": {
     "description": "Ready card message on last What's New page"
   },
-  "whatsNewGetStarted": "Let's Go",
+  "whatsNewGetStarted": "Los geht's",
   "@whatsNewGetStarted": {
     "description": "Button text to dismiss What's New screen"
   },
-  "whatsNewPageIndicator": "{current} of {total}",
+  "whatsNewPageIndicator": "{current} von {total}",
   "@whatsNewPageIndicator": {
     "description": "Page indicator text in What's New screen",
     "placeholders": {
