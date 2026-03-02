@@ -3879,7 +3879,5 @@
   "setupModeStreamingFeature1": "ダウンロードせずにトラックを即座にストリーミング",
   "setupModeStreamingFeature2": "Smart Queueが自動的に新しい音楽を見つけます",
   "setupModeStreamingFeature3": "再生コントロールで任意のトラックをオンデマンド再生",
-  "setupModeChangeableLater": "設定からいつでもモードを切り替えられます。",
-  "settingsSmartQueueTitle": "Smart Queue",
-  "settingsSmartQueueSubtitle": "類似トラックを自動的に検出してキューに追加"
+  "setupModeChangeableLater": "設定からいつでもモードを切り替えられます。"
 }

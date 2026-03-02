@@ -149,6 +149,12 @@ class AboutPage extends StatelessWidget {
                     subtitle:
                         'Partner lyrics proxy for Apple Music and QQ Music sources',
                     onTap: () => _launchUrl('https://lyrics.paxsenix.org'),
+                    showDivider: true,
+                  ),
+                  _ContributorItem(
+                    name: 'Ruubiiiii',
+                    description: 'Provided Qobuz API for the project',
+                    githubUsername: 'Ruubiiiii',
                     showDivider: false,
                   ),
                 ],

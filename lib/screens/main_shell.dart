@@ -20,7 +20,6 @@ import 'package:spotiflac_android/services/shell_navigation_service.dart';
 import 'package:spotiflac_android/services/share_intent_service.dart';
 import 'package:spotiflac_android/services/update_checker.dart';
 import 'package:spotiflac_android/widgets/update_dialog.dart';
-import 'package:spotiflac_android/widgets/mini_player_bar.dart';
 import 'package:spotiflac_android/utils/logger.dart';
 
 final _log = AppLogger('MainShell');
@@ -375,7 +374,7 @@ class _MainShellState extends ConsumerState<MainShell> {
     if (_lastBackPress != null &&
         now.difference(_lastBackPress!) < const Duration(seconds: 2)) {
       _log.i('Back: step 8 - double-tap exit');
-      SystemNavigator.pop();
+      unawaited(PlatformBridge.exitApp());
     } else {
       _log.i('Back: step 7 - first tap, showing exit snackbar');
       _lastBackPress = now;
@@ -487,28 +486,17 @@ class _MainShellState extends ConsumerState<MainShell> {
       });
     }
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) async {
-        if (didPop) {
-          return;
-        }
-
+    return BackButtonListener(
+      onBackButtonPressed: () async {
         _handleBackPress();
+        return true;
       },
       child: Scaffold(
-        body: Column(
-          children: [
-            Expanded(
-              child: PageView(
-                controller: _pageController,
-                onPageChanged: _onPageChanged,
-                physics: const NeverScrollableScrollPhysics(),
-                children: tabs,
-              ),
-            ),
-            const MiniPlayerBar(),
-          ],
+        body: PageView(
+          controller: _pageController,
+          onPageChanged: _onPageChanged,
+          physics: const NeverScrollableScrollPhysics(),
+          children: tabs,
         ),
         bottomNavigationBar: NavigationBar(
           selectedIndex: _currentIndex.clamp(0, maxIndex),

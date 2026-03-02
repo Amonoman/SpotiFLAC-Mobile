@@ -2,6 +2,7 @@ package gobackend
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -30,7 +31,20 @@ var (
 const (
 	qobuzTrackGetBaseURL    = "https://www.qobuz.com/api.json/0.2/track/get?track_id="
 	qobuzTrackSearchBaseURL = "https://www.qobuz.com/api.json/0.2/track/search?query="
+	qobuzTrackPlayBaseURL   = "https://play.qobuz.com/track/"
+	qobuzDownloadAPIURL     = "https://www.musicdl.me/api/qobuz/download"
+	qobuzDabMusicAPIURL     = "https://dabmusic.xyz/api/stream?trackId="
+	qobuzDeebAPIURL         = "https://dab.yeet.su/api/stream?trackId="
+	qobuzDebugKeyXORMask    = byte(0x5A)
 )
+
+var qobuzDebugKeyObfuscated = []byte{
+	0x69, 0x3b, 0x38, 0x3e, 0x36, 0x37, 0x35, 0x2f, 0x36, 0x3b,
+	0x33, 0x29, 0x2e, 0x32, 0x3f, 0x3d, 0x35, 0x3b, 0x2e, 0x3b,
+	0x34, 0x3e, 0x34, 0x35, 0x35, 0x34, 0x3f, 0x39, 0x35, 0x37,
+	0x3f, 0x29, 0x3f, 0x2c, 0x3f, 0x34, 0x39, 0x36, 0x35, 0x29,
+	0x3f,
+}
 
 type QobuzTrack struct {
 	ID                  int64   `json:"id"`
@@ -368,45 +382,181 @@ func (q *QobuzDownloader) GetTrackByID(trackID int64) (*QobuzTrack, error) {
 
 func (q *QobuzDownloader) GetAvailableAPIs() []string {
 	return []string{
-		"https://dab.yeet.su/api/stream?trackId=",
-		"https://dabmusic.xyz/api/stream?trackId=",
+		qobuzDownloadAPIURL,
 	}
 }
 
-func extractQobuzDownloadURLFromBody(body []byte) (string, error) {
+type qobuzAPIProvider struct {
+	Name string
+	URL  string
+	Kind string
+}
+
+const (
+	qobuzAPIKindMusicDL  = "musicdl"
+	qobuzAPIKindStandard = "standard"
+)
+
+func (q *QobuzDownloader) GetAvailableProviders() []qobuzAPIProvider {
+	return []qobuzAPIProvider{
+		{Name: "musicdl", URL: qobuzDownloadAPIURL, Kind: qobuzAPIKindMusicDL},
+		{Name: "dabmusic", URL: qobuzDabMusicAPIURL, Kind: qobuzAPIKindStandard},
+		// "deeb" is mapped from the legacy reference fallback endpoint.
+		{Name: "deeb", URL: qobuzDeebAPIURL, Kind: qobuzAPIKindStandard},
+	}
+}
+
+type qobuzDownloadInfo struct {
+	DownloadURL string
+	BitDepth    int
+	SampleRate  int
+}
+
+func extractQobuzDownloadInfoFromBody(body []byte) (qobuzDownloadInfo, error) {
 	var raw map[string]any
 	if err := json.Unmarshal(body, &raw); err != nil {
-		return "", fmt.Errorf("invalid JSON: %v", err)
+		return qobuzDownloadInfo{}, fmt.Errorf("invalid JSON: %v", err)
 	}
 
 	if errMsg, ok := raw["error"].(string); ok && strings.TrimSpace(errMsg) != "" {
-		return "", fmt.Errorf("%s", errMsg)
+		return qobuzDownloadInfo{}, fmt.Errorf("%s", errMsg)
+	}
+	if detail, ok := raw["detail"].(string); ok && strings.TrimSpace(detail) != "" {
+		return qobuzDownloadInfo{}, fmt.Errorf("%s", detail)
 	}
 
 	if success, ok := raw["success"].(bool); ok && !success {
 		if msg, ok := raw["message"].(string); ok && strings.TrimSpace(msg) != "" {
-			return "", fmt.Errorf("%s", msg)
+			return qobuzDownloadInfo{}, fmt.Errorf("%s", msg)
 		}
-		return "", fmt.Errorf("api returned success=false")
+		return qobuzDownloadInfo{}, fmt.Errorf("api returned success=false")
 	}
 
+	info := qobuzDownloadInfo{
+		BitDepth:   qobuzParseBitDepth(raw["bit_depth"]),
+		SampleRate: qobuzParseSampleRate(raw["sampling_rate"]),
+	}
+	if urlVal, ok := raw["download_url"].(string); ok && strings.TrimSpace(urlVal) != "" {
+		info.DownloadURL = strings.TrimSpace(urlVal)
+		return info, nil
+	}
 	if urlVal, ok := raw["url"].(string); ok && strings.TrimSpace(urlVal) != "" {
-		return strings.TrimSpace(urlVal), nil
+		info.DownloadURL = strings.TrimSpace(urlVal)
+		return info, nil
 	}
 	if linkVal, ok := raw["link"].(string); ok && strings.TrimSpace(linkVal) != "" {
-		return strings.TrimSpace(linkVal), nil
+		info.DownloadURL = strings.TrimSpace(linkVal)
+		return info, nil
 	}
 
 	if data, ok := raw["data"].(map[string]any); ok {
+		if info.BitDepth == 0 {
+			info.BitDepth = qobuzParseBitDepth(data["bit_depth"])
+		}
+		if info.SampleRate == 0 {
+			info.SampleRate = qobuzParseSampleRate(data["sampling_rate"])
+		}
+		if urlVal, ok := data["download_url"].(string); ok && strings.TrimSpace(urlVal) != "" {
+			info.DownloadURL = strings.TrimSpace(urlVal)
+			return info, nil
+		}
 		if urlVal, ok := data["url"].(string); ok && strings.TrimSpace(urlVal) != "" {
-			return strings.TrimSpace(urlVal), nil
+			info.DownloadURL = strings.TrimSpace(urlVal)
+			return info, nil
 		}
 		if linkVal, ok := data["link"].(string); ok && strings.TrimSpace(linkVal) != "" {
-			return strings.TrimSpace(linkVal), nil
+			info.DownloadURL = strings.TrimSpace(linkVal)
+			return info, nil
 		}
 	}
 
-	return "", fmt.Errorf("no download URL in response")
+	return qobuzDownloadInfo{}, fmt.Errorf("no download URL in response")
+}
+
+func extractQobuzDownloadURLFromBody(body []byte) (string, error) {
+	info, err := extractQobuzDownloadInfoFromBody(body)
+	if err != nil {
+		return "", err
+	}
+	return info.DownloadURL, nil
+}
+
+func qobuzParseBitDepth(value any) int {
+	switch v := value.(type) {
+	case float64:
+		return int(v)
+	case int:
+		return v
+	case int64:
+		return int(v)
+	case json.Number:
+		n, _ := v.Int64()
+		return int(n)
+	default:
+		return 0
+	}
+}
+
+func qobuzParseSampleRate(value any) int {
+	switch v := value.(type) {
+	case float64:
+		if v > 0 && v < 1000 {
+			return int(v * 1000)
+		}
+		return int(v)
+	case int:
+		if v > 0 && v < 1000 {
+			return v * 1000
+		}
+		return v
+	case int64:
+		if v > 0 && v < 1000 {
+			return int(v * 1000)
+		}
+		return int(v)
+	case json.Number:
+		if n, err := v.Float64(); err == nil {
+			if n > 0 && n < 1000 {
+				return int(n * 1000)
+			}
+			return int(n)
+		}
+		return 0
+	default:
+		return 0
+	}
+}
+
+func normalizeQobuzQualityCode(quality string) string {
+	switch strings.ToLower(strings.TrimSpace(quality)) {
+	case "", "5", "6", "cd", "lossless":
+		return "6"
+	case "7", "hi-res":
+		return "7"
+	case "27", "hi-res-max":
+		return "27"
+	default:
+		return "6"
+	}
+}
+
+func mapQobuzQualityCodeToAPI(qualityCode string) string {
+	switch normalizeQobuzQualityCode(qualityCode) {
+	case "27":
+		return "hi-res-max"
+	case "7":
+		return "hi-res"
+	default:
+		return "cd"
+	}
+}
+
+func getQobuzDebugKey() string {
+	decoded := make([]byte, len(qobuzDebugKeyObfuscated))
+	for i, b := range qobuzDebugKeyObfuscated {
+		decoded[i] = b ^ qobuzDebugKeyXORMask
+	}
+	return string(decoded)
 }
 
 func (q *QobuzDownloader) SearchTrackByISRC(isrc string) (*QobuzTrack, error) {
@@ -688,10 +838,10 @@ func (q *QobuzDownloader) SearchTrackByMetadataWithDuration(trackName, artistNam
 }
 
 type qobuzAPIResult struct {
-	apiURL      string
-	downloadURL string
-	err         error
-	duration    time.Duration
+	provider qobuzAPIProvider
+	info     qobuzDownloadInfo
+	err      error
+	duration time.Duration
 }
 
 // Qobuz API timeout configuration
@@ -711,35 +861,72 @@ func getQobuzAPITimeout() time.Duration {
 }
 
 // fetchQobuzURLWithRetry fetches download URL from a single Qobuz API with retry logic
-func fetchQobuzURLWithRetry(api string, trackID int64, quality string, timeout time.Duration) (string, error) {
-	return fetchQobuzURLSingleAttempt(api, trackID, quality, timeout, "")
+func fetchQobuzURLWithRetry(provider qobuzAPIProvider, trackID int64, quality string, timeout time.Duration) (qobuzDownloadInfo, error) {
+	return fetchQobuzURLSingleAttempt(provider, trackID, quality, timeout, "")
 }
 
 // fetchQobuzURLSingleAttempt fetches download URL with retry logic for a single API+country combination
-func fetchQobuzURLSingleAttempt(api string, trackID int64, quality string, timeout time.Duration, country string) (string, error) {
+func fetchQobuzURLSingleAttempt(provider qobuzAPIProvider, trackID int64, quality string, timeout time.Duration, country string) (qobuzDownloadInfo, error) {
 	var lastErr error
 	retryDelay := qobuzRetryDelay
+	var payloadBytes []byte
+	if provider.Kind == qobuzAPIKindMusicDL {
+		requestQuality := mapQobuzQualityCodeToAPI(quality)
+		payload := map[string]any{
+			"quality":      requestQuality,
+			"upload_to_r2": false,
+			"url":          fmt.Sprintf("%s%d", qobuzTrackPlayBaseURL, trackID),
+		}
+		var err error
+		payloadBytes, err = json.Marshal(payload)
+		if err != nil {
+			return qobuzDownloadInfo{}, fmt.Errorf("failed to encode qobuz request: %w", err)
+		}
+	}
 
 	for attempt := 0; attempt <= qobuzMaxRetries; attempt++ {
 		if attempt > 0 {
-			GoLog("[Qobuz] Retry %d/%d for %s after %v\n", attempt, qobuzMaxRetries, api, retryDelay)
+			GoLog("[Qobuz] Retry %d/%d for %s after %v\n", attempt, qobuzMaxRetries, provider.Name, retryDelay)
 			time.Sleep(retryDelay)
 			retryDelay *= 2 // Exponential backoff
 		}
 
 		client := NewHTTPClientWithTimeout(timeout)
-		reqURL := fmt.Sprintf("%s%d&quality=%s", api, trackID, quality)
+		reqURL := provider.URL
 		if country != "" {
-			reqURL += "&country=" + country
+			reqURL += "?country=" + url.QueryEscape(country)
 		}
 
-		req, err := http.NewRequest("GET", reqURL, nil)
+		var (
+			req *http.Request
+			err error
+		)
+		if provider.Kind == qobuzAPIKindStandard {
+			separator := "&"
+			if !strings.Contains(reqURL, "?") {
+				separator = "?"
+			}
+			reqURL = fmt.Sprintf(
+				"%s%d%squality=%s",
+				reqURL,
+				trackID,
+				separator,
+				url.QueryEscape(normalizeQobuzQualityCode(quality)),
+			)
+			req, err = http.NewRequest("GET", reqURL, nil)
+		} else {
+			req, err = http.NewRequest("POST", reqURL, bytes.NewReader(payloadBytes))
+		}
 		if err != nil {
 			lastErr = err
 			continue
 		}
+		if provider.Kind == qobuzAPIKindMusicDL {
+			req.Header.Set("Content-Type", "application/json")
+			req.Header.Set("X-Debug-Key", getQobuzDebugKey())
+		}
 
-		resp, err := client.Do(req)
+		resp, err := DoRequestWithUserAgent(client, req)
 		if err != nil {
 			lastErr = err
 			// Check for retryable errors (timeout, connection reset)
@@ -772,7 +959,7 @@ func fetchQobuzURLSingleAttempt(api string, trackID int64, quality string, timeo
 		if resp.StatusCode != 200 {
 			io.Copy(io.Discard, resp.Body)
 			resp.Body.Close()
-			return "", fmt.Errorf("HTTP %d", resp.StatusCode)
+			return qobuzDownloadInfo{}, fmt.Errorf("HTTP %d", resp.StatusCode)
 		}
 
 		body, err := io.ReadAll(resp.Body)
@@ -783,117 +970,115 @@ func fetchQobuzURLSingleAttempt(api string, trackID int64, quality string, timeo
 		}
 
 		if len(body) > 0 && body[0] == '<' {
-			return "", fmt.Errorf("received HTML instead of JSON")
+			return qobuzDownloadInfo{}, fmt.Errorf("received HTML instead of JSON")
 		}
 
-		urlVal, parseErr := extractQobuzDownloadURLFromBody(body)
+		info, parseErr := extractQobuzDownloadInfoFromBody(body)
 		if parseErr == nil {
-			return urlVal, nil
+			return info, nil
 		}
 		lastErr = parseErr
 		continue
 	}
 
 	if lastErr != nil {
-		return "", lastErr
+		return qobuzDownloadInfo{}, lastErr
 	}
-	return "", fmt.Errorf("all retries failed")
+	return qobuzDownloadInfo{}, fmt.Errorf("all retries failed")
 }
 
-func getQobuzDownloadURLParallel(apis []string, trackID int64, quality string) (string, string, error) {
-	if len(apis) == 0 {
-		return "", "", fmt.Errorf("no APIs available")
+func getQobuzDownloadURLParallel(providers []qobuzAPIProvider, trackID int64, quality string) (qobuzAPIProvider, qobuzDownloadInfo, error) {
+	if len(providers) == 0 {
+		return qobuzAPIProvider{}, qobuzDownloadInfo{}, fmt.Errorf("no APIs available")
 	}
 
-	GoLog("[Qobuz] Requesting download URL from %d APIs in parallel (with retry)...\n", len(apis))
+	GoLog("[Qobuz] Requesting download URL from %d APIs in parallel (with retry)...\n", len(providers))
 
-	resultChan := make(chan qobuzAPIResult, len(apis))
+	resultChan := make(chan qobuzAPIResult, len(providers))
 	startTime := time.Now()
 	timeout := getQobuzAPITimeout()
 
-	for _, apiURL := range apis {
-		go func(api string) {
+	for _, provider := range providers {
+		go func(provider qobuzAPIProvider) {
 			reqStart := time.Now()
-			downloadURL, err := fetchQobuzURLWithRetry(api, trackID, quality, timeout)
+			info, err := fetchQobuzURLWithRetry(provider, trackID, quality, timeout)
 			resultChan <- qobuzAPIResult{
-				apiURL:      api,
-				downloadURL: downloadURL,
-				err:         err,
-				duration:    time.Since(reqStart),
+				provider: provider,
+				info:     info,
+				err:      err,
+				duration: time.Since(reqStart),
 			}
-		}(apiURL)
+		}(provider)
 	}
 
 	var errors []string
 
-	for i := 0; i < len(apis); i++ {
+	for i := 0; i < len(providers); i++ {
 		result := <-resultChan
 		if result.err == nil {
-			GoLog("[Qobuz] [Parallel] Got response from %s in %v\n", result.apiURL, result.duration)
+			GoLog("[Qobuz] [Parallel] Got response from %s in %v\n", result.provider.Name, result.duration)
 
 			go func(remaining int) {
 				for j := 0; j < remaining; j++ {
 					<-resultChan
 				}
-			}(len(apis) - i - 1)
+			}(len(providers) - i - 1)
 
 			GoLog("[Qobuz] [Parallel] Total time: %v (first success)\n", time.Since(startTime))
-			return result.apiURL, result.downloadURL, nil
+			return result.provider, result.info, nil
 		}
 		errMsg := result.err.Error()
 		if len(errMsg) > 50 {
 			errMsg = errMsg[:50] + "..."
 		}
-		errors = append(errors, fmt.Sprintf("%s: %s", result.apiURL, errMsg))
+		errors = append(errors, fmt.Sprintf("%s: %s", result.provider.Name, errMsg))
 	}
 
-	GoLog("[Qobuz] [Parallel] All %d APIs failed in %v\n", len(apis), time.Since(startTime))
-	return "", "", fmt.Errorf("all %d Qobuz APIs failed. Errors: %v", len(apis), errors)
+	GoLog("[Qobuz] [Parallel] All %d APIs failed in %v\n", len(providers), time.Since(startTime))
+	return qobuzAPIProvider{}, qobuzDownloadInfo{}, fmt.Errorf("all %d Qobuz APIs failed. Errors: %v", len(providers), errors)
 }
 
-func (q *QobuzDownloader) GetDownloadURL(trackID int64, quality string) (string, error) {
-	apis := q.GetAvailableAPIs()
-	if len(apis) == 0 {
-		return "", fmt.Errorf("no Qobuz API available")
+func (q *QobuzDownloader) GetDownloadURL(trackID int64, quality string) (qobuzDownloadInfo, error) {
+	providers := q.GetAvailableProviders()
+	if len(providers) == 0 {
+		return qobuzDownloadInfo{}, fmt.Errorf("no Qobuz API available")
 	}
 
-	qualityCode := strings.TrimSpace(quality)
-	if qualityCode == "" || qualityCode == "5" {
-		qualityCode = "6"
-	}
+	qualityCode := normalizeQobuzQualityCode(quality)
 
-	downloadFunc := func(qual string) (string, error) {
-		_, downloadURL, err := getQobuzDownloadURLParallel(apis, trackID, qual)
+	downloadFunc := func(qual string) (qobuzDownloadInfo, error) {
+		provider, info, err := getQobuzDownloadURLParallel(providers, trackID, qual)
 		if err != nil {
-			return "", err
+			return qobuzDownloadInfo{}, err
 		}
-		return downloadURL, nil
+		GoLog("[Qobuz] Download URL resolved via %s\n", provider.Name)
+		return info, nil
 	}
 
-	downloadURL, err := downloadFunc(qualityCode)
+	downloadInfo, err := downloadFunc(qualityCode)
 	if err == nil {
-		return downloadURL, nil
+		return downloadInfo, nil
 	}
 
 	currentQuality := qualityCode
 	if currentQuality == "27" {
 		GoLog("[Qobuz] Hi-res (27) failed, trying 24-bit (7)...\n")
-		downloadURL, err = downloadFunc("7")
+		downloadInfo, err = downloadFunc("7")
 		if err == nil {
-			return downloadURL, nil
+			return downloadInfo, nil
 		}
 		currentQuality = "7"
 	}
 
 	if currentQuality == "7" {
 		GoLog("[Qobuz] 24-bit failed, trying 16-bit (6)...\n")
-		downloadURL, err = downloadFunc("6")
+		downloadInfo, err = downloadFunc("6")
 		if err == nil {
-			return downloadURL, nil
+			return downloadInfo, nil
 		}
 	}
 
-	return "", fmt.Errorf("all Qobuz APIs failed: %w", err)
+	return qobuzDownloadInfo{}, fmt.Errorf("all Qobuz APIs failed: %w", err)
 }
 
 func (q *QobuzDownloader) DownloadFile(downloadURL, outputPath string, outputFD int, itemID string) error {
@@ -1150,9 +1335,18 @@ func downloadFromQobuz(req DownloadRequest) (QobuzDownloadResult, error) {
 	actualSampleRate := int(track.MaximumSamplingRate * 1000)
 	GoLog("[Qobuz] Actual quality: %d-bit/%.1fkHz\n", actualBitDepth, track.MaximumSamplingRate)
 
-	downloadURL, err := downloader.GetDownloadURL(track.ID, qobuzQuality)
+	downloadInfo, err := downloader.GetDownloadURL(track.ID, qobuzQuality)
 	if err != nil {
 		return QobuzDownloadResult{}, fmt.Errorf("failed to get download URL: %w", err)
+	}
+	if downloadInfo.BitDepth > 0 {
+		actualBitDepth = downloadInfo.BitDepth
+	}
+	if downloadInfo.SampleRate > 0 {
+		actualSampleRate = downloadInfo.SampleRate
+	}
+	if actualBitDepth > 0 || actualSampleRate > 0 {
+		GoLog("[Qobuz] API returned quality: %d-bit/%dHz\n", actualBitDepth, actualSampleRate)
 	}
 
 	var parallelResult *ParallelDownloadResult
@@ -1176,7 +1370,7 @@ func downloadFromQobuz(req DownloadRequest) (QobuzDownloadResult, error) {
 		)
 	}()
 
-	if err := downloader.DownloadFile(downloadURL, outputPath, req.OutputFD, req.ItemID); err != nil {
+	if err := downloader.DownloadFile(downloadInfo.DownloadURL, outputPath, req.OutputFD, req.ItemID); err != nil {
 		if errors.Is(err, ErrDownloadCancelled) {
 			return QobuzDownloadResult{}, ErrDownloadCancelled
 		}

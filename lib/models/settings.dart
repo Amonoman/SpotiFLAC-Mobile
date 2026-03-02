@@ -11,9 +11,6 @@ class AppSettings {
   final String storageMode; // 'app' or 'saf'
   final String downloadTreeUri; // SAF persistable tree URI
   final bool autoFallback;
-  final bool autoSkipUnavailableTracks;
-  final String playerMode; // 'internal' or 'external'
-  final bool smartQueueEnabled; // Enable smart curated autoplay queue
   final bool embedMetadata; // Master switch for metadata/cover/lyrics embedding
   final bool embedLyrics;
   final bool maxQualityCover;
@@ -92,9 +89,6 @@ class AppSettings {
     this.storageMode = 'app',
     this.downloadTreeUri = '',
     this.autoFallback = true,
-    this.autoSkipUnavailableTracks = true,
-    this.playerMode = 'internal',
-    this.smartQueueEnabled = true,
     this.embedMetadata = true,
     this.embedLyrics = true,
     this.maxQualityCover = true,
@@ -160,10 +154,7 @@ class AppSettings {
     String? downloadDirectory,
     String? storageMode,
     String? downloadTreeUri,
-    bool? autoFallback,
-    bool? autoSkipUnavailableTracks,
-    String? playerMode,
-    bool? smartQueueEnabled,
+     bool? autoFallback,
     bool? embedMetadata,
     bool? embedLyrics,
     bool? maxQualityCover,
@@ -223,10 +214,6 @@ class AppSettings {
       storageMode: storageMode ?? this.storageMode,
       downloadTreeUri: downloadTreeUri ?? this.downloadTreeUri,
       autoFallback: autoFallback ?? this.autoFallback,
-      autoSkipUnavailableTracks:
-          autoSkipUnavailableTracks ?? this.autoSkipUnavailableTracks,
-      playerMode: playerMode ?? this.playerMode,
-      smartQueueEnabled: smartQueueEnabled ?? this.smartQueueEnabled,
       embedMetadata: embedMetadata ?? this.embedMetadata,
       embedLyrics: embedLyrics ?? this.embedLyrics,
       maxQualityCover: maxQualityCover ?? this.maxQualityCover,

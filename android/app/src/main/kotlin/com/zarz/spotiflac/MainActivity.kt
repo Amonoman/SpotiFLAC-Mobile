@@ -7,7 +7,7 @@ import android.os.Build
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.documentfile.provider.DocumentFile
-import com.ryanheise.audioservice.AudioServiceFragmentActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode
 import io.flutter.embedding.android.FlutterFragment
 import io.flutter.embedding.android.RenderMode
@@ -32,7 +32,7 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.Locale
 
-class MainActivity: AudioServiceFragmentActivity() {
+class MainActivity: FlutterFragmentActivity() {
     private val CHANNEL = "com.zarz.spotiflac/backend"
     private val DOWNLOAD_PROGRESS_STREAM_CHANNEL =
         "com.zarz.spotiflac/download_progress_stream"
@@ -50,6 +50,7 @@ class MainActivity: AudioServiceFragmentActivity() {
     private var libraryScanProgressStreamJob: Job? = null
     private var libraryScanProgressEventSink: EventChannel.EventSink? = null
     private var lastLibraryScanProgressPayload: String? = null
+    private var flutterBackCallback: OnBackPressedCallback? = null
     @Volatile private var safScanCancel = false
     @Volatile private var safScanActive = false
     private val safTreeLauncher = registerForActivityResult(
@@ -1370,11 +1371,12 @@ class MainActivity: AudioServiceFragmentActivity() {
         // which disables Flutter's own OnBackPressedCallback and causes the
         // system default (finish activity) to run. This callback guarantees
         // popRoute is always forwarded to Flutter, where PopScope handles it.
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+        flutterBackCallback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 flutterEngine.navigationChannel.popRoute()
             }
-        })
+        }
+        onBackPressedDispatcher.addCallback(this, flutterBackCallback!!)
 
         val messenger = flutterEngine.dartExecutor.binaryMessenger
 
@@ -1416,6 +1418,15 @@ class MainActivity: AudioServiceFragmentActivity() {
             scope.launch {
                 try {
                     when (call.method) {
+                        "exitApp" -> {
+                            flutterBackCallback?.isEnabled = false
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                finishAndRemoveTask()
+                            } else {
+                                finish()
+                            }
+                            result.success(null)
+                        }
                         "parseSpotifyUrl" -> {
                             val url = call.argument<String>("url") ?: ""
                             val response = withContext(Dispatchers.IO) {

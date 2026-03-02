@@ -3879,7 +3879,5 @@
   "setupModeStreamingFeature1": "Diffusez des pistes instantanément sans télécharger",
   "setupModeStreamingFeature2": "Smart Queue découvre automatiquement de nouvelle musique pour vous",
   "setupModeStreamingFeature3": "Écoutez n'importe quelle piste à la demande avec les contrôles de lecture",
-  "setupModeChangeableLater": "Vous pouvez changer de mode à tout moment dans les Paramètres.",
-  "settingsSmartQueueTitle": "Smart Queue",
-  "settingsSmartQueueSubtitle": "Découvrir et ajouter automatiquement des pistes similaires à votre file d'attente"
+  "setupModeChangeableLater": "Vous pouvez changer de mode à tout moment dans les Paramètres."
 }

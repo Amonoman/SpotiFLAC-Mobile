@@ -3879,7 +3879,5 @@
   "setupModeStreamingFeature1": "Streame Titel sofort ohne Herunterladen",
   "setupModeStreamingFeature2": "Smart Queue entdeckt automatisch neue Musik für dich",
   "setupModeStreamingFeature3": "Spiele jeden Titel auf Abruf mit Wiedergabesteuerung",
-  "setupModeChangeableLater": "Du kannst jederzeit in den Einstellungen zwischen den Modi wechseln.",
-  "settingsSmartQueueTitle": "Smart Queue",
-  "settingsSmartQueueSubtitle": "Automatisch ähnliche Titel entdecken und zu deiner Warteschlange hinzufügen"
+  "setupModeChangeableLater": "Du kannst jederzeit in den Einstellungen zwischen den Modi wechseln."
 }

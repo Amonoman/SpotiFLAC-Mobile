@@ -152,40 +152,6 @@ class OptionsSettingsPage extends ConsumerWidget {
                     onChanged: (v) =>
                         ref.read(settingsProvider.notifier).setAutoFallback(v),
                   ),
-                  SettingsSwitchItem(
-                    icon: Icons.skip_next_rounded,
-                    title: context.l10n.optionsAutoSkipUnavailableTracks,
-                    subtitle: settings.autoSkipUnavailableTracks
-                        ? context
-                              .l10n
-                              .optionsAutoSkipUnavailableTracksSubtitleOn
-                        : context
-                              .l10n
-                              .optionsAutoSkipUnavailableTracksSubtitleOff,
-                    value: settings.autoSkipUnavailableTracks,
-                    onChanged: (v) => ref
-                        .read(settingsProvider.notifier)
-                        .setAutoSkipUnavailableTracks(v),
-                  ),
-                  SettingsItem(
-                    icon: Icons.headphones,
-                    title: 'Music Player',
-                    subtitle: _playerModeLabel(settings.playerMode),
-                    onTap: () => _showPlayerModePicker(
-                      context,
-                      ref,
-                      settings.playerMode,
-                    ),
-                  ),
-                  SettingsSwitchItem(
-                    icon: Icons.queue_music_rounded,
-                    title: context.l10n.settingsSmartQueueTitle,
-                    subtitle: context.l10n.settingsSmartQueueSubtitle,
-                    value: settings.smartQueueEnabled,
-                    onChanged: (v) => ref
-                        .read(settingsProvider.notifier)
-                        .setSmartQueueEnabled(v),
-                  ),
                   if (hasExtensions)
                     SettingsSwitchItem(
                       icon: Icons.extension,
@@ -325,74 +291,6 @@ class OptionsSettingsPage extends ConsumerWidget {
           ],
         ),
       ),
-    );
-  }
-
-  String _playerModeLabel(String mode) {
-    if (mode == 'external') {
-      return 'External app (Poweramp, etc.)';
-    }
-    return 'Internal player';
-  }
-
-  void _showPlayerModePicker(
-    BuildContext context,
-    WidgetRef ref,
-    String currentMode,
-  ) {
-    showModalBottomSheet<void>(
-      context: context,
-      useRootNavigator: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (sheetContext) {
-        final colorScheme = Theme.of(sheetContext).colorScheme;
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 8),
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: colorScheme.outlineVariant,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-              ),
-              const SizedBox(height: 12),
-              ListTile(
-                leading: const Icon(Icons.play_circle_outline),
-                title: const Text('Internal Player'),
-                subtitle: const Text('Use built-in app playback and queue'),
-                trailing: currentMode == 'internal'
-                    ? Icon(Icons.check, color: colorScheme.primary)
-                    : null,
-                onTap: () {
-                  ref.read(settingsProvider.notifier).setPlayerMode('internal');
-                  Navigator.pop(sheetContext);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.open_in_new),
-                title: const Text('External Player'),
-                subtitle: const Text(
-                  'Open songs with apps like Poweramp, Musicolet, etc.',
-                ),
-                trailing: currentMode == 'external'
-                    ? Icon(Icons.check, color: colorScheme.primary)
-                    : null,
-                onTap: () {
-                  ref.read(settingsProvider.notifier).setPlayerMode('external');
-                  Navigator.pop(sheetContext);
-                },
-              ),
-              const SizedBox(height: 8),
-            ],
-          ),
-        );
-      },
     );
   }
 

@@ -3879,7 +3879,5 @@
   "setupModeStreamingFeature1": "Transmita faixas instantaneamente sem transferir",
   "setupModeStreamingFeature2": "Smart Queue descobre automaticamente novas músicas para si",
   "setupModeStreamingFeature3": "Reproduza qualquer faixa a pedido com controlos de reprodução",
-  "setupModeChangeableLater": "Pode alternar entre modos a qualquer momento nas Definições.",
-  "settingsSmartQueueTitle": "Smart Queue",
-  "settingsSmartQueueSubtitle": "Descubra e adicione automaticamente faixas semelhantes à sua fila"
+  "setupModeChangeableLater": "Pode alternar entre modos a qualquer momento nas Definições."
 }

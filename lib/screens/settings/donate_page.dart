@@ -166,19 +166,7 @@ class _RecentDonorsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    const donorNames = [
-      'NinoBrown',
-      '@nino_sandzak',
-      'IMJ',
-      'J',
-      'Julian',
-      'matt_3050',
-      'Daniel',
-      '283Fabio',
-      'laflame',
-      'Elias el Autentico',
-      'Faylyne',
-    ];
+    const donorNames = <String>[];
 
     // Match SettingsGroup color logic
     final cardColor = isDark
@@ -221,16 +209,39 @@ class _RecentDonorsCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: donorNames
-                  .map(
-                    (name) =>
-                        _SupporterChip(name: name, colorScheme: colorScheme),
-                  )
-                  .toList(),
-            ),
+            if (donorNames.isEmpty)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.emoji_events_outlined,
+                        size: 32,
+                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'No supporters yet — be the first!',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: donorNames
+                    .map(
+                      (name) =>
+                          _SupporterChip(name: name, colorScheme: colorScheme),
+                    )
+                    .toList(),
+              ),
           ],
         ),
       ),
@@ -463,8 +474,8 @@ int _cr(String v) {
   for (final c in v.codeUnits) { r = (r * 31 + c) & 0x7FFFFFFF; }
   return r;
 }
-// Highlighted supporters (hashes of names): Julian, J, NinoBrown, @nino_sandzak, IMJ.
-const _cv = {1825257268, 1035, 1497948283, 398058782, 996135};
+// Highlighted supporters (hashes of names): none for now.
+const _cv = <int>{};
 
 class _SupporterChip extends StatelessWidget {
   final String name;

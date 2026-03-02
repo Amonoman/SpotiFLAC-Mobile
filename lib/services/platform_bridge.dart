@@ -142,6 +142,10 @@ class PlatformBridge {
     });
   }
 
+  static Future<void> exitApp() async {
+    await _channel.invokeMethod('exitApp');
+  }
+
   static Future<void> initItemProgress(String itemId) async {
     await _channel.invokeMethod('initItemProgress', {'item_id': itemId});
   }

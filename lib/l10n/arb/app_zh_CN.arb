@@ -3879,7 +3879,5 @@
   "setupModeStreamingFeature1": "无需下载即可即时播放曲目",
   "setupModeStreamingFeature2": "Smart Queue 自动为您发现新音乐",
   "setupModeStreamingFeature3": "通过播放控件随时点播任意曲目",
-  "setupModeChangeableLater": "您可以随时在设置中切换模式。",
-  "settingsSmartQueueTitle": "Smart Queue",
-  "settingsSmartQueueSubtitle": "自动发现并将相似曲目添加到您的队列中"
+  "setupModeChangeableLater": "您可以随时在设置中切换模式。"
 }

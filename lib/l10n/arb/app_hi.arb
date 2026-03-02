@@ -3879,7 +3879,5 @@
   "setupModeStreamingFeature1": "बिना डाउनलोड किए तुरंत ट्रैक स्ट्रीम करें",
   "setupModeStreamingFeature2": "Smart Queue स्वचालित रूप से आपके लिए नया संगीत खोजता है",
   "setupModeStreamingFeature3": "प्लेबैक नियंत्रण के साथ किसी भी ट्रैक को मांग पर चलाएं",
-  "setupModeChangeableLater": "आप सेटिंग्स में कभी भी मोड बदल सकते हैं।",
-  "settingsSmartQueueTitle": "Smart Queue",
-  "settingsSmartQueueSubtitle": "स्वचालित रूप से समान ट्रैक खोजें और अपनी कतार में जोड़ें"
+  "setupModeChangeableLater": "आप सेटिंग्स में कभी भी मोड बदल सकते हैं।"
 }
