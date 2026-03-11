@@ -430,7 +430,15 @@ func ParseCueFileJSON(cuePath string, audioDir string) (string, error) {
 // entries, one per track. This is used by the library scanner to populate the
 // library with individual track entries from a single CUE+FLAC album.
 func ScanCueFileForLibrary(cuePath string, scanTime string) ([]LibraryScanResult, error) {
-	return scanCueFileForLibraryInternal(cuePath, "", "", 0, scanTime)
+	sheet, err := ParseCueFile(cuePath)
+	if err != nil {
+		return nil, err
+	}
+	audioPath, err := resolveCueAudioPathForLibrary(cuePath, sheet, "")
+	if err != nil {
+		return nil, err
+	}
+	return scanCueSheetForLibrary(cuePath, sheet, audioPath, "", 0, scanTime)
 }
 
 // ScanCueFileForLibraryExt is like ScanCueFileForLibrary but with extra parameters
@@ -441,23 +449,35 @@ func ScanCueFileForLibrary(cuePath string, scanTime string) ([]LibraryScanResult
 //   - fileModTime: if > 0, used as the FileModTime for all results instead of
 //     stat-ing the cuePath on disk (useful when the real file lives behind SAF)
 func ScanCueFileForLibraryExt(cuePath, audioDir, virtualPathPrefix string, fileModTime int64, scanTime string) ([]LibraryScanResult, error) {
-	return scanCueFileForLibraryInternal(cuePath, audioDir, virtualPathPrefix, fileModTime, scanTime)
-}
-
-func scanCueFileForLibraryInternal(cuePath, audioDir, virtualPathPrefix string, fileModTime int64, scanTime string) ([]LibraryScanResult, error) {
 	sheet, err := ParseCueFile(cuePath)
 	if err != nil {
 		return nil, err
 	}
+	audioPath, err := resolveCueAudioPathForLibrary(cuePath, sheet, audioDir)
+	if err != nil {
+		return nil, err
+	}
+	return scanCueSheetForLibrary(cuePath, sheet, audioPath, virtualPathPrefix, fileModTime, scanTime)
+}
 
-	// Resolve audio file — optionally in an overridden directory
+func resolveCueAudioPathForLibrary(cuePath string, sheet *CueSheet, audioDir string) (string, error) {
+	if sheet == nil {
+		return "", fmt.Errorf("cue sheet is nil for %s", cuePath)
+	}
 	resolveBase := cuePath
 	if audioDir != "" {
 		resolveBase = filepath.Join(audioDir, filepath.Base(cuePath))
 	}
 	audioPath := ResolveCueAudioPath(resolveBase, sheet.FileName)
 	if audioPath == "" {
-		return nil, fmt.Errorf("audio file not found for cue: %s (referenced: %s)", cuePath, sheet.FileName)
+		return "", fmt.Errorf("audio file not found for cue: %s (referenced: %s)", cuePath, sheet.FileName)
+	}
+	return audioPath, nil
+}
+
+func scanCueSheetForLibrary(cuePath string, sheet *CueSheet, audioPath, virtualPathPrefix string, fileModTime int64, scanTime string) ([]LibraryScanResult, error) {
+	if sheet == nil {
+		return nil, fmt.Errorf("cue sheet is nil for %s", cuePath)
 	}
 
 	// Try to get quality info from the audio file

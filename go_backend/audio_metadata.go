@@ -1566,7 +1566,14 @@ func base64StdDecode(dst, src []byte) (int, error) {
 }
 
 func extractAnyCoverArt(filePath string) ([]byte, string, error) {
+	return extractAnyCoverArtWithHint(filePath, "")
+}
+
+func extractAnyCoverArtWithHint(filePath, displayNameHint string) ([]byte, string, error) {
 	ext := strings.ToLower(filepath.Ext(filePath))
+	if ext == "" {
+		ext = strings.ToLower(filepath.Ext(displayNameHint))
+	}
 
 	switch ext {
 	case ".flac":
@@ -1595,6 +1602,10 @@ func extractAnyCoverArt(filePath string) ([]byte, string, error) {
 }
 
 func SaveCoverToCache(filePath, cacheDir string) (string, error) {
+	return SaveCoverToCacheWithHint(filePath, "", cacheDir)
+}
+
+func SaveCoverToCacheWithHint(filePath, displayNameHint, cacheDir string) (string, error) {
 	cacheKey := filePath
 	if stat, err := os.Stat(filePath); err == nil {
 		cacheKey = fmt.Sprintf("%s|%d|%d", filePath, stat.Size(), stat.ModTime().UnixNano())
@@ -1611,7 +1622,7 @@ func SaveCoverToCache(filePath, cacheDir string) (string, error) {
 		return pngPath, nil
 	}
 
-	imageData, mimeType, err := extractAnyCoverArt(filePath)
+	imageData, mimeType, err := extractAnyCoverArtWithHint(filePath, displayNameHint)
 	if err != nil {
 		return "", err
 	}

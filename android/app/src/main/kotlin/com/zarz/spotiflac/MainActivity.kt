@@ -703,6 +703,80 @@ class MainActivity: FlutterFragmentActivity() {
         }
     }
 
+    private fun buildUriDisplayName(
+        uri: Uri,
+        displayNameHint: String? = null,
+        fallbackExt: String? = null,
+    ): String {
+        val explicitName = displayNameHint?.trim().orEmpty()
+        if (explicitName.isNotEmpty()) return explicitName
+
+        val docName = try { DocumentFile.fromSingleUri(this, uri)?.name } catch (_: Exception) { null }
+        val uriName = uri.lastPathSegment
+        val resolvedName = (docName ?: uriName ?: "").trim()
+        if (resolvedName.isNotEmpty()) return resolvedName
+
+        val ext = when {
+            fallbackExt.isNullOrBlank().not() -> fallbackExt
+            isMediaStoreUri(uri) -> resolveMediaStoreExt(uri, fallbackExt)
+            else -> ""
+        }
+        return if (ext.isNullOrBlank()) "audio" else "audio$ext"
+    }
+
+    private fun readAudioMetadataFromUri(
+        uri: Uri,
+        displayNameHint: String? = null,
+        fallbackExt: String? = null,
+    ): JSONObject? {
+        val displayName = buildUriDisplayName(uri, displayNameHint, fallbackExt)
+
+        try {
+            contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
+                val directPath = "/proc/self/fd/${pfd.fd}"
+                val metadataJson = Gobackend.readAudioMetadataWithHintJSON(directPath, displayName)
+                if (metadataJson.isNotBlank()) {
+                    val obj = JSONObject(metadataJson)
+                    if (!obj.has("error")) {
+                        return obj
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.d(
+                "SpotiFLAC",
+                "Direct SAF metadata read fallback for $uri: ${e.message}",
+            )
+        }
+
+        val tempPath = try {
+            copyUriToTemp(uri, fallbackExt)
+        } catch (e: Exception) {
+            android.util.Log.w(
+                "SpotiFLAC",
+                "SAF metadata fallback copy failed for $uri: ${e.message}",
+            )
+            null
+        } ?: return null
+
+        try {
+            val metadataJson = Gobackend.readAudioMetadataWithHintJSON(tempPath, displayName)
+            if (metadataJson.isBlank()) return null
+            val obj = JSONObject(metadataJson)
+            return if (obj.has("error")) null else obj
+        } catch (e: Exception) {
+            android.util.Log.w(
+                "SpotiFLAC",
+                "SAF metadata temp read failed for $uri: ${e.message}",
+            )
+            return null
+        } finally {
+            try {
+                File(tempPath).delete()
+            } catch (_: Exception) {}
+        }
+    }
+
     private fun writeUriFromPath(uri: Uri, srcPath: String): Boolean {
         val srcFile = File(srcPath)
         if (!srcFile.exists()) return false
@@ -873,6 +947,66 @@ class MainActivity: FlutterFragmentActivity() {
         return null
     }
 
+    private val cueSiblingAudioExtensions = listOf(
+        ".flac", ".wav", ".ape", ".mp3", ".ogg", ".wv", ".m4a"
+    )
+
+    private fun getSafChildFileLookup(
+        dir: DocumentFile,
+        cache: MutableMap<String, Map<String, DocumentFile>>,
+    ): Map<String, DocumentFile> {
+        val dirKey = dir.uri.toString()
+        return cache.getOrPut(dirKey) {
+            try {
+                buildMap {
+                    for (child in dir.listFiles()) {
+                        if (!child.isFile) continue
+                        val childName = child.name?.trim().orEmpty()
+                        if (childName.isBlank()) continue
+                        put(childName.lowercase(Locale.ROOT), child)
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.w(
+                    "SpotiFLAC",
+                    "Failed to build SAF child lookup for $dirKey: ${e.message}",
+                )
+                emptyMap()
+            }
+        }
+    }
+
+    private fun resolveCueAudioSibling(
+        parentDir: DocumentFile,
+        cueName: String,
+        audioFileName: String?,
+        childLookupCache: MutableMap<String, Map<String, DocumentFile>>,
+    ): DocumentFile? {
+        val childLookup = getSafChildFileLookup(parentDir, childLookupCache)
+
+        val directMatch = audioFileName
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
+            ?.substringAfterLast("/")
+            ?.substringAfterLast("\\")
+            ?.lowercase(Locale.ROOT)
+            ?.let(childLookup::get)
+        if (directMatch != null) {
+            return directMatch
+        }
+
+        val cueBaseName = cueName.substringBeforeLast('.').trim()
+        if (cueBaseName.isBlank()) {
+            return null
+        }
+
+        val cueBaseKey = cueBaseName.lowercase(Locale.ROOT)
+        for (ext in cueSiblingAudioExtensions) {
+            childLookup["$cueBaseKey$ext"]?.let { return it }
+        }
+        return null
+    }
+
     private fun scanSafTree(treeUriStr: String): String {
         if (treeUriStr.isBlank()) return "[]"
 
@@ -891,6 +1025,7 @@ class MainActivity: FlutterFragmentActivity() {
         // CUE files: (cueDoc, parentDir) — we need the parent to find sibling audio
         val cueFiles = mutableListOf<Pair<DocumentFile, DocumentFile>>()
         val visitedDirUris = mutableSetOf<String>()
+        val safChildLookupCache = mutableMapOf<String, Map<String, DocumentFile>>()
         var traversalErrors = 0
 
         val queue: ArrayDeque<Pair<DocumentFile, String>> = ArrayDeque()
@@ -1000,23 +1135,12 @@ class MainActivity: FlutterFragmentActivity() {
                 val audioFileName = extractCueAudioFileName(tempCuePath)
 
                 // Find the referenced audio file as a sibling in the same SAF directory
-                var audioDoc: DocumentFile? = null
-                if (!audioFileName.isNullOrBlank()) {
-                    audioDoc = try { parentDir.findFile(audioFileName) } catch (_: Exception) { null }
-                }
-
-                // Fallback: try common audio extensions with the CUE base name
-                if (audioDoc == null) {
-                    val cueBaseName = cueName.substringBeforeLast('.')
-                    val commonExts = listOf(".flac", ".wav", ".ape", ".mp3", ".ogg", ".wv", ".m4a")
-                    for (ext in commonExts) {
-                        audioDoc = try { parentDir.findFile(cueBaseName + ext) } catch (_: Exception) { null }
-                        if (audioDoc != null) break
-                        // Try uppercase
-                        audioDoc = try { parentDir.findFile(cueBaseName + ext.uppercase(Locale.ROOT)) } catch (_: Exception) { null }
-                        if (audioDoc != null) break
-                    }
-                }
+                val audioDoc = resolveCueAudioSibling(
+                    parentDir = parentDir,
+                    cueName = cueName,
+                    audioFileName = audioFileName,
+                    childLookupCache = safChildLookupCache,
+                )
 
                 if (audioDoc == null) {
                     android.util.Log.w("SpotiFLAC", "SAF scan: no audio file found for CUE $cueName")
@@ -1111,35 +1235,17 @@ class MainActivity: FlutterFragmentActivity() {
 
             val ext = name.substringAfterLast('.', "").lowercase(Locale.ROOT)
             val fallbackExt = if (ext.isNotBlank()) ".${ext}" else null
-            val tempPath = try {
-                copyUriToTemp(doc.uri, fallbackExt)
-            } catch (e: Exception) {
-                android.util.Log.w(
-                    "SpotiFLAC",
-                    "SAF scan: failed to copy ${doc.uri}: ${e.message}",
-                )
-                null
-            }
-            if (tempPath == null) {
+            val metadataObj = readAudioMetadataFromUri(doc.uri, name, fallbackExt)
+            if (metadataObj == null) {
                 errors++
             } else {
                 try {
-                    val metadataJson = Gobackend.readAudioMetadataJSON(tempPath)
-                    if (metadataJson.isNotBlank()) {
-                        val obj = JSONObject(metadataJson)
-                        val lastModified = try { doc.lastModified() } catch (_: Exception) { 0L }
-                        obj.put("filePath", doc.uri.toString())
-                        obj.put("fileModTime", lastModified)
-                        results.put(obj)
-                    } else {
-                        errors++
-                    }
+                    val lastModified = try { doc.lastModified() } catch (_: Exception) { 0L }
+                    metadataObj.put("filePath", doc.uri.toString())
+                    metadataObj.put("fileModTime", lastModified)
+                    results.put(metadataObj)
                 } catch (_: Exception) {
                     errors++
-                } finally {
-                    try {
-                        File(tempPath).delete()
-                    } catch (_: Exception) {}
                 }
             }
 
@@ -1214,6 +1320,7 @@ class MainActivity: FlutterFragmentActivity() {
         val unchangedCueFiles = mutableListOf<Pair<DocumentFile, DocumentFile>>()
         val currentUris = mutableSetOf<String>()
         val visitedDirUris = mutableSetOf<String>()
+        val safChildLookupCache = mutableMapOf<String, Map<String, DocumentFile>>()
         var traversalErrors = 0
 
         // Build a map of CUE base URIs -> existing virtual track URIs from the database.
@@ -1398,22 +1505,12 @@ class MainActivity: FlutterFragmentActivity() {
                 val audioFileName = extractCueAudioFileName(tempCuePath)
 
                 // Find the referenced audio file as a sibling in the same SAF directory
-                var audioDoc: DocumentFile? = null
-                if (!audioFileName.isNullOrBlank()) {
-                    audioDoc = try { parentDir.findFile(audioFileName) } catch (_: Exception) { null }
-                }
-
-                // Fallback: try common audio extensions with the CUE base name
-                if (audioDoc == null) {
-                    val cueBaseName = cueName.substringBeforeLast('.')
-                    val commonExts = listOf(".flac", ".wav", ".ape", ".mp3", ".ogg", ".wv", ".m4a")
-                    for (ext in commonExts) {
-                        audioDoc = try { parentDir.findFile(cueBaseName + ext) } catch (_: Exception) { null }
-                        if (audioDoc != null) break
-                        audioDoc = try { parentDir.findFile(cueBaseName + ext.uppercase(Locale.ROOT)) } catch (_: Exception) { null }
-                        if (audioDoc != null) break
-                    }
-                }
+                val audioDoc = resolveCueAudioSibling(
+                    parentDir = parentDir,
+                    cueName = cueName,
+                    audioFileName = audioFileName,
+                    childLookupCache = safChildLookupCache,
+                )
 
                 if (audioDoc == null) {
                     android.util.Log.w("SpotiFLAC", "SAF incremental scan: no audio file found for CUE $cueName")
@@ -1501,24 +1598,13 @@ class MainActivity: FlutterFragmentActivity() {
                 tempCue = copyUriToTemp(cueDoc.uri, ".cue")
                 if (tempCue != null) {
                     val audioFileName = extractCueAudioFileName(tempCue)
-                    var audioDoc: DocumentFile? = null
-                    if (!audioFileName.isNullOrBlank()) {
-                        audioDoc = try { parentDir.findFile(audioFileName) } catch (_: Exception) { null }
-                    }
-                    // Fallback: try common extensions with CUE base name
-                    if (audioDoc == null) {
-                        val cueName = try { cueDoc.name ?: "" } catch (_: Exception) { "" }
-                        val cueBaseName = cueName.substringBeforeLast('.')
-                        if (cueBaseName.isNotBlank()) {
-                            val commonExts = listOf(".flac", ".wav", ".ape", ".mp3", ".ogg", ".wv", ".m4a")
-                            for (ext in commonExts) {
-                                audioDoc = try { parentDir.findFile(cueBaseName + ext) } catch (_: Exception) { null }
-                                if (audioDoc != null) break
-                                audioDoc = try { parentDir.findFile(cueBaseName + ext.uppercase(Locale.ROOT)) } catch (_: Exception) { null }
-                                if (audioDoc != null) break
-                            }
-                        }
-                    }
+                    val cueName = try { cueDoc.name ?: "" } catch (_: Exception) { "" }
+                    val audioDoc = resolveCueAudioSibling(
+                        parentDir = parentDir,
+                        cueName = cueName,
+                        audioFileName = audioFileName,
+                        childLookupCache = safChildLookupCache,
+                    )
                     if (audioDoc != null) {
                         cueReferencedAudioUris.add(audioDoc.uri.toString())
                     }
@@ -1566,36 +1652,18 @@ class MainActivity: FlutterFragmentActivity() {
 
             val ext = name.substringAfterLast('.', "").lowercase(Locale.ROOT)
             val fallbackExt = if (ext.isNotBlank()) ".${ext}" else null
-            val tempPath = try {
-                copyUriToTemp(doc.uri, fallbackExt)
-            } catch (e: Exception) {
-                android.util.Log.w(
-                    "SpotiFLAC",
-                    "SAF incremental scan: failed to copy ${doc.uri}: ${e.message}",
-                )
-                null
-            }
-            if (tempPath == null) {
+            val metadataObj = readAudioMetadataFromUri(doc.uri, name, fallbackExt)
+            if (metadataObj == null) {
                 errors++
             } else {
                 try {
-                    val metadataJson = Gobackend.readAudioMetadataJSON(tempPath)
-                    if (metadataJson.isNotBlank()) {
-                        val obj = JSONObject(metadataJson)
-                        val safeLastModified = try { doc.lastModified() } catch (_: Exception) { lastModified }
-                        obj.put("filePath", doc.uri.toString())
-                        obj.put("fileModTime", safeLastModified)
-                        obj.put("lastModified", safeLastModified)
-                        results.put(obj)
-                    } else {
-                        errors++
-                    }
+                    val safeLastModified = try { doc.lastModified() } catch (_: Exception) { lastModified }
+                    metadataObj.put("filePath", doc.uri.toString())
+                    metadataObj.put("fileModTime", safeLastModified)
+                    metadataObj.put("lastModified", safeLastModified)
+                    results.put(metadataObj)
                 } catch (_: Exception) {
                     errors++
-                } finally {
-                    try {
-                        File(tempPath).delete()
-                    } catch (_: Exception) {}
                 }
             }
 
@@ -3116,13 +3184,10 @@ class MainActivity: FlutterFragmentActivity() {
                                 try {
                                     if (filePath.startsWith("content://")) {
                                         val uri = Uri.parse(filePath)
-                                        val tempPath = copyUriToTemp(uri)
-                                            ?: return@withContext """{"error":"Failed to copy SAF file to temp"}"""
-                                        try {
-                                            Gobackend.readAudioMetadataJSON(tempPath)
-                                        } finally {
-                                            try { File(tempPath).delete() } catch (_: Exception) {}
-                                        }
+                                        val metadata = readAudioMetadataFromUri(uri)
+                                            ?: return@withContext """{"error":"Failed to read SAF audio metadata"}"""
+                                        metadata.put("filePath", filePath)
+                                        metadata.toString()
                                     } else {
                                         Gobackend.readAudioMetadataJSON(filePath)
                                     }

@@ -205,6 +205,7 @@ class DownloadHistoryState {
   final List<DownloadHistoryItem> items;
   final Map<String, DownloadHistoryItem> _bySpotifyId;
   final Map<String, DownloadHistoryItem> _byIsrc;
+  final Map<String, DownloadHistoryItem> _byTrackArtistKey;
 
   DownloadHistoryState({this.items = const []})
     : _bySpotifyId = Map.fromEntries(
@@ -218,7 +219,24 @@ class DownloadHistoryState {
         items
             .where((item) => item.isrc != null && item.isrc!.isNotEmpty)
             .map((item) => MapEntry(item.isrc!, item)),
+      ),
+      _byTrackArtistKey = Map.fromEntries(
+        items
+            .map(
+              (item) => MapEntry(
+                _trackArtistKey(item.trackName, item.artistName),
+                item,
+              ),
+            )
+            .where((entry) => entry.key.isNotEmpty),
       );
+
+  static String _trackArtistKey(String trackName, String artistName) {
+    final normalizedTrack = trackName.trim().toLowerCase();
+    if (normalizedTrack.isEmpty) return '';
+    final normalizedArtist = artistName.trim().toLowerCase();
+    return '$normalizedTrack|$normalizedArtist';
+  }
 
   bool isDownloaded(String spotifyId) => _bySpotifyId.containsKey(spotifyId);
 
@@ -231,16 +249,9 @@ class DownloadHistoryState {
     String trackName,
     String artistName,
   ) {
-    final normalizedTrack = trackName.trim().toLowerCase();
-    final normalizedArtist = artistName.trim().toLowerCase();
-    if (normalizedTrack.isEmpty) return null;
-    for (final item in items) {
-      if (item.trackName.trim().toLowerCase() == normalizedTrack &&
-          item.artistName.trim().toLowerCase() == normalizedArtist) {
-        return item;
-      }
-    }
-    return null;
+    final key = _trackArtistKey(trackName, artistName);
+    if (key.isEmpty) return null;
+    return _byTrackArtistKey[key];
   }
 
   DownloadHistoryState copyWith({List<DownloadHistoryItem>? items}) {
@@ -252,10 +263,12 @@ class DownloadHistoryNotifier extends Notifier<DownloadHistoryState> {
   static const int _safRepairBatchSize = 20;
   static const int _safRepairMaxPerLaunch = 60;
   static const int _audioMetadataBackfillMaxPerLaunch = 24;
+  static const _startupMaintenanceDelay = Duration(seconds: 2);
   final HistoryDatabase _db = HistoryDatabase.instance;
   bool _isLoaded = false;
   bool _isSafRepairInProgress = false;
   bool _isAudioMetadataBackfillInProgress = false;
+  bool _startupMaintenanceScheduled = false;
 
   @override
   DownloadHistoryState build() {
@@ -292,31 +305,43 @@ class DownloadHistoryNotifier extends Notifier<DownloadHistoryState> {
 
       state = state.copyWith(items: items);
       _historyLog.i('Loaded ${items.length} items from SQLite database');
-
-      if (Platform.isAndroid) {
-        Future.microtask(() async {
-          await _repairMissingSafEntries(
-            items,
-            maxItems: _safRepairMaxPerLaunch,
-          );
-          await cleanupOrphanedDownloads();
-          await _backfillAudioMetadata(
-            state.items,
-            maxItems: _audioMetadataBackfillMaxPerLaunch,
-          );
-        });
-      } else {
-        Future.microtask(() async {
-          await cleanupOrphanedDownloads();
-          await _backfillAudioMetadata(
-            state.items,
-            maxItems: _audioMetadataBackfillMaxPerLaunch,
-          );
-        });
-      }
+      _scheduleStartupMaintenance(items);
     } catch (e, stack) {
       _historyLog.e('Failed to load history from database: $e', e, stack);
     }
+  }
+
+  void _scheduleStartupMaintenance(List<DownloadHistoryItem> initialItems) {
+    if (_startupMaintenanceScheduled) {
+      return;
+    }
+    _startupMaintenanceScheduled = true;
+
+    unawaited(
+      Future<void>.delayed(_startupMaintenanceDelay, () async {
+        try {
+          if (Platform.isAndroid) {
+            await _repairMissingSafEntries(
+              initialItems,
+              maxItems: _safRepairMaxPerLaunch,
+            );
+          }
+
+          await cleanupOrphanedDownloads();
+
+          final currentItems = state.items;
+          if (currentItems.isNotEmpty) {
+            await _backfillAudioMetadata(
+              currentItems,
+              maxItems: _audioMetadataBackfillMaxPerLaunch,
+            );
+          }
+        } catch (e, stack) {
+          _historyLog.w('Startup history maintenance failed: $e');
+          _historyLog.d('$stack');
+        }
+      }),
+    );
   }
 
   String _fileNameFromUri(String uri) {
@@ -1912,7 +1937,12 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
     );
   }
 
-  String addToQueue(Track track, String service, {String? qualityOverride, String? playlistName}) {
+  String addToQueue(
+    Track track,
+    String service, {
+    String? qualityOverride,
+    String? playlistName,
+  }) {
     final settings = ref.read(settingsProvider);
     updateSettings(settings);
 

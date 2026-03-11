@@ -3098,3 +3098,7 @@ func CancelLibraryScanJSON() {
 func ReadAudioMetadataJSON(filePath string) (string, error) {
 	return ReadAudioMetadata(filePath)
 }
+
+func ReadAudioMetadataWithHintJSON(filePath, displayName string) (string, error) {
+	return ReadAudioMetadataWithDisplayName(filePath, displayName)
+}

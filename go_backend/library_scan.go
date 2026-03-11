@@ -71,6 +71,11 @@ type libraryAudioFileInfo struct {
 	modTime int64
 }
 
+type scannedCueFileInfo struct {
+	sheet     *CueSheet
+	audioPath string
+}
+
 func collectLibraryAudioFiles(folderPath string, cancelCh <-chan struct{}) ([]libraryAudioFileInfo, error) {
 	var files []libraryAudioFileInfo
 
@@ -144,12 +149,7 @@ func ScanLibraryFolder(folderPath string) (string, error) {
 		return "[]", err
 	}
 
-	audioFiles := make([]string, 0, len(audioFileInfos))
-	for _, fileInfo := range audioFileInfos {
-		audioFiles = append(audioFiles, fileInfo.path)
-	}
-
-	totalFiles := len(audioFiles)
+	totalFiles := len(audioFileInfos)
 	libraryScanProgressMu.Lock()
 	libraryScanProgress.TotalFiles = totalFiles
 	libraryScanProgressMu.Unlock()
@@ -169,22 +169,29 @@ func ScanLibraryFolder(folderPath string) (string, error) {
 
 	// Track audio files referenced by .cue sheets to avoid duplicates
 	cueReferencedAudioFiles := make(map[string]bool)
+	parsedCueFiles := make(map[string]scannedCueFileInfo)
 
 	// First pass: scan .cue files to collect referenced audio paths
-	for _, filePath := range audioFiles {
+	for _, fileInfo := range audioFileInfos {
+		filePath := fileInfo.path
 		ext := strings.ToLower(filepath.Ext(filePath))
 		if ext == ".cue" {
 			sheet, err := ParseCueFile(filePath)
 			if err == nil && sheet.FileName != "" {
 				audioPath := ResolveCueAudioPath(filePath, sheet.FileName)
 				if audioPath != "" {
+					parsedCueFiles[filePath] = scannedCueFileInfo{
+						sheet:     sheet,
+						audioPath: audioPath,
+					}
 					cueReferencedAudioFiles[audioPath] = true
 				}
 			}
 		}
 	}
 
-	for i, filePath := range audioFiles {
+	for i, fileInfo := range audioFileInfos {
+		filePath := fileInfo.path
 		select {
 		case <-cancelCh:
 			return "[]", fmt.Errorf("scan cancelled")
@@ -201,7 +208,20 @@ func ScanLibraryFolder(folderPath string) (string, error) {
 
 		// Handle .cue files: produce multiple track results
 		if ext == ".cue" {
-			cueResults, err := ScanCueFileForLibrary(filePath, scanTime)
+			var cueResults []LibraryScanResult
+			cueInfo, ok := parsedCueFiles[filePath]
+			if ok {
+				cueResults, err = scanCueSheetForLibrary(
+					filePath,
+					cueInfo.sheet,
+					cueInfo.audioPath,
+					"",
+					fileInfo.modTime,
+					scanTime,
+				)
+			} else {
+				cueResults, err = ScanCueFileForLibrary(filePath, scanTime)
+			}
 			if err != nil {
 				errorCount++
 				GoLog("[LibraryScan] Error scanning cue %s: %v\n", filePath, err)
@@ -219,7 +239,7 @@ func ScanLibraryFolder(folderPath string) (string, error) {
 			continue
 		}
 
-		result, err := scanAudioFile(filePath, scanTime)
+		result, err := scanAudioFileWithKnownModTime(filePath, scanTime, fileInfo.modTime)
 		if err != nil {
 			errorCount++
 			GoLog("[LibraryScan] Error scanning %s: %v\n", filePath, err)
@@ -245,7 +265,15 @@ func ScanLibraryFolder(folderPath string) (string, error) {
 }
 
 func scanAudioFile(filePath, scanTime string) (*LibraryScanResult, error) {
-	ext := strings.ToLower(filepath.Ext(filePath))
+	return scanAudioFileWithKnownModTimeAndDisplayName(filePath, "", scanTime, 0)
+}
+
+func scanAudioFileWithKnownModTime(filePath, scanTime string, knownModTime int64) (*LibraryScanResult, error) {
+	return scanAudioFileWithKnownModTimeAndDisplayName(filePath, "", scanTime, knownModTime)
+}
+
+func scanAudioFileWithKnownModTimeAndDisplayName(filePath, displayNameHint, scanTime string, knownModTime int64) (*LibraryScanResult, error) {
+	ext := resolveLibraryAudioExt(filePath, displayNameHint)
 
 	result := &LibraryScanResult{
 		ID:        generateLibraryID(filePath),
@@ -254,7 +282,9 @@ func scanAudioFile(filePath, scanTime string) (*LibraryScanResult, error) {
 		Format:    strings.TrimPrefix(ext, "."),
 	}
 
-	if info, err := os.Stat(filePath); err == nil {
+	if knownModTime > 0 {
+		result.FileModTime = knownModTime
+	} else if info, err := os.Stat(filePath); err == nil {
 		result.FileModTime = info.ModTime().UnixMilli()
 	}
 
@@ -262,7 +292,7 @@ func scanAudioFile(filePath, scanTime string) (*LibraryScanResult, error) {
 	coverCacheDir := libraryCoverCacheDir
 	libraryCoverCacheMu.RUnlock()
 	if coverCacheDir != "" && ext != ".m4a" {
-		coverPath, err := SaveCoverToCache(filePath, coverCacheDir)
+		coverPath, err := SaveCoverToCacheWithHint(filePath, displayNameHint, coverCacheDir)
 		if err == nil && coverPath != "" {
 			result.CoverPath = coverPath
 		}
@@ -276,15 +306,31 @@ func scanAudioFile(filePath, scanTime string) (*LibraryScanResult, error) {
 	case ".mp3":
 		return scanMP3File(filePath, result)
 	case ".opus", ".ogg":
-		return scanOggFile(filePath, result)
+		return scanOggFile(filePath, result, displayNameHint)
 	default:
-		return scanFromFilename(filePath, result)
+		return scanFromFilename(filePath, displayNameHint, result)
 	}
 }
 
-func applyDefaultLibraryMetadata(filePath string, result *LibraryScanResult) {
+func resolveLibraryAudioExt(filePath, displayNameHint string) string {
+	ext := strings.ToLower(filepath.Ext(filePath))
+	if ext != "" {
+		return ext
+	}
+	return strings.ToLower(filepath.Ext(displayNameHint))
+}
+
+func libraryDisplayNameOrPath(filePath, displayNameHint string) string {
+	if displayNameHint != "" {
+		return displayNameHint
+	}
+	return filePath
+}
+
+func applyDefaultLibraryMetadata(filePath, displayNameHint string, result *LibraryScanResult) {
+	nameSource := libraryDisplayNameOrPath(filePath, displayNameHint)
 	if result.TrackName == "" {
-		result.TrackName = strings.TrimSuffix(filepath.Base(filePath), filepath.Ext(filePath))
+		result.TrackName = strings.TrimSuffix(filepath.Base(nameSource), filepath.Ext(nameSource))
 	}
 	if result.ArtistName == "" {
 		result.ArtistName = "Unknown Artist"
@@ -297,7 +343,7 @@ func applyDefaultLibraryMetadata(filePath string, result *LibraryScanResult) {
 func scanFLACFile(filePath string, result *LibraryScanResult) (*LibraryScanResult, error) {
 	metadata, err := ReadMetadata(filePath)
 	if err != nil {
-		return scanFromFilename(filePath, result)
+		return scanFromFilename(filePath, "", result)
 	}
 
 	result.TrackName = metadata.Title
@@ -319,7 +365,7 @@ func scanFLACFile(filePath string, result *LibraryScanResult) (*LibraryScanResul
 		}
 	}
 
-	applyDefaultLibraryMetadata(filePath, result)
+	applyDefaultLibraryMetadata(filePath, "", result)
 
 	return result, nil
 }
@@ -331,14 +377,14 @@ func scanM4AFile(filePath string, result *LibraryScanResult) (*LibraryScanResult
 		result.SampleRate = quality.SampleRate
 	}
 
-	return scanFromFilename(filePath, result)
+	return scanFromFilename(filePath, "", result)
 }
 
 func scanMP3File(filePath string, result *LibraryScanResult) (*LibraryScanResult, error) {
 	metadata, err := ReadID3Tags(filePath)
 	if err != nil {
 		GoLog("[LibraryScan] ID3 read error for %s: %v\n", filePath, err)
-		return scanFromFilename(filePath, result)
+		return scanFromFilename(filePath, "", result)
 	}
 
 	result.TrackName = metadata.Title
@@ -365,16 +411,16 @@ func scanMP3File(filePath string, result *LibraryScanResult) (*LibraryScanResult
 		}
 	}
 
-	applyDefaultLibraryMetadata(filePath, result)
+	applyDefaultLibraryMetadata(filePath, "", result)
 
 	return result, nil
 }
 
-func scanOggFile(filePath string, result *LibraryScanResult) (*LibraryScanResult, error) {
+func scanOggFile(filePath string, result *LibraryScanResult, displayNameHint string) (*LibraryScanResult, error) {
 	metadata, err := ReadOggVorbisComments(filePath)
 	if err != nil {
 		GoLog("[LibraryScan] Ogg/Opus read error for %s: %v\n", filePath, err)
-		return scanFromFilename(filePath, result)
+		return scanFromFilename(filePath, displayNameHint, result)
 	}
 
 	result.TrackName = metadata.Title
@@ -397,13 +443,14 @@ func scanOggFile(filePath string, result *LibraryScanResult) (*LibraryScanResult
 		}
 	}
 
-	applyDefaultLibraryMetadata(filePath, result)
+	applyDefaultLibraryMetadata(filePath, displayNameHint, result)
 
 	return result, nil
 }
 
-func scanFromFilename(filePath string, result *LibraryScanResult) (*LibraryScanResult, error) {
-	filename := strings.TrimSuffix(filepath.Base(filePath), filepath.Ext(filePath))
+func scanFromFilename(filePath, displayNameHint string, result *LibraryScanResult) (*LibraryScanResult, error) {
+	nameSource := libraryDisplayNameOrPath(filePath, displayNameHint)
+	filename := strings.TrimSuffix(filepath.Base(nameSource), filepath.Ext(nameSource))
 
 	parts := strings.SplitN(filename, " - ", 2)
 	if len(parts) == 2 {
@@ -426,7 +473,7 @@ func scanFromFilename(filePath string, result *LibraryScanResult) (*LibraryScanR
 
 	dir := filepath.Dir(filePath)
 	result.AlbumName = filepath.Base(dir)
-	if result.AlbumName == "." || result.AlbumName == "" {
+	if result.AlbumName == "." || result.AlbumName == "" || result.AlbumName == "fd" || result.AlbumName == "self" {
 		result.AlbumName = "Unknown Album"
 	}
 
@@ -473,8 +520,12 @@ func CancelLibraryScan() {
 }
 
 func ReadAudioMetadata(filePath string) (string, error) {
+	return ReadAudioMetadataWithDisplayName(filePath, "")
+}
+
+func ReadAudioMetadataWithDisplayName(filePath, displayNameHint string) (string, error) {
 	scanTime := time.Now().UTC().Format(time.RFC3339)
-	result, err := scanAudioFile(filePath, scanTime)
+	result, err := scanAudioFileWithKnownModTimeAndDisplayName(filePath, displayNameHint, scanTime, 0)
 	if err != nil {
 		return "", err
 	}
@@ -541,14 +592,13 @@ func ScanLibraryFolderIncremental(folderPath, existingFilesJSON string) (string,
 	// Find files to scan (new or modified)
 	var filesToScan []libraryAudioFileInfo
 	skippedCount := 0
-
-	// Build a set of existing CUE virtual path base files for incremental matching.
-	// CUE tracks are stored with virtual paths like "/path/album.cue#track01".
-	// We need to match these against the actual .cue file's modTime.
-	cueBaseModTimes := make(map[string]int64) // base cue path -> modTime from disk
-	for _, f := range currentFiles {
-		if strings.ToLower(filepath.Ext(f.path)) == ".cue" {
-			cueBaseModTimes[f.path] = f.modTime
+	existingCueTrackModTimes := make(map[string]int64)
+	for existingPath, modTime := range existingFiles {
+		if idx := strings.LastIndex(existingPath, "#track"); idx > 0 {
+			baseCuePath := existingPath[:idx]
+			if _, exists := existingCueTrackModTimes[baseCuePath]; !exists {
+				existingCueTrackModTimes[baseCuePath] = modTime
+			}
 		}
 	}
 
@@ -557,25 +607,12 @@ func ScanLibraryFolderIncremental(folderPath, existingFilesJSON string) (string,
 		if !exists {
 			// For .cue files, also check if any virtual path entries exist
 			if strings.ToLower(filepath.Ext(f.path)) == ".cue" {
-				hasCueTracks := false
-				for existingPath := range existingFiles {
-					if strings.HasPrefix(existingPath, f.path+"#track") {
-						hasCueTracks = true
-						break
-					}
-				}
-				if hasCueTracks {
+				if cueTrackModTime, hasCueTracks := existingCueTrackModTimes[f.path]; hasCueTracks {
 					// CUE file exists in DB via virtual paths; check if modTime changed
-					// Use modTime from any virtual path (they all share the same .cue modTime)
-					for existingPath, modTime := range existingFiles {
-						if strings.HasPrefix(existingPath, f.path+"#track") {
-							if f.modTime == modTime {
-								skippedCount++
-							} else {
-								filesToScan = append(filesToScan, f)
-							}
-							break
-						}
+					if f.modTime == cueTrackModTime {
+						skippedCount++
+					} else {
+						filesToScan = append(filesToScan, f)
 					}
 					continue
 				}
@@ -630,6 +667,7 @@ func ScanLibraryFolderIncremental(folderPath, existingFilesJSON string) (string,
 
 	// Track audio files referenced by .cue sheets to avoid duplicates (incremental)
 	cueReferencedAudioFilesInc := make(map[string]bool)
+	parsedCueFiles := make(map[string]scannedCueFileInfo)
 	for _, f := range filesToScan {
 		ext := strings.ToLower(filepath.Ext(f.path))
 		if ext == ".cue" {
@@ -637,6 +675,10 @@ func ScanLibraryFolderIncremental(folderPath, existingFilesJSON string) (string,
 			if err == nil && sheet.FileName != "" {
 				audioPath := ResolveCueAudioPath(f.path, sheet.FileName)
 				if audioPath != "" {
+					parsedCueFiles[f.path] = scannedCueFileInfo{
+						sheet:     sheet,
+						audioPath: audioPath,
+					}
 					cueReferencedAudioFilesInc[audioPath] = true
 				}
 			}
@@ -660,7 +702,20 @@ func ScanLibraryFolderIncremental(folderPath, existingFilesJSON string) (string,
 
 		// Handle .cue files: produce multiple track results
 		if ext == ".cue" {
-			cueResults, err := ScanCueFileForLibrary(f.path, scanTime)
+			var cueResults []LibraryScanResult
+			cueInfo, ok := parsedCueFiles[f.path]
+			if ok {
+				cueResults, err = scanCueSheetForLibrary(
+					f.path,
+					cueInfo.sheet,
+					cueInfo.audioPath,
+					"",
+					f.modTime,
+					scanTime,
+				)
+			} else {
+				cueResults, err = ScanCueFileForLibrary(f.path, scanTime)
+			}
 			if err != nil {
 				errorCount++
 				GoLog("[LibraryScan] Error scanning cue %s: %v\n", f.path, err)
@@ -675,7 +730,7 @@ func ScanLibraryFolderIncremental(folderPath, existingFilesJSON string) (string,
 			continue
 		}
 
-		result, err := scanAudioFile(f.path, scanTime)
+		result, err := scanAudioFileWithKnownModTime(f.path, scanTime, f.modTime)
 		if err != nil {
 			errorCount++
 			GoLog("[LibraryScan] Error scanning %s: %v\n", f.path, err)

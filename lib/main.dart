@@ -8,6 +8,7 @@ import 'package:spotiflac_android/providers/download_queue_provider.dart';
 import 'package:spotiflac_android/providers/extension_provider.dart';
 import 'package:spotiflac_android/providers/library_collections_provider.dart';
 import 'package:spotiflac_android/providers/local_library_provider.dart';
+import 'package:spotiflac_android/providers/settings_provider.dart';
 import 'package:spotiflac_android/services/notification_service.dart';
 import 'package:spotiflac_android/services/share_intent_service.dart';
 import 'package:spotiflac_android/services/cover_cache_manager.dart';
@@ -89,14 +90,51 @@ class _EagerInitialization extends ConsumerStatefulWidget {
 }
 
 class _EagerInitializationState extends ConsumerState<_EagerInitialization> {
+  ProviderSubscription<bool>? _localLibraryEnabledSub;
+  bool _localLibraryPreloaded = false;
+
   @override
   void initState() {
     super.initState();
     _initializeAppServices();
     _initializeExtensions();
     ref.read(downloadHistoryProvider);
-    ref.read(localLibraryProvider);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _initializeDeferredProviders();
+    });
+  }
+
+  @override
+  void dispose() {
+    _localLibraryEnabledSub?.close();
+    super.dispose();
+  }
+
+  void _initializeDeferredProviders() {
     ref.read(libraryCollectionsProvider);
+    _maybePreloadLocalLibrary(
+      ref.read(
+        settingsProvider.select((settings) => settings.localLibraryEnabled),
+      ),
+    );
+
+    _localLibraryEnabledSub = ref.listenManual<bool>(
+      settingsProvider.select((settings) => settings.localLibraryEnabled),
+      (previous, next) {
+        if (next == true) {
+          _maybePreloadLocalLibrary(true);
+        }
+      },
+    );
+  }
+
+  void _maybePreloadLocalLibrary(bool enabled) {
+    if (!enabled || _localLibraryPreloaded) return;
+    _localLibraryPreloaded = true;
+    ref.read(localLibraryProvider);
+    _localLibraryEnabledSub?.close();
+    _localLibraryEnabledSub = null;
   }
 
   Future<void> _initializeAppServices() async {
