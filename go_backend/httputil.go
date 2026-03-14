@@ -350,7 +350,7 @@ func calculateNextDelay(currentDelay time.Duration, config RetryConfig) time.Dur
 func getRetryAfterDuration(resp *http.Response) time.Duration {
 	retryAfter := resp.Header.Get("Retry-After")
 	if retryAfter == "" {
-		return 60 * time.Second // Default wait time
+		return 60 * time.Second
 	}
 
 	if seconds, err := strconv.Atoi(retryAfter); err == nil {
@@ -364,7 +364,7 @@ func getRetryAfterDuration(resp *http.Response) time.Duration {
 		}
 	}
 
-	return 60 * time.Second // Default
+	return 60 * time.Second
 }
 
 func ReadResponseBody(resp *http.Response) ([]byte, error) {

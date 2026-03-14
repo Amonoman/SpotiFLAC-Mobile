@@ -64,9 +64,9 @@ class _TrackMetadataScreenState extends ConsumerState<TrackMetadataScreen> {
   String? _lyricsError;
   String? _lyricsSource;
   bool _showTitleInAppBar = false;
-  bool _lyricsEmbedded = false; // Track if lyrics are embedded in file
+  bool _lyricsEmbedded = false;
   bool _isEmbedding = false; // Track embed operation in progress
-  bool _isInstrumental = false; // Track if detected as instrumental
+  bool _isInstrumental = false;
   bool _isConverting = false; // Track convert operation in progress
   bool _hasMetadataChanges = false;
   bool _hasLoadedResolvedAudioMetadata = false;

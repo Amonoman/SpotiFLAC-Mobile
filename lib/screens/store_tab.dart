@@ -121,7 +121,6 @@ class _StoreTabState extends ConsumerState<StoreTab> {
               ),
             ),
 
-            // Show setup screen if no registry URL is configured
             if (!hasRegistryUrl)
               SliverFillRemaining(
                 child: _buildSetupRepoState(colorScheme, error),

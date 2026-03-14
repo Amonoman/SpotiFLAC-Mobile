@@ -115,10 +115,8 @@ class DownloadService : Service() {
      * We must call stopSelf() within a few seconds to avoid a crash.
      */
     override fun onTimeout(startId: Int, fgsType: Int) {
-        // Log the timeout for debugging
         android.util.Log.w("DownloadService", "Foreground service timeout reached (6 hours limit). Stopping service.")
         
-        // Gracefully stop the service
         stopForegroundService()
     }
     

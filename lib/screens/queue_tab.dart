@@ -105,7 +105,7 @@ class UnifiedLibraryItem {
       artistName: item.artistName,
       albumName: item.albumName,
       coverUrl: null, // Local library doesn't have cover URLs
-      localCoverPath: item.coverPath, // Use extracted cover path
+      localCoverPath: item.coverPath,
       filePath: item.filePath,
       quality: quality,
       addedAt: item.fileModTime != null
@@ -2067,7 +2067,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     final albumCounts = <String, int>{};
     final albumMap = <String, List<DownloadHistoryItem>>{};
     for (final item in items) {
-      // Use lowercase key for case-insensitive grouping
       final key =
           '${item.albumName.toLowerCase()}|${(item.albumArtist ?? item.artistName).toLowerCase()}';
       albumCounts[key] = (albumCounts[key] ?? 0) + 1;

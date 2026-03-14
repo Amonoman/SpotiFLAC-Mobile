@@ -151,7 +151,6 @@ func (m *ExtensionManager) LoadExtensionFromFile(filePath string) (*LoadedExtens
 	if exists {
 		versionCompare := compareVersions(manifest.Version, existingVersion)
 		if versionCompare > 0 {
-			// This is an upgrade - call UpgradeExtension
 			return m.UpgradeExtension(filePath)
 		} else if versionCompare == 0 {
 			return nil, fmt.Errorf("Extension '%s' v%s is already installed", existingDisplayName, existingVersion)
@@ -429,7 +428,6 @@ func (m *ExtensionManager) loadExtensionFromDirectory(dirPath string) (*LoadedEx
 		SourceDir: dirPath,
 	}
 
-	// Restore enabled state from settings store
 	store := GetExtensionSettingsStore()
 	if enabledVal, err := store.Get(manifest.Name, "_enabled"); err == nil {
 		if enabled, ok := enabledVal.(bool); ok {

@@ -315,7 +315,6 @@ class LocalLibraryNotifier extends Notifier<LocalLibraryState> {
         int skippedDownloads = 0;
         for (final json in results) {
           final filePath = json['filePath'] as String?;
-          // Skip files that are already in download history
           if (_isDownloadedPath(filePath, downloadedPathKeys)) {
             skippedDownloads++;
             continue;
@@ -464,7 +463,6 @@ class LocalLibraryNotifier extends Notifier<LocalLibraryState> {
           }
         }
 
-        // Delete removed items
         if (deletedPaths.isNotEmpty) {
           final deleteCount = await _db.deleteByPaths(deletedPaths);
           for (final path in deletedPaths) {

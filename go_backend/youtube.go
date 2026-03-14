@@ -510,12 +510,10 @@ func ExtractYouTubeVideoID(urlStr string) (string, error) {
 		return "", fmt.Errorf("invalid URL: %w", err)
 	}
 
-	// /watch?v=
 	if v := parsed.Query().Get("v"); v != "" {
 		return v, nil
 	}
 
-	// /embed/
 	if strings.Contains(parsed.Path, "/embed/") {
 		parts := strings.Split(parsed.Path, "/embed/")
 		if len(parts) >= 2 {
@@ -523,7 +521,6 @@ func ExtractYouTubeVideoID(urlStr string) (string, error) {
 		}
 	}
 
-	// /v/
 	if strings.Contains(parsed.Path, "/v/") {
 		parts := strings.Split(parsed.Path, "/v/")
 		if len(parts) >= 2 {

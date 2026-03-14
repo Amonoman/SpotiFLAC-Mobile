@@ -114,7 +114,6 @@ func ParseCueFile(cuePath string) (*CueSheet, error) {
 			continue
 		}
 
-		// PERFORMER
 		if strings.HasPrefix(upper, "PERFORMER ") {
 			value := unquoteCue(line[len("PERFORMER "):])
 			if currentTrack != nil {
@@ -125,7 +124,6 @@ func ParseCueFile(cuePath string) (*CueSheet, error) {
 			continue
 		}
 
-		// TITLE
 		if strings.HasPrefix(upper, "TITLE ") {
 			value := unquoteCue(line[len("TITLE "):])
 			if currentTrack != nil {
@@ -136,7 +134,6 @@ func ParseCueFile(cuePath string) (*CueSheet, error) {
 			continue
 		}
 
-		// FILE
 		if strings.HasPrefix(upper, "FILE ") {
 			rest := line[len("FILE "):]
 			// Extract filename and type
@@ -148,7 +145,6 @@ func ParseCueFile(cuePath string) (*CueSheet, error) {
 			continue
 		}
 
-		// TRACK
 		if strings.HasPrefix(upper, "TRACK ") {
 			// Save previous track
 			if currentTrack != nil {
@@ -168,7 +164,6 @@ func ParseCueFile(cuePath string) (*CueSheet, error) {
 			continue
 		}
 
-		// INDEX
 		if strings.HasPrefix(upper, "INDEX ") && currentTrack != nil {
 			parts := strings.Fields(line)
 			if len(parts) >= 3 {
@@ -184,7 +179,6 @@ func ParseCueFile(cuePath string) (*CueSheet, error) {
 			continue
 		}
 
-		// ISRC
 		if strings.HasPrefix(upper, "ISRC ") && currentTrack != nil {
 			currentTrack.ISRC = strings.TrimSpace(line[len("ISRC "):])
 			continue
@@ -560,7 +554,6 @@ func scanCueSheetForLibrary(cuePath string, sheet *CueSheet, audioPath, virtualP
 			duration = int(totalDurationSec - track.StartTime)
 		}
 
-		// Use a unique ID based on pathBase + track number
 		id := generateLibraryID(fmt.Sprintf("%s#track%d", pathBase, track.Number))
 
 		// Use a virtual file path that includes the track number to ensure

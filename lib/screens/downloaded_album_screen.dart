@@ -125,7 +125,6 @@ class _DownloadedAlbumScreenState extends ConsumerState<DownloadedAlbumScreen> {
               (item.albumArtist != null && item.albumArtist!.isNotEmpty)
               ? item.albumArtist!
               : item.artistName;
-          // Use lowercase for case-insensitive matching
           final itemKey =
               '${item.albumName.toLowerCase()}|${itemArtist.toLowerCase()}';
           return itemKey == _albumLookupKey;

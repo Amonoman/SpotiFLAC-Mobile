@@ -70,7 +70,7 @@ class RecentAccessItem {
 /// State for recent access history
 class RecentAccessState {
   final List<RecentAccessItem> items;
-  final Set<String> hiddenDownloadIds; // IDs of downloads hidden from recents
+  final Set<String> hiddenDownloadIds;
   final bool isLoaded;
 
   const RecentAccessState({

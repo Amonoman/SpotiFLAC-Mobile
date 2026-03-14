@@ -1385,7 +1385,6 @@ class FFmpegService {
       final track = tracks[i];
       onProgress?.call(i + 1, tracks.length);
 
-      // Sanitize filename
       final sanitizedTitle = track.title
           .replaceAll(RegExp(r'[<>:"/\\|?*]'), '_')
           .replaceAll(RegExp(r'\s+'), ' ')
@@ -1394,11 +1393,9 @@ class FFmpegService {
       final outputFileName = '$trackNumStr - $sanitizedTitle.$outputExt';
       final outputPath = '$outputDir${Platform.pathSeparator}$outputFileName';
 
-      // Build FFmpeg command for this track
       final StringBuffer cmdBuffer = StringBuffer();
       cmdBuffer.write('-i "$audioPath" ');
 
-      // Time range
       final startTime = _formatSecondsForFFmpeg(track.startSec);
       cmdBuffer.write('-ss $startTime ');
 
@@ -1413,7 +1410,6 @@ class FFmpegService {
         cmdBuffer.write('-c:a copy ');
       }
 
-      // Metadata
       final artist = track.artist.isNotEmpty ? track.artist : (albumMetadata['artist'] ?? '');
       final album = albumMetadata['album'] ?? '';
       final genre = albumMetadata['genre'] ?? '';

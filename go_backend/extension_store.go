@@ -484,12 +484,10 @@ func (s *ExtensionStore) SearchExtensions(query string, category string) ([]Stor
 	queryLower := toLower(query)
 
 	for _, ext := range extensions {
-		// Filter by category
 		if category != "" && ext.Category != category {
 			continue
 		}
 
-		// Filter by query
 		if query != "" {
 			if !containsIgnoreCase(ext.Name, queryLower) &&
 				!containsIgnoreCase(ext.DisplayName, queryLower) &&

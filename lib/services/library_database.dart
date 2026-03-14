@@ -176,7 +176,6 @@ class LibraryDatabase {
     _log.i('Upgrading library database from v$oldVersion to v$newVersion');
 
     if (oldVersion < 2) {
-      // Add cover_path column
       await db.execute('ALTER TABLE library ADD COLUMN cover_path TEXT');
       _log.i('Added cover_path column');
     }
