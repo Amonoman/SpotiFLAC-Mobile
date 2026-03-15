@@ -2153,6 +2153,28 @@ class AppLocalizationsId extends AppLocalizations {
   String get trackReEnrichFfmpegFailed => 'FFmpeg metadata embed failed';
 
   @override
+  String get queueFlacAction => 'Antrekan FLAC';
+
+  @override
+  String queueFlacConfirmMessage(int count) {
+    return 'Cari kecocokan online untuk track yang dipilih lalu antrekan download FLAC.\n\nFile yang sudah ada tidak akan diubah atau dihapus.\n\nHanya kecocokan dengan keyakinan tinggi yang akan diantrikan otomatis.\n\n$count dipilih';
+  }
+
+  @override
+  String queueFlacFindingProgress(int current, int total) {
+    return 'Mencari kecocokan FLAC... ($current/$total)';
+  }
+
+  @override
+  String get queueFlacNoReliableMatches =>
+      'Tidak ada kecocokan online yang cukup meyakinkan untuk pilihan ini';
+
+  @override
+  String queueFlacQueuedWithSkipped(int addedCount, int skippedCount) {
+    return 'Menambahkan $addedCount track ke antrean, melewati $skippedCount';
+  }
+
+  @override
   String trackSaveFailed(String error) {
     return 'Failed: $error';
   }
@@ -2646,12 +2668,6 @@ class AppLocalizationsId extends AppLocalizations {
       'Select a built-in service to enable';
 
   @override
-  String get downloadLossy320 => 'Lossy 320kbps';
-
-  @override
-  String get downloadLossyFormat => 'Lossy Format';
-
-  @override
   String get downloadSelectTidalQobuz =>
       'Select Tidal or Qobuz above to configure quality';
 
@@ -2726,32 +2742,6 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get downloadMusixmatchAuto => 'Auto';
-
-  @override
-  String get downloadLossy320Format => 'Lossy 320kbps Format';
-
-  @override
-  String get downloadLossy320FormatDesc =>
-      'Choose the output format for Tidal 320kbps lossy downloads. The original AAC stream will be converted to your selected format.';
-
-  @override
-  String get downloadLossyMp3 => 'MP3 320kbps';
-
-  @override
-  String get downloadLossyMp3Subtitle => 'Best compatibility, ~10MB per track';
-
-  @override
-  String get downloadLossyOpus256 => 'Opus 256kbps';
-
-  @override
-  String get downloadLossyOpus256Subtitle =>
-      'Best quality Opus, ~8MB per track';
-
-  @override
-  String get downloadLossyOpus128 => 'Opus 128kbps';
-
-  @override
-  String get downloadLossyOpus128Subtitle => 'Smallest size, ~4MB per track';
 
   @override
   String get downloadNetworkAnySubtitle => 'WiFi + Mobile Data';

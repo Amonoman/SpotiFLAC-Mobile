@@ -1,20 +1,22 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:spotiflac_android/models/settings.dart';
 import 'package:spotiflac_android/constants/app_info.dart';
 import 'package:spotiflac_android/services/platform_bridge.dart';
+import 'package:spotiflac_android/utils/file_access.dart';
 import 'package:spotiflac_android/utils/logger.dart';
 
 const _settingsKey = 'app_settings';
 const _migrationVersionKey = 'settings_migration_version';
-const _currentMigrationVersion = 5;
+const _currentMigrationVersion = 6;
 const _spotifyClientSecretKey = 'spotify_client_secret';
 final _log = AppLogger('SettingsProvider');
 
 class SettingsNotifier extends Notifier<AppSettings> {
-  static const List<int> _youtubeOpusSupportedBitrates = [128, 256];
+  static const List<int> _youtubeOpusSupportedBitrates = [128, 256, 320];
   static const List<int> _youtubeMp3SupportedBitrates = [128, 256, 320];
   static final RegExp _isoRegionPattern = RegExp(r'^[A-Z]{2}$');
 
@@ -37,6 +39,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
       state = AppSettings.fromJson(jsonDecode(json));
 
       await _runMigrations(prefs);
+      await _normalizeIosDownloadDirectoryIfNeeded();
       await _normalizeYouTubeBitratesIfNeeded();
       await _normalizeSongLinkRegionIfNeeded();
     }
@@ -114,6 +117,10 @@ class SettingsNotifier extends Notifier<AppSettings> {
           useCustomSpotifyCredentials: false,
         );
       }
+      // Migration 6: Tidal HIGH quality removed — migrate to LOSSLESS
+      if (state.audioQuality == 'HIGH') {
+        state = state.copyWith(audioQuality: 'LOSSLESS');
+      }
       state = state.copyWith(lastSeenVersion: AppInfo.version);
       await prefs.setInt(_migrationVersionKey, _currentMigrationVersion);
       await _saveSettings();
@@ -186,6 +193,20 @@ class SettingsNotifier extends Notifier<AppSettings> {
       youtubeOpusBitrate: normalizedOpus,
       youtubeMp3Bitrate: normalizedMp3,
     );
+    await _saveSettings();
+  }
+
+  Future<void> _normalizeIosDownloadDirectoryIfNeeded() async {
+    if (!Platform.isIOS) return;
+
+    final currentDir = state.downloadDirectory.trim();
+    if (currentDir.isEmpty) return;
+
+    final normalizedDir = await validateOrFixIosPath(currentDir);
+    if (normalizedDir == currentDir) return;
+
+    _log.i('Normalized iOS download directory: $currentDir -> $normalizedDir');
+    state = state.copyWith(downloadDirectory: normalizedDir);
     await _saveSettings();
   }
 
@@ -427,11 +448,6 @@ class SettingsNotifier extends Notifier<AppSettings> {
 
   void setLocale(String locale) {
     state = state.copyWith(locale: locale);
-    _saveSettings();
-  }
-
-  void setTidalHighFormat(String format) {
-    state = state.copyWith(tidalHighFormat: format);
     _saveSettings();
   }
 

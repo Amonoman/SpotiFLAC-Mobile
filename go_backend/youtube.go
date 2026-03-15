@@ -29,6 +29,7 @@ var (
 type YouTubeQuality string
 
 const (
+	YouTubeQualityOpus320 YouTubeQuality = "opus_320"
 	YouTubeQualityOpus256 YouTubeQuality = "opus_256"
 	YouTubeQualityOpus128 YouTubeQuality = "opus_128"
 	YouTubeQualityMP3128  YouTubeQuality = "mp3_128"
@@ -37,7 +38,7 @@ const (
 )
 
 var (
-	youtubeOpusSupportedBitrates = []int{128, 256}
+	youtubeOpusSupportedBitrates = []int{128, 256, 320}
 	youtubeMp3SupportedBitrates  = []int{128, 256, 320}
 )
 
@@ -146,6 +147,8 @@ func parseYouTubeQualityInput(raw string) (format string, bitrate int, normalize
 	switch normalizedRaw {
 	case "opus_256", "opus256", "opus":
 		return "opus", 256, YouTubeQualityOpus256
+	case "opus_320", "opus320":
+		return "opus", 320, YouTubeQualityOpus320
 	case "opus_128", "opus128":
 		return "opus", 128, YouTubeQualityOpus128
 	case "mp3_320", "mp3320", "mp3", "":

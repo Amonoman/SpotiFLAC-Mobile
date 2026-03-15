@@ -23,7 +23,7 @@ class BuiltInService {
 }
 
 /// Default quality options for built-in services
-/// Note: Tidal lossy (HIGH) removed - use YouTube for lossy downloads
+/// Default quality options for each built-in service
 const _builtInServices = [
   BuiltInService(
     id: 'tidal',
@@ -83,9 +83,9 @@ const _builtInServices = [
     label: 'YouTube',
     qualityOptions: [
       QualityOption(
-        id: 'opus_256',
-        label: 'Opus 256kbps',
-        description: 'Best quality lossy (~8MB per track)',
+        id: 'opus_320',
+        label: 'Opus 320kbps',
+        description: 'Best quality lossy (~10MB per track)',
       ),
       QualityOption(
         id: 'mp3_320',
@@ -146,7 +146,7 @@ class DownloadServicePicker extends ConsumerStatefulWidget {
 }
 
 class _DownloadServicePickerState extends ConsumerState<DownloadServicePicker> {
-  static const List<int> _youtubeOpusSupportedBitrates = [128, 256];
+  static const List<int> _youtubeOpusSupportedBitrates = [128, 256, 320];
   static const List<int> _youtubeMp3SupportedBitrates = [128, 256, 320];
 
   late String _selectedService;

@@ -3838,6 +3838,36 @@ abstract class AppLocalizations {
   /// **'FFmpeg metadata embed failed'**
   String get trackReEnrichFfmpegFailed;
 
+  /// Action/button label for queueing FLAC redownloads for local tracks
+  ///
+  /// In en, this message translates to:
+  /// **'Queue FLAC'**
+  String get queueFlacAction;
+
+  /// Confirmation dialog body before queueing FLAC redownloads for local tracks
+  ///
+  /// In en, this message translates to:
+  /// **'Search online matches for the selected tracks and queue FLAC downloads.\n\nExisting files will not be modified or deleted.\n\nOnly high-confidence matches are queued automatically.\n\n{count} selected'**
+  String queueFlacConfirmMessage(int count);
+
+  /// Snackbar while resolving remote matches for local FLAC redownloads
+  ///
+  /// In en, this message translates to:
+  /// **'Finding FLAC matches... ({current}/{total})'**
+  String queueFlacFindingProgress(int current, int total);
+
+  /// Snackbar when no safe FLAC redownload matches were found
+  ///
+  /// In en, this message translates to:
+  /// **'No reliable online matches found for the selection'**
+  String get queueFlacNoReliableMatches;
+
+  /// Snackbar when some selected local tracks were queued for FLAC redownload and some were skipped
+  ///
+  /// In en, this message translates to:
+  /// **'Added {addedCount} tracks to queue, skipped {skippedCount}'**
+  String queueFlacQueuedWithSkipped(int addedCount, int skippedCount);
+
   /// Snackbar when save operation fails
   ///
   /// In en, this message translates to:
@@ -4602,18 +4632,6 @@ abstract class AppLocalizations {
   /// **'Select a built-in service to enable'**
   String get downloadSelectServiceToEnable;
 
-  /// Quality option label for Tidal lossy 320kbps
-  ///
-  /// In en, this message translates to:
-  /// **'Lossy 320kbps'**
-  String get downloadLossy320;
-
-  /// Setting title to pick output format for Tidal lossy downloads
-  ///
-  /// In en, this message translates to:
-  /// **'Lossy Format'**
-  String get downloadLossyFormat;
-
   /// Info hint when non-Tidal/Qobuz service is selected
   ///
   /// In en, this message translates to:
@@ -4739,54 +4757,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Auto'**
   String get downloadMusixmatchAuto;
-
-  /// Title of the Tidal lossy format picker bottom sheet
-  ///
-  /// In en, this message translates to:
-  /// **'Lossy 320kbps Format'**
-  String get downloadLossy320Format;
-
-  /// Description in the Tidal lossy format picker
-  ///
-  /// In en, this message translates to:
-  /// **'Choose the output format for Tidal 320kbps lossy downloads. The original AAC stream will be converted to your selected format.'**
-  String get downloadLossy320FormatDesc;
-
-  /// Tidal lossy format option - MP3 320kbps
-  ///
-  /// In en, this message translates to:
-  /// **'MP3 320kbps'**
-  String get downloadLossyMp3;
-
-  /// Subtitle for MP3 320kbps option
-  ///
-  /// In en, this message translates to:
-  /// **'Best compatibility, ~10MB per track'**
-  String get downloadLossyMp3Subtitle;
-
-  /// Tidal lossy format option - Opus 256kbps
-  ///
-  /// In en, this message translates to:
-  /// **'Opus 256kbps'**
-  String get downloadLossyOpus256;
-
-  /// Subtitle for Opus 256kbps option
-  ///
-  /// In en, this message translates to:
-  /// **'Best quality Opus, ~8MB per track'**
-  String get downloadLossyOpus256Subtitle;
-
-  /// Tidal lossy format option - Opus 128kbps
-  ///
-  /// In en, this message translates to:
-  /// **'Opus 128kbps'**
-  String get downloadLossyOpus128;
-
-  /// Subtitle for Opus 128kbps option
-  ///
-  /// In en, this message translates to:
-  /// **'Smallest size, ~4MB per track'**
-  String get downloadLossyOpus128Subtitle;
 
   /// Subtitle for 'Any' network mode option
   ///

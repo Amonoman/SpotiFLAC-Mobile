@@ -2819,6 +2819,47 @@
   "@trackReEnrichFfmpegFailed": {
     "description": "Snackbar when FFmpeg embed fails for MP3/Opus"
   },
+  "queueFlacAction": "Queue FLAC",
+  "@queueFlacAction": {
+    "description": "Action/button label for queueing FLAC redownloads for local tracks"
+  },
+  "queueFlacConfirmMessage": "Search online matches for the selected tracks and queue FLAC downloads.\n\nExisting files will not be modified or deleted.\n\nOnly high-confidence matches are queued automatically.\n\n{count} selected",
+  "@queueFlacConfirmMessage": {
+    "description": "Confirmation dialog body before queueing FLAC redownloads for local tracks",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "queueFlacFindingProgress": "Finding FLAC matches... ({current}/{total})",
+  "@queueFlacFindingProgress": {
+    "description": "Snackbar while resolving remote matches for local FLAC redownloads",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "queueFlacNoReliableMatches": "No reliable online matches found for the selection",
+  "@queueFlacNoReliableMatches": {
+    "description": "Snackbar when no safe FLAC redownload matches were found"
+  },
+  "queueFlacQueuedWithSkipped": "Added {addedCount} tracks to queue, skipped {skippedCount}",
+  "@queueFlacQueuedWithSkipped": {
+    "description": "Snackbar when some selected local tracks were queued for FLAC redownload and some were skipped",
+    "placeholders": {
+      "addedCount": {
+        "type": "int"
+      },
+      "skippedCount": {
+        "type": "int"
+      }
+    }
+  },
   "trackSaveFailed": "Failed: {error}",
   "@trackSaveFailed": {
     "description": "Snackbar when save operation fails",
@@ -3513,14 +3554,7 @@
   "@downloadSelectServiceToEnable": {
     "description": "Hint shown instead of Ask-quality subtitle when no built-in service selected"
   },
-  "downloadLossy320": "Lossy 320kbps",
-  "@downloadLossy320": {
-    "description": "Quality option label for Tidal lossy 320kbps"
-  },
-  "downloadLossyFormat": "Lossy Format",
-  "@downloadLossyFormat": {
-    "description": "Setting title to pick output format for Tidal lossy downloads"
-  },
+
   "downloadSelectTidalQobuz": "Select Tidal or Qobuz above to configure quality",
   "@downloadSelectTidalQobuz": {
     "description": "Info hint when non-Tidal/Qobuz service is selected"
@@ -3606,38 +3640,7 @@
   "@downloadMusixmatchAuto": {
     "description": "Button to reset Musixmatch language to automatic"
   },
-  "downloadLossy320Format": "Lossy 320kbps Format",
-  "@downloadLossy320Format": {
-    "description": "Title of the Tidal lossy format picker bottom sheet"
-  },
-  "downloadLossy320FormatDesc": "Choose the output format for Tidal 320kbps lossy downloads. The original AAC stream will be converted to your selected format.",
-  "@downloadLossy320FormatDesc": {
-    "description": "Description in the Tidal lossy format picker"
-  },
-  "downloadLossyMp3": "MP3 320kbps",
-  "@downloadLossyMp3": {
-    "description": "Tidal lossy format option - MP3 320kbps"
-  },
-  "downloadLossyMp3Subtitle": "Best compatibility, ~10MB per track",
-  "@downloadLossyMp3Subtitle": {
-    "description": "Subtitle for MP3 320kbps option"
-  },
-  "downloadLossyOpus256": "Opus 256kbps",
-  "@downloadLossyOpus256": {
-    "description": "Tidal lossy format option - Opus 256kbps"
-  },
-  "downloadLossyOpus256Subtitle": "Best quality Opus, ~8MB per track",
-  "@downloadLossyOpus256Subtitle": {
-    "description": "Subtitle for Opus 256kbps option"
-  },
-  "downloadLossyOpus128": "Opus 128kbps",
-  "@downloadLossyOpus128": {
-    "description": "Tidal lossy format option - Opus 128kbps"
-  },
-  "downloadLossyOpus128Subtitle": "Smallest size, ~4MB per track",
-  "@downloadLossyOpus128Subtitle": {
-    "description": "Subtitle for Opus 128kbps option"
-  },
+
   "downloadNetworkAnySubtitle": "WiFi + Mobile Data",
   "@downloadNetworkAnySubtitle": {
     "description": "Subtitle for 'Any' network mode option"

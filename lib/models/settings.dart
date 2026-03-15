@@ -38,10 +38,8 @@ class AppSettings {
   final bool showExtensionStore;
   final String locale;
   final String lyricsMode;
-  final String
-  tidalHighFormat; // Format for Tidal HIGH quality: 'mp3_320', 'opus_256', or 'opus_128'
   final int
-  youtubeOpusBitrate; // YouTube Opus bitrate (supported: 128/256 kbps)
+  youtubeOpusBitrate; // YouTube Opus bitrate (supported: 128/256/320 kbps)
   final int
   youtubeMp3Bitrate; // YouTube MP3 bitrate (supported: 128/256/320 kbps)
   final bool
@@ -114,7 +112,6 @@ class AppSettings {
     this.showExtensionStore = true,
     this.locale = 'system',
     this.lyricsMode = 'embed',
-    this.tidalHighFormat = 'mp3_320',
     this.youtubeOpusBitrate = 256,
     this.youtubeMp3Bitrate = 320,
     this.useAllFilesAccess = false,
@@ -178,7 +175,6 @@ class AppSettings {
     bool? showExtensionStore,
     String? locale,
     String? lyricsMode,
-    String? tidalHighFormat,
     int? youtubeOpusBitrate,
     int? youtubeMp3Bitrate,
     bool? useAllFilesAccess,
@@ -241,7 +237,6 @@ class AppSettings {
       showExtensionStore: showExtensionStore ?? this.showExtensionStore,
       locale: locale ?? this.locale,
       lyricsMode: lyricsMode ?? this.lyricsMode,
-      tidalHighFormat: tidalHighFormat ?? this.tidalHighFormat,
       youtubeOpusBitrate: youtubeOpusBitrate ?? this.youtubeOpusBitrate,
       youtubeMp3Bitrate: youtubeMp3Bitrate ?? this.youtubeMp3Bitrate,
       useAllFilesAccess: useAllFilesAccess ?? this.useAllFilesAccess,
