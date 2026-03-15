@@ -1911,6 +1911,32 @@ func resolveTidalTrackForRequest(req DownloadRequest, downloader *TidalDownloade
 		return nil, fmt.Errorf("failed to find tidal track id from request/cache/songlink")
 	}
 
+	// Verify the resolved track matches the request.
+	actualTrack, fetchErr := downloader.getPublicTrack(strconv.FormatInt(trackID, 10))
+	if fetchErr != nil {
+		GoLog("[%s] Warning: could not fetch Tidal track %d for verification: %v\n", logPrefix, trackID, fetchErr)
+		// Continue without verification — better than failing entirely.
+	} else {
+		providerArtist := actualTrack.Artist.Name
+		if providerArtist == "" && len(actualTrack.Artists) > 0 {
+			providerArtist = actualTrack.Artists[0].Name
+		}
+		resolved := resolvedTrackInfo{
+			Title:      actualTrack.Title,
+			ArtistName: providerArtist,
+			Duration:   actualTrack.Duration,
+		}
+		if !trackMatchesRequest(req, resolved, logPrefix) {
+			// Invalidate the cached ID so future requests don't reuse it.
+			if req.ISRC != "" {
+				GetTrackIDCache().SetTidal(req.ISRC, 0)
+			}
+			return nil, fmt.Errorf("tidal track %d does not match request: expected '%s - %s', got '%s - %s'",
+				trackID, req.ArtistName, req.TrackName, resolved.ArtistName, resolved.Title)
+		}
+		GoLog("[%s] Track %d verified: '%s - %s' ✓\n", logPrefix, trackID, resolved.ArtistName, resolved.Title)
+	}
+
 	track := &TidalTrack{
 		ID:           trackID,
 		Title:        strings.TrimSpace(req.TrackName),

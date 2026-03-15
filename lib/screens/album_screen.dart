@@ -81,7 +81,6 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
     _scrollController.addListener(_onScroll);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Use extensionId if available, otherwise detect from albumId prefix
       final providerId =
           widget.extensionId ??
           (() {
@@ -134,9 +133,7 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
     return (mediaSize.height * 0.55).clamp(360.0, 520.0);
   }
 
-  /// Upgrade cover URL to a reasonable resolution for full-screen display.
-  /// Spotify CDN only has 300, 640, ~2000 — we stay at 640 (no intermediate).
-  /// Deezer CDN: upgrade to 1000x1000 (available: 56, 250, 500, 1000, 1400, 1800).
+  /// Upgrade cover URL to a higher resolution for full-screen display.
   String? _highResCoverUrl(String? url) {
     if (url == null) return null;
     // Spotify CDN: upgrade 300 → 640 only (no intermediate between 640 and 2000)
@@ -519,7 +516,6 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
   }
 
   Widget _buildInfoCard(BuildContext context, ColorScheme colorScheme) {
-    // Info is now displayed in the full-screen cover overlay
     return const SliverToBoxAdapter(child: SizedBox.shrink());
   }
 
@@ -575,7 +571,7 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
     final tracks = _tracks;
     if (tracks == null || tracks.isEmpty) return;
 
-    // Filter out tracks already in download history or local library
+    // Skip already-downloaded tracks
     final historyState = ref.read(downloadHistoryProvider);
     final settings = ref.read(settingsProvider);
     final localLibState = (settings.localLibraryEnabled && settings.localLibraryShowDuplicates)

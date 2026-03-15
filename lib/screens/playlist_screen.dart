@@ -350,7 +350,6 @@ class _PlaylistScreenState extends ConsumerState<PlaylistScreen> {
   }
 
   Widget _buildInfoCard(BuildContext context, ColorScheme colorScheme) {
-    // Info is now displayed in the full-screen cover overlay
     return const SliverToBoxAdapter(child: SizedBox.shrink());
   }
 
@@ -609,7 +608,7 @@ class _PlaylistScreenState extends ConsumerState<PlaylistScreen> {
   void _downloadTracks(BuildContext context, List<Track> tracks) {
     if (tracks.isEmpty) return;
 
-    // Filter out tracks already in download history or local library
+    // Skip already-downloaded tracks
     final historyState = ref.read(downloadHistoryProvider);
     final settings = ref.read(settingsProvider);
     final localLibState = (settings.localLibraryEnabled && settings.localLibraryShowDuplicates)
