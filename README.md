@@ -89,6 +89,18 @@ _If this software is useful and brings you value, consider supporting the projec
 
 [![Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/zarzet)
 
+## Contributors
+
+Thanks to all the amazing people who have contributed to SpotiFLAC Mobile!
+
+<a href="https://github.com/zarzet/SpotiFLAC-Mobile/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=zarzet/SpotiFLAC-Mobile" />
+</a>
+
+We also appreciate everyone who has helped with [translations on Crowdin](https://crowdin.com/project/spotiflac-mobile), reported bugs, suggested features, and spread the word about SpotiFLAC Mobile.
+
+Interested in contributing? Check out our [Contributing Guide](CONTRIBUTING.md) to get started!
+
 ## API Credits
 
 [hifi-api](https://github.com/binimum/hifi-api) · [music.binimum.org](https://music.binimum.org) · [qqdl.site](https://qqdl.site) · [squid.wtf](https://squid.wtf) · [spotisaver.net](https://spotisaver.net) · [dabmusic.xyz](https://dabmusic.xyz) · [AfkarXYZ](https://github.com/afkarxyz) · [LRCLib](https://lrclib.net) · [Paxsenix](https://lyrics.paxsenix.org) · [Cobalt](https://cobalt.tools) · [qwkuns.me](https://qwkuns.me) · [SpotubeDL](https://spotubedl.com) · [Song.link](https://song.link) · [IDHS](https://github.com/sjdonado/idonthavespotify)
