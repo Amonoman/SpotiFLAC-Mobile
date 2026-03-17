@@ -83,7 +83,6 @@ class _MainShellState extends ConsumerState<MainShell> {
     final extState = ref.read(extensionProvider);
     if (!extState.isInitialized) {
       _log.d('Waiting for extensions to initialize before handling URL...');
-      // Wait up to 5 seconds for extensions to initialize
       for (int i = 0; i < 50; i++) {
         await Future.delayed(const Duration(milliseconds: 100));
         if (!mounted) return;

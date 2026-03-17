@@ -5082,7 +5082,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
       );
 
       try {
-        // Read metadata from file
         final metadata = <String, String>{
           'TITLE': item.trackName,
           'ARTIST': item.artistName,
@@ -5111,7 +5110,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
               1000,
         );
 
-        // Extract cover art
         String? coverPath;
         try {
           final tempDir = await getTemporaryDirectory();
@@ -5126,7 +5124,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
           }
         } catch (_) {}
 
-        // Handle SAF vs regular file
         String workingPath = item.filePath;
         final isSaf = isContentUri(item.filePath);
         String? safTempPath;
@@ -5139,7 +5136,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
           workingPath = safTempPath;
         }
 
-        // Convert
         final newPath = await FFmpegService.convertAudioFormat(
           inputPath: workingPath,
           targetFormat: targetFormat.toLowerCase(),
@@ -5149,7 +5145,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
           deleteOriginal: !isSaf,
         );
 
-        // Cleanup cover temp
         if (coverPath != null) {
           try {
             await File(coverPath).delete();

@@ -406,8 +406,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
   }
 
   void setMetadataSource(String source) {
-    final normalized = source == 'deezer' ? 'deezer' : 'deezer';
-    state = state.copyWith(metadataSource: normalized);
+    state = state.copyWith(metadataSource: source);
     _saveSettings();
   }
 

@@ -22,7 +22,6 @@ class BuiltInService {
   });
 }
 
-/// Default quality options for built-in services
 /// Default quality options for each built-in service
 const _builtInServices = [
   BuiltInService(
@@ -98,7 +97,6 @@ const _builtInServices = [
   ),
 ];
 
-/// A reusable widget for selecting download service (built-in + extensions)
 class DownloadServicePicker extends ConsumerStatefulWidget {
   final String? trackName;
   final String? artistName;

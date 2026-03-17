@@ -35,7 +35,6 @@ class AppTheme {
     );
   }
 
-  /// Create dark theme
   static ThemeData dark({
     ColorScheme? dynamicScheme,
     Color? seedColor,
@@ -88,12 +87,11 @@ class AppTheme {
     ),
   );
 
-  /// Card theme
   static CardThemeData _cardTheme(ColorScheme scheme) => CardThemeData(
     elevation: 0,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(16),
-    ), // 12 -> 16
+    ),
     color: scheme.surfaceContainerLow,
     surfaceTintColor: scheme.surfaceTint,
   );
@@ -104,18 +102,17 @@ class AppTheme {
           elevation: 1,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-          ), // 20 -> 16
+          ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         ),
       );
 
-  /// Filled button theme
   static FilledButtonThemeData _filledButtonTheme(ColorScheme scheme) =>
       FilledButtonThemeData(
         style: FilledButton.styleFrom(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-          ), // 20 -> 16
+          ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         ),
       );
@@ -125,18 +122,17 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-          ), // 20 -> 16
+          ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         ),
       );
 
-  /// Text button theme
   static TextButtonThemeData _textButtonTheme(ColorScheme scheme) =>
       TextButtonThemeData(
         style: TextButton.styleFrom(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-          ), // 20 -> 16
+          ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         ),
       );
@@ -149,40 +145,39 @@ class AppTheme {
         foregroundColor: scheme.onPrimaryContainer,
       );
 
-  /// Input decoration theme
   static InputDecorationTheme _inputDecorationTheme(ColorScheme scheme) =>
       InputDecorationTheme(
         filled: true,
         fillColor: scheme.surfaceContainerHighest.withValues(
           alpha: 0.3,
-        ), // Added transparency
+        ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16), // 12 -> 16
+          borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16), // 12 -> 16
+          borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16), // 12 -> 16
+          borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(color: scheme.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16), // 12 -> 16
+          borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(color: scheme.error, width: 1),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 20,
           vertical: 16,
-        ), // consistent padding
+        ),
       );
 
   static ListTileThemeData _listTileTheme(ColorScheme scheme) =>
       ListTileThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-        ), // 12 -> 16
+        ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       );
 
@@ -193,7 +188,6 @@ class AppTheme {
     surfaceTintColor: scheme.surfaceTint,
   );
 
-  /// Navigation bar theme
   static NavigationBarThemeData _navigationBarTheme(
     ColorScheme scheme, {
     bool isAmoled = false,
@@ -213,7 +207,6 @@ class AppTheme {
         contentTextStyle: TextStyle(color: scheme.onInverseSurface),
       );
 
-  /// Progress indicator theme
   static ProgressIndicatorThemeData _progressIndicatorTheme(
     ColorScheme scheme,
   ) => ProgressIndicatorThemeData(
@@ -243,7 +236,6 @@ class AppTheme {
     }),
   );
 
-  /// Chip theme
   static ChipThemeData _chipTheme(ColorScheme scheme) => ChipThemeData(
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     backgroundColor: scheme.surfaceContainerLow,

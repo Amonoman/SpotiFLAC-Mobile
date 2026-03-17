@@ -123,7 +123,7 @@ class LibraryDatabase {
 
     return await openDatabase(
       path,
-      version: 4, // Bumped version for bitrate column
+      version: 4,
       onConfigure: (db) async {
         await db.rawQuery('PRAGMA journal_mode = WAL');
         await db.execute('PRAGMA synchronous = NORMAL');
@@ -331,13 +331,11 @@ class LibraryDatabase {
     String? trackName,
     String? artistName,
   }) async {
-    // First try ISRC if available
     if (isrc != null && isrc.isNotEmpty) {
       final byIsrc = await getByIsrc(isrc);
       if (byIsrc != null) return byIsrc;
     }
 
-    // Then try name matching
     if (trackName != null && artistName != null) {
       final matches = await findByTrackAndArtist(trackName, artistName);
       if (matches.isNotEmpty) return matches.first;
@@ -523,7 +521,6 @@ class LibraryDatabase {
     return rows.map((r) => r['file_path'] as String).toSet();
   }
 
-  /// Delete multiple items by their file paths
   Future<int> deleteByPaths(List<String> filePaths) async {
     if (filePaths.isEmpty) return 0;
     final db = await database;

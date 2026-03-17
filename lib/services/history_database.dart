@@ -12,7 +12,6 @@ final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 /// Cached current iOS container path for path normalization
 String? _currentContainerPath;
 
-/// SQLite database service for download history
 /// Provides O(1) lookups by spotify_id and isrc with proper indexing
 class HistoryDatabase {
   static final HistoryDatabase instance = HistoryDatabase._init();
@@ -78,7 +77,6 @@ class HistoryDatabase {
       )
     ''');
 
-    // Indexes for fast lookups
     await db.execute('CREATE INDEX idx_spotify_id ON history(spotify_id)');
     await db.execute('CREATE INDEX idx_isrc ON history(isrc)');
     await db.execute(
@@ -171,7 +169,6 @@ class HistoryDatabase {
     try {
       final db = await database;
 
-      // Get all items with iOS paths
       final rows = await db.query('history', columns: ['id', 'file_path']);
       int updatedCount = 0;
       final batch = db.batch();
@@ -198,7 +195,6 @@ class HistoryDatabase {
         await batch.commit(noResult: true);
       }
 
-      // Save current container path
       await prefs.setString('ios_last_container_path', _currentContainerPath!);
 
       _log.i('iOS path migration complete: $updatedCount paths updated');
@@ -323,7 +319,6 @@ class HistoryDatabase {
     };
   }
 
-  /// Insert or update a history item
   Future<void> upsert(Map<String, dynamic> json) async {
     final db = await database;
     await db.insert(
@@ -345,7 +340,6 @@ class HistoryDatabase {
     return rows.map(_dbRowToJson).toList();
   }
 
-  /// Get item by ID
   Future<Map<String, dynamic>?> getById(String id) async {
     final db = await database;
     final rows = await db.query(
@@ -403,26 +397,22 @@ class HistoryDatabase {
     return rows.map((r) => r['spotify_id'] as String).toSet();
   }
 
-  /// Delete by ID
   Future<void> deleteById(String id) async {
     final db = await database;
     await db.delete('history', where: 'id = ?', whereArgs: [id]);
   }
 
-  /// Delete by Spotify ID
   Future<void> deleteBySpotifyId(String spotifyId) async {
     final db = await database;
     await db.delete('history', where: 'spotify_id = ?', whereArgs: [spotifyId]);
   }
 
-  /// Clear all history
   Future<void> clearAll() async {
     final db = await database;
     await db.delete('history');
     _log.i('Cleared all history');
   }
 
-  /// Get total count
   Future<int> getCount() async {
     final db = await database;
     final result = await db.rawQuery('SELECT COUNT(*) as count FROM history');
@@ -459,7 +449,6 @@ class HistoryDatabase {
     return null;
   }
 
-  /// Close database
   Future<void> close() async {
     final db = await database;
     await db.close();

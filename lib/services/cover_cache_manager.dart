@@ -37,7 +37,6 @@ class CoverCacheManager {
       final appDir = await getApplicationSupportDirectory();
       _cachePath = p.join(appDir.path, 'cover_cache');
       
-      // Ensure cache directory exists
       await Directory(_cachePath!).create(recursive: true);
       
       debugPrint('CoverCacheManager: Initializing at $_cachePath');
@@ -48,7 +47,6 @@ class CoverCacheManager {
       debugPrint('CoverCacheManager: Initialized successfully');
     } catch (e) {
       debugPrint('CoverCacheManager: Failed to initialize: $e');
-      // Will fallback to DefaultCacheManager
     }
   }
 
