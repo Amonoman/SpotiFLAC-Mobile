@@ -54,6 +54,9 @@ Want to create your own extension? Check out the [Extension Development Guide](h
 ### [SpotiFLAC (Desktop)](https://github.com/afkarxyz/SpotiFLAC)
 Download music in true lossless FLAC from Tidal, Qobuz & Amazon Music for Windows, macOS & Linux
 
+### [SpotiFLAC (Python Module)](https://github.com/ShuShuzinhuu/SpotiFLAC-Module-Version)
+SpotiFLAC Python library for SpotiFLAC integration — maintained by [@ShuShuzinhuu](https://github.com/ShuShuzinhuu)
+
 ## FAQ
 
 **Q: Why does the Store tab ask me to enter a URL?**  
