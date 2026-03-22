@@ -301,6 +301,7 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
     final topPadding = normalizedHeaderTopPadding(context);
 
     final isBuiltInService = _builtInServices.contains(settings.defaultService);
+    final isTidalService = settings.defaultService == 'tidal';
 
     return PopScope(
       canPop: true,
@@ -408,8 +409,37 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
                       onTap: () => ref
                           .read(settingsProvider.notifier)
                           .setAudioQuality('HI_RES_LOSSLESS'),
-                      showDivider: false,
+                      showDivider: isTidalService,
                     ),
+                    // Lossy 320kbps option (Tidal only) - downloads M4A AAC from server, converts to MP3/Opus
+                    if (isTidalService)
+                      _QualityOption(
+                        title: context.l10n.downloadLossy320,
+                        subtitle: _getTidalHighFormatLabel(
+                          context,
+                          settings.tidalHighFormat,
+                        ),
+                        isSelected: settings.audioQuality == 'HIGH',
+                        onTap: () => ref
+                            .read(settingsProvider.notifier)
+                            .setAudioQuality('HIGH'),
+                        showDivider: false,
+                      ),
+                    if (isTidalService && settings.audioQuality == 'HIGH')
+                      SettingsItem(
+                        icon: Icons.tune,
+                        title: context.l10n.downloadLossyFormat,
+                        subtitle: _getTidalHighFormatLabel(
+                          context,
+                          settings.tidalHighFormat,
+                        ),
+                        onTap: () => _showTidalHighFormatPicker(
+                          context,
+                          ref,
+                          settings.tidalHighFormat,
+                        ),
+                        showDivider: false,
+                      ),
                   ],
                   if (!isBuiltInService) ...[
                     Padding(
@@ -1559,6 +1589,104 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
   String _normalizeMusixmatchLanguage(String value) {
     final normalized = value.trim().toLowerCase();
     return normalized.replaceAll(RegExp(r'[^a-z0-9\-_]'), '');
+  }
+
+  String _getTidalHighFormatLabel(BuildContext context, String format) {
+    switch (format) {
+      case 'mp3_320':
+        return context.l10n.downloadLossyMp3;
+      case 'opus_256':
+        return context.l10n.downloadLossyOpus256;
+      case 'opus_128':
+        return context.l10n.downloadLossyOpus128;
+      default:
+        return context.l10n.downloadLossyMp3;
+    }
+  }
+
+  void _showTidalHighFormatPicker(
+    BuildContext context,
+    WidgetRef ref,
+    String current,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    showModalBottomSheet(
+      context: context,
+      useRootNavigator: true,
+      backgroundColor: colorScheme.surfaceContainerHigh,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+              child: Text(
+                context.l10n.downloadLossy320Format,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+              child: Text(
+                context.l10n.downloadLossy320FormatDesc,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.audiotrack),
+              title: Text(context.l10n.downloadLossyMp3),
+              subtitle: Text(context.l10n.downloadLossyMp3Subtitle),
+              trailing: current == 'mp3_320'
+                  ? Icon(Icons.check, color: colorScheme.primary)
+                  : null,
+              onTap: () {
+                ref
+                    .read(settingsProvider.notifier)
+                    .setTidalHighFormat('mp3_320');
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.graphic_eq),
+              title: Text(context.l10n.downloadLossyOpus256),
+              subtitle: Text(context.l10n.downloadLossyOpus256Subtitle),
+              trailing: current == 'opus_256'
+                  ? Icon(Icons.check, color: colorScheme.primary)
+                  : null,
+              onTap: () {
+                ref
+                    .read(settingsProvider.notifier)
+                    .setTidalHighFormat('opus_256');
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.graphic_eq),
+              title: Text(context.l10n.downloadLossyOpus128),
+              subtitle: Text(context.l10n.downloadLossyOpus128Subtitle),
+              trailing: current == 'opus_128'
+                  ? Icon(Icons.check, color: colorScheme.primary)
+                  : null,
+              onTap: () {
+                ref
+                    .read(settingsProvider.notifier)
+                    .setTidalHighFormat('opus_128');
+                Navigator.pop(context);
+              },
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showYoutubeBitratePicker({

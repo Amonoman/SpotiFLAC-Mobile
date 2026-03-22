@@ -1390,6 +1390,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get qualityHiResFlacMaxSubtitle => '24-bit / up to 192kHz';
 
   @override
+  String get downloadLossy320 => 'Lossy 320kbps';
+
+  @override
+  String get downloadLossyFormat => 'Lossy Format';
+
+  @override
+  String get downloadLossy320Format => 'Lossy 320kbps Format';
+
+  @override
+  String get downloadLossy320FormatDesc =>
+      'Choose the output format for Tidal 320kbps lossy downloads. The original AAC stream will be converted to your selected format.';
+
+  @override
+  String get downloadLossyMp3 => 'MP3 320kbps';
+
+  @override
+  String get downloadLossyMp3Subtitle => 'Best compatibility, ~10MB per track';
+
+  @override
+  String get downloadLossyOpus256 => 'Opus 256kbps';
+
+  @override
+  String get downloadLossyOpus256Subtitle =>
+      'Best quality Opus, ~8MB per track';
+
+  @override
+  String get downloadLossyOpus128 => 'Opus 128kbps';
+
+  @override
+  String get downloadLossyOpus128Subtitle => 'Smallest size, ~4MB per track';
+
+  @override
   String get qualityNote =>
       'Actual quality depends on track availability from the service';
 

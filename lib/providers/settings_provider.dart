@@ -117,10 +117,6 @@ class SettingsNotifier extends Notifier<AppSettings> {
           useCustomSpotifyCredentials: false,
         );
       }
-      // Migration 6: Tidal HIGH quality removed — migrate to LOSSLESS
-      if (state.audioQuality == 'HIGH') {
-        state = state.copyWith(audioQuality: 'LOSSLESS');
-      }
       state = state.copyWith(lastSeenVersion: AppInfo.version);
       await prefs.setInt(_migrationVersionKey, _currentMigrationVersion);
       await _saveSettings();
@@ -452,6 +448,11 @@ class SettingsNotifier extends Notifier<AppSettings> {
 
   void setLocale(String locale) {
     state = state.copyWith(locale: locale);
+    _saveSettings();
+  }
+
+  void setTidalHighFormat(String format) {
+    state = state.copyWith(tidalHighFormat: format);
     _saveSettings();
   }
 

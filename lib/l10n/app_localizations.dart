@@ -2596,6 +2596,66 @@ abstract class AppLocalizations {
   /// **'24-bit / up to 192kHz'**
   String get qualityHiResFlacMaxSubtitle;
 
+  /// Quality option label for Tidal lossy 320kbps
+  ///
+  /// In en, this message translates to:
+  /// **'Lossy 320kbps'**
+  String get downloadLossy320;
+
+  /// Setting title to pick output format for Tidal lossy downloads
+  ///
+  /// In en, this message translates to:
+  /// **'Lossy Format'**
+  String get downloadLossyFormat;
+
+  /// Title of the Tidal lossy format picker bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Lossy 320kbps Format'**
+  String get downloadLossy320Format;
+
+  /// Description in the Tidal lossy format picker
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the output format for Tidal 320kbps lossy downloads. The original AAC stream will be converted to your selected format.'**
+  String get downloadLossy320FormatDesc;
+
+  /// Tidal lossy format option - MP3 320kbps
+  ///
+  /// In en, this message translates to:
+  /// **'MP3 320kbps'**
+  String get downloadLossyMp3;
+
+  /// Subtitle for MP3 320kbps Tidal lossy option
+  ///
+  /// In en, this message translates to:
+  /// **'Best compatibility, ~10MB per track'**
+  String get downloadLossyMp3Subtitle;
+
+  /// Tidal lossy format option - Opus 256kbps
+  ///
+  /// In en, this message translates to:
+  /// **'Opus 256kbps'**
+  String get downloadLossyOpus256;
+
+  /// Subtitle for Opus 256kbps Tidal lossy option
+  ///
+  /// In en, this message translates to:
+  /// **'Best quality Opus, ~8MB per track'**
+  String get downloadLossyOpus256Subtitle;
+
+  /// Tidal lossy format option - Opus 128kbps
+  ///
+  /// In en, this message translates to:
+  /// **'Opus 128kbps'**
+  String get downloadLossyOpus128;
+
+  /// Subtitle for Opus 128kbps Tidal lossy option
+  ///
+  /// In en, this message translates to:
+  /// **'Smallest size, ~4MB per track'**
+  String get downloadLossyOpus128Subtitle;
+
   /// Note about quality availability
   ///
   /// In en, this message translates to:
