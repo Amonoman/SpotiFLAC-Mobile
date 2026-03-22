@@ -14,15 +14,6 @@
 
 </div>
 
-## Screenshots
-
-<p align="center">
-  <img src="assets/images/1.jpg?v=2" width="200" />
-  <img src="assets/images/2.jpg?v=2" width="200" />
-  <img src="assets/images/3.jpg?v=2" width="200" />
-  <img src="assets/images/4.jpg?v=2" width="200" />
-</p>
-
 <div align="center">
 
 [![GitHub Release](https://img.shields.io/github/v/release/zarzet/SpotiFLAC-Mobile?style=for-the-badge&logo=github)](https://github.com/zarzet/SpotiFLAC-Mobile/releases)
@@ -34,78 +25,150 @@
 
 </div>
 
+## Screenshots
+
+<p align="center">
+  <img src="assets/images/1.jpg?v=2" width="200" />
+  <img src="assets/images/2.jpg?v=2" width="200" />
+  <img src="assets/images/3.jpg?v=2" width="200" />
+  <img src="assets/images/4.jpg?v=2" width="200" />
+</p>
+
+---
+
 ## Extensions
 
-Extensions allow the community to add new music sources and features without waiting for app updates. When a streaming service API changes or a new source becomes available, extensions can be updated independently.
+Extensions let the community add new music sources and features without waiting for app updates. When a streaming service API changes or a new source becomes available, extensions can be updated independently.
 
 ### Installing Extensions
-1. Go to **Store** tab in the app
-2. When opening the Store for the first time, you will be asked to enter an **Extension Repository URL**
+
+1. Open the **Store** tab in the app
+2. On first launch, enter an **Extension Repository URL** when prompted
 3. Browse and install extensions with one tap
 4. Or download a `.spotiflac-ext` file and install manually via **Settings > Extensions**
 5. Configure extension settings if needed
-6. Set provider priority in **Settings > Extensions > Provider Priority**
+6. Set provider priority under **Settings > Extensions > Provider Priority**
 
 ### Developing Extensions
-Want to create your own extension? Check out the [Extension Development Guide](https://zarzet.github.io/SpotiFLAC-Mobile/docs) for complete documentation.
 
-## Other project
+> [!NOTE]
+> Want to build your own extension? The [Extension Development Guide](https://zarzet.github.io/SpotiFLAC-Mobile/docs) has everything you need.
+
+---
+
+## Related Projects
 
 ### [SpotiFLAC (Desktop)](https://github.com/afkarxyz/SpotiFLAC)
-Download music in true lossless FLAC from Tidal, Qobuz & Amazon Music for Windows, macOS & Linux
+Download music in true lossless FLAC from Tidal, Qobuz & Amazon Music available for Windows, macOS & Linux.
+
+### [SpotiFLAC (Python Module)](https://github.com/ShuShuzinhuu/SpotiFLAC-Module-Version)
+Python library for SpotiFLAC integration, maintained by [@ShuShuzinhuu](https://github.com/ShuShuzinhuu).
+
+---
 
 ## FAQ
 
-**Q: Why does the Store tab ask me to enter a URL?**  
-A: Starting from version 3.8.0, SpotiFLAC uses a decentralized extension repository system — extensions are hosted on GitHub repositories rather than a built-in server, so anyone can create and host their own. Enter a repository URL in the Store tab to browse and install extensions.
+<details>
+<summary><b>Why does the Store tab ask me to enter a URL?</b></summary>
+<br>
 
-**Q: Why is my download failing with "Song not found"?**  
-A: The track may not be available on the streaming services. Try enabling more download services in Settings > Download > Provider Priority, or install additional extensions like Amazon Music from the Store.
+Starting from version 3.8.0, SpotiFLAC uses a decentralized extension repository system extensions are hosted on GitHub repositories rather than a built-in server, so anyone can create and host their own. Enter a repository URL in the Store tab to browse and install extensions.
 
-**Q: Why are some tracks downloading in lower quality?**  
-A: Quality depends on what's available from the streaming service and extensions. Built-in providers: Tidal offers up to 24-bit/192kHz, Qobuz up to 24-bit/192kHz, and Deezer up to 16-bit/44.1kHz.
+</details>
 
-**Q: Can I download playlists?**  
-A: Yes! Just paste the playlist URL in the search bar. The app will fetch all tracks and queue them for download.
+<details>
+<summary><b>Why is my download failing with "Song not found"?</b></summary>
+<br>
 
-**Q: Why do I need to grant storage permission?**  
-A: The app needs permission to save downloaded files to your device. On Android 13+, you may need to grant "All files access" in Settings > Apps > SpotiFLAC > Permissions.
+The track may not be available on the streaming services. Try enabling more providers under **Settings > Download > Provider Priority**, or install additional extensions like Amazon Music from the Store.
 
-**Q: Is this app safe?**  
-A: Yes, the app is open source and you can verify the code yourself. Each release is scanned with VirusTotal (see badge at top of README).
+</details>
 
-**Q: Why is download not working in my country?**  
-A: Some countries have restricted access to certain streaming service APIs. If downloads are failing, try using a VPN to connect through a different region.
+<details>
+<summary><b>Why are some tracks downloading in lower quality?</b></summary>
+<br>
 
-**Q: Can I add SpotiFLAC to AltStore or SideStore?**
-A: Yes! You can add the official source to receive updates directly within the app. Just copy this link:
+Quality depends on what's available from the streaming service and its extensions. Built-in providers:
+- **Tidal** up to 24-bit/192kHz
+- **Qobuz** up to 24-bit/192kHz
+- **Deezer** up to 16-bit/44.1kHz
+
+</details>
+
+<details>
+<summary><b>Can I download playlists?</b></summary>
+<br>
+
+Yes! Just paste the playlist URL in the search bar. The app will fetch all tracks and queue them for download.
+
+</details>
+
+<details>
+<summary><b>Why do I need to grant storage permission?</b></summary>
+<br>
+
+The app needs permission to save downloaded files to your device. On Android 13+, you may need to grant **All files access** under **Settings > Apps > SpotiFLAC > Permissions**.
+
+</details>
+
+<details>
+<summary><b>Is this app safe?</b></summary>
+<br>
+
+Yes SpotiFLAC is open source and you can verify the code yourself. Each release is also scanned with VirusTotal (see badge above).
+
+</details>
+
+<details>
+<summary><b>Why is downloading not working in my country?</b></summary>
+<br>
+
+Some countries have restricted access to certain streaming service APIs. If downloads are failing, try using a VPN to connect through a different region.
+
+</details>
+
+<details>
+<summary><b>Can I add SpotiFLAC to AltStore or SideStore?</b></summary>
+<br>
+
+Yes! Add the official source to receive updates directly within the app. Copy this link:
+
+```
 https://raw.githubusercontent.com/zarzet/SpotiFLAC-Mobile/refs/heads/main/apps.json
-In AltStore/SideStore, go to the Browse tab, tap Sources at the top, then tap the + icon and paste the link.
+```
 
+In AltStore/SideStore, go to **Browse > Sources**, tap **+**, and paste the link.
 
-### Want to support SpotiFLAC-Mobile?
+</details>
 
-_If this software is useful and brings you value, consider supporting the project. Your support helps keep development going._
-
-[![Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/zarzet)
+---
 
 ## Contributors
 
-Thanks to all the amazing people who have contributed to SpotiFLAC Mobile!
+Thanks to everyone who has contributed to SpotiFLAC Mobile!
 
 <a href="https://github.com/zarzet/SpotiFLAC-Mobile/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=zarzet/SpotiFLAC-Mobile" />
 </a>
 
-We also appreciate everyone who has helped with [translations on Crowdin](https://crowdin.com/project/spotiflac-mobile), reported bugs, suggested features, and spread the word about SpotiFLAC Mobile.
+We also appreciate everyone who helped with [translations on Crowdin](https://crowdin.com/project/spotiflac-mobile), reported bugs, suggested features, and spread the word.
 
-Interested in contributing? Check out our [Contributing Guide](CONTRIBUTING.md) to get started!
+Interested in contributing? Check out the [Contributing Guide](CONTRIBUTING.md) to get started!
+
+---
 
 ## API Credits
 
-[hifi-api](https://github.com/binimum/hifi-api) · [music.binimum.org](https://music.binimum.org) · [qqdl.site](https://qqdl.site) · [squid.wtf](https://squid.wtf) · [spotisaver.net](https://spotisaver.net) · [dabmusic.xyz](https://dabmusic.xyz) · [AfkarXYZ](https://github.com/afkarxyz) · [LRCLib](https://lrclib.net) · [Paxsenix](https://lyrics.paxsenix.org) · [Cobalt](https://cobalt.tools) · [qwkuns.me](https://qwkuns.me) · [SpotubeDL](https://spotubedl.com) · [Song.link](https://song.link) · [IDHS](https://github.com/sjdonado/idonthavespotify)
+| | | | | |
+|---|---|---|---|---|
+| [hifi-api](https://github.com/binimum/hifi-api) | [music.binimum.org](https://music.binimum.org) | [qqdl.site](https://qqdl.site) | [squid.wtf](https://squid.wtf) | [spotisaver.net](https://spotisaver.net) |
+| [dabmusic.xyz](https://dabmusic.xyz) | [AfkarXYZ](https://github.com/afkarxyz) | [LRCLib](https://lrclib.net) | [Paxsenix](https://lyrics.paxsenix.org) | [Cobalt](https://cobalt.tools) |
+| [qwkuns.me](https://qwkuns.me) | [SpotubeDL](https://spotubedl.com) | [Song.link](https://song.link) | [IDHS](https://github.com/sjdonado/idonthavespotify) | |
 
+> [!NOTE]
+> If SpotiFLAC is useful to you, consider supporting development:
+>
+> [![Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/zarzet)
 
 > [!TIP]
->
-> **Star Us**, You will receive all release notifications from GitHub without any delay 
+> **Star the repo** to get notified about all new releases directly from GitHub.
