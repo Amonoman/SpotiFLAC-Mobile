@@ -1594,7 +1594,19 @@ func extractAnyCoverArtWithHint(filePath, displayNameHint string) ([]byte, strin
 		return extractOggCoverArt(filePath)
 
 	case ".m4a":
-		return nil, "", fmt.Errorf("M4A cover extraction not yet supported")
+		data, err := extractCoverFromM4A(filePath)
+		if err != nil {
+			return nil, "", err
+		}
+		mimeType := "image/jpeg"
+		if len(data) >= 8 &&
+			data[0] == 0x89 &&
+			data[1] == 0x50 &&
+			data[2] == 0x4E &&
+			data[3] == 0x47 {
+			mimeType = "image/png"
+		}
+		return data, mimeType, nil
 
 	default:
 		return nil, "", fmt.Errorf("unsupported format: %s", ext)
