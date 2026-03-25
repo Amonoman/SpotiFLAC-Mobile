@@ -17,6 +17,8 @@ const (
 // Deezer CDN supports these sizes: 56, 250, 500, 1000, 1400, 1800
 var deezerSizeRegex = regexp.MustCompile(`/(\d+)x(\d+)-\d+-\d+-\d+-\d+\.jpg$`)
 
+var tidalSizeRegex = regexp.MustCompile(`/\d+x\d+\.jpg$`)
+
 func convertSmallToMedium(imageURL string) string {
 	if strings.Contains(imageURL, spotifySize300) {
 		return strings.Replace(imageURL, spotifySize300, spotifySize640, 1)
@@ -96,6 +98,16 @@ func upgradeToMaxQuality(coverURL string) string {
 		return upgradeDeezerCover(coverURL)
 	}
 
+	// Tidal CDN upgrade: 1280x1280 → origin
+	if strings.Contains(coverURL, "resources.tidal.com") {
+		return upgradeTidalCover(coverURL)
+	}
+
+	// Qobuz CDN upgrade: _600 → _max
+	if strings.Contains(coverURL, "static.qobuz.com") {
+		return upgradeQobuzCover(coverURL)
+	}
+
 	return coverURL
 }
 
@@ -107,6 +119,30 @@ func upgradeDeezerCover(coverURL string) string {
 	upgraded := deezerSizeRegex.ReplaceAllString(coverURL, "/1800x1800-000000-80-0-0.jpg")
 	if upgraded != coverURL {
 		GoLog("[Cover] Deezer: upgraded to 1800x1800")
+	}
+	return upgraded
+}
+
+func upgradeTidalCover(coverURL string) string {
+	if !strings.Contains(coverURL, "resources.tidal.com") {
+		return coverURL
+	}
+
+	upgraded := tidalSizeRegex.ReplaceAllString(coverURL, "/origin.jpg")
+	if upgraded != coverURL {
+		GoLog("[Cover] Tidal: upgraded to origin resolution")
+	}
+	return upgraded
+}
+
+func upgradeQobuzCover(coverURL string) string {
+	if !strings.Contains(coverURL, "static.qobuz.com") {
+		return coverURL
+	}
+
+	upgraded := qobuzImageSizeRe.ReplaceAllString(coverURL, "_max.jpg")
+	if upgraded != coverURL {
+		GoLog("[Cover] Qobuz: upgraded to max resolution")
 	}
 	return upgraded
 }

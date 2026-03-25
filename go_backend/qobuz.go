@@ -262,26 +262,35 @@ func qobuzTrackDisplayTitle(track *QobuzTrack) string {
 	return fmt.Sprintf("%s (%s)", title, version)
 }
 
+var qobuzImageSizeRe = regexp.MustCompile(`_\d+\.jpg$`)
+
+func qobuzUpscaleImageURL(url string) string {
+	if url == "" {
+		return ""
+	}
+	return qobuzImageSizeRe.ReplaceAllString(url, "_max.jpg")
+}
+
 func qobuzTrackAlbumImage(track *QobuzTrack) string {
 	if track == nil {
 		return ""
 	}
-	return qobuzFirstNonEmpty(
+	return qobuzUpscaleImageURL(qobuzFirstNonEmpty(
 		track.Album.Image.Large,
 		track.Album.Image.Small,
 		track.Album.Image.Thumbnail,
-	)
+	))
 }
 
 func qobuzAlbumImage(album *qobuzAlbumDetails) string {
 	if album == nil {
 		return ""
 	}
-	return qobuzFirstNonEmpty(
+	return qobuzUpscaleImageURL(qobuzFirstNonEmpty(
 		album.Image.Large,
 		album.Image.Small,
 		album.Image.Thumbnail,
-	)
+	))
 }
 
 func qobuzTrackArtistID(track *QobuzTrack) string {
@@ -936,7 +945,17 @@ func (q *QobuzDownloader) GetAlbumMetadata(resourceID string) (*AlbumResponsePay
 
 	tracks := make([]AlbumTrackMetadata, 0, len(album.Tracks.Items))
 	for i := range album.Tracks.Items {
-		tracks = append(tracks, qobuzTrackToAlbumTrackMetadata(&album.Tracks.Items[i]))
+		track := &album.Tracks.Items[i]
+		track.Album.ID = album.ID
+		track.Album.Title = album.Title
+		track.Album.ReleaseDate = album.ReleaseDateOriginal
+		track.Album.Image = qobuzImageSet{
+			Thumbnail: album.Image.Thumbnail,
+			Small:     album.Image.Small,
+			Large:     album.Image.Large,
+		}
+		track.Album.TracksCount = album.TracksCount
+		tracks = append(tracks, qobuzTrackToAlbumTrackMetadata(track))
 	}
 
 	return &AlbumResponsePayload{

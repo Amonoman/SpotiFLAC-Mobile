@@ -1015,13 +1015,11 @@ func (t *TidalDownloader) GetAlbumMetadata(resourceID string) (*AlbumResponsePay
 	tracks := make([]AlbumTrackMetadata, 0, len(itemsModule.PagedList.Items))
 	for _, item := range itemsModule.PagedList.Items {
 		track := item.Item
-		if track.Album.ID == 0 {
-			track.Album.ID = headerModule.Album.ID
-			track.Album.Title = headerModule.Album.Title
-			track.Album.Cover = headerModule.Album.Cover
-			track.Album.ReleaseDate = headerModule.Album.ReleaseDate
-			track.Album.URL = headerModule.Album.URL
-		}
+		track.Album.ID = headerModule.Album.ID
+		track.Album.Title = headerModule.Album.Title
+		track.Album.Cover = headerModule.Album.Cover
+		track.Album.ReleaseDate = headerModule.Album.ReleaseDate
+		track.Album.URL = headerModule.Album.URL
 		tracks = append(tracks, tidalTrackToAlbumTrackMetadata(&track))
 	}
 
