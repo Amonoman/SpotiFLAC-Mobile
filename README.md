@@ -14,6 +14,15 @@
 
 </div>
 
+## Screenshots
+
+<p align="center">
+  <img src="assets/images/1.jpg?v=2" width="200" />
+  <img src="assets/images/2.jpg?v=2" width="200" />
+  <img src="assets/images/3.jpg?v=2" width="200" />
+  <img src="assets/images/4.jpg?v=2" width="200" />
+</p>
+
 <div align="center">
 
 [![GitHub Release](https://img.shields.io/github/v/release/zarzet/SpotiFLAC-Mobile?style=for-the-badge&logo=github)](https://github.com/zarzet/SpotiFLAC-Mobile/releases)
@@ -24,15 +33,6 @@
 [![Telegram Community](https://img.shields.io/badge/COMMUNITY-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/spotiflac_chat)
 
 </div>
-
-## Screenshots
-
-<p align="center">
-  <img src="assets/images/1.jpg?v=2" width="200" />
-  <img src="assets/images/2.jpg?v=2" width="200" />
-  <img src="assets/images/3.jpg?v=2" width="200" />
-  <img src="assets/images/4.jpg?v=2" width="200" />
-</p>
 
 ---
 
