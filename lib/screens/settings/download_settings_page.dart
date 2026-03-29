@@ -1359,7 +1359,9 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
                       SnackBar(
-                        content: Text('Failed to open folder picker: $e'),
+                        content: Text(
+                          ctx.l10n.snackbarFolderPickerFailed(e.toString()),
+                        ),
                         backgroundColor: Theme.of(ctx).colorScheme.error,
                         duration: const Duration(seconds: 4),
                       ),

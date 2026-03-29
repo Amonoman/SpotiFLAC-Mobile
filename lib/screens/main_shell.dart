@@ -18,6 +18,7 @@ import 'package:spotiflac_android/screens/settings/settings_tab.dart';
 import 'package:spotiflac_android/services/platform_bridge.dart';
 import 'package:spotiflac_android/services/shell_navigation_service.dart';
 import 'package:spotiflac_android/services/share_intent_service.dart';
+import 'package:spotiflac_android/services/notification_service.dart';
 import 'package:spotiflac_android/services/update_checker.dart';
 import 'package:spotiflac_android/widgets/update_dialog.dart';
 import 'package:spotiflac_android/widgets/animation_utils.dart';
@@ -46,6 +47,12 @@ class _MainShellState extends ConsumerState<MainShell>
       ShellNavigationService.libraryTabNavigatorKey;
   final GlobalKey<NavigatorState> _repoTabNavigatorKey =
       ShellNavigationService.repoTabNavigatorKey;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    NotificationService().updateStrings(context.l10n);
+  }
 
   @override
   void initState() {

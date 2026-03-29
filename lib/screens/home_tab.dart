@@ -3124,7 +3124,7 @@ class _HomeTabState extends ConsumerState<HomeTab>
             Padding(
               padding: const EdgeInsets.only(right: 8),
               child: FilterChip(
-                label: const Text('All'),
+                label: Text(context.l10n.historyFilterAll),
                 selected: selectedFilter == null,
                 onSelected: (_) {
                   ref.read(trackProvider.notifier).setSearchFilter(null);
@@ -4212,7 +4212,7 @@ class _ExtensionAlbumScreenState extends ConsumerState<ExtensionAlbumScreen> {
 
       if (result == null) {
         setState(() {
-          _error = 'Failed to load album';
+          _error = context.l10n.errorLoadAlbum;
           _isLoading = false;
         });
         return;
@@ -4221,7 +4221,7 @@ class _ExtensionAlbumScreenState extends ConsumerState<ExtensionAlbumScreen> {
       final trackList = result['tracks'] as List<dynamic>?;
       if (trackList == null) {
         setState(() {
-          _error = 'No tracks found';
+          _error = context.l10n.errorNoTracksFound;
           _isLoading = false;
         });
         return;
@@ -4243,7 +4243,7 @@ class _ExtensionAlbumScreenState extends ConsumerState<ExtensionAlbumScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = 'Error: $e';
+        _error = context.l10n.snackbarError(e.toString());
         _isLoading = false;
       });
     }
@@ -4376,7 +4376,7 @@ class _ExtensionPlaylistScreenState
 
       if (result == null) {
         setState(() {
-          _error = 'Failed to load playlist';
+          _error = context.l10n.errorLoadPlaylist;
           _isLoading = false;
         });
         return;
@@ -4385,7 +4385,7 @@ class _ExtensionPlaylistScreenState
       final trackList = result['tracks'] as List<dynamic>?;
       if (trackList == null) {
         setState(() {
-          _error = 'No tracks found';
+          _error = context.l10n.errorNoTracksFound;
           _isLoading = false;
         });
         return;
@@ -4402,7 +4402,7 @@ class _ExtensionPlaylistScreenState
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = 'Error: $e';
+        _error = context.l10n.snackbarError(e.toString());
         _isLoading = false;
       });
     }
@@ -4528,7 +4528,7 @@ class _ExtensionArtistScreenState extends ConsumerState<ExtensionArtistScreen> {
 
       if (result == null) {
         setState(() {
-          _error = 'Failed to load artist';
+          _error = context.l10n.errorLoadArtist;
           _isLoading = false;
         });
         return;
@@ -4562,7 +4562,7 @@ class _ExtensionArtistScreenState extends ConsumerState<ExtensionArtistScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = 'Error: $e';
+        _error = context.l10n.snackbarError(e.toString());
         _isLoading = false;
       });
     }

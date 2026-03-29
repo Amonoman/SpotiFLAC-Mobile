@@ -5300,6 +5300,298 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Samples'**
   String get audioAnalysisSamples;
+
+  /// Extensions page - subtitle for built-in search provider option
+  ///
+  /// In en, this message translates to:
+  /// **'Search with {providerName}'**
+  String extensionsSearchWith(String providerName);
+
+  /// Extensions page - label for home feed provider selector
+  ///
+  /// In en, this message translates to:
+  /// **'Home Feed Provider'**
+  String get extensionsHomeFeedProvider;
+
+  /// Extensions page - description for home feed provider picker
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which extension provides the home feed on the main screen'**
+  String get extensionsHomeFeedDescription;
+
+  /// Extensions page - home feed provider option: auto
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get extensionsHomeFeedAuto;
+
+  /// Extensions page - subtitle for auto home feed option
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically select the best available'**
+  String get extensionsHomeFeedAutoSubtitle;
+
+  /// Extensions page - subtitle for a specific extension home feed option
+  ///
+  /// In en, this message translates to:
+  /// **'Use {extensionName} home feed'**
+  String extensionsHomeFeedUse(String extensionName);
+
+  /// Extensions page - shown when no installed extension has home feed
+  ///
+  /// In en, this message translates to:
+  /// **'No extensions with home feed'**
+  String get extensionsNoHomeFeedExtensions;
+
+  /// Sort option - alphabetical ascending
+  ///
+  /// In en, this message translates to:
+  /// **'A-Z'**
+  String get sortAlphaAsc;
+
+  /// Sort option - alphabetical descending
+  ///
+  /// In en, this message translates to:
+  /// **'Z-A'**
+  String get sortAlphaDesc;
+
+  /// Dialog title when confirming cancellation of an active download
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel download?'**
+  String get cancelDownloadTitle;
+
+  /// Dialog body when confirming cancellation of an active download
+  ///
+  /// In en, this message translates to:
+  /// **'This will cancel the active download for \"{trackName}\".'**
+  String cancelDownloadContent(String trackName);
+
+  /// Dialog button - keep the active download (do not cancel)
+  ///
+  /// In en, this message translates to:
+  /// **'Keep'**
+  String get cancelDownloadKeep;
+
+  /// Snackbar error when FFmpeg fails to write metadata
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save metadata via FFmpeg'**
+  String get metadataSaveFailedFfmpeg;
+
+  /// Snackbar error when writing metadata file back to storage fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to write metadata back to storage'**
+  String get metadataSaveFailedStorage;
+
+  /// Snackbar shown when folder picker fails to open
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to open folder picker: {error}'**
+  String snackbarFolderPickerFailed(String error);
+
+  /// Error state shown when album fails to load
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load album'**
+  String get errorLoadAlbum;
+
+  /// Error state shown when playlist fails to load
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load playlist'**
+  String get errorLoadPlaylist;
+
+  /// Error state shown when artist fails to load
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load artist'**
+  String get errorLoadArtist;
+
+  /// Android notification channel name for download progress
+  ///
+  /// In en, this message translates to:
+  /// **'Download Progress'**
+  String get notifChannelDownloadName;
+
+  /// Android notification channel description for download progress
+  ///
+  /// In en, this message translates to:
+  /// **'Shows download progress for tracks'**
+  String get notifChannelDownloadDesc;
+
+  /// Android notification channel name for library scan
+  ///
+  /// In en, this message translates to:
+  /// **'Library Scan'**
+  String get notifChannelLibraryScanName;
+
+  /// Android notification channel description for library scan
+  ///
+  /// In en, this message translates to:
+  /// **'Shows local library scan progress'**
+  String get notifChannelLibraryScanDesc;
+
+  /// Notification title while downloading a track
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading {trackName}'**
+  String notifDownloadingTrack(String trackName);
+
+  /// Notification title while finalizing (embedding metadata) a track
+  ///
+  /// In en, this message translates to:
+  /// **'Finalizing {trackName}'**
+  String notifFinalizingTrack(String trackName);
+
+  /// Notification body while embedding metadata into a downloaded track
+  ///
+  /// In en, this message translates to:
+  /// **'Embedding metadata...'**
+  String get notifEmbeddingMetadata;
+
+  /// Notification title when track is already in library, with count
+  ///
+  /// In en, this message translates to:
+  /// **'Already in Library ({completed}/{total})'**
+  String notifAlreadyInLibraryCount(int completed, int total);
+
+  /// Notification title when track is already in library
+  ///
+  /// In en, this message translates to:
+  /// **'Already in Library'**
+  String get notifAlreadyInLibrary;
+
+  /// Notification title when download is complete, with count
+  ///
+  /// In en, this message translates to:
+  /// **'Download Complete ({completed}/{total})'**
+  String notifDownloadCompleteCount(int completed, int total);
+
+  /// Notification title when a single download is complete
+  ///
+  /// In en, this message translates to:
+  /// **'Download Complete'**
+  String get notifDownloadComplete;
+
+  /// Notification title when queue finishes with some failures
+  ///
+  /// In en, this message translates to:
+  /// **'Downloads Finished ({completed} done, {failed} failed)'**
+  String notifDownloadsFinished(int completed, int failed);
+
+  /// Notification title when all downloads finish successfully
+  ///
+  /// In en, this message translates to:
+  /// **'All Downloads Complete'**
+  String get notifAllDownloadsComplete;
+
+  /// Notification body for queue complete - how many tracks were downloaded
+  ///
+  /// In en, this message translates to:
+  /// **'{count} tracks downloaded successfully'**
+  String notifTracksDownloadedSuccess(int count);
+
+  /// Notification title while scanning local library
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning local library'**
+  String get notifScanningLibrary;
+
+  /// Notification body for library scan progress when total is known
+  ///
+  /// In en, this message translates to:
+  /// **'{scanned}/{total} files • {percentage}%'**
+  String notifLibraryScanProgressWithTotal(
+    int scanned,
+    int total,
+    int percentage,
+  );
+
+  /// Notification body for library scan progress when total is unknown
+  ///
+  /// In en, this message translates to:
+  /// **'{scanned} files scanned • {percentage}%'**
+  String notifLibraryScanProgressNoTotal(int scanned, int percentage);
+
+  /// Notification title when library scan finishes
+  ///
+  /// In en, this message translates to:
+  /// **'Library scan complete'**
+  String get notifLibraryScanComplete;
+
+  /// Notification body for library scan complete - number of indexed tracks
+  ///
+  /// In en, this message translates to:
+  /// **'{count} tracks indexed'**
+  String notifLibraryScanCompleteBody(int count);
+
+  /// Library scan complete suffix - excluded track count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} excluded'**
+  String notifLibraryScanExcluded(int count);
+
+  /// Library scan complete suffix - error count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} errors'**
+  String notifLibraryScanErrors(int count);
+
+  /// Notification title when library scan fails
+  ///
+  /// In en, this message translates to:
+  /// **'Library scan failed'**
+  String get notifLibraryScanFailed;
+
+  /// Notification title when library scan is cancelled by the user
+  ///
+  /// In en, this message translates to:
+  /// **'Library scan cancelled'**
+  String get notifLibraryScanCancelled;
+
+  /// Notification body when library scan is cancelled
+  ///
+  /// In en, this message translates to:
+  /// **'Scan stopped before completion.'**
+  String get notifLibraryScanStopped;
+
+  /// Notification title while downloading an app update
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading SpotiFLAC v{version}'**
+  String notifDownloadingUpdate(String version);
+
+  /// Notification body showing update download progress
+  ///
+  /// In en, this message translates to:
+  /// **'{received} / {total} MB • {percentage}%'**
+  String notifUpdateProgress(String received, String total, int percentage);
+
+  /// Notification title when app update download is complete
+  ///
+  /// In en, this message translates to:
+  /// **'Update Ready'**
+  String get notifUpdateReady;
+
+  /// Notification body when app update is ready to install
+  ///
+  /// In en, this message translates to:
+  /// **'SpotiFLAC v{version} downloaded. Tap to install.'**
+  String notifUpdateReadyBody(String version);
+
+  /// Notification title when app update download fails
+  ///
+  /// In en, this message translates to:
+  /// **'Update Failed'**
+  String get notifUpdateFailed;
+
+  /// Notification body when app update download fails
+  ///
+  /// In en, this message translates to:
+  /// **'Could not download update. Try again later.'**
+  String get notifUpdateFailedBody;
 }
 
 class _AppLocalizationsDelegate

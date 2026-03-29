@@ -339,7 +339,9 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Failed to open folder picker: $e'),
+                        content: Text(
+                          context.l10n.snackbarFolderPickerFailed(e.toString()),
+                        ),
                         backgroundColor: Theme.of(context).colorScheme.error,
                         duration: const Duration(seconds: 4),
                       ),
@@ -430,9 +432,9 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
       if (mounted) context.go('/tutorial');
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.snackbarError(e.toString()))),
+        );
       }
     } finally {
       setState(() => _isLoading = false);

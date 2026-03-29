@@ -307,9 +307,9 @@ class OptionsSettingsPage extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         Navigator.pop(context); // Close loading dialog
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.snackbarError(e.toString()))),
+        );
       }
     }
   }

@@ -5025,9 +5025,7 @@ class _EditMetadataSheetState extends State<_EditMetadataSheet> {
         if (ffmpegResult == null) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Failed to save metadata via FFmpeg'),
-              ),
+              SnackBar(content: Text(context.l10n.metadataSaveFailedFfmpeg)),
             );
           }
           setState(() => _saving = false);
@@ -5038,9 +5036,7 @@ class _EditMetadataSheetState extends State<_EditMetadataSheet> {
           final ok = await PlatformBridge.writeTempToSaf(ffmpegResult, safUri);
           if (!ok && mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Failed to write metadata back to storage'),
-              ),
+              SnackBar(content: Text(context.l10n.metadataSaveFailedStorage)),
             );
             setState(() => _saving = false);
             return;
@@ -5094,7 +5090,7 @@ class _EditMetadataSheetState extends State<_EditMetadataSheet> {
                 children: [
                   Expanded(
                     child: Text(
-                      'Edit Metadata',
+                      context.l10n.trackEditMetadata,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -5107,7 +5103,10 @@ class _EditMetadataSheetState extends State<_EditMetadataSheet> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   else
-                    FilledButton(onPressed: _save, child: const Text('Save')),
+                    FilledButton(
+                      onPressed: _save,
+                      child: Text(context.l10n.dialogSave),
+                    ),
                 ],
               ),
             ),

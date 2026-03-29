@@ -735,7 +735,7 @@ class _SearchProviderSelector extends ConsumerWidget {
                 (entry) => ListTile(
                   leading: Icon(Icons.search, color: colorScheme.tertiary),
                   title: Text(entry.value),
-                  subtitle: Text('Search with ${entry.value}'),
+                  subtitle: Text(ctx.l10n.extensionsSearchWith(entry.value)),
                   trailing: settings.searchProvider == entry.key
                       ? Icon(Icons.check_circle, color: colorScheme.primary)
                       : Icon(Icons.circle_outlined, color: colorScheme.outline),
@@ -791,7 +791,7 @@ class _HomeFeedProviderSelector extends ConsumerWidget {
 
     final hasAnyProvider = homeFeedProviders.isNotEmpty;
 
-    String currentProviderName = 'Auto';
+    String currentProviderName = context.l10n.extensionsHomeFeedAuto;
     if (settings.homeFeedProvider != null &&
         settings.homeFeedProvider!.isNotEmpty) {
       final ext = homeFeedProviders
@@ -828,7 +828,7 @@ class _HomeFeedProviderSelector extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Home Feed Provider',
+                        context.l10n.extensionsHomeFeedProvider,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: !hasAnyProvider ? colorScheme.outline : null,
                         ),
@@ -836,7 +836,7 @@ class _HomeFeedProviderSelector extends ConsumerWidget {
                       const SizedBox(height: 2),
                       Text(
                         !hasAnyProvider
-                            ? 'No extensions with home feed'
+                            ? context.l10n.extensionsNoHomeFeedExtensions
                             : currentProviderName,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
@@ -883,7 +883,7 @@ class _HomeFeedProviderSelector extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
                 child: Text(
-                  'Home Feed Provider',
+                  ctx.l10n.extensionsHomeFeedProvider,
                   style: Theme.of(
                     context,
                   ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
@@ -892,7 +892,7 @@ class _HomeFeedProviderSelector extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
                 child: Text(
-                  'Choose which extension provides the home feed on the main screen',
+                  ctx.l10n.extensionsHomeFeedDescription,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -900,8 +900,8 @@ class _HomeFeedProviderSelector extends ConsumerWidget {
               ),
               ListTile(
                 leading: Icon(Icons.auto_awesome, color: colorScheme.primary),
-                title: const Text('Auto'),
-                subtitle: const Text('Automatically select the best available'),
+                title: Text(ctx.l10n.extensionsHomeFeedAuto),
+                subtitle: Text(ctx.l10n.extensionsHomeFeedAutoSubtitle),
                 trailing:
                     (settings.homeFeedProvider == null ||
                         settings.homeFeedProvider!.isEmpty)
@@ -917,7 +917,9 @@ class _HomeFeedProviderSelector extends ConsumerWidget {
                 (ext) => ListTile(
                   leading: Icon(Icons.extension, color: colorScheme.secondary),
                   title: Text(ext.displayName),
-                  subtitle: Text('Use ${ext.displayName} home feed'),
+                  subtitle: Text(
+                    ctx.l10n.extensionsHomeFeedUse(ext.displayName),
+                  ),
                   trailing: settings.homeFeedProvider == ext.id
                       ? Icon(Icons.check_circle, color: colorScheme.primary)
                       : Icon(Icons.circle_outlined, color: colorScheme.outline),

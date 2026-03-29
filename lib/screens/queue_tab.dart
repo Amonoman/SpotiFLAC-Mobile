@@ -2174,13 +2174,13 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                                 ),
                               ),
                               FilterChip(
-                                label: const Text('A-Z'),
+                                label: Text(context.l10n.sortAlphaAsc),
                                 selected: tempSortMode == 'a-z',
                                 onSelected: (_) =>
                                     setSheetState(() => tempSortMode = 'a-z'),
                               ),
                               FilterChip(
-                                label: const Text('Z-A'),
+                                label: Text(context.l10n.sortAlphaDesc),
                                 selected: tempSortMode == 'z-a',
                                 onSelected: (_) =>
                                     setSheetState(() => tempSortMode = 'z-a'),
@@ -5461,18 +5461,18 @@ class _QueueTabState extends ConsumerState<QueueTab> {
               return await showDialog<bool>(
                     context: context,
                     builder: (ctx) => AlertDialog(
-                      title: const Text('Cancel download?'),
+                      title: Text(context.l10n.cancelDownloadTitle),
                       content: Text(
-                        'This will cancel the active download for "${item.track.name}".',
+                        context.l10n.cancelDownloadContent(item.track.name),
                       ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(ctx).pop(false),
-                          child: const Text('Keep'),
+                          child: Text(context.l10n.cancelDownloadKeep),
                         ),
                         TextButton(
                           onPressed: () => Navigator.of(ctx).pop(true),
-                          child: const Text('Cancel'),
+                          child: Text(context.l10n.dialogCancel),
                         ),
                       ],
                     ),

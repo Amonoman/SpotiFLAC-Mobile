@@ -3093,4 +3093,192 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get audioAnalysisSamples => 'Samples';
+
+  @override
+  String extensionsSearchWith(String providerName) {
+    return 'Search with $providerName';
+  }
+
+  @override
+  String get extensionsHomeFeedProvider => 'Home Feed Provider';
+
+  @override
+  String get extensionsHomeFeedDescription =>
+      'Choose which extension provides the home feed on the main screen';
+
+  @override
+  String get extensionsHomeFeedAuto => 'Auto';
+
+  @override
+  String get extensionsHomeFeedAutoSubtitle =>
+      'Automatically select the best available';
+
+  @override
+  String extensionsHomeFeedUse(String extensionName) {
+    return 'Use $extensionName home feed';
+  }
+
+  @override
+  String get extensionsNoHomeFeedExtensions => 'No extensions with home feed';
+
+  @override
+  String get sortAlphaAsc => 'A-Z';
+
+  @override
+  String get sortAlphaDesc => 'Z-A';
+
+  @override
+  String get cancelDownloadTitle => 'Cancel download?';
+
+  @override
+  String cancelDownloadContent(String trackName) {
+    return 'This will cancel the active download for \"$trackName\".';
+  }
+
+  @override
+  String get cancelDownloadKeep => 'Keep';
+
+  @override
+  String get metadataSaveFailedFfmpeg => 'Failed to save metadata via FFmpeg';
+
+  @override
+  String get metadataSaveFailedStorage =>
+      'Failed to write metadata back to storage';
+
+  @override
+  String snackbarFolderPickerFailed(String error) {
+    return 'Failed to open folder picker: $error';
+  }
+
+  @override
+  String get errorLoadAlbum => 'Failed to load album';
+
+  @override
+  String get errorLoadPlaylist => 'Failed to load playlist';
+
+  @override
+  String get errorLoadArtist => 'Failed to load artist';
+
+  @override
+  String get notifChannelDownloadName => 'Download Progress';
+
+  @override
+  String get notifChannelDownloadDesc => 'Shows download progress for tracks';
+
+  @override
+  String get notifChannelLibraryScanName => 'Library Scan';
+
+  @override
+  String get notifChannelLibraryScanDesc => 'Shows local library scan progress';
+
+  @override
+  String notifDownloadingTrack(String trackName) {
+    return 'Downloading $trackName';
+  }
+
+  @override
+  String notifFinalizingTrack(String trackName) {
+    return 'Finalizing $trackName';
+  }
+
+  @override
+  String get notifEmbeddingMetadata => 'Embedding metadata...';
+
+  @override
+  String notifAlreadyInLibraryCount(int completed, int total) {
+    return 'Already in Library ($completed/$total)';
+  }
+
+  @override
+  String get notifAlreadyInLibrary => 'Already in Library';
+
+  @override
+  String notifDownloadCompleteCount(int completed, int total) {
+    return 'Download Complete ($completed/$total)';
+  }
+
+  @override
+  String get notifDownloadComplete => 'Download Complete';
+
+  @override
+  String notifDownloadsFinished(int completed, int failed) {
+    return 'Downloads Finished ($completed done, $failed failed)';
+  }
+
+  @override
+  String get notifAllDownloadsComplete => 'All Downloads Complete';
+
+  @override
+  String notifTracksDownloadedSuccess(int count) {
+    return '$count tracks downloaded successfully';
+  }
+
+  @override
+  String get notifScanningLibrary => 'Scanning local library';
+
+  @override
+  String notifLibraryScanProgressWithTotal(
+    int scanned,
+    int total,
+    int percentage,
+  ) {
+    return '$scanned/$total files • $percentage%';
+  }
+
+  @override
+  String notifLibraryScanProgressNoTotal(int scanned, int percentage) {
+    return '$scanned files scanned • $percentage%';
+  }
+
+  @override
+  String get notifLibraryScanComplete => 'Library scan complete';
+
+  @override
+  String notifLibraryScanCompleteBody(int count) {
+    return '$count tracks indexed';
+  }
+
+  @override
+  String notifLibraryScanExcluded(int count) {
+    return '$count excluded';
+  }
+
+  @override
+  String notifLibraryScanErrors(int count) {
+    return '$count errors';
+  }
+
+  @override
+  String get notifLibraryScanFailed => 'Library scan failed';
+
+  @override
+  String get notifLibraryScanCancelled => 'Library scan cancelled';
+
+  @override
+  String get notifLibraryScanStopped => 'Scan stopped before completion.';
+
+  @override
+  String notifDownloadingUpdate(String version) {
+    return 'Downloading SpotiFLAC v$version';
+  }
+
+  @override
+  String notifUpdateProgress(String received, String total, int percentage) {
+    return '$received / $total MB • $percentage%';
+  }
+
+  @override
+  String get notifUpdateReady => 'Update Ready';
+
+  @override
+  String notifUpdateReadyBody(String version) {
+    return 'SpotiFLAC v$version downloaded. Tap to install.';
+  }
+
+  @override
+  String get notifUpdateFailed => 'Update Failed';
+
+  @override
+  String get notifUpdateFailedBody =>
+      'Could not download update. Try again later.';
 }

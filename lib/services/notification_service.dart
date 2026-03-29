@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:spotiflac_android/l10n/app_localizations.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -13,6 +14,13 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
   bool _isInitialized = false;
   bool _notificationPermissionRequested = false;
+  AppLocalizations? _l10n;
+
+  /// Call this from the widget tree (e.g. didChangeDependencies) whenever the
+  /// app locale changes so that notification strings stay in sync.
+  void updateStrings(AppLocalizations l10n) {
+    _l10n = l10n;
+  }
 
   static const int downloadProgressId = 1;
   static const int updateDownloadId = 2;
@@ -165,7 +173,8 @@ class NotificationService {
 
     await _showSafely(
       id: downloadProgressId,
-      title: 'Downloading $trackName',
+      title:
+          _l10n?.notifDownloadingTrack(trackName) ?? 'Downloading $trackName',
       body: '$artistName • $percentage%',
       details: details,
     );
@@ -208,8 +217,9 @@ class NotificationService {
 
     await _showSafely(
       id: downloadProgressId,
-      title: 'Finalizing $trackName',
-      body: '$artistName • Embedding metadata...',
+      title: _l10n?.notifFinalizingTrack(trackName) ?? 'Finalizing $trackName',
+      body:
+          '$artistName • ${_l10n?.notifEmbeddingMetadata ?? 'Embedding metadata...'}',
       details: details,
     );
   }
@@ -226,12 +236,14 @@ class NotificationService {
     String title;
     if (alreadyInLibrary) {
       title = completedCount != null && totalCount != null
-          ? 'Already in Library ($completedCount/$totalCount)'
-          : 'Already in Library';
+          ? (_l10n?.notifAlreadyInLibraryCount(completedCount, totalCount) ??
+                'Already in Library ($completedCount/$totalCount)')
+          : (_l10n?.notifAlreadyInLibrary ?? 'Already in Library');
     } else {
       title = completedCount != null && totalCount != null
-          ? 'Download Complete ($completedCount/$totalCount)'
-          : 'Download Complete';
+          ? (_l10n?.notifDownloadCompleteCount(completedCount, totalCount) ??
+                'Download Complete ($completedCount/$totalCount)')
+          : (_l10n?.notifDownloadComplete ?? 'Download Complete');
     }
 
     const androidDetails = AndroidNotificationDetails(
@@ -271,8 +283,9 @@ class NotificationService {
     if (!_isInitialized) await initialize();
 
     final title = failedCount > 0
-        ? 'Downloads Finished ($completedCount done, $failedCount failed)'
-        : 'All Downloads Complete';
+        ? (_l10n?.notifDownloadsFinished(completedCount, failedCount) ??
+              'Downloads Finished ($completedCount done, $failedCount failed)')
+        : (_l10n?.notifAllDownloadsComplete ?? 'All Downloads Complete');
 
     const androidDetails = AndroidNotificationDetails(
       channelId,
@@ -299,7 +312,9 @@ class NotificationService {
     await _showSafely(
       id: downloadProgressId,
       title: title,
-      body: '$completedCount tracks downloaded successfully',
+      body:
+          _l10n?.notifTracksDownloadedSuccess(completedCount) ??
+          '$completedCount tracks downloaded successfully',
       details: details,
     );
   }
@@ -319,8 +334,14 @@ class NotificationService {
     final clampedProgress = progress.clamp(0.0, 100.0);
     final percentage = clampedProgress.round();
     final progressBody = totalFiles > 0
-        ? '$scannedFiles/$totalFiles files • $percentage%'
-        : '$scannedFiles files scanned • $percentage%';
+        ? (_l10n?.notifLibraryScanProgressWithTotal(
+                scannedFiles,
+                totalFiles,
+                percentage,
+              ) ??
+              '$scannedFiles/$totalFiles files • $percentage%')
+        : (_l10n?.notifLibraryScanProgressNoTotal(scannedFiles, percentage) ??
+              '$scannedFiles files scanned • $percentage%');
     final body = (currentFile != null && currentFile.isNotEmpty)
         ? '$progressBody\n$currentFile'
         : progressBody;
@@ -355,7 +376,7 @@ class NotificationService {
 
     await _showSafely(
       id: libraryScanId,
-      title: 'Scanning local library',
+      title: _l10n?.notifScanningLibrary ?? 'Scanning local library',
       body: body,
       details: details,
     );
@@ -370,10 +391,15 @@ class NotificationService {
 
     final extras = <String>[];
     if (excludedDownloadedCount > 0) {
-      extras.add('$excludedDownloadedCount excluded');
+      extras.add(
+        _l10n?.notifLibraryScanExcluded(excludedDownloadedCount) ??
+            '$excludedDownloadedCount excluded',
+      );
     }
     if (errorCount > 0) {
-      extras.add('$errorCount errors');
+      extras.add(
+        _l10n?.notifLibraryScanErrors(errorCount) ?? '$errorCount errors',
+      );
     }
     final suffix = extras.isEmpty ? '' : ' (${extras.join(', ')})';
 
@@ -401,8 +427,9 @@ class NotificationService {
 
     await _showSafely(
       id: libraryScanId,
-      title: 'Library scan complete',
-      body: '$totalTracks tracks indexed$suffix',
+      title: _l10n?.notifLibraryScanComplete ?? 'Library scan complete',
+      body:
+          '${_l10n?.notifLibraryScanCompleteBody(totalTracks) ?? '$totalTracks tracks indexed'}$suffix',
       details: details,
     );
   }
@@ -434,7 +461,7 @@ class NotificationService {
 
     await _showSafely(
       id: libraryScanId,
-      title: 'Library scan failed',
+      title: _l10n?.notifLibraryScanFailed ?? 'Library scan failed',
       body: message,
       details: details,
     );
@@ -467,8 +494,8 @@ class NotificationService {
 
     await _showSafely(
       id: libraryScanId,
-      title: 'Library scan cancelled',
-      body: 'Scan stopped before completion.',
+      title: _l10n?.notifLibraryScanCancelled ?? 'Library scan cancelled',
+      body: _l10n?.notifLibraryScanStopped ?? 'Scan stopped before completion.',
       details: details,
     );
   }
@@ -518,8 +545,12 @@ class NotificationService {
 
     await _showSafely(
       id: updateDownloadId,
-      title: 'Downloading SpotiFLAC v$version',
-      body: '$receivedMB / $totalMB MB • $percentage%',
+      title:
+          _l10n?.notifDownloadingUpdate(version) ??
+          'Downloading SpotiFLAC v$version',
+      body:
+          _l10n?.notifUpdateProgress(receivedMB, totalMB, percentage) ??
+          '$receivedMB / $totalMB MB • $percentage%',
       details: details,
     );
   }
@@ -551,8 +582,10 @@ class NotificationService {
 
     await _showSafely(
       id: updateDownloadId,
-      title: 'Update Ready',
-      body: 'SpotiFLAC v$version downloaded. Tap to install.',
+      title: _l10n?.notifUpdateReady ?? 'Update Ready',
+      body:
+          _l10n?.notifUpdateReadyBody(version) ??
+          'SpotiFLAC v$version downloaded. Tap to install.',
       details: details,
     );
   }
@@ -583,8 +616,10 @@ class NotificationService {
 
     await _showSafely(
       id: updateDownloadId,
-      title: 'Update Failed',
-      body: 'Could not download update. Try again later.',
+      title: _l10n?.notifUpdateFailed ?? 'Update Failed',
+      body:
+          _l10n?.notifUpdateFailedBody ??
+          'Could not download update. Try again later.',
       details: details,
     );
   }
