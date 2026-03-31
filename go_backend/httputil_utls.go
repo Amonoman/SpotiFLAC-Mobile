@@ -16,8 +16,6 @@ import (
 	"golang.org/x/net/http2"
 )
 
-// uTLS transport that mimics Chrome's TLS fingerprint to bypass Cloudflare
-// Uses HTTP/2 for optimal performance as uTLS works best with HTTP/2
 type utlsTransport struct {
 	dialer       *net.Dialer
 	mu           sync.Mutex
@@ -98,15 +96,10 @@ var cloudflareBypassClient = &http.Client{
 	Timeout:   DefaultTimeout,
 }
 
-// GetCloudflareBypassClient returns an HTTP client that mimics Chrome's TLS fingerprint
-// Use this when requests are blocked by Cloudflare (common when using VPN)
 func GetCloudflareBypassClient() *http.Client {
 	return cloudflareBypassClient
 }
 
-// DoRequestWithCloudflareBypass attempts request with standard client first,
-// then retries with uTLS Chrome fingerprint if Cloudflare blocks it.
-// This is useful when using VPN as Cloudflare detects Go's default TLS fingerprint.
 func DoRequestWithCloudflareBypass(req *http.Request) (*http.Response, error) {
 	req.Header.Set("User-Agent", getRandomUserAgent())
 
@@ -142,7 +135,6 @@ func DoRequestWithCloudflareBypass(req *http.Request) (*http.Response, error) {
 				}
 			}
 
-			// Not Cloudflare, return original response (recreate body)
 			return &http.Response{
 				Status:     resp.Status,
 				StatusCode: resp.StatusCode,

@@ -145,7 +145,7 @@ func initExtensionStore(cacheDir string) *extensionStore {
 
 	if globalExtensionStore == nil {
 		globalExtensionStore = &extensionStore{
-			registryURL: "", // No default - user must provide a registry URL
+			registryURL: "",
 			cacheDir:    cacheDir,
 			cacheTTL:    cacheTTL,
 		}
@@ -154,8 +154,6 @@ func initExtensionStore(cacheDir string) *extensionStore {
 	return globalExtensionStore
 }
 
-// SetRegistryURL updates the registry URL and clears the in-memory cache
-// so the next fetch will use the new URL. Disk cache is also cleared.
 func (s *extensionStore) setRegistryURL(registryURL string) {
 	s.cacheMu.Lock()
 	defer s.cacheMu.Unlock()
@@ -168,7 +166,6 @@ func (s *extensionStore) setRegistryURL(registryURL string) {
 	s.cache = nil
 	s.cacheTime = time.Time{}
 
-	// Clear disk cache since it's from a different registry
 	if s.cacheDir != "" {
 		cachePath := filepath.Join(s.cacheDir, cacheFileName)
 		os.Remove(cachePath)
@@ -177,7 +174,6 @@ func (s *extensionStore) setRegistryURL(registryURL string) {
 	LogInfo("ExtensionStore", "Registry URL updated to: %s", registryURL)
 }
 
-// GetRegistryURL returns the currently configured registry URL.
 func (s *extensionStore) getRegistryURL() string {
 	s.cacheMu.RLock()
 	defer s.cacheMu.RUnlock()
@@ -394,32 +390,22 @@ func (s *extensionStore) downloadExtension(extensionID string, destPath string) 
 	return nil
 }
 
-// ResolveRegistryURL normalises a user-supplied URL into a direct registry.json URL.
-//
-// Accepted formats:
-//   - https://raw.githubusercontent.com/owner/repo/<branch>/registry.json  → returned as-is
-//   - https://github.com/owner/repo  (with optional trailing path / .git)  → resolved via
-//     the GitHub API to discover the default branch, then converted to the raw URL
-//   - Any other HTTPS URL  → returned as-is (assumed to be a direct link)
 func resolveRegistryURL(input string) (string, error) {
 	input = strings.TrimSpace(input)
 	if input == "" {
 		return "", fmt.Errorf("registry URL is empty")
 	}
 
-	// Already a fully-qualified raw URL – keep it.
 	if strings.Contains(input, "raw.githubusercontent.com") {
 		return input, nil
 	}
 
 	const ghPrefix = "https://github.com/"
 	if !strings.HasPrefix(input, ghPrefix) {
-		// Also accept http:// and upgrade silently.
 		const ghPrefixHTTP = "http://github.com/"
 		if strings.HasPrefix(input, ghPrefixHTTP) {
 			input = "https://github.com/" + input[len(ghPrefixHTTP):]
 		} else {
-			// Not a GitHub URL – return as-is.
 			return input, nil
 		}
 	}
@@ -439,8 +425,6 @@ func resolveRegistryURL(input string) (string, error) {
 	return resolved, nil
 }
 
-// resolveGitHubDefaultBranch calls the GitHub API to discover the repository's
-// default branch.  Falls back to "main" on any error.
 func resolveGitHubDefaultBranch(owner, repo string) string {
 	apiURL := fmt.Sprintf("https://api.github.com/repos/%s/%s", owner, repo)
 	client := NewHTTPClientWithTimeout(10 * time.Second)

@@ -1041,9 +1041,6 @@ func DownloadWithExtensionFallback(req DownloadRequest) (*DownloadResponse, erro
 		}
 	}
 
-	// If key metadata is still missing after extension enrichment, search
-	// configured metadata providers (Spotify/Deezer/Tidal/Qobuz) — same
-	// logic that ReEnrichFile uses.
 	if req.Source != "" && !isBuiltInProvider(strings.ToLower(req.Source)) &&
 		req.TrackName != "" && req.ArtistName != "" &&
 		(req.AlbumName == "" || req.ReleaseDate == "" || req.ISRC == "") {
@@ -1091,7 +1088,6 @@ func DownloadWithExtensionFallback(req DownloadRequest) (*DownloadResponse, erro
 			GoLog("[DownloadWithExtensionFallback] Metadata provider search failed (non-fatal): %v\n", searchErr)
 		}
 
-		// Try Deezer extended metadata if we have ISRC
 		if req.ISRC != "" &&
 			(req.Genre == "" || req.Label == "" || req.Copyright == "") {
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -1205,8 +1201,6 @@ func DownloadWithExtensionFallback(req DownloadRequest) (*DownloadResponse, erro
 					}
 				}
 
-				// Always pass enriched metadata from req so Flutter can
-				// embed it — fills gaps from metadata provider search.
 				if req.AlbumName != "" && resp.Album == "" {
 					resp.Album = req.AlbumName
 				}
@@ -1609,7 +1603,6 @@ func buildOutputPathForExtension(req DownloadRequest, ext *LoadedExtension) stri
 		return buildOutputPath(req)
 	}
 
-	// SAF mode: use extension's data dir as writable temp location
 	tempDir := filepath.Join(ext.DataDir, "downloads")
 	os.MkdirAll(tempDir, 0755)
 	AddAllowedDownloadDir(tempDir)
@@ -2267,7 +2260,6 @@ func (p *ExtensionProviderWrapper) FetchLyrics(trackName, artistName, albumName 
 		return nil, fmt.Errorf("failed to parse lyrics result: %w", err)
 	}
 
-	// Convert ExtLyricsResult to LyricsResponse
 	response := &LyricsResponse{
 		SyncType:     extResult.SyncType,
 		Instrumental: extResult.Instrumental,
@@ -2288,7 +2280,6 @@ func (p *ExtensionProviderWrapper) FetchLyrics(trackName, artistName, albumName 
 		})
 	}
 
-	// If the extension provided plainLyrics but no lines, parse them as unsynced
 	if len(response.Lines) == 0 && response.PlainLyrics != "" && !response.Instrumental {
 		response.SyncType = "UNSYNCED"
 		for _, line := range strings.Split(response.PlainLyrics, "\n") {
@@ -2316,7 +2307,6 @@ func (m *ExtensionManager) GetLyricsProviders() []*ExtensionProviderWrapper {
 		}
 	}
 
-	// Keep a deterministic order so provider selection is stable across runs.
 	sort.Slice(providers, func(i, j int) bool {
 		return providers[i].extension.ID < providers[j].extension.ID
 	})

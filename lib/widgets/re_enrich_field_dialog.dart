@@ -29,10 +29,6 @@ class ReEnrichFieldSelection {
   bool get isAll => fields.length == ReEnrichFields.all.length;
 }
 
-/// Shows a bottom sheet that lets the user pick which metadata fields to update
-/// during a bulk re-enrich operation.
-///
-/// Returns `null` when cancelled, or a [ReEnrichFieldSelection] when confirmed.
 Future<ReEnrichFieldSelection?> showReEnrichFieldDialog(
   BuildContext context, {
   required int selectedCount,
@@ -128,7 +124,6 @@ class _ReEnrichFieldSheetState extends State<_ReEnrichFieldSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Title
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 0, 24, 4),
             child: Text(
@@ -138,7 +133,6 @@ class _ReEnrichFieldSheetState extends State<_ReEnrichFieldSheet> {
               ),
             ),
           ),
-          // Subtitle
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 0, 24, 4),
             child: Text(
@@ -158,7 +152,6 @@ class _ReEnrichFieldSheetState extends State<_ReEnrichFieldSheet> {
             ),
           ),
           const Divider(height: 1),
-          // Select All
           CheckboxListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             title: Text(
@@ -171,7 +164,6 @@ class _ReEnrichFieldSheetState extends State<_ReEnrichFieldSheet> {
             controlAffinity: ListTileControlAffinity.leading,
           ),
           const Divider(height: 1, indent: 16, endIndent: 16),
-          // Individual fields
           for (final field in ReEnrichFields.all)
             CheckboxListTile(
               contentPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -182,7 +174,6 @@ class _ReEnrichFieldSheetState extends State<_ReEnrichFieldSheet> {
               controlAffinity: ListTileControlAffinity.leading,
             ),
           const SizedBox(height: 8),
-          // Confirm button
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             child: SizedBox(

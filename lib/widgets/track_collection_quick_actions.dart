@@ -74,7 +74,6 @@ class _TrackOptionsSheet extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Header with drag handle + track info (matches _TrackInfoHeader)
               Column(
                 children: [
                   const SizedBox(height: 8),
@@ -163,7 +162,6 @@ class _TrackOptionsSheet extends ConsumerWidget {
                 color: colorScheme.outlineVariant.withValues(alpha: 0.5),
               ),
 
-              // Action items (matches _QualityOption style)
               _OptionTile(
                 icon: isLoved ? Icons.favorite : Icons.favorite_border,
                 iconColor: isLoved ? colorScheme.error : null,
@@ -234,7 +232,6 @@ class _TrackOptionsSheet extends ConsumerWidget {
   }
 }
 
-/// Styled like _QualityOption in download_service_picker.dart
 class _OptionTile extends StatelessWidget {
   final IconData icon;
   final Color? iconColor;

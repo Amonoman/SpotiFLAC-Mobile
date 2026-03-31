@@ -338,7 +338,6 @@ func readID3v1(file *os.File) (*AudioMetadata, error) {
 		Year:   strings.TrimRight(string(tag[93:97]), " \x00"),
 	}
 
-	// ID3v1.1 track number (if byte 125 is 0 and byte 126 is not)
 	if tag[125] == 0 && tag[126] != 0 {
 		metadata.TrackNumber = int(tag[126])
 	}
@@ -373,27 +372,23 @@ func extractTextFrame(data []byte) string {
 	}
 }
 
-// extractCommentFrame parses an ID3v2 COMM frame.
-// Format: encoding(1) + language(3) + description(null-terminated) + text
 func extractCommentFrame(data []byte) string {
 	if len(data) < 5 {
 		return ""
 	}
 	encoding := data[0]
-	// skip 3-byte language code
 	rest := data[4:]
 
-	// find null terminator separating description from text
 	var text []byte
 	switch encoding {
-	case 1, 2: // UTF-16 variants use double-null terminator
+	case 1, 2:
 		for i := 0; i+1 < len(rest); i += 2 {
 			if rest[i] == 0 && rest[i+1] == 0 {
 				text = rest[i+2:]
 				break
 			}
 		}
-	default: // ISO-8859-1 or UTF-8
+	default:
 		idx := bytes.IndexByte(rest, 0)
 		if idx >= 0 && idx+1 < len(rest) {
 			text = rest[idx+1:]
@@ -406,33 +401,30 @@ func extractCommentFrame(data []byte) string {
 		return ""
 	}
 
-	// re-prepend encoding byte so extractTextFrame can decode properly
 	framed := make([]byte, 1+len(text))
 	framed[0] = encoding
 	copy(framed[1:], text)
 	return extractTextFrame(framed)
 }
 
-// extractLyricsFrame parses ID3 unsynchronized lyrics frames (USLT/ULT).
-// Format: encoding(1) + language(3) + description(null-terminated) + lyrics text.
 func extractLyricsFrame(data []byte) string {
 	if len(data) < 5 {
 		return ""
 	}
 
 	encoding := data[0]
-	rest := data[4:] // skip 3-byte language code
+	rest := data[4:]
 
 	var text []byte
 	switch encoding {
-	case 1, 2: // UTF-16 variants use double-null terminator
+	case 1, 2:
 		for i := 0; i+1 < len(rest); i += 2 {
 			if rest[i] == 0 && rest[i+1] == 0 {
 				text = rest[i+2:]
 				break
 			}
 		}
-	default: // ISO-8859-1 or UTF-8
+	default:
 		idx := bytes.IndexByte(rest, 0)
 		if idx >= 0 && idx+1 < len(rest) {
 			text = rest[idx+1:]
@@ -451,8 +443,6 @@ func extractLyricsFrame(data []byte) string {
 	return extractTextFrame(framed)
 }
 
-// extractUserTextFrame parses ID3 TXXX/TXX user text frame:
-// encoding(1) + description + separator + value.
 func extractUserTextFrame(data []byte) (string, string) {
 	if len(data) < 2 {
 		return "", ""
@@ -463,7 +453,7 @@ func extractUserTextFrame(data []byte) (string, string) {
 
 	var descRaw, valueRaw []byte
 	switch encoding {
-	case 1, 2: // UTF-16 variants
+	case 1, 2:
 		for i := 0; i+1 < len(payload); i += 2 {
 			if payload[i] == 0 && payload[i+1] == 0 {
 				descRaw = payload[:i]
@@ -471,7 +461,7 @@ func extractUserTextFrame(data []byte) (string, string) {
 				break
 			}
 		}
-	default: // ISO-8859-1 or UTF-8
+	default:
 		idx := bytes.IndexByte(payload, 0)
 		if idx >= 0 {
 			descRaw = payload[:idx]
@@ -665,7 +655,6 @@ func GetMP3Quality(filePath string) (*MP3Quality, error) {
 
 	file.Seek(audioStart, io.SeekStart)
 
-	// Find first valid MP3 frame sync
 	frameHeader := make([]byte, 4)
 	var frameStart int64 = -1
 	for i := 0; i < 10000; i++ {
@@ -692,8 +681,6 @@ func GetMP3Quality(filePath string) (*MP3Quality, error) {
 	sampleRateIdx := (frameHeader[2] >> 2) & 0x03
 	channelMode := (frameHeader[3] >> 6) & 0x03
 
-	// Sample rate tables: [version][index]
-	// version: 0=MPEG2.5, 1=reserved, 2=MPEG2, 3=MPEG1
 	sampleRates := [][]int{
 		{11025, 12000, 8000},
 		{0, 0, 0},
@@ -704,15 +691,12 @@ func GetMP3Quality(filePath string) (*MP3Quality, error) {
 		quality.SampleRate = sampleRates[version][sampleRateIdx]
 	}
 
-	// Bitrate tables for all MPEG versions and layers
-	// MPEG1 Layer III
 	if version == 3 && layer == 1 {
 		bitrates := []int{0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 0}
 		if bitrateIdx < 16 {
 			quality.Bitrate = bitrates[bitrateIdx] * 1000
 		}
 	}
-	// MPEG2/2.5 Layer III
 	if (version == 0 || version == 2) && layer == 1 {
 		bitrates := []int{0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, 0}
 		if bitrateIdx < 16 {
@@ -720,14 +704,11 @@ func GetMP3Quality(filePath string) (*MP3Quality, error) {
 		}
 	}
 
-	// Determine samples per frame for duration calculation
 	samplesPerFrame := 1152 // MPEG1 Layer III
 	if version == 0 || version == 2 {
 		samplesPerFrame = 576 // MPEG2/2.5 Layer III
 	}
 
-	// Try to read Xing/VBRI header from the first frame for VBR info
-	// Xing header offset depends on MPEG version and channel mode
 	var xingOffset int
 	if version == 3 { // MPEG1
 		if channelMode == 3 { // Mono
@@ -743,7 +724,6 @@ func GetMP3Quality(filePath string) (*MP3Quality, error) {
 		}
 	}
 
-	// Read enough of the first frame to find Xing/VBRI header
 	xingBuf := make([]byte, 200)
 	file.Seek(frameStart+4, io.SeekStart)
 	n, _ := io.ReadFull(file, xingBuf)
@@ -753,7 +733,6 @@ func GetMP3Quality(filePath string) (*MP3Quality, error) {
 	vbrBytes := int64(0)
 	isVBR := false
 
-	// Check for Xing/Info header
 	if xingOffset+8 <= n {
 		tag := string(xingBuf[xingOffset : xingOffset+4])
 		if tag == "Xing" || tag == "Info" {
@@ -772,7 +751,6 @@ func GetMP3Quality(filePath string) (*MP3Quality, error) {
 		}
 	}
 
-	// Check for VBRI header (always at offset 32 from frame start + 4)
 	if !isVBR && 36+26 <= n {
 		if string(xingBuf[32:36]) == "VBRI" {
 			vbrBytes = int64(binary.BigEndian.Uint32(xingBuf[36+6 : 36+10]))
@@ -784,11 +762,9 @@ func GetMP3Quality(filePath string) (*MP3Quality, error) {
 	}
 
 	if isVBR && vbrFrames > 0 && quality.SampleRate > 0 {
-		// Accurate duration from total frames
 		totalSamples := int64(vbrFrames) * int64(samplesPerFrame)
 		quality.Duration = int(totalSamples / int64(quality.SampleRate))
 
-		// Accurate average bitrate
 		if vbrBytes > 0 && quality.Duration > 0 {
 			quality.Bitrate = int(vbrBytes * 8 / int64(quality.Duration))
 		} else if quality.Duration > 0 {
@@ -796,7 +772,6 @@ func GetMP3Quality(filePath string) (*MP3Quality, error) {
 			quality.Bitrate = int(audioSize * 8 / int64(quality.Duration))
 		}
 	} else if quality.Bitrate > 0 {
-		// CBR fallback: estimate duration from file size and frame bitrate
 		audioSize := fileSize - audioStart - 128 // subtract possible ID3v1 tag
 		if audioSize > 0 {
 			quality.Duration = int(audioSize * 8 / int64(quality.Bitrate))
@@ -983,7 +958,6 @@ func parseVorbisComments(data []byte, metadata *AudioMetadata) {
 	artistValues := make([]string, 0, 1)
 	albumArtistValues := make([]string, 0, 1)
 
-	// Read vendor string length
 	var vendorLen uint32
 	if err := binary.Read(reader, binary.LittleEndian, &vendorLen); err != nil {
 		return
@@ -1012,8 +986,6 @@ func parseVorbisComments(data []byte, metadata *AudioMetadata) {
 		if commentLen > remaining {
 			break
 		}
-		// Large comment entries are typically METADATA_BLOCK_PICTURE.
-		// Skip them so we can continue parsing normal text tags after/before.
 		if commentLen > 512*1024 {
 			reader.Seek(int64(commentLen), io.SeekCurrent)
 			continue
@@ -1123,7 +1095,6 @@ func GetOggQuality(filePath string) (*OggQuality, error) {
 		}
 	}
 
-	// Read granule position from the last Ogg page for accurate duration
 	stat, err := file.Stat()
 	if err != nil {
 		return quality, nil
@@ -1133,7 +1104,6 @@ func GetOggQuality(filePath string) (*OggQuality, error) {
 	granule := readLastOggGranulePosition(file, fileSize)
 	if granule > 0 {
 		if isOpus {
-			// Opus always uses 48kHz granule position internally
 			totalSamples := granule - int64(preSkip)
 			if totalSamples > 0 {
 				durationSec := float64(totalSamples) / 48000.0
@@ -1151,11 +1121,9 @@ func GetOggQuality(filePath string) (*OggQuality, error) {
 		}
 	}
 
-	// Fallback bitrate estimate if duration exists but bitrate couldn't be derived.
 	if quality.Bitrate <= 0 && quality.Duration > 0 {
 		quality.Bitrate = int(fileSize * 8 / int64(quality.Duration))
 	}
-	// Guard against obviously invalid values from corrupted/unreliable granule reads.
 	if quality.Duration > 24*60*60 {
 		quality.Duration = 0
 		quality.Bitrate = 0
@@ -1167,10 +1135,7 @@ func GetOggQuality(filePath string) (*OggQuality, error) {
 	return quality, nil
 }
 
-// readLastOggGranulePosition seeks to the end of the file and scans backwards
-// to find the last Ogg page, then reads its granule position (bytes 6-13).
 func readLastOggGranulePosition(file *os.File, fileSize int64) int64 {
-	// Read the last chunk of the file to find the last OggS sync
 	searchSize := int64(65536)
 	if searchSize > fileSize {
 		searchSize = fileSize
@@ -1194,7 +1159,6 @@ func readLastOggGranulePosition(file *os.File, fileSize int64) int64 {
 		if i+27 > n {
 			continue
 		}
-		// Validate minimal header fields to avoid false positives inside payload bytes.
 		version := buf[i+4]
 		headerType := buf[i+5]
 		if version != 0 || headerType > 0x07 {
@@ -1212,7 +1176,6 @@ func readLastOggGranulePosition(file *os.File, fileSize int64) int64 {
 		if i+headerLen+payloadLen > n {
 			continue
 		}
-		// Granule position is at bytes 6-13 of the Ogg page header (little-endian int64).
 		return int64(binary.LittleEndian.Uint64(buf[i+6 : i+14]))
 	}
 	return 0
@@ -1272,7 +1235,6 @@ func extractMP3CoverArt(filePath string) ([]byte, string, error) {
 		return nil, "", err
 	}
 
-	// Parse frames looking for APIC (Attached Picture)
 	pos := 0
 	var frameIDLen, headerLen int
 	if majorVersion == 2 {
@@ -1303,7 +1265,6 @@ func extractMP3CoverArt(filePath string) ([]byte, string, error) {
 			break
 		}
 
-		// Check for APIC (ID3v2.3/2.4) or PIC (ID3v2.2)
 		if (frameIDLen == 4 && frameID == "APIC") || (frameIDLen == 3 && frameID == "PIC") {
 			frameData := tagData[pos+headerLen : pos+headerLen+frameSize]
 			imageData, mimeType := parseAPICFrame(frameData, majorVersion)

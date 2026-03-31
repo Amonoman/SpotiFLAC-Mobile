@@ -20,6 +20,7 @@ import 'package:spotiflac_android/services/history_database.dart';
 import 'package:spotiflac_android/utils/logger.dart';
 import 'package:spotiflac_android/utils/file_access.dart';
 import 'package:spotiflac_android/utils/string_utils.dart';
+import 'package:spotiflac_android/utils/artist_utils.dart';
 
 final _log = AppLogger('DownloadQueue');
 final _historyLog = AppLogger('DownloadHistory');
@@ -3008,6 +3009,22 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
         _log.d('Metadata and cover embedded via FFmpeg');
       } else {
         _log.w('FFmpeg metadata/cover embed failed');
+      }
+
+      // After FFmpeg embed, fix split artist tags using native FLAC writer.
+      // FFmpeg deduplicates repeated metadata keys, so multiple ARTIST entries
+      // collapse into one. The Go FLAC writer rewrites them properly.
+      if (settings.artistTagMode == artistTagModeSplitVorbis) {
+        try {
+          await PlatformBridge.rewriteSplitArtistTags(
+            flacPath,
+            track.artistName,
+            albumArtist,
+          );
+          _log.d('Split artist tags rewritten via native FLAC writer');
+        } catch (e) {
+          _log.w('Failed to rewrite split artist tags: $e');
+        }
       }
 
       if (coverPath != null) {

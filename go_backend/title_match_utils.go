@@ -22,8 +22,6 @@ func writeNormalizedArtistRune(b *strings.Builder, r rune) {
 	}
 }
 
-// normalizeLooseTitle collapses separators/punctuation so titles like
-// "Doctor / Cops" and "Doctor _ Cops" can still match.
 func normalizeLooseTitle(title string) string {
 	trimmed := strings.TrimSpace(strings.ToLower(title))
 	if trimmed == "" {
@@ -48,8 +46,6 @@ func normalizeLooseTitle(title string) string {
 	return strings.Join(strings.Fields(b.String()), " ")
 }
 
-// normalizeLooseArtistName folds diacritics and common separators so artist
-// verification is resilient to variants like "Özkent" vs "Ozkent".
 func normalizeLooseArtistName(name string) string {
 	trimmed := strings.TrimSpace(strings.ToLower(name))
 	if trimmed == "" {
@@ -87,9 +83,6 @@ func hasAlphaNumericRunes(value string) bool {
 	return false
 }
 
-// normalizeSymbolOnlyTitle keeps symbol/emoji runes while dropping letters,
-// digits, spaces and punctuation. This is useful for emoji-only titles such as
-// "🪐", "🌎" etc, so we can compare them strictly and avoid false matches.
 func normalizeSymbolOnlyTitle(title string) string {
 	trimmed := strings.TrimSpace(strings.ToLower(title))
 	if trimmed == "" {
@@ -114,7 +107,6 @@ func normalizeSymbolOnlyTitle(title string) string {
 	return b.String()
 }
 
-// resolvedTrackInfo holds the metadata fetched from a provider for verification.
 type resolvedTrackInfo struct {
 	Title                string
 	ArtistName           string
@@ -123,8 +115,6 @@ type resolvedTrackInfo struct {
 	SkipNameVerification bool
 }
 
-// trackMatchesRequest checks whether a resolved track from a provider matches
-// the original download request. Returns true if the track is a plausible match.
 func trackMatchesRequest(req DownloadRequest, resolved resolvedTrackInfo, logPrefix string) bool {
 	exactISRCMatch := req.ISRC != "" &&
 		resolved.ISRC != "" &&

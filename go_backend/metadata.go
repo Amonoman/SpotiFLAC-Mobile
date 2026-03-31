@@ -431,6 +431,52 @@ func setArtistComments(cmt *flacvorbis.MetaDataBlockVorbisComment, key, value, m
 	}
 }
 
+// RewriteSplitArtistTags opens a FLAC file and rewrites the ARTIST and
+// ALBUMARTIST Vorbis comments as multiple separate entries (one per artist).
+// This is needed because FFmpeg's -metadata flag deduplicates keys, so only
+// the last value survives when multiple -metadata ARTIST=X flags are used.
+// The native go-flac writer correctly handles multiple Vorbis comments.
+func RewriteSplitArtistTags(filePath, artist, albumArtist string) error {
+	if !shouldSplitVorbisArtistTags(artistTagModeSplitVorbis) {
+		return nil
+	}
+
+	f, err := flac.ParseFile(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to parse FLAC file: %w", err)
+	}
+
+	var cmtIdx int = -1
+	var cmt *flacvorbis.MetaDataBlockVorbisComment
+
+	for idx, meta := range f.Meta {
+		if meta.Type == flac.VorbisComment {
+			cmtIdx = idx
+			cmt, err = flacvorbis.ParseFromMetaDataBlock(*meta)
+			if err != nil {
+				return fmt.Errorf("failed to parse vorbis comment: %w", err)
+			}
+			break
+		}
+	}
+
+	if cmt == nil {
+		cmt = flacvorbis.New()
+	}
+
+	setArtistComments(cmt, "ARTIST", artist, artistTagModeSplitVorbis)
+	setArtistComments(cmt, "ALBUMARTIST", albumArtist, artistTagModeSplitVorbis)
+
+	cmtMeta := cmt.Marshal()
+	if cmtIdx >= 0 {
+		f.Meta[cmtIdx] = &cmtMeta
+	} else {
+		f.Meta = append(f.Meta, &cmtMeta)
+	}
+
+	return f.Save(filePath)
+}
+
 func removeCommentKey(cmt *flacvorbis.MetaDataBlockVorbisComment, key string) {
 	keyUpper := strings.ToUpper(key)
 	for i := len(cmt.Comments) - 1; i >= 0; i-- {

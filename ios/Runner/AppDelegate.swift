@@ -342,6 +342,15 @@ import Gobackend  // Import Go framework
             if let error = error { throw error }
             return response
             
+        case "rewriteSplitArtistTags":
+            let args = call.arguments as! [String: Any]
+            let filePath = args["file_path"] as! String
+            let artist = args["artist"] as! String
+            let albumArtist = args["album_artist"] as! String
+            let response = GobackendRewriteSplitArtistTagsExport(filePath, artist, albumArtist, &error)
+            if let error = error { throw error }
+            return response
+            
         case "cleanupConnections":
             GobackendCleanupConnections()
             return nil

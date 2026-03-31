@@ -1350,7 +1350,6 @@ class FFmpegService {
       return null;
     }
 
-    // Lossless targets: dedicated single-pass methods
     if (format == 'alac') {
       return _convertToAlac(
         inputPath: inputPath,
@@ -1369,7 +1368,6 @@ class FFmpegService {
       );
     }
 
-    // Lossy targets: MP3 / Opus
     final extension = format == 'opus' ? '.opus' : '.mp3';
     final outputPath = _buildOutputPath(inputPath, extension);
 
@@ -1966,7 +1964,6 @@ class FFmpegService {
   }
 }
 
-/// Track info for CUE splitting, passed from the CUE parser
 class CueSplitTrackInfo {
   final int number;
   final String title;

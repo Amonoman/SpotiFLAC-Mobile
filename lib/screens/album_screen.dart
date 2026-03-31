@@ -138,14 +138,11 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
     return (mediaSize.height * 0.55).clamp(360.0, 520.0);
   }
 
-  /// Upgrade cover URL to a higher resolution for full-screen display.
   String? _highResCoverUrl(String? url) {
     if (url == null) return null;
-    // Spotify CDN: upgrade 300 → 640 only (no intermediate between 640 and 2000)
     if (url.contains('ab67616d00001e02')) {
       return url.replaceAll('ab67616d00001e02', 'ab67616d0000b273');
     }
-    // Deezer CDN: upgrade to 1000x1000
     final deezerRegex = RegExp(r'/(\d+)x(\d+)-(\d+)-(\d+)-(\d+)-(\d+)\.jpg$');
     if (url.contains('cdn-images.dzcdn.net') && deezerRegex.hasMatch(url)) {
       return url.replaceAllMapped(

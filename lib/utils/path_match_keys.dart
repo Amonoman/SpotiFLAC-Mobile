@@ -25,9 +25,6 @@ const _audioExtensions = <String>[
 const _maxPathMatchKeyCacheSize = 6000;
 final Map<String, Set<String>> _pathMatchKeyCache = <String, Set<String>>{};
 
-/// Strips a trailing audio extension from [path] if present.
-/// Returns the path without extension, or `null` if no known audio extension
-/// was found.
 String? _stripAudioExtension(String path) {
   final lower = path.toLowerCase();
   for (final ext in _audioExtensions) {
@@ -115,8 +112,6 @@ Set<String> buildPathMatchKeys(String? filePath) {
 
   addNormalized(cleaned);
 
-  // Add extension-stripped variants so that a file converted from one audio
-  // format to another (e.g. Song.flac → Song.opus) still matches.
   final extensionStrippedKeys = <String>{};
   for (final key in keys) {
     final stripped = _stripAudioExtension(key);

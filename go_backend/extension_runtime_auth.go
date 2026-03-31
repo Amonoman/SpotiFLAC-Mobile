@@ -201,7 +201,6 @@ func (r *ExtensionRuntime) authGetTokens(call goja.FunctionCall) goja.Value {
 	return r.vm.ToValue(result)
 }
 
-// Length should be between 43-128 characters (RFC 7636)
 func generatePKCEVerifier(length int) (string, error) {
 	if length < 43 {
 		length = 43
@@ -226,7 +225,6 @@ func generatePKCEVerifier(length int) (string, error) {
 
 func generatePKCEChallenge(verifier string) string {
 	hash := sha256.Sum256([]byte(verifier))
-	// Base64url encode without padding (RFC 7636)
 	return base64.RawURLEncoding.EncodeToString(hash[:])
 }
 
@@ -283,7 +281,6 @@ func (r *ExtensionRuntime) authGetPKCE(call goja.FunctionCall) goja.Value {
 	})
 }
 
-// config: { authUrl, clientId, redirectUri, scope, extraParams }
 func (r *ExtensionRuntime) authStartOAuthWithPKCE(call goja.FunctionCall) goja.Value {
 	if len(call.Arguments) < 1 {
 		return r.vm.ToValue(map[string]interface{}{
@@ -388,7 +385,6 @@ func (r *ExtensionRuntime) authStartOAuthWithPKCE(call goja.FunctionCall) goja.V
 	})
 }
 
-// config: { tokenUrl, clientId, redirectUri, code, extraParams }
 func (r *ExtensionRuntime) authExchangeCodeWithPKCE(call goja.FunctionCall) goja.Value {
 	if len(call.Arguments) < 1 {
 		return r.vm.ToValue(map[string]interface{}{

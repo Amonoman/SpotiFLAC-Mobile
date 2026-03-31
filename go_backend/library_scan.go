@@ -170,11 +170,9 @@ func ScanLibraryFolder(folderPath string) (string, error) {
 	scanTime := time.Now().UTC().Format(time.RFC3339)
 	errorCount := 0
 
-	// Track audio files referenced by .cue sheets to avoid duplicates
 	cueReferencedAudioFiles := make(map[string]bool)
 	parsedCueFiles := make(map[string]scannedCueFileInfo)
 
-	// First pass: scan .cue files to collect referenced audio paths
 	for _, fileInfo := range audioFileInfos {
 		filePath := fileInfo.path
 		ext := strings.ToLower(filepath.Ext(filePath))
@@ -209,7 +207,6 @@ func ScanLibraryFolder(folderPath string) (string, error) {
 
 		ext := strings.ToLower(filepath.Ext(filePath))
 
-		// Handle .cue files: produce multiple track results
 		if ext == ".cue" {
 			var cueResults []LibraryScanResult
 			cueInfo, ok := parsedCueFiles[filePath]
@@ -827,9 +824,6 @@ func scanLibraryFolderIncrementalWithExistingFiles(folderPath string, existingFi
 	return string(jsonBytes), nil
 }
 
-// ScanLibraryFolderIncremental performs an incremental scan of the library folder
-// existingFilesJSON is a JSON object mapping filePath -> modTime (unix millis)
-// Only files that are new or have changed modification time will be scanned
 func ScanLibraryFolderIncremental(folderPath, existingFilesJSON string) (string, error) {
 	existingFiles := make(map[string]int64)
 	if existingFilesJSON != "" && existingFilesJSON != "{}" {

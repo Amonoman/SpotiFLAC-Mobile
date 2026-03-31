@@ -9,10 +9,8 @@ import 'package:spotiflac_android/utils/logger.dart';
 final _log = AppLogger('HistoryDatabase');
 final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
-/// Cached current iOS container path for path normalization
 String? _currentContainerPath;
 
-/// Provides O(1) lookups by spotify_id and isrc with proper indexing
 class HistoryDatabase {
   static final HistoryDatabase instance = HistoryDatabase._init();
   static Database? _database;
@@ -102,21 +100,16 @@ class HistoryDatabase {
     }
   }
 
-  /// Pattern to match iOS container paths
-  /// Example: /var/mobile/Containers/Data/Application/UUID-HERE/Documents/...
   static final _iosContainerPattern = RegExp(
     r'/var/mobile/Containers/Data/Application/[A-F0-9\-]+/',
     caseSensitive: false,
   );
 
-  /// Initialize and cache the current iOS container path
   Future<void> _initContainerPath() async {
     if (!Platform.isIOS || _currentContainerPath != null) return;
 
     try {
       final docDir = await getApplicationDocumentsDirectory();
-      // Extract container path up to and including the UUID folder
-      // e.g., /var/mobile/Containers/Data/Application/UUID/
       final match = _iosContainerPattern.firstMatch(docDir.path);
       if (match != null) {
         _currentContainerPath = match.group(0);
@@ -127,13 +120,10 @@ class HistoryDatabase {
     }
   }
 
-  /// Normalize iOS file path by replacing old container UUID with current one
-  /// This fixes the issue where iOS changes container UUID after app updates
   String _normalizeIosPath(String? filePath) {
     if (filePath == null || filePath.isEmpty) return filePath ?? '';
     if (!Platform.isIOS || _currentContainerPath == null) return filePath;
 
-    // Check if path contains an iOS container path
     if (_iosContainerPattern.hasMatch(filePath)) {
       final normalized = filePath.replaceFirst(
         _iosContainerPattern,
@@ -148,8 +138,6 @@ class HistoryDatabase {
     return filePath;
   }
 
-  /// Migrate iOS paths in database to use current container UUID
-  /// This is called once after app update if container changed
   Future<bool> migrateIosContainerPaths() async {
     if (!Platform.isIOS) return false;
 
@@ -205,8 +193,6 @@ class HistoryDatabase {
     }
   }
 
-  /// Migrate data from SharedPreferences to SQLite
-  /// Returns true if migration was performed, false if already migrated
   Future<bool> migrateFromSharedPreferences() async {
     final prefs = await _prefs;
     final migrationKey = 'history_migrated_to_sqlite';
@@ -243,7 +229,6 @@ class HistoryDatabase {
 
       await batch.commit(noResult: true);
 
-      // Mark as migrated but keep old data for safety
       await prefs.setBool(migrationKey, true);
       _log.i('Migration complete: ${jsonList.length} items');
 
@@ -254,7 +239,6 @@ class HistoryDatabase {
     }
   }
 
-  /// Convert JSON format (camelCase) to DB row (snake_case)
   Map<String, dynamic> _jsonToDbRow(Map<String, dynamic> json) {
     return {
       'id': json['id'],
@@ -286,8 +270,6 @@ class HistoryDatabase {
     };
   }
 
-  /// Convert DB row (snake_case) to JSON format (camelCase)
-  /// Also normalizes iOS paths if container UUID changed
   Map<String, dynamic> _dbRowToJson(Map<String, dynamic> row) {
     return {
       'id': row['id'],
@@ -342,7 +324,6 @@ class HistoryDatabase {
     await batch.commit(noResult: true);
   }
 
-  /// Get all history items ordered by download date (newest first)
   Future<List<Map<String, dynamic>>> getAll({int? limit, int? offset}) async {
     final db = await database;
     final rows = await db.query(
@@ -366,7 +347,6 @@ class HistoryDatabase {
     return _dbRowToJson(rows.first);
   }
 
-  /// Get item by Spotify ID - O(1) with index
   Future<Map<String, dynamic>?> getBySpotifyId(String spotifyId) async {
     final db = await database;
     final rows = await db.query(
@@ -379,7 +359,6 @@ class HistoryDatabase {
     return _dbRowToJson(rows.first);
   }
 
-  /// Get item by ISRC - O(1) with index
   Future<Map<String, dynamic>?> getByIsrc(String isrc) async {
     final db = await database;
     final rows = await db.query(
@@ -392,7 +371,6 @@ class HistoryDatabase {
     return _dbRowToJson(rows.first);
   }
 
-  /// Check if spotify_id exists - O(1) with index
   Future<bool> existsBySpotifyId(String spotifyId) async {
     final db = await database;
     final result = await db.rawQuery(
@@ -402,7 +380,6 @@ class HistoryDatabase {
     return result.isNotEmpty;
   }
 
-  /// Get all spotify_ids as Set for fast in-memory lookup
   Future<Set<String>> getAllSpotifyIds() async {
     final db = await database;
     final rows = await db.rawQuery(
@@ -433,7 +410,6 @@ class HistoryDatabase {
     return Sqflite.firstIntValue(result) ?? 0;
   }
 
-  /// Find existing item by spotify_id or isrc (for deduplication)
   Future<Map<String, dynamic>?> findExisting({
     String? spotifyId,
     String? isrc,
@@ -442,7 +418,6 @@ class HistoryDatabase {
       final bySpotify = await getBySpotifyId(spotifyId);
       if (bySpotify != null) return bySpotify;
 
-      // Check for deezer: prefix matching
       if (spotifyId.startsWith('deezer:')) {
         final deezerId = spotifyId.substring(7);
         final db = await database;
@@ -469,7 +444,6 @@ class HistoryDatabase {
     _database = null;
   }
 
-  /// Update file path for a history entry (e.g. after format conversion)
   Future<void> updateFilePath(
     String id,
     String newFilePath, {
@@ -524,8 +498,6 @@ class HistoryDatabase {
     await db.update('history', values, where: 'id = ?', whereArgs: [id]);
   }
 
-  /// Get all file paths from download history
-  /// Used to exclude downloaded files from local library scan
   Future<Set<String>> getAllFilePaths() async {
     final db = await database;
     final rows = await db.rawQuery(
@@ -534,8 +506,6 @@ class HistoryDatabase {
     return rows.map((r) => r['file_path'] as String).toSet();
   }
 
-  /// Get all entries with file paths for orphan detection
-  /// Returns list of (id, file_path, storage_mode, download_tree_uri, saf_relative_dir, saf_file_name)
   Future<List<Map<String, dynamic>>> getAllEntriesWithPaths() async {
     final db = await database;
     final rows = await db.rawQuery('''
@@ -569,7 +539,6 @@ class HistoryDatabase {
     return rows.map((r) => Map<String, dynamic>.from(r)).toList();
   }
 
-  /// Delete multiple entries by IDs
   Future<int> deleteByIds(List<String> ids) async {
     if (ids.isEmpty) return 0;
 

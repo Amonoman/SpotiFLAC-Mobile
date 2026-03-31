@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spotiflac_android/l10n/l10n.dart';
 
-/// Progress state communicated from caller to dialog via [ValueNotifier].
 class _BatchProgress {
   final int current;
   final String? detail;
@@ -54,11 +53,8 @@ class BatchProgressDialog extends StatefulWidget {
     required ValueNotifier<_BatchProgress> progressNotifier,
   }) : _progressNotifier = progressNotifier;
 
-  // ── Static bookkeeping ──────────────────────────────────────────────
-
   static ValueNotifier<_BatchProgress>? _activeNotifier;
 
-  /// Show the dialog. Call [update] to push progress, [dismiss] to close.
   static void show({
     required BuildContext context,
     required String title,
@@ -82,13 +78,10 @@ class BatchProgressDialog extends StatefulWidget {
     );
   }
 
-  /// Update the progress of the currently visible dialog.
-  /// No [BuildContext] needed – communicates via [ValueNotifier].
   static void update({required int current, String? detail}) {
     _activeNotifier?.value = _BatchProgress(current: current, detail: detail);
   }
 
-  /// Dismiss the dialog and clean up.
   static void dismiss(BuildContext context) {
     _activeNotifier = null;
     Navigator.of(context, rootNavigator: true).pop();

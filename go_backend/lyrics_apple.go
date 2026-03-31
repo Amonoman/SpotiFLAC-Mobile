@@ -11,8 +11,6 @@ import (
 	"time"
 )
 
-// AppleMusicClient fetches lyrics from Apple Music.
-// Uses Paxsenix endpoints for search and lyrics.
 type AppleMusicClient struct {
 	httpClient *http.Client
 }
@@ -25,7 +23,6 @@ type appleMusicSearchResult struct {
 	Duration   int    `json:"duration"`
 }
 
-// PaxResponse represents the lyrics proxy response for word-by-word / line lyrics
 type paxResponse struct {
 	Type    string      `json:"type"`    // "Syllable" or "Line"
 	Content []paxLyrics `json:"content"` // List of lyric lines
@@ -103,7 +100,6 @@ func selectBestAppleMusicSearchResult(results []appleMusicSearchResult, trackNam
 	return &results[bestIndex]
 }
 
-// SearchSong searches for a song on Apple Music and returns its ID.
 func (c *AppleMusicClient) SearchSong(trackName, artistName string, durationSec float64) (string, error) {
 	query := trackName + " " + artistName
 	if strings.TrimSpace(query) == "" {
@@ -144,7 +140,6 @@ func (c *AppleMusicClient) SearchSong(trackName, artistName string, durationSec 
 	return strings.TrimSpace(best.ID), nil
 }
 
-// FetchLyricsByID fetches lyrics from the paxsenix proxy using Apple Music song ID.
 func (c *AppleMusicClient) FetchLyricsByID(songID string) (string, error) {
 	lyricsURL := fmt.Sprintf("https://lyrics.paxsenix.org/apple-music/lyrics?id=%s", songID)
 
@@ -252,7 +247,6 @@ func formatPaxContent(lyricsType string, content []paxLyrics, multiPersonWordByW
 	return strings.TrimSpace(sb.String())
 }
 
-// FetchLyrics searches Apple Music and returns parsed LyricsResponse.
 func (c *AppleMusicClient) FetchLyrics(
 	trackName,
 	artistName string,
@@ -272,10 +266,8 @@ func (c *AppleMusicClient) FetchLyrics(
 		return nil, fmt.Errorf("apple music proxy returned non-lyric payload: %s", errMsg)
 	}
 
-	// Try to parse as pax format (word-by-word or line)
 	lrcText, err := formatPaxLyricsToLRC(rawLyrics, multiPersonWordByWord)
 	if err != nil {
-		// If pax parsing fails, try to parse as direct LRC text
 		lrcText = rawLyrics
 	}
 
@@ -289,7 +281,6 @@ func (c *AppleMusicClient) FetchLyrics(
 		}, nil
 	}
 
-	// Fall back to plain text if no timestamps found
 	resultLines := plainTextLyricsLines(lrcText)
 
 	if len(resultLines) > 0 {

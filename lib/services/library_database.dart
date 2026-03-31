@@ -96,7 +96,6 @@ class LocalLibraryItem {
         format: json['format'] as String?,
       );
 
-  /// Create a unique key for matching tracks
   String get matchKey =>
       '${trackName.toLowerCase()}|${artistName.toLowerCase()}';
   String get albumKey =>
@@ -183,13 +182,11 @@ class LibraryDatabase {
     }
 
     if (oldVersion < 3) {
-      // Add file_mod_time column for incremental scanning
       await db.execute('ALTER TABLE library ADD COLUMN file_mod_time INTEGER');
       _log.i('Added file_mod_time column for incremental scanning');
     }
 
     if (oldVersion < 4) {
-      // Add bitrate column for lossy format quality info
       await db.execute('ALTER TABLE library ADD COLUMN bitrate INTEGER');
       _log.i('Added bitrate column for lossy format quality');
     }
@@ -475,8 +472,6 @@ class LibraryDatabase {
     _database = null;
   }
 
-  /// Get all file paths with their modification times for incremental scanning
-  /// Returns a map of filePath -> fileModTime (unix timestamp in milliseconds)
   Future<Map<String, int>> getFileModTimes() async {
     final db = await database;
     final rows = await db.rawQuery(
@@ -491,8 +486,6 @@ class LibraryDatabase {
     return result;
   }
 
-  /// Export file modification times to a compact line-based snapshot that
-  /// native code can read without receiving a large method-channel payload.
   Future<String> writeFileModTimesSnapshot() async {
     final db = await database;
     final rows = await db.rawQuery(
@@ -519,7 +512,6 @@ class LibraryDatabase {
     return file.path;
   }
 
-  /// Update file_mod_time for existing rows using file_path as key.
   Future<void> updateFileModTimes(Map<String, int> fileModTimes) async {
     if (fileModTimes.isEmpty) return;
     final db = await database;
@@ -535,7 +527,6 @@ class LibraryDatabase {
     await batch.commit(noResult: true);
   }
 
-  /// Get all file paths in the library (for detecting deleted files)
   Future<Set<String>> getAllFilePaths() async {
     final db = await database;
     final rows = await db.rawQuery('SELECT file_path FROM library');

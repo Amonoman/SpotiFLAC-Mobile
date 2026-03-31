@@ -228,7 +228,6 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
   }
 
   void _onScroll() {
-    // Show title when scrolled past the header (280px trigger)
     final shouldShow = _scrollController.offset > 280;
     if (shouldShow != _showTitleInAppBar) {
       setState(() => _showTitleInAppBar = shouldShow);
@@ -2013,7 +2012,6 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
   }
 }
 
-/// Option tile for discography download bottom sheet
 class _DiscographyOptionTile extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -2051,7 +2049,6 @@ class _DiscographyOptionTile extends StatelessWidget {
   }
 }
 
-/// Progress dialog shown while fetching album tracks
 class _FetchingProgressDialog extends StatefulWidget {
   final int totalAlbums;
   final VoidCallback onCancel;

@@ -146,7 +146,6 @@ class StoreState {
     this.registryUrl = '',
   });
 
-  /// Whether a registry URL has been configured by the user.
   bool get hasRegistryUrl => registryUrl.isNotEmpty;
 
   StoreState copyWith({
@@ -218,7 +217,6 @@ class StoreNotifier extends Notifier<StoreState> {
   Future<void> initialize(String cacheDir) async {
     if (state.isInitialized) return;
 
-    // Load saved registry URL early to avoid UI flash (empty → setup screen)
     final prefs = await SharedPreferences.getInstance();
     final savedUrl = prefs.getString(_registryUrlPrefKey) ?? '';
 
@@ -246,8 +244,6 @@ class StoreNotifier extends Notifier<StoreState> {
     }
   }
 
-  /// Sets the registry URL, saves it, and refreshes the store.
-  /// The Go backend handles URL normalisation (GitHub repo → raw URL, branch detection).
   Future<void> setRegistryUrl(String url) async {
     final trimmed = url.trim();
     if (trimmed.isEmpty) {
@@ -258,10 +254,8 @@ class StoreNotifier extends Notifier<StoreState> {
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
-      // Go backend resolves GitHub URLs (detects default branch) and validates HTTPS.
       await PlatformBridge.setStoreRegistryUrl(trimmed);
 
-      // Read back the resolved URL (may differ from input after normalisation).
       final resolvedUrl = await PlatformBridge.getStoreRegistryUrl();
 
       final prefs = await SharedPreferences.getInstance();
@@ -280,13 +274,11 @@ class StoreNotifier extends Notifier<StoreState> {
     }
   }
 
-  /// Removes the saved registry URL and fully detaches the repo from backend.
   Future<void> removeRegistryUrl() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_registryUrlPrefKey);
 
-      // Reset the URL in Go backend memory AND clear its cache
       await PlatformBridge.clearStoreRegistryUrl();
 
       state = state.copyWith(

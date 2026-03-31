@@ -82,7 +82,6 @@ class _RuntimeProfile {
   });
 }
 
-/// Widget to eagerly initialize providers that need to load data on startup
 class _EagerInitialization extends ConsumerStatefulWidget {
   const _EagerInitialization({required this.child});
   final Widget child;
@@ -170,10 +169,8 @@ class _EagerInitializationState extends ConsumerState<_EagerInitialization>
       const Duration(milliseconds: 1600),
       () {
         ref.read(localLibraryProvider);
-        // Trigger auto-scan after initial warmup on first app launch.
         if (!_autoScanTriggeredOnLaunch) {
           _autoScanTriggeredOnLaunch = true;
-          // Give the provider a moment to load existing data before scanning.
           Future.delayed(const Duration(milliseconds: 500), () {
             if (mounted) _maybeAutoScanLocalLibrary();
           });
@@ -182,8 +179,6 @@ class _EagerInitializationState extends ConsumerState<_EagerInitialization>
     );
   }
 
-  /// Checks whether an automatic incremental scan should be triggered based on
-  /// the user's auto-scan preference and the time since the last scan.
   Future<void> _maybeAutoScanLocalLibrary() async {
     if (!mounted) return;
 
@@ -204,7 +199,6 @@ class _EagerInitializationState extends ConsumerState<_EagerInitialization>
 
       switch (settings.localLibraryAutoScan) {
         case 'on_open':
-          // Cooldown of 10 minutes to prevent rapid re-scans.
           if (elapsed.inMinutes < 10) return;
           break;
         case 'daily':

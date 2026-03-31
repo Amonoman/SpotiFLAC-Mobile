@@ -9,7 +9,6 @@ import (
 	"time"
 )
 
-// NeteaseClient fetches lyrics through Paxsenix's NetEase endpoints.
 type NeteaseClient struct {
 	httpClient *http.Client
 }
@@ -51,7 +50,6 @@ func NewNeteaseClient() *NeteaseClient {
 	}
 }
 
-// SearchSong searches for a song on Netease and returns the song ID.
 func (c *NeteaseClient) SearchSong(trackName, artistName string) (int64, error) {
 	query := trackName + " " + artistName
 	if strings.TrimSpace(query) == "" {
@@ -96,7 +94,6 @@ func (c *NeteaseClient) SearchSong(trackName, artistName string) (int64, error) 
 	return searchResp.Result.Songs[0].ID, nil
 }
 
-// FetchLyricsByID fetches synced lyrics for a given Netease song ID.
 func (c *NeteaseClient) FetchLyricsByID(songID int64, includeTranslation, includeRomanization bool) (string, error) {
 	lyricsURL := "https://lyrics.paxsenix.org/netease/lyrics"
 	params := url.Values{}
@@ -146,7 +143,6 @@ func (c *NeteaseClient) FetchLyricsByID(songID int64, includeTranslation, includ
 	return lyric, nil
 }
 
-// FetchLyrics searches for a track and returns parsed LyricsResponse.
 func (c *NeteaseClient) FetchLyrics(
 	trackName,
 	artistName string,
@@ -166,7 +162,6 @@ func (c *NeteaseClient) FetchLyrics(
 
 	lines := parseSyncedLyrics(lrcText)
 	if len(lines) == 0 {
-		// May be plain text lyrics without timestamps
 		plainLines := strings.Split(lrcText, "\n")
 		for _, line := range plainLines {
 			trimmed := strings.TrimSpace(line)

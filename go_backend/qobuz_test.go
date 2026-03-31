@@ -201,18 +201,6 @@ func TestNormalizeQobuzQualityCode(t *testing.T) {
 	}
 }
 
-func TestGetQobuzDebugKey(t *testing.T) {
-	got := getQobuzDebugKey()
-	if len(got) != len(qobuzDebugKeyObfuscated) {
-		t.Fatalf("unexpected debug key length: %d", len(got))
-	}
-	for i := range got {
-		if got[i]^qobuzDebugKeyXORMask != qobuzDebugKeyObfuscated[i] {
-			t.Fatalf("unexpected debug key reconstruction at index %d", i)
-		}
-	}
-}
-
 func TestBuildQobuzMusicDLPayloadUsesOpenTrackURL(t *testing.T) {
 	payloadBytes, err := buildQobuzMusicDLPayload(374610875, "7")
 	if err != nil {

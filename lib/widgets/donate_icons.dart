@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Custom painted icons for donate platforms
-
 class KofiIcon extends StatelessWidget {
   final double size;
   final Color color;
@@ -46,7 +44,6 @@ class _KofiPainter extends CustomPainter {
       ..quadraticBezierTo(s * 0.92, s * 0.68, s * 0.70, s * 0.68);
     canvas.drawPath(handlePath, handlePaint);
 
-    // Heart on cup
     final heartPaint = Paint()
       ..color = const Color(0xFFFF5E5B)
       ..style = PaintingStyle.fill;
@@ -62,7 +59,6 @@ class _KofiPainter extends CustomPainter {
       ..close();
     canvas.drawPath(heart, heartPaint);
 
-    // Steam lines
     final steamPaint = Paint()
       ..color = color.withValues(alpha: 0.6)
       ..style = PaintingStyle.stroke
@@ -108,12 +104,9 @@ class _GitHubPainter extends CustomPainter {
       ..color = color
       ..style = PaintingStyle.fill;
 
-    // GitHub octocat silhouette (simplified mark)
-    // Based on the GitHub logo path, scaled to fit
     final scale = s / 24.0;
 
     final path = Path();
-    // Outer circle/head shape
     path.moveTo(12 * scale, 0.5 * scale);
     path.cubicTo(
       5.37 * scale, 0.5 * scale,
@@ -135,7 +128,6 @@ class _GitHubPainter extends CustomPainter {
       9.01 * scale, 22.01 * scale,
       9.01 * scale, 21.01 * scale,
     );
-    // Left arm
     path.cubicTo(
       5.67 * scale, 21.71 * scale,
       4.97 * scale, 19.56 * scale,

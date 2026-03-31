@@ -348,7 +348,6 @@ class _MainShellState extends ConsumerState<MainShell>
         trackState.isShowingRecentAccess &&
         !trackState.isLoading &&
         (trackState.hasSearchText || trackState.hasContent)) {
-      // Has recent access AND search content — clear everything at once
       _log.i(
         'Back: step 3a - dismiss recent access + clear search/content '
         '(hasSearchText=${trackState.hasSearchText}, hasContent=${trackState.hasContent})',
@@ -360,7 +359,6 @@ class _MainShellState extends ConsumerState<MainShell>
     }
 
     if (_currentIndex == 0 && trackState.isShowingRecentAccess) {
-      // Recent access overlay only (no search content) — just dismiss it
       _log.i('Back: step 3b - dismiss recent access only');
       ref.read(trackProvider.notifier).setShowingRecentAccess(false);
       FocusManager.instance.primaryFocus?.unfocus();

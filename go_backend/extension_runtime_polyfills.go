@@ -12,10 +12,6 @@ import (
 	"github.com/dop251/goja"
 )
 
-// These polyfills make porting browser/Node.js libraries easier
-// without compromising sandbox security.
-
-// Returns a Promise-like object with json(), text() methods.
 func (r *ExtensionRuntime) fetchPolyfill(call goja.FunctionCall) goja.Value {
 	if len(call.Arguments) < 1 {
 		return r.createFetchError("URL is required")
@@ -38,7 +34,6 @@ func (r *ExtensionRuntime) fetchPolyfill(call goja.FunctionCall) goja.Value {
 				method = strings.ToUpper(m)
 			}
 
-			// Body - support string, object (auto-stringify), or nil
 			if bodyArg, ok := opts["body"]; ok && bodyArg != nil {
 				switch v := bodyArg.(type) {
 				case string:
@@ -197,7 +192,6 @@ func (r *ExtensionRuntime) registerTextEncoderDecoder(vm *goja.Runtime) {
 		})
 
 		encoder.Set("encodeInto", func(call goja.FunctionCall) goja.Value {
-			// Simplified implementation
 			if len(call.Arguments) < 2 {
 				return vm.ToValue(map[string]interface{}{"read": 0, "written": 0})
 			}
@@ -422,7 +416,6 @@ func (r *ExtensionRuntime) registerURLClass(vm *goja.Runtime) {
 	})
 }
 
-// JSON is already built-in to Goja; this ensures a fallback exists.
 func (r *ExtensionRuntime) registerJSONGlobal(vm *goja.Runtime) {
 	jsonScript := `
 		if (typeof JSON === 'undefined') {

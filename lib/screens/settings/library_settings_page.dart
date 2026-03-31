@@ -53,10 +53,8 @@ class _LibrarySettingsPageState extends ConsumerState<LibrarySettingsPage> {
       if (mounted) {
         setState(() {
           _androidSdkVersion = sdkVersion;
-          // SAF doesn't need storage permission on Android 10+
           _hasStoragePermission = sdkVersion >= 29 ? true : false;
         });
-        // For older Android, check legacy storage permission
         if (sdkVersion < 29) {
           final hasPermission = await Permission.storage.isGranted;
           if (mounted) {
@@ -65,7 +63,6 @@ class _LibrarySettingsPageState extends ConsumerState<LibrarySettingsPage> {
         }
       }
     } else if (Platform.isIOS) {
-      // iOS doesn't need explicit storage permission for app documents
       setState(() => _hasStoragePermission = true);
     } else {
       setState(() => _hasStoragePermission = true);
@@ -74,7 +71,6 @@ class _LibrarySettingsPageState extends ConsumerState<LibrarySettingsPage> {
 
   Future<bool> _requestStoragePermission() async {
     if (!Platform.isAndroid) return true;
-    // SAF on Android 10+ doesn't need MANAGE_EXTERNAL_STORAGE
     if (_androidSdkVersion >= 29) return true;
 
     final status = await Permission.storage.request();
@@ -125,12 +121,9 @@ class _LibrarySettingsPageState extends ConsumerState<LibrarySettingsPage> {
         final granted = await _requestStoragePermission();
         if (!granted) return;
       }
-      // Fallback for older devices
       final result = await FilePicker.platform.getDirectoryPath();
       if (result != null) {
         if (Platform.isIOS) {
-          // On iOS, create a security-scoped bookmark so we can access
-          // this folder across app restarts and from the Go backend.
           final bookmark = await PlatformBridge.createIosBookmarkFromPath(
             result,
           );
@@ -139,8 +132,6 @@ class _LibrarySettingsPageState extends ConsumerState<LibrarySettingsPage> {
                 .read(settingsProvider.notifier)
                 .setLocalLibraryPathAndBookmark(result, bookmark);
           } else {
-            // Bookmark creation failed; save path anyway (works for
-            // app-internal folders like Documents/).
             ref.read(settingsProvider.notifier).setLocalLibraryPath(result);
           }
         } else {
@@ -162,13 +153,7 @@ class _LibrarySettingsPageState extends ConsumerState<LibrarySettingsPage> {
       return;
     }
 
-    // On iOS with a bookmark, try resolving the bookmark first to validate
-    // access instead of checking the path directly (which may fail outside
-    // the app sandbox).
     if (Platform.isIOS && iosBookmark.isNotEmpty) {
-      // Bookmark will be resolved inside startScan; skip Directory.exists
-      // check since security-scoped paths are not accessible without the
-      // bookmark being activated.
     } else if (!libraryPath.startsWith('content://') &&
         !await Directory(libraryPath).exists()) {
       if (mounted) {
@@ -467,7 +452,6 @@ class _LibrarySettingsPageState extends ConsumerState<LibrarySettingsPage> {
             ),
           ),
 
-          // Scan Actions Section
           if (settings.localLibraryEnabled) ...[
             SliverToBoxAdapter(
               child: SettingsSectionHeader(title: context.l10n.libraryActions),

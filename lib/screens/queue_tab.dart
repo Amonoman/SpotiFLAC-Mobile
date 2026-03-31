@@ -156,7 +156,6 @@ class UnifiedLibraryItem {
     return 'builtin:$id';
   }
 
-  /// Convert to a [Track] for adding to collections/playlists.
   Track toTrack() {
     if (historyItem != null) {
       final h = historyItem!;
@@ -2101,7 +2100,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
         }
       }
 
-      // Reload local library if we deleted any local items
       if (allItems.any(
         (i) =>
             _selectedIds.contains(i.id) && i.source == LibraryItemSource.local,
@@ -2121,7 +2119,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     }
   }
 
-  /// Strip EXISTS: prefix from file path (legacy history items)
   String _cleanFilePath(String? filePath) {
     return DownloadedEmbeddedCoverResolver.cleanFilePath(filePath);
   }
@@ -2971,7 +2968,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     }
   }
 
-  /// Navigate with unfocus pattern — unfocuses search before and after navigation.
   void _navigateWithUnfocus(Route<dynamic> route) {
     _searchFocusNode.unfocus();
     Navigator.of(context).push(route).then((_) => _searchFocusNode.unfocus());
@@ -3201,14 +3197,12 @@ class _QueueTabState extends ConsumerState<QueueTab> {
   }) async {
     final notifier = ref.read(libraryCollectionsProvider.notifier);
 
-    // If in selection mode and the dragged item is selected, add ALL selected
     if (_isSelectionMode &&
         _selectedIds.isNotEmpty &&
         _selectedIds.contains(item.id)) {
       final selectedItems = allItems
           .where((e) => _selectedIds.contains(e.id))
           .toList();
-      // Fallback: if allItems is empty or no match, at least add the dragged item
       if (selectedItems.isEmpty) {
         selectedItems.add(item);
       }
@@ -3247,8 +3241,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     );
   }
 
-  /// Build a compact floating feedback widget shown while dragging a track.
-  /// Shows the count when multiple tracks are selected and being dragged.
   Widget _buildDragFeedback(
     BuildContext context,
     UnifiedLibraryItem item,
@@ -3777,7 +3769,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     );
   }
 
-  /// Build a Spotify-style collection list item (Wishlist, Loved, Playlists)
   Widget _buildCollectionListItem({
     required BuildContext context,
     required ColorScheme colorScheme,
@@ -3854,7 +3845,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     );
   }
 
-  /// Build a collection grid item for grid view mode
   Widget _buildCollectionGridItem({
     required BuildContext context,
     required ColorScheme colorScheme,
@@ -3937,7 +3927,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     return entries;
   }
 
-  /// Build a collection item for the unified "All" tab grid view.
   Widget _buildAllTabGridCollectionItem({
     required BuildContext context,
     required ColorScheme colorScheme,
@@ -4055,7 +4044,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     }
   }
 
-  /// Build a collection item for the unified "All" tab list view.
   Widget _buildAllTabListCollectionItem({
     required BuildContext context,
     required ColorScheme colorScheme,
@@ -4208,8 +4196,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
             ),
           ),
 
-        // Collection folders as list items (Spotify-style) in "All" tab
-        // are now rendered inline with tracks below (unified sliver)
         if ((filteredGroupedAlbums.isNotEmpty ||
                 filteredGroupedLocalAlbums.isNotEmpty) &&
             filterMode == 'albums')
@@ -4696,7 +4682,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     );
   }
 
-  /// Album grid item for local library albums
   Widget _buildLocalAlbumGridItem(
     BuildContext context,
     _GroupedLocalAlbum album,
@@ -5275,7 +5260,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
       return;
     }
 
-    // Share SAF content URIs via native intent
     if (safUris.isNotEmpty) {
       try {
         if (safUris.length == 1) {
@@ -5286,7 +5270,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
       } catch (_) {}
     }
 
-    // Share regular files via SharePlus
     if (filesToShare.isNotEmpty) {
       await SharePlus.instance.share(ShareParams(files: filesToShare));
     }
@@ -6400,7 +6383,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     }
   }
 
-  /// Reusable filter button with badge showing active filter count.
   Widget _buildFilterButton(
     BuildContext context,
     List<UnifiedLibraryItem> unifiedItems,
@@ -6495,7 +6477,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
       }
     }
 
-    // Network URL cover (downloaded items)
     if (item.coverUrl != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(8),
@@ -6513,7 +6494,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
       );
     }
 
-    // Local file cover (from library scan)
     if (item.localCoverPath != null && item.localCoverPath!.isNotEmpty) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(8),
@@ -6530,7 +6510,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
       );
     }
 
-    // Placeholder (no cover)
     if (size != null) {
       return buildPlaceholder();
     }
@@ -6540,7 +6519,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     );
   }
 
-  /// Build a unified library item (merged downloaded + local)
   Widget _buildUnifiedLibraryItem(
     BuildContext context,
     UnifiedLibraryItem item,
@@ -6748,7 +6726,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     );
   }
 
-  /// Build unified grid item for grid view mode
   Widget _buildUnifiedGridItem(
     BuildContext context,
     UnifiedLibraryItem item,
@@ -7038,7 +7015,6 @@ class _FilterChip extends StatelessWidget {
   }
 }
 
-/// Reusable action button for selection mode bottom bar
 class _SelectionActionButton extends StatelessWidget {
   final IconData icon;
   final String label;

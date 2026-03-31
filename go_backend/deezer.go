@@ -196,15 +196,22 @@ type deezerAlbumSimple struct {
 	RecordType  string `json:"record_type"`
 }
 
-func (c *DeezerClient) convertTrack(track deezerTrack) TrackMetadata {
-	artistName := track.Artist.Name
+// deezerTrackArtistDisplay returns the display artist string for a track,
+// preferring the Contributors list (comma-joined) when available, falling
+// back to the primary Artist.Name.
+func deezerTrackArtistDisplay(track deezerTrack) string {
 	if len(track.Contributors) > 0 {
 		names := make([]string, len(track.Contributors))
 		for i, a := range track.Contributors {
 			names[i] = a.Name
 		}
-		artistName = strings.Join(names, ", ")
+		return strings.Join(names, ", ")
 	}
+	return track.Artist.Name
+}
+
+func (c *DeezerClient) convertTrack(track deezerTrack) TrackMetadata {
+	artistName := deezerTrackArtistDisplay(track)
 
 	albumImage := track.Album.CoverXL
 	if albumImage == "" {
@@ -641,7 +648,7 @@ func (c *DeezerClient) GetAlbum(ctx context.Context, albumID string) (*AlbumResp
 
 		tracks = append(tracks, AlbumTrackMetadata{
 			SpotifyID:   fmt.Sprintf("deezer:%d", track.ID),
-			Artists:     track.Artist.Name,
+			Artists:     deezerTrackArtistDisplay(track),
 			Name:        track.Title,
 			AlbumName:   album.Title,
 			AlbumArtist: artistName,
@@ -892,7 +899,7 @@ func (c *DeezerClient) GetPlaylist(ctx context.Context, playlistID string) (*Pla
 
 		tracks = append(tracks, AlbumTrackMetadata{
 			SpotifyID:   fmt.Sprintf("deezer:%d", track.ID),
-			Artists:     track.Artist.Name,
+			Artists:     deezerTrackArtistDisplay(track),
 			Name:        track.Title,
 			AlbumName:   track.Album.Title,
 			AlbumArtist: track.Artist.Name,

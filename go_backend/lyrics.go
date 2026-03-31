@@ -20,7 +20,6 @@ const (
 	durationToleranceSec = 10.0
 )
 
-// Lyrics provider names (used in settings and cascade ordering)
 const (
 	LyricsProviderLRCLIB     = "lrclib"
 	LyricsProviderNetease    = "netease"
@@ -29,8 +28,6 @@ const (
 	LyricsProviderQQMusic    = "qqmusic"
 )
 
-// DefaultLyricsProviders is the default cascade order for lyrics fetching.
-// LRCLIB first (no proxy dependency), then the others.
 var DefaultLyricsProviders = []string{
 	LyricsProviderLRCLIB,
 	LyricsProviderMusixmatch,
@@ -44,7 +41,6 @@ var (
 	lyricsProviders   []string // ordered list of enabled providers
 )
 
-// LyricsFetchOptions controls optional provider-specific enhancements.
 type LyricsFetchOptions struct {
 	IncludeTranslationNetease  bool   `json:"include_translation_netease"`
 	IncludeRomanizationNetease bool   `json:"include_romanization_netease"`
@@ -64,8 +60,6 @@ var (
 	lyricsFetchOptions   = defaultLyricsFetchOptions
 )
 
-// SetLyricsProviderOrder sets the ordered list of lyrics providers to try.
-// Providers not in the list are disabled. An empty list resets to defaults.
 func SetLyricsProviderOrder(providers []string) {
 	lyricsProvidersMu.Lock()
 	defer lyricsProvidersMu.Unlock()
@@ -532,19 +526,16 @@ func (c *LyricsClient) FetchLyricsAllSources(spotifyID, trackName, artistName st
 	return nil, fmt.Errorf("lyrics not found from any source")
 }
 
-// tryLRCLIB attempts all LRCLIB search strategies (exact match, simplified, search).
 func (c *LyricsClient) tryLRCLIB(primaryArtist, artistName, trackName, simplifiedTrack string, durationSec float64) (*LyricsResponse, error) {
 	var lyrics *LyricsResponse
 	var err error
 
-	// 1. Exact match with primary artist
 	lyrics, err = c.FetchLyricsWithMetadata(primaryArtist, trackName)
 	if err == nil && lyrics != nil && (len(lyrics.Lines) > 0 || lyrics.Instrumental) {
 		lyrics.Source = "LRCLIB"
 		return lyrics, nil
 	}
 
-	// 2. Exact match with full artist name
 	if primaryArtist != artistName {
 		lyrics, err = c.FetchLyricsWithMetadata(artistName, trackName)
 		if err == nil && lyrics != nil && (len(lyrics.Lines) > 0 || lyrics.Instrumental) {
@@ -553,7 +544,6 @@ func (c *LyricsClient) tryLRCLIB(primaryArtist, artistName, trackName, simplifie
 		}
 	}
 
-	// 3. Simplified track name
 	if simplifiedTrack != trackName {
 		lyrics, err = c.FetchLyricsWithMetadata(primaryArtist, simplifiedTrack)
 		if err == nil && lyrics != nil && (len(lyrics.Lines) > 0 || lyrics.Instrumental) {
@@ -562,7 +552,6 @@ func (c *LyricsClient) tryLRCLIB(primaryArtist, artistName, trackName, simplifie
 		}
 	}
 
-	// 4. Search by query
 	query := primaryArtist + " " + trackName
 	lyrics, err = c.FetchLyricsFromLRCLibSearch(query, durationSec)
 	if err == nil && lyrics != nil && (len(lyrics.Lines) > 0 || lyrics.Instrumental) {
@@ -570,7 +559,6 @@ func (c *LyricsClient) tryLRCLIB(primaryArtist, artistName, trackName, simplifie
 		return lyrics, nil
 	}
 
-	// 5. Search with simplified track name
 	if simplifiedTrack != trackName {
 		query = primaryArtist + " " + simplifiedTrack
 		lyrics, err = c.FetchLyricsFromLRCLibSearch(query, durationSec)
@@ -688,8 +676,6 @@ func lyricsHasUsableText(lyrics *LyricsResponse) bool {
 	return false
 }
 
-// detectLyricsErrorPayload extracts human-readable error messages from
-// JSON payloads returned by lyrics proxies when no lyric is available.
 func detectLyricsErrorPayload(raw string) (string, bool) {
 	trimmed := strings.TrimSpace(raw)
 	if trimmed == "" || !strings.HasPrefix(trimmed, "{") {
@@ -814,8 +800,6 @@ func simplifyTrackName(name string) string {
 		return result
 	}
 
-	// Add a loose fallback form for provider queries where punctuation
-	// and separators differ (e.g. "/" vs "_" vs spaces).
 	if loose := normalizeLooseTitle(result); loose != "" {
 		return loose
 	}

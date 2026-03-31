@@ -2412,8 +2412,6 @@ class _HomeTabState extends ConsumerState<HomeTab>
     );
   }
 
-  // ── Search result sorting ──────────────────────────────────────────────
-
   String _sortOptionLabel(_SearchSortOption option) {
     switch (option) {
       case _SearchSortOption.defaultOrder:

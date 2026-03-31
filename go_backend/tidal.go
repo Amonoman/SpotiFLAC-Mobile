@@ -875,8 +875,6 @@ func (t *TidalDownloader) SearchTracks(query string, limit int) ([]ExtTrackMetad
 	return results, nil
 }
 
-// SearchAll searches Tidal for tracks, artists, and albums matching the query.
-// Returns results in the same SearchAllResult format as Deezer's SearchAll.
 func (t *TidalDownloader) SearchAll(query string, trackLimit, artistLimit int, filter string) (*SearchAllResult, error) {
 	GoLog("[Tidal] SearchAll: query=%q, trackLimit=%d, artistLimit=%d, filter=%q\n", query, trackLimit, artistLimit, filter)
 
@@ -1165,7 +1163,6 @@ type tidalAPIResult struct {
 	duration time.Duration
 }
 
-// Mobile networks are more unstable, so we use longer timeouts
 const (
 	tidalAPITimeoutMobile = 25 * time.Second
 	tidalMaxRetries       = 2
@@ -1211,7 +1208,6 @@ func fetchTidalURLWithRetry(api string, trackID int64, quality string, timeout t
 			continue
 		}
 
-		// 429 rate limit - wait and retry
 		if resp.StatusCode == 429 {
 			io.Copy(io.Discard, resp.Body)
 			resp.Body.Close()
@@ -1233,7 +1229,6 @@ func fetchTidalURLWithRetry(api string, trackID int64, quality string, timeout t
 			continue
 		}
 
-		// Try V2 response format (with manifest)
 		var v2Response TidalAPIResponseV2
 		if err := json.Unmarshal(body, &v2Response); err == nil && v2Response.Data.Manifest != "" {
 			if v2Response.Data.AssetPresentation == "PREVIEW" {
@@ -1247,7 +1242,6 @@ func fetchTidalURLWithRetry(api string, trackID int64, quality string, timeout t
 			}, nil
 		}
 
-		// Try V1 response format
 		var v1Responses []struct {
 			OriginalTrackURL string `json:"OriginalTrackUrl"`
 		}
@@ -1602,10 +1596,6 @@ func (t *TidalDownloader) downloadFromManifest(ctx context.Context, manifestB64,
 		return nil
 	}
 
-	// For DASH format, determine correct M4A path
-	// If outputPath already ends with .m4a, use it directly.
-	// If outputPath ends with .flac, convert .flac to .m4a.
-	// Otherwise (e.g., SAF /proc/self/fd/*), use outputPath as-is.
 	var m4aPath string
 	if strings.HasSuffix(outputPath, ".m4a") {
 		m4aPath = outputPath
@@ -1879,8 +1869,6 @@ func titlesMatch(expectedTitle, foundTitle string) bool {
 		}
 	}
 
-	// Emoji/symbol-only titles must be matched strictly to avoid false positives
-	// like mapping "🪐" to "Higher Power".
 	if (!hasAlphaNumericRunes(expectedTitle) || !hasAlphaNumericRunes(foundTitle)) &&
 		strings.TrimSpace(expectedTitle) != "" &&
 		strings.TrimSpace(foundTitle) != "" {
@@ -2111,7 +2099,6 @@ func resolveTidalTrackForRequest(req DownloadRequest, downloader *TidalDownloade
 			}
 		}
 
-		// Prefer Deezer-based SongLink lookup when DeezerID is available.
 		if req.DeezerID != "" {
 			GoLog("[%s] Using Deezer ID for SongLink lookup: %s\n", logPrefix, req.DeezerID)
 			songlink := NewSongLinkClient()
@@ -2150,11 +2137,9 @@ func resolveTidalTrackForRequest(req DownloadRequest, downloader *TidalDownloade
 		return nil, fmt.Errorf("failed to find tidal track id from request/cache/songlink")
 	}
 
-	// Verify the resolved track matches the request.
 	actualTrack, fetchErr := tidalGetPublicTrackFunc(downloader, strconv.FormatInt(trackID, 10))
 	if fetchErr != nil {
 		GoLog("[%s] Warning: could not fetch Tidal track %d for verification: %v\n", logPrefix, trackID, fetchErr)
-		// Continue without verification — better than failing entirely.
 	} else {
 		providerArtist := actualTrack.Artist.Name
 		if providerArtist == "" && len(actualTrack.Artists) > 0 {
@@ -2168,7 +2153,6 @@ func resolveTidalTrackForRequest(req DownloadRequest, downloader *TidalDownloade
 			SkipNameVerification: resolvedViaSongLink,
 		}
 		if !trackMatchesRequest(req, resolved, logPrefix) {
-			// Invalidate the cached ID so future requests don't reuse it.
 			if req.ISRC != "" {
 				GetTrackIDCache().SetTidal(req.ISRC, 0)
 			}
@@ -2497,7 +2481,6 @@ func parseTidalURL(input string) (string, string, error) {
 
 	parts := strings.Split(strings.Trim(parsed.Path, "/"), "/")
 
-	// Handle /browse/track/123 format
 	if len(parts) > 0 && parts[0] == "browse" {
 		parts = parts[1:]
 	}

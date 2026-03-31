@@ -422,6 +422,21 @@ class PlatformBridge {
     return jsonDecode(result as String) as Map<String, dynamic>;
   }
 
+  /// Rewrites ARTIST/ALBUMARTIST Vorbis comments as multiple split entries
+  /// using the native Go FLAC writer, fixing FFmpeg's tag deduplication.
+  static Future<Map<String, dynamic>> rewriteSplitArtistTags(
+    String filePath,
+    String artist,
+    String albumArtist,
+  ) async {
+    final result = await _channel.invokeMethod('rewriteSplitArtistTags', {
+      'file_path': filePath,
+      'artist': artist,
+      'album_artist': albumArtist,
+    });
+    return jsonDecode(result as String) as Map<String, dynamic>;
+  }
+
   static Future<bool> writeTempToSaf(String tempPath, String safUri) async {
     final result = await _channel.invokeMethod('writeTempToSaf', {
       'temp_path': tempPath,

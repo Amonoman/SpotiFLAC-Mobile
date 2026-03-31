@@ -47,26 +47,20 @@ bool isValidIosWritablePath(String path) {
   if (path.isEmpty) return false;
   if (!path.startsWith('/')) return false;
 
-  // Check if it's the container root (without Documents/, tmp/, etc.)
   if (_iosContainerRootPattern.hasMatch(path)) {
     return false;
   }
 
-  // Check for iCloud Drive paths
   if (path.contains('Mobile Documents') ||
       path.contains('CloudDocs') ||
       path.contains('com~apple~CloudDocs')) {
     return false;
   }
 
-  // Reject stale paths where an old sandbox container path has been embedded
-  // inside the current Documents directory.
   if (_iosNestedLegacyDocumentsPattern.hasMatch(path)) {
     return false;
   }
 
-  // Ensure path contains a valid subdirectory (Documents, tmp, Library, etc.)
-  // This handles cases where FilePicker returns container root
   final containerPattern = RegExp(
     r'/var/mobile/Containers/Data/Application/[A-F0-9\-]+',
     caseSensitive: false,
@@ -74,7 +68,6 @@ bool isValidIosWritablePath(String path) {
   final match = containerPattern.firstMatch(path);
   if (match != null) {
     final remainingPath = path.substring(match.end);
-    // Valid paths should have something after the UUID
     if (remainingPath.isEmpty || remainingPath == '/') {
       return false;
     }
@@ -111,13 +104,10 @@ Future<String> validateOrFixIosPath(
     candidates.add(trimmed);
   }
 
-  // Some pickers can return absolute iOS paths without the leading slash.
   if (_iosContainerPathWithoutLeadingSlashPattern.hasMatch(trimmed)) {
     candidates.add('/$trimmed');
   }
 
-  // Recover legacy relative iOS path format:
-  // Data/Application/<UUID>/Documents/<subdir>
   final legacyRelativeMatch = _iosLegacyRelativeDocumentsPattern.firstMatch(
     trimmed,
   );
@@ -127,7 +117,6 @@ Future<String> validateOrFixIosPath(
     );
   }
 
-  // Generic salvage for relative paths containing `Documents/...`.
   if (!trimmed.startsWith('/')) {
     final documentsMarker = 'Documents/';
     final index = trimmed.indexOf(documentsMarker);
@@ -143,7 +132,6 @@ Future<String> validateOrFixIosPath(
     }
   }
 
-  // Fall back to app Documents directory
   final musicDir = Directory('${docDir.path}/$subfolder');
   if (!await musicDir.exists()) {
     await musicDir.create(recursive: true);
@@ -185,7 +173,6 @@ IosPathValidationResult validateIosPath(String path) {
     );
   }
 
-  // Check if it's the container root
   if (_iosContainerRootPattern.hasMatch(path)) {
     return const IosPathValidationResult(
       isValid: false,
@@ -194,7 +181,6 @@ IosPathValidationResult validateIosPath(String path) {
     );
   }
 
-  // Check for iCloud Drive paths
   if (path.contains('Mobile Documents') ||
       path.contains('CloudDocs') ||
       path.contains('com~apple~CloudDocs')) {
@@ -213,7 +199,6 @@ IosPathValidationResult validateIosPath(String path) {
     );
   }
 
-  // Check for container root without subdirectory
   final containerPattern = RegExp(
     r'/var/mobile/Containers/Data/Application/[A-F0-9\-]+',
     caseSensitive: false,
@@ -263,7 +248,6 @@ String stripCueTrackSuffix(String path) {
 
 Future<bool> fileExists(String? path) async {
   if (path == null || path.isEmpty) return false;
-  // For CUE virtual paths, check if the base .cue file exists
   final realPath = isCueVirtualPath(path) ? stripCueTrackSuffix(path) : path;
   if (isContentUri(realPath)) {
     return PlatformBridge.safExists(realPath);
@@ -288,7 +272,6 @@ Future<void> deleteFile(String? path) async {
 
 Future<FileAccessStat?> fileStat(String? path) async {
   if (path == null || path.isEmpty) return null;
-  // For CUE virtual paths, stat the base .cue file
   final realPath = isCueVirtualPath(path) ? stripCueTrackSuffix(path) : path;
   if (isContentUri(realPath)) {
     final stat = await PlatformBridge.safStat(realPath);

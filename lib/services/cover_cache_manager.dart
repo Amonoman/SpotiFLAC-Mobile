@@ -21,7 +21,6 @@ class CoverCacheManager {
 
   static CacheManager get instance {
     if (!_initialized || _instance == null) {
-      // Fallback to default cache manager if not initialized
       debugPrint('CoverCacheManager: Not initialized, using DefaultCacheManager');
       return DefaultCacheManager();
     }
@@ -36,13 +35,13 @@ class CoverCacheManager {
     try {
       final appDir = await getApplicationSupportDirectory();
       _cachePath = p.join(appDir.path, 'cover_cache');
-      
+
       await Directory(_cachePath!).create(recursive: true);
-      
+
       debugPrint('CoverCacheManager: Initializing at $_cachePath');
 
       _instance = _createManager(_cachePath!);
-      
+
       _initialized = true;
       debugPrint('CoverCacheManager: Initialized successfully');
     } catch (e) {
@@ -60,22 +59,18 @@ class CoverCacheManager {
 
     if (instance == null || cachePath == null) return;
 
-    // Ask cache manager to clear indexed entries first.
     try {
       await instance.emptyCache();
     } catch (e) {
       debugPrint('CoverCacheManager: emptyCache failed, fallback to wipe: $e');
     }
 
-    // Then wipe the directory to remove orphaned files/metadata leftovers.
     await _wipeDirectory(cachePath);
 
-    // Clear in-memory image cache so cleared covers are not retained in RAM.
     final imageCache = PaintingBinding.instance.imageCache;
     imageCache.clear();
     imageCache.clearLiveImages();
 
-    // Reset manager memory/index state after on-disk wipe.
     instance.store.emptyMemoryCache();
     _instance = _createManager(cachePath);
     _initialized = true;
@@ -124,7 +119,6 @@ class CoverCacheManager {
         _cacheKey,
         stalePeriod: _maxCacheAge,
         maxNrOfCacheObjects: _maxCacheObjects,
-        // Use path only (not databaseName) to store database in persistent directory
         repo: JsonCacheInfoRepository(path: cachePath),
         fileSystem: IOFileSystem(cachePath),
         fileService: HttpFileService(),

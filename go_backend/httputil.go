@@ -66,9 +66,6 @@ var sharedTransport = &http.Transport{
 	DisableCompression:    true,
 }
 
-// metadataTransport is a separate transport for metadata API calls (Deezer, Spotify, SongLink).
-// Isolated from download traffic so that download failures cannot poison
-// the connection pool used by metadata enrichment.
 var metadataTransport = &http.Transport{
 	DialContext: (&net.Dialer{
 		Timeout:   30 * time.Second,
@@ -104,8 +101,6 @@ func NewHTTPClientWithTimeout(timeout time.Duration) *http.Client {
 	}
 }
 
-// NewMetadataHTTPClient creates an HTTP client using the isolated metadata transport.
-// Use this for API calls that should not be affected by download traffic.
 func NewMetadataHTTPClient(timeout time.Duration) *http.Client {
 	return &http.Client{
 		Transport: newCompatibilityTransport(metadataTransport),
@@ -229,7 +224,6 @@ func cloneRequestWithHTTPScheme(req *http.Request, scheme string) (*http.Request
 	return reqCopy, nil
 }
 
-// Also checks for ISP blocking on errors
 func DoRequestWithUserAgent(client *http.Client, req *http.Request) (*http.Response, error) {
 	req.Header.Set("User-Agent", getRandomUserAgent())
 	resp, err := client.Do(req)
@@ -239,7 +233,6 @@ func DoRequestWithUserAgent(client *http.Client, req *http.Request) (*http.Respo
 	return resp, err
 }
 
-// RetryConfig holds configuration for retry logic
 type RetryConfig struct {
 	MaxRetries    int
 	InitialDelay  time.Duration

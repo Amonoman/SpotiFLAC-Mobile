@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-const deezerMusicDLURL = "https://www.musicdl.me/api/download"
+const deezerMusicDLURL = "https://api.zarz.moe/v1/dzr"
 
 type DeezerDownloadResult struct {
 	FilePath    string
@@ -145,7 +145,6 @@ func (c *DeezerClient) GetMusicDLDownloadURL(deezerTrackURL string) (string, err
 		return "", fmt.Errorf("failed to create MusicDL request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-Debug-Key", getQobuzDebugKey())
 	req.Header.Set("User-Agent", getRandomUserAgent())
 
 	resp, err := c.httpClient.Do(req)

@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// 1. Staggered List Item – fade + slide-up entrance with index-based delay
-// ─────────────────────────────────────────────────────────────────────────────
-
 /// Wraps a child in a staggered fade-in + slide-up animation.
 ///
 /// [index] controls the stagger delay (each item delayed by [staggerDelay]).
@@ -31,7 +27,6 @@ class StaggeredListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!animate || index >= maxAnimatedItems) return child;
-    // Cap the delay so very long lists don't have absurd wait times.
     final cappedIndex = index.clamp(0, maxAnimatedItems - 1);
     final delay = staggerDelay * cappedIndex;
     final totalDuration = duration + delay;
@@ -42,7 +37,6 @@ class StaggeredListItem extends StatelessWidget {
       duration: totalDuration,
       curve: Curves.easeOutCubic,
       builder: (context, value, child) {
-        // Compute the effective progress after the stagger delay.
         final delayFraction = totalDuration.inMilliseconds > 0
             ? delay.inMilliseconds / totalDuration.inMilliseconds
             : 0.0;
@@ -61,10 +55,6 @@ class StaggeredListItem extends StatelessWidget {
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// 2. Animated State Switcher – crossfade between loading / content / empty / error
-// ─────────────────────────────────────────────────────────────────────────────
 
 /// A convenience wrapper around [AnimatedSwitcher] that crossfades between
 /// different widget states (loading, content, empty, error).
@@ -94,10 +84,6 @@ class AnimatedStateSwitcher extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// 3. Shared Page Route – consistent slide-from-right transition
-// ─────────────────────────────────────────────────────────────────────────────
-
 /// Creates a platform-aware material route.
 ///
 /// This intentionally defers route transitions to Flutter's material route and
@@ -106,10 +92,6 @@ class AnimatedStateSwitcher extends StatelessWidget {
 Route<T> slidePageRoute<T>({required Widget page}) {
   return MaterialPageRoute<T>(builder: (context) => page);
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// 4. Shimmer / Skeleton Loading Widget
-// ─────────────────────────────────────────────────────────────────────────────
 
 /// A shimmer effect widget that can wrap skeleton placeholders.
 class ShimmerLoading extends StatefulWidget {
@@ -682,10 +664,6 @@ class HomeSearchSkeleton extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// 5. Animated Selection Checkbox – scales in when entering selection mode
-// ─────────────────────────────────────────────────────────────────────────────
-
 /// An animated selection indicator that scales in/out and crossfades the
 /// checked/unchecked state.
 class AnimatedSelectionCheckbox extends StatelessWidget {
@@ -746,10 +724,6 @@ class AnimatedSelectionCheckbox extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// 6. Download Success Animation – green flash + checkmark
-// ─────────────────────────────────────────────────────────────────────────────
-
 /// A widget that briefly flashes a success color behind its child and shows
 /// an animated checkmark when [showSuccess] transitions to true.
 class DownloadSuccessOverlay extends StatefulWidget {
@@ -775,8 +749,6 @@ class _DownloadSuccessOverlayState extends State<DownloadSuccessOverlay>
   @override
   void initState() {
     super.initState();
-    // Initialise from the current widget value so items that are already
-    // completed when first built do not play the flash animation.
     _wasSuccess = widget.showSuccess;
     _controller = AnimationController(
       vsync: this,
@@ -820,10 +792,6 @@ class _DownloadSuccessOverlayState extends State<DownloadSuccessOverlay>
     );
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// 7. Badge Bump Animation – scales the badge when count changes
-// ─────────────────────────────────────────────────────────────────────────────
 
 /// Wraps a [Badge] child and plays a brief scale-bump whenever [count] changes.
 class AnimatedBadge extends StatefulWidget {
@@ -876,10 +844,6 @@ class _AnimatedBadgeState extends State<AnimatedBadge>
     return ScaleTransition(scale: _scaleAnimation, child: widget.child);
   }
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// 8. Animated Removal Item – fade + slide out when removed from a list
-// ─────────────────────────────────────────────────────────────────────────────
 
 /// Build a removal animation for [AnimatedList] items.
 /// Use as the `builder` callback in [AnimatedListState.removeItem].

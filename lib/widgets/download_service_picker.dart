@@ -5,7 +5,6 @@ import 'package:spotiflac_android/providers/extension_provider.dart';
 import 'package:spotiflac_android/providers/settings_provider.dart';
 import 'package:spotiflac_android/l10n/l10n.dart';
 
-/// Built-in service info with quality options
 class BuiltInService {
   final String id;
   final String label;
@@ -22,7 +21,6 @@ class BuiltInService {
   });
 }
 
-/// Default quality options for each built-in service
 const _builtInServices = [
   BuiltInService(
     id: 'tidal',
@@ -99,7 +97,6 @@ class DownloadServicePicker extends ConsumerStatefulWidget {
   ConsumerState<DownloadServicePicker> createState() =>
       _DownloadServicePickerState();
 
-  /// Show the download service picker as a modal bottom sheet
   static void show(
     BuildContext context, {
     String? trackName,
@@ -135,7 +132,6 @@ class _DownloadServicePickerState extends ConsumerState<DownloadServicePicker> {
   @override
   void initState() {
     super.initState();
-    // Default to recommended service if available, otherwise use default
     final recommended = widget.recommendedService;
     if (recommended != null && recommended.isNotEmpty) {
       _selectedService = recommended;
@@ -144,7 +140,6 @@ class _DownloadServicePickerState extends ConsumerState<DownloadServicePicker> {
     }
   }
 
-  /// Get quality options for the selected service
   List<QualityOption> _getQualityOptions() {
     final builtIn = _builtInServices
         .where((s) => s.id == _selectedService)
@@ -161,8 +156,6 @@ class _DownloadServicePickerState extends ConsumerState<DownloadServicePicker> {
       return ext.qualityOptions;
     }
 
-    // Extensions without quality options use Tidal's options as default
-    // since the download will fall back to built-in providers anyway.
     return _builtInServices.firstWhere((s) => s.id == 'tidal').qualityOptions;
   }
 

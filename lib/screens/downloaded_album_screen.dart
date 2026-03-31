@@ -95,7 +95,6 @@ class _DownloadedAlbumScreenState extends ConsumerState<DownloadedAlbumScreen> {
     return (mediaSize.height * 0.55).clamp(360.0, 520.0);
   }
 
-  /// Upgrade cover URL to a reasonable resolution for full-screen display.
   String? _highResCoverUrl(String? url) {
     if (url == null) return null;
     if (url.contains('ab67616d00001e02')) {
@@ -111,7 +110,6 @@ class _DownloadedAlbumScreenState extends ConsumerState<DownloadedAlbumScreen> {
     return url;
   }
 
-  /// Get tracks for this album from history provider (reactive)
   List<DownloadHistoryItem> _getAlbumTracks(
     List<DownloadHistoryItem> allItems,
   ) {
@@ -641,7 +639,6 @@ class _DownloadedAlbumScreenState extends ConsumerState<DownloadedAlbumScreen> {
     ColorScheme colorScheme,
     List<DownloadHistoryItem> tracks,
   ) {
-    // Info is now displayed in the full-screen cover overlay
     return const SliverToBoxAdapter(child: SizedBox.shrink());
   }
 
@@ -848,7 +845,6 @@ class _DownloadedAlbumScreenState extends ConsumerState<DownloadedAlbumScreen> {
     );
   }
 
-  /// Share selected tracks via system share sheet
   Future<void> _shareSelected(List<DownloadHistoryItem> allTracks) async {
     final tracksById = {for (final t in allTracks) t.id: t};
     final safUris = <String>[];
@@ -1091,7 +1087,6 @@ class _DownloadedAlbumScreenState extends ConsumerState<DownloadedAlbumScreen> {
     for (final id in _selectedIds) {
       final item = tracksById[id];
       if (item == null) continue;
-      // For SAF items, use safFileName to detect format (filePath is content:// URI)
       final nameToCheck =
           (item.safFileName != null && item.safFileName!.isNotEmpty)
           ? item.safFileName!.toLowerCase()

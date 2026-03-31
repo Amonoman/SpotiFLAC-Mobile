@@ -707,10 +707,6 @@ class _TutorialPage extends StatelessWidget {
     final contentGap = (56 * scale) + ((textScale - 1) * 10);
     final bottomGap = (32 * scale).clamp(20.0, 32.0);
 
-    // Parallax effect logic (simplified for StatelessWidget)
-    // In a real advanced implementation we'd pass the Controller's listenable
-    // But for now, let's use entrance animations based on currentIndex == index
-
     final isActive = currentIndex == index;
 
     return SingleChildScrollView(

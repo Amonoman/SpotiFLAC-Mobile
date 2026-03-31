@@ -145,13 +145,10 @@ func LogError(tag, format string, args ...interface{}) {
 	GetLogBuffer().Add("ERROR", tag, fmt.Sprintf(format, args...))
 }
 
-// GoLog is a drop-in replacement for fmt.Printf that also logs to buffer
-// It parses the tag from the format string if it starts with [Tag]
 func GoLog(format string, args ...interface{}) {
 	message := fmt.Sprintf(format, args...)
 	message = strings.TrimSuffix(message, "\n")
 
-	// Extract tag from message if present (e.g., "[Tidal] message")
 	tag := "Go"
 	level := "INFO"
 
@@ -163,7 +160,6 @@ func GoLog(format string, args ...interface{}) {
 		}
 	}
 
-	// Determine level from message content
 	msgLower := strings.ToLower(message)
 	if strings.Contains(msgLower, "error") || strings.Contains(msgLower, "failed") {
 		level = "ERROR"

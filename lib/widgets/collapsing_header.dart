@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spotiflac_android/utils/app_bar_layout.dart';
 
-/// A collapsing header widget
-/// Title collapses from large to small when scrolling
 class CollapsingHeader extends StatelessWidget {
   final String title;
   final bool showBackButton;
@@ -100,7 +98,6 @@ class CollapsingHeader extends StatelessWidget {
   }
 }
 
-/// Section header for settings
 class SettingsSection extends StatelessWidget {
   final String title;
   const SettingsSection({super.key, required this.title});
@@ -120,7 +117,6 @@ class SettingsSection extends StatelessWidget {
   }
 }
 
-/// Info card widget (like version info)
 class InfoCard extends StatelessWidget {
   final IconData icon;
   final String title;

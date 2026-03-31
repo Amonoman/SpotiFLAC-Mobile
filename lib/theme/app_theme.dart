@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:spotiflac_android/models/theme_settings.dart';
 
 class AppTheme {
-  /// Default seed color (Spotify green)
   static const Color defaultSeedColor = Color(kDefaultSeedColor);
 
   static ThemeData light({ColorScheme? dynamicScheme, Color? seedColor}) {
@@ -87,12 +86,10 @@ class AppTheme {
       fontWeight: FontWeight.w500,
     ),
     systemOverlayStyle: SystemUiOverlayStyle(
-      // Status bar
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: scheme.brightness == Brightness.dark
           ? Brightness.light
           : Brightness.dark,
-      // System navigation bar — match the in-app NavigationBar color
       systemNavigationBarColor: isAmoled
           ? Colors.black
           : scheme.surfaceContainer,

@@ -597,7 +597,6 @@ class _LibraryTracksFolderScreenState
     final customCoverPath = playlist?.coverImagePath;
     final isLovedMode = widget.mode == LibraryTracksFolderMode.loved;
     final isPlaylistMode = widget.mode == LibraryTracksFolderMode.playlist;
-    // Loved always shows the heart icon (like Spotify's Liked Songs)
     final coverUrl = isLovedMode ? null : _firstCoverUrl(entries, localState);
     final hasCustomCover =
         customCoverPath != null && customCoverPath.isNotEmpty;
@@ -667,7 +666,6 @@ class _LibraryTracksFolderScreenState
             background: Stack(
               fit: StackFit.expand,
               children: [
-                // Cover background: custom > first track URL > icon
                 if (hasCustomCover)
                   Image.file(
                     File(customCoverPath),
@@ -1364,15 +1362,12 @@ class _CollectionTrackTile extends ConsumerWidget {
     final track = entry.track;
     final historyState = ref.read(downloadHistoryProvider);
 
-    // 1. Download history by Spotify ID
     var historyItem = historyState.getBySpotifyId(track.id);
 
-    // 2. Download history by ISRC
     if (historyItem == null && track.isrc != null && track.isrc!.isNotEmpty) {
       historyItem = historyState.getByIsrc(track.isrc!);
     }
 
-    // 3. Download history by track name + artist (handles ID/ISRC mismatch)
     historyItem ??= historyState.findByTrackAndArtist(
       track.name,
       track.artistName,
@@ -1385,14 +1380,12 @@ class _CollectionTrackTile extends ConsumerWidget {
       return;
     }
 
-    // 4. Local library by ISRC
     final localState = ref.read(localLibraryProvider);
     LocalLibraryItem? localItem;
     if (track.isrc != null && track.isrc!.isNotEmpty) {
       localItem = localState.getByIsrc(track.isrc!);
     }
 
-    // 5. Local library by track name + artist
     localItem ??= localState.findByTrackAndArtist(track.name, track.artistName);
 
     if (localItem != null) {
@@ -1402,7 +1395,6 @@ class _CollectionTrackTile extends ConsumerWidget {
       return;
     }
 
-    // 6. Not found anywhere — offer to download
     _downloadTrack(context, ref);
   }
 }

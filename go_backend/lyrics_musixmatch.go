@@ -11,8 +11,6 @@ import (
 	"time"
 )
 
-// MusixmatchClient fetches lyrics from Musixmatch via a proxy server.
-// The proxy handles Musixmatch authentication internally.
 type MusixmatchClient struct {
 	httpClient *http.Client
 	baseURL    string
@@ -114,7 +112,6 @@ func (c *MusixmatchClient) fetchLyricsPayload(trackName, artistName string, dura
 	return "", fmt.Errorf("failed to decode musixmatch response")
 }
 
-// FetchLyricsInLanguage retrieves lyrics from Musixmatch for a specific language code.
 func (c *MusixmatchClient) FetchLyricsInLanguage(trackName, artistName string, durationSec float64, language string) (*LyricsResponse, error) {
 	lang := strings.ToLower(strings.TrimSpace(language))
 	if lang == "" {
@@ -151,7 +148,6 @@ func (c *MusixmatchClient) FetchLyricsInLanguage(trackName, artistName string, d
 	return nil, fmt.Errorf("no lyrics found on musixmatch for language %s", lang)
 }
 
-// FetchLyrics searches Musixmatch and returns parsed LyricsResponse.
 func (c *MusixmatchClient) FetchLyrics(trackName, artistName string, durationSec float64, preferredLanguage string) (*LyricsResponse, error) {
 	if preferred := strings.ToLower(strings.TrimSpace(preferredLanguage)); preferred != "" {
 		localized, localizedErr := c.FetchLyricsInLanguage(trackName, artistName, durationSec, preferred)

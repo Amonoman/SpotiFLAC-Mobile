@@ -1442,6 +1442,25 @@ func EmbedLyricsToFile(filePath, lyrics string) (string, error) {
 	return string(jsonBytes), nil
 }
 
+// RewriteSplitArtistTagsExport rewrites ARTIST and ALBUMARTIST Vorbis
+// comments in a FLAC file as multiple separate entries (one per artist).
+// Call this after FFmpeg metadata embedding to fix split artist tags,
+// since FFmpeg deduplicates -metadata keys and only keeps the last value.
+func RewriteSplitArtistTagsExport(filePath, artist, albumArtist string) (string, error) {
+	err := RewriteSplitArtistTags(filePath, artist, albumArtist)
+	if err != nil {
+		return errorResponse("Failed to rewrite artist tags: " + err.Error())
+	}
+
+	resp := map[string]interface{}{
+		"success": true,
+		"message": "Split artist tags written successfully",
+	}
+
+	jsonBytes, _ := json.Marshal(resp)
+	return string(jsonBytes), nil
+}
+
 func PreWarmTrackCacheJSON(tracksJSON string) (string, error) {
 	var tracks []struct {
 		ISRC       string `json:"isrc"`

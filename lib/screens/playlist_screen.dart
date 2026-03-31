@@ -117,7 +117,6 @@ class _PlaylistScreenState extends ConsumerState<PlaylistScreen> {
       final playlistInfo = result['playlist_info'] as Map<String, dynamic>?;
       final owner = playlistInfo?['owner'] as Map<String, dynamic>?;
 
-      // Go backend returns 'track_list' not 'tracks'
       final trackList = result['track_list'] as List<dynamic>? ?? [];
       final tracks = trackList
           .map((t) => _parseTrack(t as Map<String, dynamic>))
@@ -182,14 +181,11 @@ class _PlaylistScreenState extends ConsumerState<PlaylistScreen> {
     return (mediaSize.height * 0.55).clamp(360.0, 520.0);
   }
 
-  /// Upgrade cover URL to a reasonable resolution for full-screen display.
   String? _highResCoverUrl(String? url) {
     if (url == null) return null;
-    // Spotify CDN: upgrade 300 → 640 only
     if (url.contains('ab67616d00001e02')) {
       return url.replaceAll('ab67616d00001e02', 'ab67616d0000b273');
     }
-    // Deezer CDN: upgrade to 1000x1000
     final deezerRegex = RegExp(r'/(\d+)x(\d+)-(\d+)-(\d+)-(\d+)-(\d+)\.jpg$');
     if (url.contains('cdn-images.dzcdn.net') && deezerRegex.hasMatch(url)) {
       return url.replaceAllMapped(
@@ -729,7 +725,6 @@ class _PlaylistScreenState extends ConsumerState<PlaylistScreen> {
   }
 }
 
-/// Separate Consumer widget for each track - only rebuilds when this specific track's status changes
 class _PlaylistTrackItem extends ConsumerWidget {
   final Track track;
   final VoidCallback onDownload;

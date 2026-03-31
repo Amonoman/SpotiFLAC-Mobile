@@ -526,7 +526,6 @@ class _LocalAlbumScreenState extends ConsumerState<LocalAlbumScreen> {
     ColorScheme colorScheme,
     List<LocalLibraryItem> tracks,
   ) {
-    // Info is now displayed in the full-screen cover overlay
     return const SliverToBoxAdapter(child: SizedBox.shrink());
   }
 
@@ -1057,7 +1056,6 @@ class _LocalAlbumScreenState extends ConsumerState<LocalAlbumScreen> {
       return;
     }
 
-    // Temporarily hide selection bar so it doesn't overlap the bottom sheet.
     // The bar uses AnimatedPositioned (250ms), so wait for the slide-out.
     setState(() => _isSelectionMode = false);
     await Future<void>.delayed(const Duration(milliseconds: 300));

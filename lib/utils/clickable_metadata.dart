@@ -11,11 +11,6 @@ import 'package:spotiflac_android/utils/logger.dart';
 
 final _log = AppLogger('ClickableMetadata');
 
-/// Navigate to an artist screen by searching Deezer for the artist ID.
-///
-/// If [artistId] is provided and valid, navigates directly.
-/// Otherwise, searches Deezer by [artistName] to resolve the ID first.
-/// For extension-based content, pass [extensionId] to use ExtensionArtistScreen.
 Future<void> navigateToArtist(
   BuildContext context, {
   required String artistName,
@@ -95,11 +90,6 @@ Future<void> navigateToArtist(
   }
 }
 
-/// Navigate to an album screen by searching Deezer for the album ID.
-///
-/// If [albumId] is provided and valid, navigates directly.
-/// Otherwise, searches Deezer by [albumName] (optionally with [artistName]) to resolve the ID.
-/// For extension-based content, pass [extensionId] to use ExtensionAlbumScreen.
 Future<void> navigateToAlbum(
   BuildContext context, {
   required String albumName,
@@ -217,9 +207,6 @@ void _pushAlbumScreen(
   String? coverUrl,
   String? extensionId,
 }) {
-  // Built-in providers (tidal, qobuz, deezer) use AlbumScreen which
-  // detects the provider from the album ID prefix. Only true JS extensions
-  // should use ExtensionAlbumScreen.
   const builtInProviders = {'tidal', 'qobuz', 'deezer'};
   final isExtension =
       extensionId != null && !builtInProviders.contains(extensionId);
@@ -297,10 +284,6 @@ void _showUnavailable(BuildContext context, String type) {
   ).showSnackBar(SnackBar(content: Text('$type information not available')));
 }
 
-/// A reusable widget that makes text tappable to navigate to an artist screen.
-///
-/// Wraps the text in a GestureDetector that, when tapped, looks up the artist
-/// via Deezer search and navigates to the ArtistScreen.
 class ClickableArtistName extends StatefulWidget {
   final String artistName;
   final String? artistId;
@@ -526,10 +509,6 @@ bool _canNavigateArtistDirectly({
 
 final RegExp _spotifyArtistIdPattern = RegExp(r'^[A-Za-z0-9]{22}$');
 
-/// A reusable widget that makes text tappable to navigate to an album screen.
-///
-/// Wraps the text in a GestureDetector that, when tapped, looks up the album
-/// via Deezer search and navigates to the AlbumScreen.
 class ClickableAlbumName extends StatelessWidget {
   final String albumName;
   final String? albumId;

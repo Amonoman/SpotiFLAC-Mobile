@@ -11,7 +11,6 @@ import (
 	"strings"
 )
 
-// CueSheet represents a parsed .cue file
 type CueSheet struct {
 	Performer string     `json:"performer"`
 	Title     string     `json:"title"`
@@ -24,7 +23,6 @@ type CueSheet struct {
 	Tracks    []CueTrack `json:"tracks"`
 }
 
-// CueTrack represents a single track in a cue sheet
 type CueTrack struct {
 	Number    int     `json:"number"`
 	Title     string  `json:"title"`
@@ -35,7 +33,6 @@ type CueTrack struct {
 	PreGap    float64 `json:"pre_gap"`    // INDEX 00 in seconds (or -1 if not present)
 }
 
-// CueSplitInfo represents the information needed to split a CUE+audio file
 type CueSplitInfo struct {
 	CuePath   string          `json:"cue_path"`
 	AudioPath string          `json:"audio_path"`
@@ -46,7 +43,6 @@ type CueSplitInfo struct {
 	Tracks    []CueSplitTrack `json:"tracks"`
 }
 
-// CueSplitTrack has the FFmpeg split parameters for a single track
 type CueSplitTrack struct {
 	Number   int     `json:"number"`
 	Title    string  `json:"title"`
@@ -62,7 +58,6 @@ var (
 	reQuoted     = regexp.MustCompile(`"([^"]*)"`)
 )
 
-// ParseCueFile parses a .cue file and returns a CueSheet
 func ParseCueFile(cuePath string) (*CueSheet, error) {
 	f, err := os.Open(cuePath)
 	if err != nil {
@@ -202,7 +197,6 @@ func ParseCueFile(cuePath string) (*CueSheet, error) {
 	return sheet, nil
 }
 
-// parseCueTimestamp converts MM:SS:FF (frames at 75fps) to seconds
 func parseCueTimestamp(ts string) float64 {
 	parts := strings.Split(ts, ":")
 	if len(parts) != 3 {
@@ -216,7 +210,6 @@ func parseCueTimestamp(ts string) float64 {
 	return float64(minutes)*60 + float64(seconds) + float64(frames)/75.0
 }
 
-// formatCueTimestamp converts seconds to HH:MM:SS.mmm format for FFmpeg
 func formatCueTimestamp(seconds float64) string {
 	if seconds < 0 {
 		return "0"
@@ -227,7 +220,6 @@ func formatCueTimestamp(seconds float64) string {
 	return fmt.Sprintf("%02d:%02d:%06.3f", hours, mins, secs)
 }
 
-// unquoteCue removes surrounding quotes from a CUE value
 func unquoteCue(s string) string {
 	s = strings.TrimSpace(s)
 	if matches := reQuoted.FindStringSubmatch(s); len(matches) == 2 {
@@ -236,14 +228,12 @@ func unquoteCue(s string) string {
 	return s
 }
 
-// parseCueFileLine parses the FILE command's filename and type
 func parseCueFileLine(rest string) (string, string) {
 	rest = strings.TrimSpace(rest)
 
 	var filename, ftype string
 
 	if strings.HasPrefix(rest, "\"") {
-		// Quoted filename
 		endQuote := strings.Index(rest[1:], "\"")
 		if endQuote >= 0 {
 			filename = rest[1 : endQuote+1]
@@ -253,7 +243,6 @@ func parseCueFileLine(rest string) (string, string) {
 			filename = rest
 		}
 	} else {
-		// Unquoted filename - last word is the type
 		parts := strings.Fields(rest)
 		if len(parts) >= 2 {
 			ftype = parts[len(parts)-1]
@@ -266,18 +255,14 @@ func parseCueFileLine(rest string) (string, string) {
 	return filename, strings.TrimSpace(ftype)
 }
 
-// ResolveCueAudioPath finds the actual audio file referenced by a .cue sheet.
-// It checks relative to the cue file's directory.
 func ResolveCueAudioPath(cuePath string, cueFileName string) string {
 	cueDir := filepath.Dir(cuePath)
 
-	// 1. Try the exact filename from the .cue
 	candidate := filepath.Join(cueDir, cueFileName)
 	if _, err := os.Stat(candidate); err == nil {
 		return candidate
 	}
 
-	// 2. Try common case variations
 	baseName := strings.TrimSuffix(cueFileName, filepath.Ext(cueFileName))
 	commonExts := []string{".flac", ".wav", ".ape", ".mp3", ".ogg", ".wv", ".m4a"}
 	for _, ext := range commonExts {
@@ -285,14 +270,12 @@ func ResolveCueAudioPath(cuePath string, cueFileName string) string {
 		if _, err := os.Stat(candidate); err == nil {
 			return candidate
 		}
-		// Try uppercase ext
 		candidate = filepath.Join(cueDir, baseName+strings.ToUpper(ext))
 		if _, err := os.Stat(candidate); err == nil {
 			return candidate
 		}
 	}
 
-	// 3. Try to find any audio file with the same base name as the .cue file
 	cueBase := strings.TrimSuffix(filepath.Base(cuePath), filepath.Ext(cuePath))
 	for _, ext := range commonExts {
 		candidate = filepath.Join(cueDir, cueBase+ext)
@@ -301,7 +284,6 @@ func ResolveCueAudioPath(cuePath string, cueFileName string) string {
 		}
 	}
 
-	// 4. If there's only one audio file in the directory, use that
 	entries, err := os.ReadDir(cueDir)
 	if err == nil {
 		audioExts := map[string]bool{
@@ -326,13 +308,9 @@ func ResolveCueAudioPath(cuePath string, cueFileName string) string {
 	return ""
 }
 
-// BuildCueSplitInfo creates the split information from a parsed CUE sheet.
-// This is returned to the Dart side so FFmpeg can perform the splitting.
-// audioDir, if non-empty, overrides the directory for audio file resolution.
 func BuildCueSplitInfo(cuePath string, sheet *CueSheet, audioDir string) (*CueSplitInfo, error) {
 	resolveDir := cuePath
 	if audioDir != "" {
-		// Create a virtual path in audioDir so ResolveCueAudioPath looks there
 		resolveDir = filepath.Join(audioDir, filepath.Base(cuePath))
 	}
 	audioPath := ResolveCueAudioPath(resolveDir, sheet.FileName)
@@ -360,11 +338,9 @@ func BuildCueSplitInfo(cuePath string, sheet *CueSheet, audioDir string) (*CueSp
 			composer = sheet.Composer
 		}
 
-		// End time is the start of the next track, or -1 for the last track
 		endSec := float64(-1)
 		if i+1 < len(sheet.Tracks) {
 			nextTrack := sheet.Tracks[i+1]
-			// Use pre-gap of next track if available, otherwise its start time
 			if nextTrack.PreGap >= 0 {
 				endSec = nextTrack.PreGap
 			} else {
@@ -386,11 +362,6 @@ func BuildCueSplitInfo(cuePath string, sheet *CueSheet, audioDir string) (*CueSp
 	return info, nil
 }
 
-// ParseCueFileJSON parses a .cue file and returns JSON with split info.
-// This is the main entry point called from Dart via the platform bridge.
-// audioDir, if non-empty, overrides the directory used for resolving the
-// referenced audio file (useful when the .cue was copied to a temp dir
-// but the audio still lives in the original location, e.g. SAF).
 func ParseCueFileJSON(cuePath string, audioDir string) (string, error) {
 	sheet, err := ParseCueFile(cuePath)
 	if err != nil {
@@ -410,9 +381,6 @@ func ParseCueFileJSON(cuePath string, audioDir string) (string, error) {
 	return string(jsonBytes), nil
 }
 
-// ScanCueFileForLibrary parses a .cue file and returns multiple LibraryScanResult
-// entries, one per track. This is used by the library scanner to populate the
-// library with individual track entries from a single CUE+FLAC album.
 func ScanCueFileForLibrary(cuePath string, scanTime string) ([]LibraryScanResult, error) {
 	sheet, err := ParseCueFile(cuePath)
 	if err != nil {
@@ -425,13 +393,6 @@ func ScanCueFileForLibrary(cuePath string, scanTime string) ([]LibraryScanResult
 	return scanCueSheetForLibrary(cuePath, sheet, audioPath, "", 0, "", scanTime)
 }
 
-// ScanCueFileForLibraryExt is like ScanCueFileForLibrary but with extra parameters
-// for SAF (Storage Access Framework) scenarios:
-//   - audioDir: if non-empty, overrides the directory used to find the audio file
-//   - virtualPathPrefix: if non-empty, used instead of cuePath as the base for
-//     virtual file paths (e.g. a content:// URI). IDs are also based on this.
-//   - fileModTime: if > 0, used as the FileModTime for all results instead of
-//     stat-ing the cuePath on disk (useful when the real file lives behind SAF)
 func ScanCueFileForLibraryExt(cuePath, audioDir, virtualPathPrefix string, fileModTime int64, scanTime string) ([]LibraryScanResult, error) {
 	return ScanCueFileForLibraryExtWithCoverCacheKey(
 		cuePath,
@@ -483,7 +444,6 @@ func scanCueSheetForLibrary(cuePath string, sheet *CueSheet, audioPath, virtualP
 		return nil, fmt.Errorf("cue sheet is nil for %s", cuePath)
 	}
 
-	// Try to get quality info from the audio file
 	var bitDepth, sampleRate int
 	var totalDurationSec float64
 	audioExt := strings.ToLower(filepath.Ext(audioPath))
@@ -505,7 +465,6 @@ func scanCueSheetForLibrary(cuePath string, sheet *CueSheet, audioPath, virtualP
 		}
 	}
 
-	// Extract cover from audio file for all tracks
 	var coverPath string
 	libraryCoverCacheMu.RLock()
 	coverCacheDir := libraryCoverCacheDir
@@ -522,13 +481,11 @@ func scanCueSheetForLibrary(cuePath string, sheet *CueSheet, audioPath, virtualP
 		}
 	}
 
-	// Determine the base path for virtual paths and IDs
 	pathBase := cuePath
 	if virtualPathPrefix != "" {
 		pathBase = virtualPathPrefix
 	}
 
-	// Determine fileModTime
 	modTime := fileModTime
 	if modTime <= 0 {
 		if info, err := os.Stat(cuePath); err == nil {
@@ -556,7 +513,6 @@ func scanCueSheetForLibrary(cuePath string, sheet *CueSheet, audioPath, virtualP
 			album = "Unknown Album"
 		}
 
-		// Calculate duration for this track
 		var duration int
 		if i+1 < len(sheet.Tracks) {
 			nextStart := sheet.Tracks[i+1].StartTime
@@ -570,9 +526,6 @@ func scanCueSheetForLibrary(cuePath string, sheet *CueSheet, audioPath, virtualP
 
 		id := generateLibraryID(fmt.Sprintf("%s#track%d", pathBase, track.Number))
 
-		// Use a virtual file path that includes the track number to ensure
-		// uniqueness in the database (file_path has a UNIQUE constraint).
-		// Format: /path/to/album.cue#track01 or content://...album.cue#track01
 		virtualFilePath := fmt.Sprintf("%s#track%02d", pathBase, track.Number)
 
 		result := LibraryScanResult{

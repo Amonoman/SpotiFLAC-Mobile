@@ -10,7 +10,6 @@ class ShareIntentService {
   factory ShareIntentService() => _instance;
   ShareIntentService._internal();
 
-  // Spotify patterns
   static final RegExp _spotifyUriPattern = RegExp(
     r'spotify:(track|album|playlist|artist):[a-zA-Z0-9]+',
   );
@@ -18,7 +17,6 @@ class ShareIntentService {
     r'https?://open\.spotify\.com/(track|album|playlist|artist)/[a-zA-Z0-9]+(\?[^\s]*)?',
   );
 
-  // Deezer patterns
   static final RegExp _deezerUrlPattern = RegExp(
     r'https?://(www\.)?deezer\.com/(track|album|playlist|artist)/\d+(\?[^\s]*)?',
   );
@@ -26,17 +24,14 @@ class ShareIntentService {
     r'https?://deezer\.page\.link/[a-zA-Z0-9]+',
   );
 
-  // Tidal patterns
   static final RegExp _tidalUrlPattern = RegExp(
     r'https?://(listen\.)?tidal\.com/(track|album|playlist|artist)/[a-zA-Z0-9-]+(\?[^\s]*)?',
   );
 
-  // YouTube Music patterns
   static final RegExp _ytMusicUrlPattern = RegExp(
     r'https?://music\.youtube\.com/(watch\?v=|playlist\?list=|channel/|browse/)[a-zA-Z0-9_-]+([?&][^\s]*)?',
   );
 
-  // Standard YouTube patterns (youtu.be short links and www.youtube.com/watch)
   static final RegExp _youtubeUrlPattern = RegExp(
     r'https?://(youtu\.be/[a-zA-Z0-9_-]+|www\.youtube\.com/watch\?v=[a-zA-Z0-9_-]+)([?&][^\s]*)?',
   );
@@ -117,7 +112,6 @@ class ShareIntentService {
       final match = pattern.firstMatch(text);
       if (match != null) {
         final fullUrl = match.group(0)!;
-        // Keep query params for YouTube URLs (needed for ?v=, ?list=, etc.)
         if (pattern == _ytMusicUrlPattern || pattern == _youtubeUrlPattern) {
           return fullUrl;
         }

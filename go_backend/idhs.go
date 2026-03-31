@@ -10,8 +10,6 @@ import (
 	"time"
 )
 
-// IDHSClient is a client for I Don't Have Spotify API
-// Used as fallback when SongLink fails or is rate limited
 type IDHSClient struct {
 	client *http.Client
 }
@@ -55,7 +53,6 @@ func NewIDHSClient() *IDHSClient {
 	return globalIDHSClient
 }
 
-// Search converts a music link to links on other platforms
 func (c *IDHSClient) Search(link string, adapters []string) (*IDHSSearchResponse, error) {
 	idhsRateLimiter.WaitForSlot()
 
@@ -109,7 +106,6 @@ func (c *IDHSClient) Search(link string, adapters []string) (*IDHSSearchResponse
 	return &result, nil
 }
 
-// GetAvailabilityFromSpotify checks track availability using IDHS as fallback
 func (c *IDHSClient) GetAvailabilityFromSpotify(spotifyTrackID string) (*TrackAvailability, error) {
 	spotifyURL := fmt.Sprintf("https://open.spotify.com/track/%s", spotifyTrackID)
 

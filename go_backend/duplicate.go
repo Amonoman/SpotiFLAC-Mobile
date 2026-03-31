@@ -25,7 +25,6 @@ var (
 )
 
 func GetISRCIndex(outputDir string) *ISRCIndex {
-	// Fast path: check cache first
 	isrcIndexCacheMu.RLock()
 	idx, exists := isrcIndexCache[outputDir]
 	isrcIndexCacheMu.RUnlock()
@@ -34,13 +33,11 @@ func GetISRCIndex(outputDir string) *ISRCIndex {
 		return idx
 	}
 
-	// Use per-directory mutex to prevent multiple goroutines from building simultaneously
 	buildLock, _ := isrcBuildingMu.LoadOrStore(outputDir, &sync.Mutex{})
 	mu := buildLock.(*sync.Mutex)
 	mu.Lock()
 	defer mu.Unlock()
 
-	// Double-check cache after acquiring lock (another goroutine may have built it)
 	isrcIndexCacheMu.RLock()
 	idx, exists = isrcIndexCache[outputDir]
 	isrcIndexCacheMu.RUnlock()

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// A grouped settings card that connects items together like Android Settings
-/// Items are connected with no gap between them, only separated when changing groups
 class SettingsGroup extends StatelessWidget {
   final List<Widget> children;
   final EdgeInsetsGeometry? margin;
@@ -17,14 +15,10 @@ class SettingsGroup extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    // Use a more contrasting color for cards
-    // In dark mode with dynamic color, surfaceContainerHighest can be too similar to surface
-    // So we add a slight white overlay to make it more visible
-    // In light mode with dynamic color, we add a slight black overlay for the same reason
     final cardColor = isDark 
         ? Color.alphaBlend(Colors.white.withValues(alpha: 0.08), colorScheme.surface)
         : Color.alphaBlend(Colors.black.withValues(alpha: 0.04), colorScheme.surface);
-    
+
     return Container(
       margin: margin ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
@@ -44,7 +38,6 @@ class SettingsGroup extends StatelessWidget {
 }
 
 class SettingsItem extends StatelessWidget {
-
   final IconData? icon;
   final String title;
   final String? subtitle;
@@ -126,7 +119,6 @@ class SettingsItem extends StatelessWidget {
 }
 
 class SettingsSwitchItem extends StatelessWidget {
-
   final IconData? icon;
   final String title;
   final String? subtitle;
@@ -214,7 +206,6 @@ class SettingsSwitchItem extends StatelessWidget {
 }
 
 class SettingsSectionHeader extends StatelessWidget {
-
   final String title;
 
   const SettingsSectionHeader({super.key, required this.title});

@@ -2430,6 +2430,41 @@ class MainActivity: FlutterFragmentActivity() {
                             }
                             result.success(response)
                         }
+                        "rewriteSplitArtistTags" -> {
+                            val filePath = call.argument<String>("file_path") ?: ""
+                            val artist = call.argument<String>("artist") ?: ""
+                            val albumArtist = call.argument<String>("album_artist") ?: ""
+                            val response = withContext(Dispatchers.IO) {
+                                if (filePath.startsWith("content://")) {
+                                    val uri = Uri.parse(filePath)
+                                    val tempPath = copyUriToTemp(uri, ".flac")
+                                        ?: return@withContext errorJson("Failed to copy SAF file to temp")
+                                    try {
+                                        val raw = Gobackend.rewriteSplitArtistTagsExport(tempPath, artist, albumArtist)
+                                        val obj = JSONObject(raw)
+                                        if (!obj.optBoolean("success", false)) {
+                                            return@withContext raw
+                                        }
+
+                                        if (!writeUriFromPath(uri, tempPath)) {
+                                            return@withContext errorJson("Failed to write rewritten tags back to SAF file")
+                                        }
+
+                                        obj.put("file_path", filePath)
+                                        obj.toString()
+                                    } catch (e: Exception) {
+                                        errorJson("Failed to rewrite split artist tags in SAF file: ${e.message}")
+                                    } finally {
+                                        try {
+                                            File(tempPath).delete()
+                                        } catch (_: Exception) {}
+                                    }
+                                } else {
+                                    Gobackend.rewriteSplitArtistTagsExport(filePath, artist, albumArtist)
+                                }
+                            }
+                            result.success(response)
+                        }
                         "cleanupConnections" -> {
                             withContext(Dispatchers.IO) {
                                 Gobackend.cleanupConnections()

@@ -10,8 +10,6 @@ import (
 	"time"
 )
 
-// QQMusicClient fetches lyrics from QQ Music.
-// Uses Paxsenix metadata lookup for lyrics.
 type QQMusicClient struct {
 	httpClient *http.Client
 }
@@ -34,7 +32,6 @@ func NewQQMusicClient() *QQMusicClient {
 	}
 }
 
-// fetchLyricsByMetadata asks Paxsenix to resolve and return QQ lyrics using track metadata.
 func (c *QQMusicClient) fetchLyricsByMetadata(trackName, artistName string, durationSec float64) (string, error) {
 	payload := qqLyricsMetadataRequest{
 		Artist: []string{artistName},
@@ -93,7 +90,6 @@ func formatQQLyricsMetadataToLRC(rawJSON string, multiPersonWordByWord bool) (st
 	return formatPaxContent("Syllable", response.Lyrics, multiPersonWordByWord), nil
 }
 
-// FetchLyrics searches QQ Music and returns parsed LyricsResponse.
 func (c *QQMusicClient) FetchLyrics(
 	trackName,
 	artistName string,

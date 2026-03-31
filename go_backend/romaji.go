@@ -16,16 +16,13 @@ var hiraganaToRomaji = map[rune]string{
 	'や': "ya", 'ゆ': "yu", 'よ': "yo",
 	'ら': "ra", 'り': "ri", 'る': "ru", 'れ': "re", 'ろ': "ro",
 	'わ': "wa", 'を': "wo", 'ん': "n",
-	// Dakuten (voiced)
 	'が': "ga", 'ぎ': "gi", 'ぐ': "gu", 'げ': "ge", 'ご': "go",
 	'ざ': "za", 'じ': "ji", 'ず': "zu", 'ぜ': "ze", 'ぞ': "zo",
 	'だ': "da", 'ぢ': "ji", 'づ': "zu", 'で': "de", 'ど': "do",
 	'ば': "ba", 'び': "bi", 'ぶ': "bu", 'べ': "be", 'ぼ': "bo",
-	// Handakuten (semi-voiced)
 	'ぱ': "pa", 'ぴ': "pi", 'ぷ': "pu", 'ぺ': "pe", 'ぽ': "po",
-	// Small characters
 	'ゃ': "ya", 'ゅ': "yu", 'ょ': "yo",
-	'っ': "", // Double consonant marker
+	'っ': "",
 	'ぁ': "a", 'ぃ': "i", 'ぅ': "u", 'ぇ': "e", 'ぉ': "o",
 }
 
@@ -40,19 +37,15 @@ var katakanaToRomaji = map[rune]string{
 	'ヤ': "ya", 'ユ': "yu", 'ヨ': "yo",
 	'ラ': "ra", 'リ': "ri", 'ル': "ru", 'レ': "re", 'ロ': "ro",
 	'ワ': "wa", 'ヲ': "wo", 'ン': "n",
-	// Dakuten (voiced)
 	'ガ': "ga", 'ギ': "gi", 'グ': "gu", 'ゲ': "ge", 'ゴ': "go",
 	'ザ': "za", 'ジ': "ji", 'ズ': "zu", 'ゼ': "ze", 'ゾ': "zo",
 	'ダ': "da", 'ヂ': "ji", 'ヅ': "zu", 'デ': "de", 'ド': "do",
 	'バ': "ba", 'ビ': "bi", 'ブ': "bu", 'ベ': "be", 'ボ': "bo",
-	// Handakuten (semi-voiced)
 	'パ': "pa", 'ピ': "pi", 'プ': "pu", 'ペ': "pe", 'ポ': "po",
-	// Small characters
 	'ャ': "ya", 'ュ': "yu", 'ョ': "yo",
-	'ッ': "", // Double consonant marker
+	'ッ': "",
 	'ァ': "a", 'ィ': "i", 'ゥ': "u", 'ェ': "e", 'ォ': "o",
-	// Extended katakana
-	'ー': "", // Long vowel mark
+	'ー': "",
 	'ヴ': "vu",
 }
 
@@ -82,7 +75,6 @@ var combinationKatakana = map[string]string{
 	"ジャ": "ja", "ジュ": "ju", "ジョ": "jo",
 	"ビャ": "bya", "ビュ": "byu", "ビョ": "byo",
 	"ピャ": "pya", "ピュ": "pyu", "ピョ": "pyo",
-	// Extended combinations
 	"ティ": "ti", "ディ": "di", "トゥ": "tu", "ドゥ": "du",
 	"ファ": "fa", "フィ": "fi", "フェ": "fe", "フォ": "fo",
 	"ウィ": "wi", "ウェ": "we", "ウォ": "wo",
@@ -120,7 +112,6 @@ func JapaneseToRomaji(text string) string {
 	i := 0
 
 	for i < len(runes) {
-		// Check for っ/ッ (double consonant)
 		if i < len(runes)-1 && (runes[i] == 'っ' || runes[i] == 'ッ') {
 			nextRomaji := ""
 			if romaji, ok := hiraganaToRomaji[runes[i+1]]; ok {
@@ -129,13 +120,12 @@ func JapaneseToRomaji(text string) string {
 				nextRomaji = romaji
 			}
 			if len(nextRomaji) > 0 {
-				result.WriteByte(nextRomaji[0]) // Double the first consonant
+				result.WriteByte(nextRomaji[0])
 			}
 			i++
 			continue
 		}
 
-		// Check for two-character combinations
 		if i < len(runes)-1 {
 			combo := string(runes[i : i+2])
 			if romaji, ok := combinationHiragana[combo]; ok {
@@ -150,17 +140,14 @@ func JapaneseToRomaji(text string) string {
 			}
 		}
 
-		// Single character conversion
 		r := runes[i]
 		if romaji, ok := hiraganaToRomaji[r]; ok {
 			result.WriteString(romaji)
 		} else if romaji, ok := katakanaToRomaji[r]; ok {
 			result.WriteString(romaji)
 		} else if isKanji(r) {
-			// Keep kanji as-is (would need dictionary for proper conversion)
 			result.WriteRune(r)
 		} else {
-			// Keep other characters (punctuation, spaces, etc.)
 			result.WriteRune(r)
 		}
 		i++

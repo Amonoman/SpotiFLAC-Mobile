@@ -53,25 +53,16 @@ const (
 	qobuzTrackOpenBaseURL   = "https://open.qobuz.com/track/"
 	qobuzTrackPlayBaseURL   = "https://play.qobuz.com/track/"
 	qobuzStoreBaseURL       = "https://www.qobuz.com/us-en"
-	qobuzDownloadAPIURL     = "https://dl.musicdl.me/qobuz/download"
+	qobuzDownloadAPIURL     = "https://api.zarz.moe/v1/qbz"
 	qobuzDabMusicAPIURL     = "https://dabmusic.xyz/api/stream?trackId="
 	qobuzDeebAPIURL         = "https://dab.yeet.su/api/stream?trackId="
 	qobuzAfkarAPIURL        = "https://qbz.afkarxyz.qzz.io/api/track/"
 	qobuzSquidAPIURL        = "https://qobuz.squid.wtf/api/download-music?country=US&track_id="
-	qobuzDebugKeyXORMask    = byte(0x5A)
 )
 
 var qobuzStoreTrackIDRegex = regexp.MustCompile(`/v4/ajax/popin-add-cart/track/([0-9]+)`)
 var qobuzArtistAlbumIDRegex = regexp.MustCompile(`data-itemtype="album"\s+data-itemId="([A-Za-z0-9]+)"`)
 var qobuzLocaleSegmentRegex = regexp.MustCompile(`^[a-z]{2}-[a-z]{2}$`)
-
-var qobuzDebugKeyObfuscated = []byte{
-	0x69, 0x3b, 0x38, 0x3e, 0x36, 0x37, 0x35, 0x2f, 0x36, 0x3b,
-	0x33, 0x29, 0x2e, 0x32, 0x3f, 0x3d, 0x35, 0x3b, 0x2e, 0x3b,
-	0x34, 0x3e, 0x34, 0x35, 0x35, 0x34, 0x3f, 0x39, 0x35, 0x37,
-	0x3f, 0x29, 0x3f, 0x2c, 0x3f, 0x34, 0x39, 0x36, 0x35, 0x29,
-	0x3f,
-}
 
 type QobuzTrack struct {
 	ID                  int64   `json:"id"`
@@ -1214,14 +1205,6 @@ func mapQobuzQualityCodeToAPI(qualityCode string) string {
 	default:
 		return "cd"
 	}
-}
-
-func getQobuzDebugKey() string {
-	decoded := make([]byte, len(qobuzDebugKeyObfuscated))
-	for i, b := range qobuzDebugKeyObfuscated {
-		decoded[i] = b ^ qobuzDebugKeyXORMask
-	}
-	return string(decoded)
 }
 
 func (q *QobuzDownloader) SearchTrackByISRC(isrc string) (*QobuzTrack, error) {
