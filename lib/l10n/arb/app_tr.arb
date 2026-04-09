@@ -5,11 +5,11 @@
   "@appName": {
     "description": "App name - DO NOT TRANSLATE"
   },
-  "navHome": "Ara",
+  "navHome": "Ana Sayfa",
   "@navHome": {
     "description": "Bottom navigation - Home tab"
   },
-  "navLibrary": "Library",
+  "navLibrary": "Kitaplık",
   "@navLibrary": {
     "description": "Bottom navigation - Library tab"
   },
@@ -17,23 +17,23 @@
   "@navSettings": {
     "description": "Bottom navigation - Settings tab"
   },
-  "navStore": "Dükkan",
+  "navStore": "Mağaza",
   "@navStore": {
     "description": "Bottom navigation - Extension store tab"
   },
-  "homeTitle": "Ara",
+  "homeTitle": "Ana Sayfa",
   "@homeTitle": {
     "description": "Home screen title"
   },
-  "homeSubtitle": "Spotify linki yapıştır veya isimle arat",
+  "homeSubtitle": "Bir Spotify bağlantısı yapıştırın veya şarkı arayın",
   "@homeSubtitle": {
     "description": "Subtitle shown below search box"
   },
-  "homeSupports": "Desteklenen linkler: Şarkı, Albüm, Çalma Listesi, Sanatçı linkleri",
+  "homeSupports": "Desteklenenler: Şarkı, Albüm, Çalma Listesi, Sanatçı bağlantıları",
   "@homeSupports": {
     "description": "Info text about supported URL types"
   },
-  "homeRecent": "En son",
+  "homeRecent": "Son Arananlar",
   "@homeRecent": {
     "description": "Section header for recent searches"
   },
@@ -49,7 +49,7 @@
   "@historyFilterSingles": {
     "description": "Filter chip - show singles only"
   },
-  "historySearchHint": "Arama geçmişi...",
+  "historySearchHint": "Geçmişte ara...",
   "@historySearchHint": {
     "description": "Search bar placeholder in history"
   },
@@ -81,15 +81,15 @@
   "@downloadTitle": {
     "description": "Download settings page title"
   },
-  "downloadAskQualitySubtitle": "Her indirmeden önce kalite seçim ekranını göster",
+  "downloadAskQualitySubtitle": "Her indirmede kalite seçme ekranını göster",
   "@downloadAskQualitySubtitle": {
     "description": "Subtitle for ask quality toggle"
   },
-  "downloadFilenameFormat": "Dosya adı formatı",
+  "downloadFilenameFormat": "Dosya Adı Formatı",
   "@downloadFilenameFormat": {
     "description": "Setting for output filename pattern"
   },
-  "downloadFolderOrganization": "Dosya Organizasyonu",
+  "downloadFolderOrganization": "Klasör Düzeni",
   "@downloadFolderOrganization": {
     "description": "Setting for folder structure"
   },
@@ -109,15 +109,15 @@
   "@appearanceThemeDark": {
     "description": "Dark theme"
   },
-  "appearanceDynamicColor": "Dinamik Renk",
+  "appearanceDynamicColor": "Dinamik Renkler",
   "@appearanceDynamicColor": {
     "description": "Material You dynamic colors"
   },
-  "appearanceDynamicColorSubtitle": "Duvar kağıdının renklerini kullan",
+  "appearanceDynamicColorSubtitle": "Uygulama renklerini duvar kağıdınızdan alır",
   "@appearanceDynamicColorSubtitle": {
     "description": "Subtitle for dynamic color"
   },
-  "appearanceHistoryView": "Geçmiş Düzeni",
+  "appearanceHistoryView": "Geçmiş Görünümü",
   "@appearanceHistoryView": {
     "description": "Layout style for history"
   },
@@ -133,15 +133,15 @@
   "@optionsTitle": {
     "description": "Options settings page title"
   },
-  "optionsPrimaryProvider": "Ana Kaynek",
+  "optionsPrimaryProvider": "Ana Sağlayıcı",
   "@optionsPrimaryProvider": {
     "description": "Main search provider setting"
   },
-  "optionsPrimaryProviderSubtitle": "Şarkı ismi aratılırken kullanılan kaynak.",
+  "optionsPrimaryProviderSubtitle": "Şarkı adıyla arama yaparken kullanılacak servis.",
   "@optionsPrimaryProviderSubtitle": {
     "description": "Subtitle for primary provider"
   },
-  "optionsUsingExtension": "Kullanılan eklenti: {extensionName}",
+  "optionsUsingExtension": "Şu anki eklenti: {extensionName}",
   "@optionsUsingExtension": {
     "description": "Shows active extension name",
     "placeholders": {
@@ -150,51 +150,51 @@
       }
     }
   },
-  "optionsSwitchBack": "Dahili kaynaklara dönmek için Deezer veya Spotify'a tıkla",
+  "optionsSwitchBack": "Eklentiden çıkıp varsayılana dönmek için Deezer veya Spotify'a dokunun",
   "@optionsSwitchBack": {
     "description": "Hint to switch back to built-in providers"
   },
-  "optionsAutoFallback": "Diğerlerini dene",
+  "optionsAutoFallback": "Otomatik Geçiş",
   "@optionsAutoFallback": {
     "description": "Auto-retry with other services"
   },
-  "optionsAutoFallbackSubtitle": "İndirme başarısız olursa diğer hizmetleri dene",
+  "optionsAutoFallbackSubtitle": "İndirme başarısız olursa otomatik olarak diğer servisleri dener",
   "@optionsAutoFallbackSubtitle": {
     "description": "Subtitle for auto fallback"
   },
-  "optionsUseExtensionProviders": "Eklenti sağlayıcılarını kullan",
+  "optionsUseExtensionProviders": "Eklenti Sağlayıcılarını Kullan",
   "@optionsUseExtensionProviders": {
     "description": "Enable extension download providers"
   },
-  "optionsUseExtensionProvidersOn": "Eklentiler ilk denenecek",
+  "optionsUseExtensionProvidersOn": "İndirme için önce eklentiler denenecek",
   "@optionsUseExtensionProvidersOn": {
     "description": "Status when extension providers enabled"
   },
-  "optionsUseExtensionProvidersOff": "Sadece dahili sağlayıcıları kullan",
+  "optionsUseExtensionProvidersOff": "Sadece yerleşik sağlayıcılar kullanılıyor",
   "@optionsUseExtensionProvidersOff": {
     "description": "Status when extension providers disabled"
   },
-  "optionsEmbedLyrics": "Şarkı Sözlerini Göm",
+  "optionsEmbedLyrics": "Şarkı Sözlerini Gömer",
   "@optionsEmbedLyrics": {
     "description": "Embed lyrics in audio files"
   },
-  "optionsEmbedLyricsSubtitle": "Senkronize şarkı sözlerini FLAC dosyalarına göm",
+  "optionsEmbedLyricsSubtitle": "Senkronize şarkı sözlerini FLAC dosyalarının içine gömer",
   "@optionsEmbedLyricsSubtitle": {
     "description": "Subtitle for embed lyrics"
   },
-  "optionsMaxQualityCover": "En Yüksek Kapak Kalitesi",
+  "optionsMaxQualityCover": "En Yüksek Kalite Albüm Kapağı",
   "@optionsMaxQualityCover": {
     "description": "Download highest quality album art"
   },
-  "optionsMaxQualityCoverSubtitle": "En yüksek kalitedeki albüm kapaklarını indir",
+  "optionsMaxQualityCoverSubtitle": "Albüm kapağını bulunabilen en yüksek çözünürlükte indirir",
   "@optionsMaxQualityCoverSubtitle": {
     "description": "Subtitle for max quality cover"
   },
-  "optionsConcurrentDownloads": "Eş Zamanlı İndirmeler",
+  "optionsConcurrentDownloads": "Eşzamanlı İndirmeler",
   "@optionsConcurrentDownloads": {
     "description": "Number of parallel downloads"
   },
-  "optionsConcurrentSequential": "Sıralı (Birer birer)",
+  "optionsConcurrentSequential": "Sırayla (Tek tek)",
   "@optionsConcurrentSequential": {
     "description": "Download one at a time"
   },
@@ -207,23 +207,23 @@
       }
     }
   },
-  "optionsConcurrentWarning": "Aynı anda birden fazla indirme sınırlamaya takılabilir",
+  "optionsConcurrentWarning": "Aynı anda çok fazla indirme yapmak kısıtlamaya takılmanıza neden olabilir",
   "@optionsConcurrentWarning": {
     "description": "Warning about rate limits"
   },
-  "optionsExtensionStore": "Eklenti Dükkanı",
+  "optionsExtensionStore": "Eklenti Mağazası",
   "@optionsExtensionStore": {
     "description": "Show/hide store tab"
   },
-  "optionsExtensionStoreSubtitle": "Dükkan sekmesini altta göster",
+  "optionsExtensionStoreSubtitle": "Gezinme çubuğunda Mağaza sekmesini göster",
   "@optionsExtensionStoreSubtitle": {
     "description": "Subtitle for extension store toggle"
   },
-  "optionsCheckUpdates": "Güncelleştirmeleri Denetle",
+  "optionsCheckUpdates": "Güncellemeleri Kontrol Et",
   "@optionsCheckUpdates": {
     "description": "Auto update check toggle"
   },
-  "optionsCheckUpdatesSubtitle": "Yeni sürüm çıktığında bildir",
+  "optionsCheckUpdatesSubtitle": "Yeni bir sürüm çıktığında haber ver",
   "@optionsCheckUpdatesSubtitle": {
     "description": "Subtitle for update check"
   },
@@ -231,15 +231,15 @@
   "@optionsUpdateChannel": {
     "description": "Stable vs preview releases"
   },
-  "optionsUpdateChannelStable": "Sadece stabil sürümler",
+  "optionsUpdateChannelStable": "Sadece kararlı sürümler",
   "@optionsUpdateChannelStable": {
     "description": "Only stable updates"
   },
-  "optionsUpdateChannelPreview": "Önizleme sürümlerini al",
+  "optionsUpdateChannelPreview": "Ön izleme (Beta) sürümlerini de al",
   "@optionsUpdateChannelPreview": {
     "description": "Include beta/preview updates"
   },
-  "optionsUpdateChannelWarning": "Önizleme sürümleri hatalar veya tamamlanmamış özellikler içerebilir",
+  "optionsUpdateChannelWarning": "Beta sürümler hatalar içerebilir veya tamamlanmamış özellikler barındırabilir",
   "@optionsUpdateChannelWarning": {
     "description": "Warning about preview channel"
   },
@@ -247,27 +247,27 @@
   "@optionsClearHistory": {
     "description": "Delete all download history"
   },
-  "optionsClearHistorySubtitle": "İndirilen bütün şarkıları geçmişten temizle",
+  "optionsClearHistorySubtitle": "İndirilen tüm şarkıları geçmişten siler",
   "@optionsClearHistorySubtitle": {
     "description": "Subtitle for clear history"
   },
-  "optionsDetailedLogging": "Detaylı Günlükleme",
+  "optionsDetailedLogging": "Detaylı Hata Ayıklama (Log)",
   "@optionsDetailedLogging": {
     "description": "Enable verbose logs for debugging"
   },
-  "optionsDetailedLoggingOn": "Detaylı günlük kayıt ediliyor",
+  "optionsDetailedLoggingOn": "Arka planda detaylı kayıt tutuluyor",
   "@optionsDetailedLoggingOn": {
     "description": "Status when logging enabled"
   },
-  "optionsDetailedLoggingOff": "Hata bildirmek için aç",
+  "optionsDetailedLoggingOff": "Hata bildirimi yapacaksanız açın",
   "@optionsDetailedLoggingOff": {
     "description": "Status when logging disabled"
   },
-  "optionsSpotifyCredentials": "Spotify Kimlik Bilgileri",
+  "optionsSpotifyCredentials": "Spotify API Kimlik Bilgileri",
   "@optionsSpotifyCredentials": {
     "description": "Spotify API credentials setting"
   },
-  "optionsSpotifyCredentialsConfigured": "Client ID: {clientId}...",
+  "optionsSpotifyCredentialsConfigured": "İstemci Kimliği (Client ID): {clientId}...",
   "@optionsSpotifyCredentialsConfigured": {
     "description": "Shows configured client ID preview",
     "placeholders": {
@@ -276,15 +276,15 @@
       }
     }
   },
-  "optionsSpotifyCredentialsRequired": "Zorunlu - değiştirmek için tıkla",
+  "optionsSpotifyCredentialsRequired": "Gerekli - ayarlamak için dokunun",
   "@optionsSpotifyCredentialsRequired": {
     "description": "Prompt to set up credentials"
   },
-  "optionsSpotifyWarning": "Spotify'ın senin API kimlik bilgilerine ihtiyacı var. Onları developer.spotify.com'dan alabilirsin",
+  "optionsSpotifyWarning": "Spotify, kendi API kimlik bilgilerinizi kullanmanızı gerektirir. developer.spotify.com adresinden ücretsiz alabilirsiniz.",
   "@optionsSpotifyWarning": {
     "description": "Info about Spotify API requirement"
   },
-  "optionsSpotifyDeprecationWarning": "Spotify search will be deprecated on March 3, 2026 due to Spotify API changes. Please switch to Deezer.",
+  "optionsSpotifyDeprecationWarning": "Spotify API'sindeki değişiklikler nedeniyle Spotify araması 3 Mart 2026'da kullanımdan kaldırılacak. Lütfen Deezer'a geçin.",
   "@optionsSpotifyDeprecationWarning": {
     "description": "Warning about Spotify API deprecation"
   },
@@ -292,11 +292,11 @@
   "@extensionsTitle": {
     "description": "Extensions page title"
   },
-  "extensionsDisabled": "Devre Dışı",
+  "extensionsDisabled": "Devre dışı",
   "@extensionsDisabled": {
     "description": "Extension status - inactive"
   },
-  "extensionsVersion": "Versiyon {version}",
+  "extensionsVersion": "Sürüm {version}",
   "@extensionsVersion": {
     "description": "Extension version display",
     "placeholders": {
@@ -318,19 +318,19 @@
   "@extensionsUninstall": {
     "description": "Uninstall extension button"
   },
-  "storeTitle": "Eklenti Dükkanı",
+  "storeTitle": "Eklenti Mağazası",
   "@storeTitle": {
     "description": "Store screen title"
   },
-  "storeSearch": "Eklenti ara...",
+  "storeSearch": "Eklentilerde ara...",
   "@storeSearch": {
     "description": "Store search placeholder"
   },
-  "storeInstall": "Kur",
+  "storeInstall": "Yükle",
   "@storeInstall": {
     "description": "Install extension button"
   },
-  "storeInstalled": "Kuruldu",
+  "storeInstalled": "Yüklü",
   "@storeInstalled": {
     "description": "Already installed badge"
   },
@@ -346,15 +346,15 @@
   "@aboutContributors": {
     "description": "Section for contributors"
   },
-  "aboutMobileDeveloper": "Mobil versiyon geliştiricisi",
+  "aboutMobileDeveloper": "Mobil sürüm geliştiricisi",
   "@aboutMobileDeveloper": {
     "description": "Role description for mobile dev"
   },
-  "aboutOriginalCreator": "Orijinal SpotiFLAC'ın kurucusu",
+  "aboutOriginalCreator": "Orijinal SpotiFLAC'ın yaratıcısı",
   "@aboutOriginalCreator": {
     "description": "Role description for original creator"
   },
-  "aboutLogoArtist": "Uygulama logomuzu yaratmış yetenekli sanatçımız!",
+  "aboutLogoArtist": "Uygulamanın harika logosunu tasarlayan yetenekli sanatçı!",
   "@aboutLogoArtist": {
     "description": "Role description for logo artist"
   },
@@ -362,11 +362,11 @@
   "@aboutTranslators": {
     "description": "Section for translators"
   },
-  "aboutSpecialThanks": "Özel teşekkür",
+  "aboutSpecialThanks": "Özel Teşekkürler",
   "@aboutSpecialThanks": {
     "description": "Section for special thanks"
   },
-  "aboutLinks": "Linkler",
+  "aboutLinks": "Bağlantılar",
   "@aboutLinks": {
     "description": "Section for external links"
   },
@@ -378,11 +378,11 @@
   "@aboutPCSource": {
     "description": "Link to PC GitHub repo"
   },
-  "aboutReportIssue": "Sorun bildir",
+  "aboutReportIssue": "Hata bildir",
   "@aboutReportIssue": {
     "description": "Link to report bugs"
   },
-  "aboutReportIssueSubtitle": "Karşılaştığın herhangi bir problemi bildir",
+  "aboutReportIssueSubtitle": "Karşılaştığınız sorunları bize iletin",
   "@aboutReportIssueSubtitle": {
     "description": "Subtitle for report issue"
   },
@@ -390,7 +390,7 @@
   "@aboutFeatureRequest": {
     "description": "Link to suggest features"
   },
-  "aboutFeatureRequestSubtitle": "Uygulama için yeni özellikler isteyin",
+  "aboutFeatureRequestSubtitle": "Uygulama için yeni özellikler önerin",
   "@aboutFeatureRequestSubtitle": {
     "description": "Subtitle for feature request"
   },
@@ -402,35 +402,35 @@
   "@aboutTelegramChannelSubtitle": {
     "description": "Subtitle for Telegram channel"
   },
-  "aboutTelegramChat": "Telegram Grubu",
+  "aboutTelegramChat": "Telegram Topluluğu",
   "@aboutTelegramChat": {
     "description": "Link to Telegram chat group"
   },
-  "aboutTelegramChatSubtitle": "Diğer kullanıcılarla sohbet et",
+  "aboutTelegramChatSubtitle": "Diğer kullanıcılarla sohbet edin",
   "@aboutTelegramChatSubtitle": {
     "description": "Subtitle for Telegram chat"
   },
-  "aboutSocial": "Sosyal ağlar",
+  "aboutSocial": "Sosyal Medya",
   "@aboutSocial": {
     "description": "Section for social links"
   },
-  "aboutApp": "Uygulama",
+  "aboutApp": "Uygulama Bilgisi",
   "@aboutApp": {
     "description": "Section for app info"
   },
-  "aboutVersion": "Versiyon",
+  "aboutVersion": "Sürüm",
   "@aboutVersion": {
     "description": "Version info label"
   },
-  "aboutBinimumDesc": "QQDL ve HiFi API'ın kurucusu. Bu API olmadan, Tidal indirmeleri olmazdı!",
+  "aboutBinimumDesc": "QQDL ve HiFi API'nin yaratıcısı. Bu API olmasaydı Tidal indirmeleri var olamazdı!",
   "@aboutBinimumDesc": {
     "description": "Credit description for binimum"
   },
-  "aboutSachinsenalDesc": "Orijinal HiFi projesi kurucusu. Tidal entegrasyonun temeli!",
+  "aboutSachinsenalDesc": "Orijinal HiFi projesinin kurucusu. Tidal entegrasyonunun temel taşı!",
   "@aboutSachinsenalDesc": {
     "description": "Credit description for sachinsenal0x64"
   },
-  "aboutSjdonadoDesc": "Creator of I Don't Have Spotify (IDHS). The fallback link resolver that saves the day!",
+  "aboutSjdonadoDesc": "I Don't Have Spotify (IDHS) projesinin yaratıcısı. Günü kurtaran bağlantı çözümleyicimiz!",
   "@aboutSjdonadoDesc": {
     "description": "Credit description for sjdonado"
   },
@@ -438,7 +438,7 @@
   "@aboutDabMusic": {
     "description": "Name of Qobuz API service - DO NOT TRANSLATE"
   },
-  "aboutDabMusicDesc": "En iyi Qobuz streaming API'ı. Yüksek kalite indirmeler bunun sayesinde!",
+  "aboutDabMusicDesc": "En iyi Qobuz yayın API'si. Hi-Res indirmeler onlar olmadan mümkün olamazdı!",
   "@aboutDabMusicDesc": {
     "description": "Credit for DAB Music API"
   },
@@ -446,11 +446,11 @@
   "@aboutSpotiSaver": {
     "description": "Name of SpotiSaver API service - DO NOT TRANSLATE"
   },
-  "aboutSpotiSaverDesc": "Tidal Hi-Res FLAC streaming endpoints. A key piece of the lossless puzzle!",
+  "aboutSpotiSaverDesc": "Tidal Hi-Res FLAC altyapısı. Kayıpsız ses deneyiminin kilit parçası!",
   "@aboutSpotiSaverDesc": {
     "description": "Credit for SpotiSaver API"
   },
-  "aboutAppDescription": "Download Spotify tracks in lossless quality from Tidal and Qobuz.",
+  "aboutAppDescription": "Spotify şarkılarını Tidal ve Qobuz üzerinden kayıpsız kalitede indirin.",
   "@aboutAppDescription": {
     "description": "App description in header card"
   },
@@ -480,7 +480,7 @@
       }
     }
   },
-  "trackMetadataService": "Hizmet",
+  "trackMetadataService": "Sağlayıcı",
   "@trackMetadataService": {
     "description": "Metadata field - download service used"
   },
@@ -504,11 +504,11 @@
   "@setupSkip": {
     "description": "Skip current step button"
   },
-  "setupStorageAccessRequired": "Depolama Erişimi Gerekli",
+  "setupStorageAccessRequired": "Depolama İzni Gerekli",
   "@setupStorageAccessRequired": {
     "description": "Title when storage access needed"
   },
-  "setupStorageAccessMessageAndroid11": "Android 11 ve sonrasında şarkıların seçili klasörünüze kaydedilebilmesi için \"Bütün dosyalara eriş\" iznine ihtiyaç var.",
+  "setupStorageAccessMessageAndroid11": "Android 11 ve üzeri, müzikleri seçtiğiniz klasöre kaydedebilmek için 'Tüm dosyalara erişim' izni gerektirir.",
   "@setupStorageAccessMessageAndroid11": {
     "description": "Android 11+ specific explanation"
   },
@@ -516,11 +516,11 @@
   "@setupOpenSettings": {
     "description": "Button to open system settings"
   },
-  "setupPermissionDeniedMessage": "İzin reddedildi. Devam etmek için lütfen bütün izinleri verin.",
+  "setupPermissionDeniedMessage": "İzin reddedildi. Devam etmek için lütfen gerekli izinleri verin.",
   "@setupPermissionDeniedMessage": {
     "description": "Error when permission denied"
   },
-  "setupPermissionRequired": "{permissionType} İzni Zorunlu",
+  "setupPermissionRequired": "{permissionType} İzni Gerekli",
   "@setupPermissionRequired": {
     "description": "Generic permission required title",
     "placeholders": {
@@ -530,7 +530,7 @@
       }
     }
   },
-  "setupPermissionRequiredMessage": "En iyi deneyim için {permissionType} izni zorunludur. Bunu ayarlardan daha sonra değiştirebilirsiniz.",
+  "setupPermissionRequiredMessage": "En iyi deneyim için {permissionType} iznine ihtiyacımız var. Bunu daha sonra Ayarlar'dan değiştirebilirsiniz.",
   "@setupPermissionRequiredMessage": {
     "description": "Generic permission required message",
     "placeholders": {
@@ -539,11 +539,11 @@
       }
     }
   },
-  "setupUseDefaultFolder": "Varsayılan Klasörü Kullan?",
+  "setupUseDefaultFolder": "Varsayılan Klasör Kullanılsın mı?",
   "@setupUseDefaultFolder": {
     "description": "Dialog title for default folder"
   },
-  "setupNoFolderSelected": "Klasör seçilmedi. Varsayılan \"Music\" klasörünü kullanmak ister misiniz?",
+  "setupNoFolderSelected": "Hiçbir klasör seçilmedi. İndirilenler için cihazınızdaki varsayılan Müzik klasörü kullanılsın mı?",
   "@setupNoFolderSelected": {
     "description": "Prompt when no folder selected"
   },
@@ -555,15 +555,15 @@
   "@setupDownloadLocationTitle": {
     "description": "Download location dialog title"
   },
-  "setupDownloadLocationIosMessage": "iOS'ta indirilenler uygulamanın \"Documents\" dosyasına kaydedilir. Onlara Dosyalar uygulamasından erişebilirsiniz.",
+  "setupDownloadLocationIosMessage": "iOS'te indirilen dosyalar uygulamanın Belgeler klasörüne kaydedilir. Bunlara Dosyalar uygulaması üzerinden erişebilirsiniz.",
   "@setupDownloadLocationIosMessage": {
     "description": "iOS-specific folder info"
   },
-  "setupAppDocumentsFolder": "App Documents Folder",
+  "setupAppDocumentsFolder": "Uygulama Belgeleri Klasörü",
   "@setupAppDocumentsFolder": {
     "description": "iOS documents folder option"
   },
-  "setupAppDocumentsFolderSubtitle": "Tavsiye edilen - Dosyalar uygulamasından erişilebilir",
+  "setupAppDocumentsFolderSubtitle": "Önerilen - Dosyalar uygulamasıyla erişilebilir",
   "@setupAppDocumentsFolderSubtitle": {
     "description": "Subtitle for documents folder"
   },
@@ -571,19 +571,19 @@
   "@setupChooseFromFiles": {
     "description": "iOS file picker option"
   },
-  "setupChooseFromFilesSubtitle": "iCloud veya başka konum seç",
+  "setupChooseFromFilesSubtitle": "iCloud veya başka bir konum seçin",
   "@setupChooseFromFilesSubtitle": {
     "description": "Subtitle for file picker"
   },
-  "setupIosEmptyFolderWarning": "iOS'un sınırlaması: Boş klasörler seçilemiyor. İçinde en az bir dosya bulunan bir klasör seçin.",
+  "setupIosEmptyFolderWarning": "iOS Kısıtlaması: Boş klasörler seçilemez. Lütfen içinde en az bir dosya olan bir klasör seçin.",
   "@setupIosEmptyFolderWarning": {
     "description": "iOS folder selection warning"
   },
-  "setupIcloudNotSupported": "iCloud Drive is not supported. Please use the app Documents folder.",
+  "setupIcloudNotSupported": "iCloud Drive desteklenmiyor. Lütfen uygulamanın Belgeler klasörünü kullanın.",
   "@setupIcloudNotSupported": {
     "description": "Error when user selects iCloud Drive on iOS"
   },
-  "setupDownloadInFlac": "Spotify şarkılarını FLAC olarak indirin",
+  "setupDownloadInFlac": "Spotify müziklerini FLAC formatında indirin",
   "@setupDownloadInFlac": {
     "description": "App tagline in setup"
   },
@@ -595,7 +595,7 @@
   "@setupStorageRequired": {
     "description": "Title when storage permission needed"
   },
-  "setupStorageDescription": "SpotiFLAC'ın şarkılarınızı kaydetmek için depolama iznine ihtiyacı var.",
+  "setupStorageDescription": "İndirdiğiniz şarkıları kaydedebilmemiz için SpotiFLAC'ın depolama iznine ihtiyacı var.",
   "@setupStorageDescription": {
     "description": "Explanation for storage permission"
   },
@@ -603,15 +603,15 @@
   "@setupNotificationGranted": {
     "description": "Success message for notification permission"
   },
-  "setupNotificationEnable": "Bildirimleri Etkinleştir",
+  "setupNotificationEnable": "Bildirimleri Aç",
   "@setupNotificationEnable": {
     "description": "Button to enable notifications"
   },
-  "setupFolderChoose": "İndirilecek Klasörü Seç",
+  "setupFolderChoose": "İndirme Klasörü Seç",
   "@setupFolderChoose": {
     "description": "Button to choose folder"
   },
-  "setupFolderDescription": "İndirdiğin şarkıların kaydedileceği klasörü seç.",
+  "setupFolderDescription": "İndirilen şarkıların nereye kaydedileceğini seçin.",
   "@setupFolderDescription": {
     "description": "Explanation for folder selection"
   },
@@ -619,11 +619,11 @@
   "@setupSelectFolder": {
     "description": "Button to select folder"
   },
-  "setupEnableNotifications": "Bildirimleri Etkinleştir",
+  "setupEnableNotifications": "Bildirimleri Aç",
   "@setupEnableNotifications": {
     "description": "Button to enable notifications"
   },
-  "setupNotificationBackgroundDescription": "İndirmelerin durumu hakkında bildirim al. Bunu açmak uygulama arka plandayken indirmelerinizi takip etmenizi sağlar.",
+  "setupNotificationBackgroundDescription": "İndirme durumları ve tamamlanan şarkılar hakkında anında bildirim alın. Bu, uygulama arka plandayken süreci takip etmenizi kolaylaştırır.",
   "@setupNotificationBackgroundDescription": {
     "description": "Detailed notification explanation"
   },
@@ -631,15 +631,15 @@
   "@setupSkipForNow": {
     "description": "Skip button text"
   },
-  "setupNext": "Sıradaki",
+  "setupNext": "İleri",
   "@setupNext": {
     "description": "Next button text"
   },
-  "setupGetStarted": "Başla",
+  "setupGetStarted": "Hadi Başlayalım",
   "@setupGetStarted": {
     "description": "Final setup button"
   },
-  "setupAllowAccessToManageFiles": "Lütfen bir sonraki ekranda \"Bütün dosyalara eriş\" iznini sağlayın.",
+  "setupAllowAccessToManageFiles": "Lütfen sonraki ekranda \"Tüm dosyaları yönetme erişimine izin ver\" seçeneğini açın.",
   "@setupAllowAccessToManageFiles": {
     "description": "Instruction for file access permission"
   },
@@ -655,7 +655,7 @@
   "@dialogDelete": {
     "description": "Dialog button - delete item"
   },
-  "dialogRetry": "Yeniden dene",
+  "dialogRetry": "Yeniden Dene",
   "@dialogRetry": {
     "description": "Dialog button - retry action"
   },
@@ -663,15 +663,19 @@
   "@dialogClear": {
     "description": "Dialog button - clear items"
   },
-  "dialogDone": "Tamamlandı",
+  "dialogDone": "Bitti",
   "@dialogDone": {
     "description": "Dialog button - action completed"
   },
-  "dialogImport": "İçe aktar",
+  "dialogImport": "İçe Aktar",
   "@dialogImport": {
     "description": "Dialog button - import data"
   },
-  "dialogDiscard": "Vazgeç",
+  "dialogDownload": "İndir",
+  "@dialogDownload": {
+    "description": "Dialog button - download action"
+  },
+  "dialogDiscard": "Değişiklikleri Sil",
   "@dialogDiscard": {
     "description": "Dialog button - discard changes"
   },
@@ -679,15 +683,15 @@
   "@dialogRemove": {
     "description": "Dialog button - remove item"
   },
-  "dialogUninstall": "Kaldır",
+  "dialogUninstall": "Sil",
   "@dialogUninstall": {
     "description": "Dialog button - uninstall extension"
   },
-  "dialogDiscardChanges": "Değişiklikleri İptal Et?",
+  "dialogDiscardChanges": "Değişiklikler İptal Edilsin mi?",
   "@dialogDiscardChanges": {
     "description": "Dialog title - unsaved changes warning"
   },
-  "dialogUnsavedChanges": "Kaydedilmeyen değişiklikler mevcut. Bu değişiklikleri iptal etmek istiyor musunuz?",
+  "dialogUnsavedChanges": "Kaydedilmemiş değişiklikleriniz var. Çıkmak istediğinize emin misiniz?",
   "@dialogUnsavedChanges": {
     "description": "Dialog message - unsaved changes"
   },
@@ -699,15 +703,15 @@
   "@dialogRemoveExtension": {
     "description": "Dialog title - uninstall extension"
   },
-  "dialogRemoveExtensionMessage": "Bu eklentiyi kaldırmak istediğine emin misin? Bu işlem geri alınamaz.",
+  "dialogRemoveExtensionMessage": "Bu eklentiyi kaldırmak istediğinize emin misiniz? Bu işlem geri alınamaz.",
   "@dialogRemoveExtensionMessage": {
     "description": "Dialog message - uninstall confirmation"
   },
-  "dialogUninstallExtension": "Eklentiyi Kaldır?",
+  "dialogUninstallExtension": "Eklentiyi Sil?",
   "@dialogUninstallExtension": {
     "description": "Dialog title - uninstall extension"
   },
-  "dialogUninstallExtensionMessage": "{extensionName} eklentisini kaldırmak istediğine emin misin?",
+  "dialogUninstallExtensionMessage": "{extensionName} eklentisini silmek istediğinize emin misiniz?",
   "@dialogUninstallExtensionMessage": {
     "description": "Dialog message - uninstall specific extension",
     "placeholders": {
@@ -720,15 +724,15 @@
   "@dialogClearHistoryTitle": {
     "description": "Dialog title - clear download history"
   },
-  "dialogClearHistoryMessage": "Tüm indirme geçmişini temizlemek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+  "dialogClearHistoryMessage": "Tüm indirme geçmişinizi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
   "@dialogClearHistoryMessage": {
     "description": "Dialog message - clear history confirmation"
   },
-  "dialogDeleteSelectedTitle": "Seçileni Sil",
+  "dialogDeleteSelectedTitle": "Seçilenleri Sil",
   "@dialogDeleteSelectedTitle": {
     "description": "Dialog title - delete selected items"
   },
-  "dialogDeleteSelectedMessage": "{count} {count, plural, one {şarkıyı} other{şarkıyı}} geçmişten silmeye emin misiniz?\n\nBu işlem seçilenleri cihazınızdan da silecektir.",
+  "dialogDeleteSelectedMessage": "Geçmişten {count} {count, plural, =1{şarkı} other{şarkı}} silinsin mi?\n\nBu işlem, indirilen dosyaları cihazınızdan da tamamen silecek.",
   "@dialogDeleteSelectedMessage": {
     "description": "Dialog message - delete selected tracks",
     "placeholders": {
@@ -737,11 +741,11 @@
       }
     }
   },
-  "dialogImportPlaylistTitle": "Çalma listesini içe aktar",
+  "dialogImportPlaylistTitle": "Çalma Listesi İçe Aktar",
   "@dialogImportPlaylistTitle": {
     "description": "Dialog title - import CSV playlist"
   },
-  "dialogImportPlaylistMessage": "CSV'de {count} şarkı bulundu. İndirme kuyruğuna ekle?",
+  "dialogImportPlaylistMessage": "CSV dosyasında {count} şarkı bulundu. İndirme sırasına eklensin mi?",
   "csvImportTracks": "CSV'den {count} şarkı",
   "@csvImportTracks": {
     "description": "Label shown in quality picker for CSV import",
@@ -759,7 +763,7 @@
       }
     }
   },
-  "snackbarAddedToQueue": "\"{trackName}\" kuyruğa eklendi",
+  "snackbarAddedToQueue": "\"{trackName}\" indirme sırasına eklendi",
   "@snackbarAddedToQueue": {
     "description": "Snackbar - track added to download queue",
     "placeholders": {
@@ -768,7 +772,7 @@
       }
     }
   },
-  "snackbarAddedTracksToQueue": "{count} şarkı kuyruğa eklendi",
+  "snackbarAddedTracksToQueue": "{count} şarkı indirme sırasına eklendi",
   "@snackbarAddedTracksToQueue": {
     "description": "Snackbar - multiple tracks added to queue",
     "placeholders": {
@@ -777,7 +781,7 @@
       }
     }
   },
-  "snackbarAlreadyDownloaded": "\"{trackName}\" zaten indirilmiş",
+  "snackbarAlreadyDownloaded": "\"{trackName}\" zaten inmiş durumda",
   "@snackbarAlreadyDownloaded": {
     "description": "Snackbar - track already exists",
     "placeholders": {
@@ -786,7 +790,7 @@
       }
     }
   },
-  "snackbarAlreadyInLibrary": "\"{trackName}\" already exists in your library",
+  "snackbarAlreadyInLibrary": "\"{trackName}\" kitaplığınızda zaten mevcut",
   "@snackbarAlreadyInLibrary": {
     "description": "Snackbar - track already exists in local library",
     "placeholders": {
@@ -799,15 +803,15 @@
   "@snackbarHistoryCleared": {
     "description": "Snackbar - history deleted"
   },
-  "snackbarCredentialsSaved": "Kimlik bilgileri kaydedildi",
+  "snackbarCredentialsSaved": "API bilgileri kaydedildi",
   "@snackbarCredentialsSaved": {
     "description": "Snackbar - Spotify credentials saved"
   },
-  "snackbarCredentialsCleared": "Kimlik bilgileri temizlendi",
+  "snackbarCredentialsCleared": "API bilgileri silindi",
   "@snackbarCredentialsCleared": {
     "description": "Snackbar - Spotify credentials removed"
   },
-  "snackbarDeletedTracks": "{count} {count, plural, one {şarkı} other{şarkı}} silindi",
+  "snackbarDeletedTracks": "{count} {count, plural, =1{şarkı} other{şarkı}} silindi",
   "@snackbarDeletedTracks": {
     "description": "Snackbar - tracks deleted",
     "placeholders": {
@@ -816,7 +820,7 @@
       }
     }
   },
-  "snackbarCannotOpenFile": "Dosya açılamadı: {error}",
+  "snackbarCannotOpenFile": "Dosya açılamıyor: {error}",
   "@snackbarCannotOpenFile": {
     "description": "Snackbar - file open error",
     "placeholders": {
@@ -829,11 +833,11 @@
   "@snackbarFillAllFields": {
     "description": "Snackbar - validation error"
   },
-  "snackbarViewQueue": "Kuyruğu Görüntüle",
+  "snackbarViewQueue": "Sırayı Gör",
   "@snackbarViewQueue": {
     "description": "Snackbar action - view download queue"
   },
-  "snackbarUrlCopied": "{platform} Bağlantı panoya kopyalandı",
+  "snackbarUrlCopied": "{platform} bağlantısı panoya kopyalandı",
   "@snackbarUrlCopied": {
     "description": "Snackbar - URL copied",
     "placeholders": {
@@ -847,19 +851,19 @@
   "@snackbarFileNotFound": {
     "description": "Snackbar - file doesn't exist"
   },
-  "snackbarSelectExtFile": "Lütfen .spotiflac-ext dosyasını seçin",
+  "snackbarSelectExtFile": "Lütfen bir .spotiflac-ext dosyası seçin",
   "@snackbarSelectExtFile": {
     "description": "Snackbar - wrong file type selected"
   },
-  "snackbarProviderPrioritySaved": "Provider priority saved",
+  "snackbarProviderPrioritySaved": "Sağlayıcı önceliği kaydedildi",
   "@snackbarProviderPrioritySaved": {
     "description": "Snackbar - provider order saved"
   },
-  "snackbarMetadataProviderSaved": "Metadata provider priority saved",
+  "snackbarMetadataProviderSaved": "Veri sağlayıcı önceliği kaydedildi",
   "@snackbarMetadataProviderSaved": {
     "description": "Snackbar - metadata provider order saved"
   },
-  "snackbarExtensionInstalled": "{extensionName} yüklendi.",
+  "snackbarExtensionInstalled": "{extensionName} başarıyla yüklendi.",
   "@snackbarExtensionInstalled": {
     "description": "Snackbar - extension installed successfully",
     "placeholders": {
@@ -868,7 +872,7 @@
       }
     }
   },
-  "snackbarExtensionUpdated": "{extensionName} güncellendi.",
+  "snackbarExtensionUpdated": "{extensionName} başarıyla güncellendi.",
   "@snackbarExtensionUpdated": {
     "description": "Snackbar - extension updated successfully",
     "placeholders": {
@@ -877,39 +881,39 @@
       }
     }
   },
-  "snackbarFailedToInstall": "Eklenti yüklenirken hata oluştu",
+  "snackbarFailedToInstall": "Eklenti yüklenemedi",
   "@snackbarFailedToInstall": {
     "description": "Snackbar - extension install error"
   },
-  "snackbarFailedToUpdate": "Eklenti güncellenirken hata oluştu",
+  "snackbarFailedToUpdate": "Eklenti güncellenemedi",
   "@snackbarFailedToUpdate": {
     "description": "Snackbar - extension update error"
   },
-  "errorRateLimited": "Aşırı istek gönderildi",
+  "errorRateLimited": "Hız Sınırına Takıldınız",
   "@errorRateLimited": {
     "description": "Error title - too many requests"
   },
-  "errorRateLimitedMessage": "Çok fazla istek. Lütfen arama yapmadan önce biraz bekleyin.",
+  "errorRateLimitedMessage": "Çok fazla istek gönderdiniz. Yeniden arama yapmadan önce lütfen biraz bekleyin.",
   "@errorRateLimitedMessage": {
     "description": "Error message - rate limit explanation"
   },
-  "errorNoTracksFound": "Parça bulunamadı",
+  "errorNoTracksFound": "Şarkı bulunamadı",
   "@errorNoTracksFound": {
     "description": "Error - search returned no results"
   },
-  "errorUrlNotRecognized": "Link not recognized",
+  "errorUrlNotRecognized": "Bağlantı algılanamadı",
   "@errorUrlNotRecognized": {
     "description": "Error title - URL not handled by any extension or service"
   },
-  "errorUrlNotRecognizedMessage": "This link is not supported. Make sure the URL is correct and a compatible extension is installed.",
+  "errorUrlNotRecognizedMessage": "Bu bağlantı desteklenmiyor. Bağlantının doğru olduğundan ve gerekli eklentinin yüklü olduğundan emin olun.",
   "@errorUrlNotRecognizedMessage": {
     "description": "Error message - URL not recognized explanation"
   },
-  "errorUrlFetchFailed": "Failed to load content from this link. Please try again.",
+  "errorUrlFetchFailed": "Bu bağlantıdan içerik yüklenemedi. Lütfen tekrar deneyin.",
   "@errorUrlFetchFailed": {
     "description": "Error message - generic URL fetch failure"
   },
-  "errorMissingExtensionSource": "{item} yüklenemedi: Eksik eklenti kaynağı",
+  "errorMissingExtensionSource": "{item} yüklenemiyor: Eklenti kaynağı eksik",
   "@errorMissingExtensionSource": {
     "description": "Error - extension source not available",
     "placeholders": {
@@ -922,11 +926,11 @@
   "@actionPause": {
     "description": "Action button - pause download"
   },
-  "actionResume": "Devam et",
+  "actionResume": "Devam Et",
   "@actionResume": {
     "description": "Action button - resume download"
   },
-  "actionCancel": "Vazgeç",
+  "actionCancel": "İptal",
   "@actionCancel": {
     "description": "Action button - cancel operation"
   },
@@ -934,15 +938,15 @@
   "@actionSelectAll": {
     "description": "Action button - select all items"
   },
-  "actionDeselect": "Seçimi kaldır",
+  "actionDeselect": "Seçimi Kaldır",
   "@actionDeselect": {
     "description": "Action button - deselect all"
   },
-  "actionRemoveCredentials": "Özellikleri kaldır",
+  "actionRemoveCredentials": "API Bilgilerini Sil",
   "@actionRemoveCredentials": {
     "description": "Action button - delete Spotify credentials"
   },
-  "actionSaveCredentials": "Özellikleri kaydet",
+  "actionSaveCredentials": "API Bilgilerini Kaydet",
   "@actionSaveCredentials": {
     "description": "Action button - save Spotify credentials"
   },
@@ -955,15 +959,15 @@
       }
     }
   },
-  "selectionAllSelected": "Tüm parçalar seçildi",
+  "selectionAllSelected": "Tüm şarkılar seçildi",
   "@selectionAllSelected": {
     "description": "Status - all items selected"
   },
-  "selectionSelectToDelete": "Silinecek parçaları seçin",
+  "selectionSelectToDelete": "Silinecek şarkıları seçin",
   "@selectionSelectToDelete": {
     "description": "Placeholder when nothing selected"
   },
-  "progressFetchingMetadata": "Meta verileri alınıyor... {current}/{total}",
+  "progressFetchingMetadata": "Veriler alınıyor... {current}/{total}",
   "@progressFetchingMetadata": {
     "description": "Progress indicator - loading track info",
     "placeholders": {
@@ -975,7 +979,7 @@
       }
     }
   },
-  "progressReadingCsv": "CSV okunuyor...",
+  "progressReadingCsv": "CSV dosyası okunuyor...",
   "@progressReadingCsv": {
     "description": "Progress indicator - parsing CSV file"
   },
@@ -995,31 +999,71 @@
   "@searchPlaylists": {
     "description": "Search result category - playlists"
   },
+  "searchSortTitle": "Sonuçları Sırala",
+  "@searchSortTitle": {
+    "description": "Bottom sheet title for search sort options"
+  },
+  "searchSortDefault": "Varsayılan",
+  "@searchSortDefault": {
+    "description": "Sort option - default API order"
+  },
+  "searchSortTitleAZ": "Şarkı Adı (A-Z)",
+  "@searchSortTitleAZ": {
+    "description": "Sort option - title ascending"
+  },
+  "searchSortTitleZA": "Şarkı Adı (Z-A)",
+  "@searchSortTitleZA": {
+    "description": "Sort option - title descending"
+  },
+  "searchSortArtistAZ": "Sanatçı (A-Z)",
+  "@searchSortArtistAZ": {
+    "description": "Sort option - artist ascending"
+  },
+  "searchSortArtistZA": "Sanatçı (Z-A)",
+  "@searchSortArtistZA": {
+    "description": "Sort option - artist descending"
+  },
+  "searchSortDurationShort": "Süre (Önce kısalar)",
+  "@searchSortDurationShort": {
+    "description": "Sort option - shortest duration first"
+  },
+  "searchSortDurationLong": "Süre (Önce uzunlar)",
+  "@searchSortDurationLong": {
+    "description": "Sort option - longest duration first"
+  },
+  "searchSortDateOldest": "Çıkış Tarihi (Önce eskiler)",
+  "@searchSortDateOldest": {
+    "description": "Sort option - oldest release first"
+  },
+  "searchSortDateNewest": "Çıkış Tarihi (Önce yeniler)",
+  "@searchSortDateNewest": {
+    "description": "Sort option - newest release first"
+  },
   "tooltipPlay": "Oynat",
   "@tooltipPlay": {
     "description": "Tooltip - play button"
   },
-  "filenameFormat": "Dosya adı formatı",
+  "filenameFormat": "Dosya Adı Formatı",
   "@filenameFormat": {
     "description": "Setting title - filename pattern"
   },
-  "filenameShowAdvancedTags": "Show advanced tags",
+  "filenameShowAdvancedTags": "Gelişmiş etiketleri göster",
   "@filenameShowAdvancedTags": {
     "description": "Toggle label for showing advanced filename tags"
   },
-  "filenameShowAdvancedTagsDescription": "Enable formatted tags for track padding and date patterns",
+  "filenameShowAdvancedTagsDescription": "Boşluk doldurma ve tarih formatları için gelişmiş dosya adı etiketlerini açar",
   "@filenameShowAdvancedTagsDescription": {
     "description": "Description for advanced filename tag toggle"
   },
-  "folderOrganizationNone": "Organizasyon yok",
+  "folderOrganizationNone": "Düzen yok",
   "@folderOrganizationNone": {
     "description": "Folder option - flat structure"
   },
-  "folderOrganizationByPlaylist": "By Playlist",
+  "folderOrganizationByPlaylist": "Çalma Listesine Göre",
   "@folderOrganizationByPlaylist": {
     "description": "Folder option - playlist folders"
   },
-  "folderOrganizationByPlaylistSubtitle": "Separate folder for each playlist",
+  "folderOrganizationByPlaylistSubtitle": "Her çalma listesi için ayrı bir klasör oluşturur",
   "@folderOrganizationByPlaylistSubtitle": {
     "description": "Subtitle for playlist folder option"
   },
@@ -1031,31 +1075,31 @@
   "@folderOrganizationByAlbum": {
     "description": "Folder option - album folders"
   },
-  "folderOrganizationByArtistAlbum": "Sanatçı/Albüm",
+  "folderOrganizationByArtistAlbum": "Sanatçı / Albüm",
   "@folderOrganizationByArtistAlbum": {
     "description": "Folder option - nested folders"
   },
-  "folderOrganizationDescription": "İndirilenleri klasörlerle organize et",
+  "folderOrganizationDescription": "İndirilen dosyaları klasörlere düzenler",
   "@folderOrganizationDescription": {
     "description": "Folder organization sheet description"
   },
-  "folderOrganizationNoneSubtitle": "Her şey indirilen dosyasına kaydedilecek",
+  "folderOrganizationNoneSubtitle": "Tüm dosyalar tek bir klasöre atılır",
   "@folderOrganizationNoneSubtitle": {
     "description": "Subtitle for no organization option"
   },
-  "folderOrganizationByArtistSubtitle": "Her sanatçı için ayrı klasör",
+  "folderOrganizationByArtistSubtitle": "Her sanatçı için ayrı klasör oluşturur",
   "@folderOrganizationByArtistSubtitle": {
     "description": "Subtitle for artist folder option"
   },
-  "folderOrganizationByAlbumSubtitle": "Her albüm için ayrı klasör",
+  "folderOrganizationByAlbumSubtitle": "Her albüm için ayrı klasör oluşturur",
   "@folderOrganizationByAlbumSubtitle": {
     "description": "Subtitle for album folder option"
   },
-  "folderOrganizationByArtistAlbumSubtitle": "Sanatçı klasörlerinin içinde Albüm klasörleri",
+  "folderOrganizationByArtistAlbumSubtitle": "İç içe Sanatçı ve Albüm klasörleri oluşturur",
   "@folderOrganizationByArtistAlbumSubtitle": {
     "description": "Subtitle for nested folder option"
   },
-  "updateAvailable": "Güncelleme Mevcut",
+  "updateAvailable": "Güncelleme Var",
   "@updateAvailable": {
     "description": "Update dialog title"
   },
@@ -1063,7 +1107,7 @@
   "@updateLater": {
     "description": "Update button - dismiss"
   },
-  "updateStartingDownload": "İndirme başlıyor...",
+  "updateStartingDownload": "İndirme başlatılıyor...",
   "@updateStartingDownload": {
     "description": "Update status - initializing"
   },
@@ -1071,15 +1115,15 @@
   "@updateDownloadFailed": {
     "description": "Update error title"
   },
-  "updateFailedMessage": "Güncelleme indirilemedi",
+  "updateFailedMessage": "Güncelleme dosyası indirilemedi",
   "@updateFailedMessage": {
     "description": "Update error message"
   },
-  "updateNewVersionReady": "Yeni bir sürüm hazır",
+  "updateNewVersionReady": "Uygulamanın yeni bir sürümü hazır",
   "@updateNewVersionReady": {
     "description": "Update subtitle"
   },
-  "updateCurrent": "Şimdiki",
+  "updateCurrent": "Mevcut",
   "@updateCurrent": {
     "description": "Label for current version"
   },
@@ -1091,31 +1135,31 @@
   "@updateDownloading": {
     "description": "Update status - downloading"
   },
-  "updateWhatsNew": "Yenilikler",
+  "updateWhatsNew": "Neler Yeni?",
   "@updateWhatsNew": {
     "description": "Changelog section title"
   },
-  "updateDownloadInstall": "İndir & Yükle",
+  "updateDownloadInstall": "İndir ve Yükle",
   "@updateDownloadInstall": {
     "description": "Update button - download and install"
   },
-  "updateDontRemind": "Bir daha sorma",
+  "updateDontRemind": "Bir daha hatırlatma",
   "@updateDontRemind": {
     "description": "Update button - skip this version"
   },
-  "providerPriorityTitle": "İndirme hizmetleri öncelik sırası",
+  "providerPriorityTitle": "Sağlayıcı Önceliği",
   "@providerPriorityTitle": {
     "description": "Provider priority page title"
   },
-  "providerPriorityDescription": "İndirme hizmetlerini sıralamak için kaydır. Uygulama şarkı indirirken hizmetleri yukarıdan aşağıya doğru deneyecektir.",
+  "providerPriorityDescription": "İndirme sağlayıcılarını sürükleyip sıralayın. Uygulama, şarkıları indirirken sağlayıcıları yukarıdan aşağıya doğru dener.",
   "@providerPriorityDescription": {
     "description": "Provider priority page description"
   },
-  "providerPriorityInfo": "Eğer bir şarkı ilk hizmette mevcut değilse uygulama otomatik olarak bir sonrakini deneyecektir.",
+  "providerPriorityInfo": "Bir şarkı ilk sağlayıcıda bulunamazsa, uygulama otomatik olarak listedeki bir sonrakini dener.",
   "@providerPriorityInfo": {
     "description": "Info tip about fallback behavior"
   },
-  "providerBuiltIn": "Dahili",
+  "providerBuiltIn": "Yerleşik",
   "@providerBuiltIn": {
     "description": "Label for built-in providers (Tidal/Qobuz)"
   },
@@ -1123,27 +1167,27 @@
   "@providerExtension": {
     "description": "Label for extension-provided providers"
   },
-  "metadataProviderPriorityTitle": "Metadata Priority",
+  "metadataProviderPriorityTitle": "Arama Kaynağı Önceliği",
   "@metadataProviderPriorityTitle": {
     "description": "Metadata priority page title"
   },
-  "metadataProviderPriorityDescription": "Drag to reorder metadata providers. The app will try providers from top to bottom when searching for tracks and fetching metadata.",
+  "metadataProviderPriorityDescription": "Arama kaynaklarını sürükleyip sıralayın. Uygulama, şarkı ararken ve veri çekerken kaynakları yukarıdan aşağıya doğru dener.",
   "@metadataProviderPriorityDescription": {
     "description": "Metadata priority page description"
   },
-  "metadataProviderPriorityInfo": "Deezer has no rate limits and is recommended as primary. Spotify may rate limit after many requests.",
+  "metadataProviderPriorityInfo": "Deezer'da hız sınırı yoktur, bu yüzden ana kaynak olarak kullanılması tavsiye edilir. Spotify, çok fazla istekte bulunduğunuzda kısıtlama yapabilir.",
   "@metadataProviderPriorityInfo": {
     "description": "Info tip about rate limits"
   },
-  "metadataNoRateLimits": "No rate limits",
+  "metadataNoRateLimits": "Hız sınırı yok",
   "@metadataNoRateLimits": {
     "description": "Deezer provider description"
   },
-  "metadataMayRateLimit": "May rate limit",
+  "metadataMayRateLimit": "Hız sınırı yapabilir",
   "@metadataMayRateLimit": {
     "description": "Spotify provider description"
   },
-  "logTitle": "Kayıtlar",
+  "logTitle": "Hata Kayıtları (Log)",
   "@logTitle": {
     "description": "Logs screen title"
   },
@@ -1151,7 +1195,7 @@
   "@logCopied": {
     "description": "Snackbar - logs copied"
   },
-  "logSearchHint": "Kayıtları Ara...",
+  "logSearchHint": "Kayıtlarda ara...",
   "@logSearchHint": {
     "description": "Log search placeholder"
   },
@@ -1159,7 +1203,7 @@
   "@logFilterLevel": {
     "description": "Filter by log level"
   },
-  "logFilterSection": "Filtre",
+  "logFilterSection": "Filtrele",
   "@logFilterSection": {
     "description": "Filter section title"
   },
@@ -1171,27 +1215,27 @@
   "@logClearLogs": {
     "description": "Clear button tooltip"
   },
-  "logClearLogsTitle": "Kayıtları temizle",
+  "logClearLogsTitle": "Kayıtları Temizle",
   "@logClearLogsTitle": {
     "description": "Clear logs dialog title"
   },
-  "logClearLogsMessage": "Tüm kayıtları temizlemek istediğinize emin misiniz?",
+  "logClearLogsMessage": "Tüm hata kayıtlarını silmek istediğinize emin misiniz?",
   "@logClearLogsMessage": {
     "description": "Clear logs confirmation message"
   },
-  "logFilterBySeverity": "Filter logs by severity",
+  "logFilterBySeverity": "Önem derecesine göre filtrele",
   "@logFilterBySeverity": {
     "description": "Filter dialog title"
   },
-  "logNoLogsYet": "No logs yet",
+  "logNoLogsYet": "Henüz kayıt yok",
   "@logNoLogsYet": {
     "description": "Empty state title"
   },
-  "logNoLogsYetSubtitle": "Logs will appear here as you use the app",
+  "logNoLogsYetSubtitle": "Uygulamayı kullandıkça teknik kayıtlar burada görünecek",
   "@logNoLogsYetSubtitle": {
     "description": "Empty state subtitle"
   },
-  "logEntriesFiltered": "Entries ({count} filtered)",
+  "logEntriesFiltered": "Kayıtlar ({count} filtrelendi)",
   "@logEntriesFiltered": {
     "description": "Log count with filter active",
     "placeholders": {
@@ -1200,7 +1244,7 @@
       }
     }
   },
-  "logEntries": "Entries ({count})",
+  "logEntries": "Kayıtlar ({count})",
   "@logEntries": {
     "description": "Total log count",
     "placeholders": {
@@ -1209,159 +1253,159 @@
       }
     }
   },
-  "credentialsTitle": "Spotify Credentials",
+  "credentialsTitle": "Spotify API Bilgileri",
   "@credentialsTitle": {
     "description": "Credentials dialog title"
   },
-  "credentialsDescription": "Enter your Client ID and Secret to use your own Spotify application quota.",
+  "credentialsDescription": "Kendi Spotify uygulamanızın kota limitlerini kullanmak için İstemci Kimliği (Client ID) ve Gizli Anahtarınızı (Client Secret) girin.",
   "@credentialsDescription": {
     "description": "Credentials dialog explanation"
   },
-  "credentialsClientId": "Client ID",
+  "credentialsClientId": "Client ID (İstemci Kimliği)",
   "@credentialsClientId": {
     "description": "Client ID field label - DO NOT TRANSLATE"
   },
-  "credentialsClientIdHint": "Paste Client ID",
+  "credentialsClientIdHint": "Client ID yapıştır",
   "@credentialsClientIdHint": {
     "description": "Client ID placeholder"
   },
-  "credentialsClientSecret": "Client Secret",
+  "credentialsClientSecret": "Client Secret (Gizli Anahtar)",
   "@credentialsClientSecret": {
     "description": "Client Secret field label - DO NOT TRANSLATE"
   },
-  "credentialsClientSecretHint": "Paste Client Secret",
+  "credentialsClientSecretHint": "Client Secret yapıştır",
   "@credentialsClientSecretHint": {
     "description": "Client Secret placeholder"
   },
-  "channelStable": "Stable",
+  "channelStable": "Kararlı",
   "@channelStable": {
     "description": "Update channel - stable releases"
   },
-  "channelPreview": "Preview",
+  "channelPreview": "Beta (Ön İzleme)",
   "@channelPreview": {
     "description": "Update channel - beta/preview releases"
   },
-  "sectionSearchSource": "Search Source",
+  "sectionSearchSource": "Arama Kaynağı",
   "@sectionSearchSource": {
     "description": "Settings section header"
   },
-  "sectionDownload": "Download",
+  "sectionDownload": "İndirme",
   "@sectionDownload": {
     "description": "Settings section header"
   },
-  "sectionPerformance": "Performance",
+  "sectionPerformance": "Performans",
   "@sectionPerformance": {
     "description": "Settings section header"
   },
-  "sectionApp": "App",
+  "sectionApp": "Uygulama",
   "@sectionApp": {
     "description": "Settings section header"
   },
-  "sectionData": "Data",
+  "sectionData": "Veri Yönetimi",
   "@sectionData": {
     "description": "Settings section header"
   },
-  "sectionDebug": "Debug",
+  "sectionDebug": "Hata Ayıklama",
   "@sectionDebug": {
     "description": "Settings section header"
   },
-  "sectionService": "Service",
+  "sectionService": "Servisler",
   "@sectionService": {
     "description": "Settings section header"
   },
-  "sectionAudioQuality": "Audio Quality",
+  "sectionAudioQuality": "Ses Kalitesi",
   "@sectionAudioQuality": {
     "description": "Settings section header"
   },
-  "sectionFileSettings": "File Settings",
+  "sectionFileSettings": "Dosya Ayarları",
   "@sectionFileSettings": {
     "description": "Settings section header"
   },
-  "sectionLyrics": "Lyrics",
+  "sectionLyrics": "Şarkı Sözleri",
   "@sectionLyrics": {
     "description": "Settings section header"
   },
-  "lyricsMode": "Lyrics Mode",
+  "lyricsMode": "Şarkı Sözü Formatı",
   "@lyricsMode": {
     "description": "Setting - how to save lyrics"
   },
-  "lyricsModeDescription": "Choose how lyrics are saved with your downloads",
+  "lyricsModeDescription": "Şarkı sözlerinin nasıl kaydedileceğini seçin",
   "@lyricsModeDescription": {
     "description": "Lyrics mode picker description"
   },
-  "lyricsModeEmbed": "Embed in file",
+  "lyricsModeEmbed": "Dosyaya göm",
   "@lyricsModeEmbed": {
     "description": "Lyrics mode option - embed in audio file"
   },
-  "lyricsModeEmbedSubtitle": "Lyrics stored inside FLAC metadata",
+  "lyricsModeEmbedSubtitle": "Şarkı sözleri FLAC dosyasının içine işlenir",
   "@lyricsModeEmbedSubtitle": {
     "description": "Subtitle for embed option"
   },
-  "lyricsModeExternal": "External .lrc file",
+  "lyricsModeExternal": "Harici .lrc dosyası",
   "@lyricsModeExternal": {
     "description": "Lyrics mode option - separate LRC file"
   },
-  "lyricsModeExternalSubtitle": "Separate .lrc file for players like Samsung Music",
+  "lyricsModeExternalSubtitle": "Bazı müzik çalarlar için şarkının yanına ayrı bir .lrc dosyası açar",
   "@lyricsModeExternalSubtitle": {
     "description": "Subtitle for external option"
   },
-  "lyricsModeBoth": "Both",
+  "lyricsModeBoth": "Her ikisi de",
   "@lyricsModeBoth": {
     "description": "Lyrics mode option - embed and external"
   },
-  "lyricsModeBothSubtitle": "Embed and save .lrc file",
+  "lyricsModeBothSubtitle": "Hem dosyaya gömer hem de .lrc dosyası olarak kaydeder",
   "@lyricsModeBothSubtitle": {
     "description": "Subtitle for both option"
   },
-  "sectionColor": "Color",
+  "sectionColor": "Renkler",
   "@sectionColor": {
     "description": "Settings section header"
   },
-  "sectionTheme": "Theme",
+  "sectionTheme": "Tema",
   "@sectionTheme": {
     "description": "Settings section header"
   },
-  "sectionLayout": "Layout",
+  "sectionLayout": "Tasarım",
   "@sectionLayout": {
     "description": "Settings section header"
   },
-  "sectionLanguage": "Language",
+  "sectionLanguage": "Dil",
   "@sectionLanguage": {
     "description": "Settings section header for language"
   },
-  "appearanceLanguage": "App Language",
+  "appearanceLanguage": "Uygulama Dili",
   "@appearanceLanguage": {
     "description": "Language setting title"
   },
-  "settingsAppearanceSubtitle": "Theme, colors, display",
+  "settingsAppearanceSubtitle": "Temalar, renkler, görünümler",
   "@settingsAppearanceSubtitle": {
     "description": "Appearance settings description"
   },
-  "settingsDownloadSubtitle": "Service, quality, filename format",
+  "settingsDownloadSubtitle": "İndirme servisi, ses kalitesi, dosya adı düzeni",
   "@settingsDownloadSubtitle": {
     "description": "Download settings description"
   },
-  "settingsOptionsSubtitle": "Fallback, lyrics, cover art, updates",
+  "settingsOptionsSubtitle": "İndirme limitleri, şarkı sözleri, güncellemeler",
   "@settingsOptionsSubtitle": {
     "description": "Options settings description"
   },
-  "settingsExtensionsSubtitle": "Manage download providers",
+  "settingsExtensionsSubtitle": "Yeni müzik kaynakları ve eklentileri yönetin",
   "@settingsExtensionsSubtitle": {
     "description": "Extensions settings description"
   },
-  "settingsLogsSubtitle": "View app logs for debugging",
+  "settingsLogsSubtitle": "Sorun tespiti için uygulama kayıtlarına göz atın",
   "@settingsLogsSubtitle": {
     "description": "Logs settings description"
   },
-  "loadingSharedLink": "Loading shared link...",
+  "loadingSharedLink": "Paylaşılan bağlantı yükleniyor...",
   "@loadingSharedLink": {
     "description": "Status when opening shared URL"
   },
-  "pressBackAgainToExit": "Press back again to exit",
+  "pressBackAgainToExit": "Çıkmak için tekrar geri dokunun",
   "@pressBackAgainToExit": {
     "description": "Exit confirmation message"
   },
-  "downloadAllCount": "Download All ({count})",
+  "downloadAllCount": "Tümünü İndir ({count})",
   "@downloadAllCount": {
     "description": "Download all button with count",
     "placeholders": {
@@ -1370,7 +1414,7 @@
       }
     }
   },
-  "tracksCount": "{count, plural, =1{1 track} other{{count} tracks}}",
+  "tracksCount": "{count, plural, =1{1 şarkı} other{{count} şarkı}}",
   "@tracksCount": {
     "description": "Track count display",
     "placeholders": {
@@ -1379,143 +1423,143 @@
       }
     }
   },
-  "trackCopyFilePath": "Copy file path",
+  "trackCopyFilePath": "Dosya yolunu kopyala",
   "@trackCopyFilePath": {
     "description": "Action - copy file path"
   },
-  "trackRemoveFromDevice": "Remove from device",
+  "trackRemoveFromDevice": "Cihazdan sil",
   "@trackRemoveFromDevice": {
     "description": "Action - delete downloaded file"
   },
-  "trackLoadLyrics": "Load Lyrics",
+  "trackLoadLyrics": "Sözleri Yükle",
   "@trackLoadLyrics": {
     "description": "Action - fetch lyrics"
   },
-  "trackMetadata": "Metadata",
+  "trackMetadata": "Şarkı Künyesi",
   "@trackMetadata": {
     "description": "Tab title - track metadata"
   },
-  "trackFileInfo": "File Info",
+  "trackFileInfo": "Dosya Bilgisi",
   "@trackFileInfo": {
     "description": "Tab title - file information"
   },
-  "trackLyrics": "Lyrics",
+  "trackLyrics": "Sözler",
   "@trackLyrics": {
     "description": "Tab title - lyrics"
   },
-  "trackFileNotFound": "File not found",
+  "trackFileNotFound": "Dosya bulunamadı",
   "@trackFileNotFound": {
     "description": "Error - file doesn't exist"
   },
-  "trackOpenInDeezer": "Open in Deezer",
+  "trackOpenInDeezer": "Deezer'da Aç",
   "@trackOpenInDeezer": {
     "description": "Action - open track in Deezer app"
   },
-  "trackOpenInSpotify": "Open in Spotify",
+  "trackOpenInSpotify": "Spotify'da Aç",
   "@trackOpenInSpotify": {
     "description": "Action - open track in Spotify app"
   },
-  "trackTrackName": "Track name",
+  "trackTrackName": "Şarkı Adı",
   "@trackTrackName": {
     "description": "Metadata label - track title"
   },
-  "trackArtist": "Artist",
+  "trackArtist": "Sanatçı",
   "@trackArtist": {
     "description": "Metadata label - artist name"
   },
-  "trackAlbumArtist": "Album artist",
+  "trackAlbumArtist": "Albüm Sanatçısı",
   "@trackAlbumArtist": {
     "description": "Metadata label - album artist"
   },
-  "trackAlbum": "Album",
+  "trackAlbum": "Albüm",
   "@trackAlbum": {
     "description": "Metadata label - album name"
   },
-  "trackTrackNumber": "Track number",
+  "trackTrackNumber": "Parça numarası",
   "@trackTrackNumber": {
     "description": "Metadata label - track number"
   },
-  "trackDiscNumber": "Disc number",
+  "trackDiscNumber": "Disk numarası",
   "@trackDiscNumber": {
     "description": "Metadata label - disc number"
   },
-  "trackDuration": "Duration",
+  "trackDuration": "Süre",
   "@trackDuration": {
     "description": "Metadata label - track length"
   },
-  "trackAudioQuality": "Audio quality",
+  "trackAudioQuality": "Ses kalitesi",
   "@trackAudioQuality": {
     "description": "Metadata label - audio quality"
   },
-  "trackReleaseDate": "Release date",
+  "trackReleaseDate": "Çıkış tarihi",
   "@trackReleaseDate": {
     "description": "Metadata label - release date"
   },
-  "trackGenre": "Genre",
+  "trackGenre": "Tür",
   "@trackGenre": {
     "description": "Metadata label - music genre"
   },
-  "trackLabel": "Label",
+  "trackLabel": "Plak Şirketi",
   "@trackLabel": {
     "description": "Metadata label - record label"
   },
-  "trackCopyright": "Copyright",
+  "trackCopyright": "Telif Hakkı",
   "@trackCopyright": {
     "description": "Metadata label - copyright information"
   },
-  "trackDownloaded": "Downloaded",
+  "trackDownloaded": "İndirilme tarihi",
   "@trackDownloaded": {
     "description": "Metadata label - download date"
   },
-  "trackCopyLyrics": "Copy lyrics",
+  "trackCopyLyrics": "Sözleri kopyala",
   "@trackCopyLyrics": {
     "description": "Action - copy lyrics to clipboard"
   },
-  "trackLyricsNotAvailable": "Lyrics not available for this track",
+  "trackLyricsNotAvailable": "Bu şarkının sözleri bulunamadı",
   "@trackLyricsNotAvailable": {
     "description": "Message when lyrics not found"
   },
-  "trackLyricsTimeout": "Request timed out. Try again later.",
+  "trackLyricsTimeout": "Zaman aşımına uğradı. Lütfen daha sonra tekrar deneyin.",
   "@trackLyricsTimeout": {
     "description": "Message when lyrics request times out"
   },
-  "trackLyricsLoadFailed": "Failed to load lyrics",
+  "trackLyricsLoadFailed": "Şarkı sözleri yüklenemedi",
   "@trackLyricsLoadFailed": {
     "description": "Message when lyrics loading fails"
   },
-  "trackEmbedLyrics": "Embed Lyrics",
+  "trackEmbedLyrics": "Şarkı Sözlerini Gömer",
   "@trackEmbedLyrics": {
     "description": "Action - embed lyrics into audio file"
   },
-  "trackLyricsEmbedded": "Lyrics embedded successfully",
+  "trackLyricsEmbedded": "Şarkı sözleri dosyaya başarıyla eklendi",
   "@trackLyricsEmbedded": {
     "description": "Snackbar - lyrics saved to file"
   },
-  "trackInstrumental": "Instrumental track",
+  "trackInstrumental": "Enstrümantal parça (Sözsüz)",
   "@trackInstrumental": {
     "description": "Message when track is instrumental (no lyrics)"
   },
-  "trackCopiedToClipboard": "Copied to clipboard",
+  "trackCopiedToClipboard": "Panoya kopyalandı",
   "@trackCopiedToClipboard": {
     "description": "Snackbar - content copied"
   },
-  "trackDeleteConfirmTitle": "Remove from device?",
+  "trackDeleteConfirmTitle": "Cihazdan silinsin mi?",
   "@trackDeleteConfirmTitle": {
     "description": "Delete confirmation title"
   },
-  "trackDeleteConfirmMessage": "This will permanently delete the downloaded file and remove it from your history.",
+  "trackDeleteConfirmMessage": "Bu işlem indirdiğiniz dosyayı tamamen silecek ve geçmişinizden kaldıracak.",
   "@trackDeleteConfirmMessage": {
     "description": "Delete confirmation message"
   },
-  "dateToday": "Today",
+  "dateToday": "Bugün",
   "@dateToday": {
     "description": "Relative date - today"
   },
-  "dateYesterday": "Yesterday",
+  "dateYesterday": "Dün",
   "@dateYesterday": {
     "description": "Relative date - yesterday"
   },
-  "dateDaysAgo": "{count} days ago",
+  "dateDaysAgo": "{count} gün önce",
   "@dateDaysAgo": {
     "description": "Relative date - days ago",
     "placeholders": {
@@ -1524,7 +1568,7 @@
       }
     }
   },
-  "dateWeeksAgo": "{count} weeks ago",
+  "dateWeeksAgo": "{count} hafta önce",
   "@dateWeeksAgo": {
     "description": "Relative date - weeks ago",
     "placeholders": {
@@ -1533,7 +1577,7 @@
       }
     }
   },
-  "dateMonthsAgo": "{count} months ago",
+  "dateMonthsAgo": "{count} ay önce",
   "@dateMonthsAgo": {
     "description": "Relative date - months ago",
     "placeholders": {
@@ -1542,111 +1586,163 @@
       }
     }
   },
-  "storeFilterAll": "All",
+  "storeFilterAll": "Tümü",
   "@storeFilterAll": {
     "description": "Store filter - all extensions"
   },
-  "storeFilterMetadata": "Metadata",
+  "storeFilterMetadata": "Şarkı Verisi",
   "@storeFilterMetadata": {
     "description": "Store filter - metadata providers"
   },
-  "storeFilterDownload": "Download",
+  "storeFilterDownload": "İndirme",
   "@storeFilterDownload": {
     "description": "Store filter - download providers"
   },
-  "storeFilterUtility": "Utility",
+  "storeFilterUtility": "Araçlar",
   "@storeFilterUtility": {
     "description": "Store filter - utility extensions"
   },
-  "storeFilterLyrics": "Lyrics",
+  "storeFilterLyrics": "Şarkı Sözü",
   "@storeFilterLyrics": {
     "description": "Store filter - lyrics providers"
   },
-  "storeFilterIntegration": "Integration",
+  "storeFilterIntegration": "Entegrasyon",
   "@storeFilterIntegration": {
     "description": "Store filter - integrations"
   },
-  "storeClearFilters": "Clear filters",
+  "storeClearFilters": "Filtreleri temizle",
   "@storeClearFilters": {
     "description": "Button to clear all filters"
   },
-  "extensionDefaultProvider": "Default (Deezer/Spotify)",
+  "storeAddRepoTitle": "Eklenti Deposu (Repository) Ekle",
+  "@storeAddRepoTitle": {
+    "description": "Store setup screen - heading when no repo is configured"
+  },
+  "storeAddRepoDescription": "Eklentilere göz atmak ve yüklemek için içinde registry.json dosyası olan bir GitHub depo bağlantısı girin.",
+  "@storeAddRepoDescription": {
+    "description": "Store setup screen - explanatory text"
+  },
+  "storeRepoUrlLabel": "Depo Bağlantısı (URL)",
+  "@storeRepoUrlLabel": {
+    "description": "Label for the repository URL input field"
+  },
+  "storeRepoUrlHint": "https://github.com/kullaniciadi/depo",
+  "@storeRepoUrlHint": {
+    "description": "Hint/placeholder for the repository URL input field"
+  },
+  "storeRepoUrlHelper": "Örn: https://github.com/spoti/extensions-repo",
+  "@storeRepoUrlHelper": {
+    "description": "Helper text below the repository URL input field"
+  },
+  "storeAddRepoButton": "Depoyu Ekle",
+  "@storeAddRepoButton": {
+    "description": "Button to submit a new repository URL"
+  },
+  "storeChangeRepoTooltip": "Depoyu değiştir",
+  "@storeChangeRepoTooltip": {
+    "description": "Tooltip for the change-repository icon button in the app bar"
+  },
+  "storeRepoDialogTitle": "Eklenti Deposu",
+  "@storeRepoDialogTitle": {
+    "description": "Title of the change/remove repository dialog"
+  },
+  "storeRepoDialogCurrent": "Mevcut depo:",
+  "@storeRepoDialogCurrent": {
+    "description": "Label shown above the current repository URL in the dialog"
+  },
+  "storeNewRepoUrlLabel": "Yeni Depo Bağlantısı",
+  "@storeNewRepoUrlLabel": {
+    "description": "Label for the new repository URL field inside the dialog"
+  },
+  "storeLoadError": "Mağaza yüklenemedi",
+  "@storeLoadError": {
+    "description": "Error heading when the store cannot be loaded"
+  },
+  "storeEmptyNoExtensions": "Kullanılabilir eklenti yok",
+  "@storeEmptyNoExtensions": {
+    "description": "Message when store has no extensions"
+  },
+  "storeEmptyNoResults": "Aramanıza uygun eklenti bulunamadı",
+  "@storeEmptyNoResults": {
+    "description": "Message when search/filter returns no results"
+  },
+  "extensionDefaultProvider": "Varsayılan (Deezer)",
   "@extensionDefaultProvider": {
     "description": "Default search provider option"
   },
-  "extensionDefaultProviderSubtitle": "Use built-in search",
+  "extensionDefaultProviderSubtitle": "Uygulamanın kendi aramasını kullan",
   "@extensionDefaultProviderSubtitle": {
     "description": "Subtitle for default provider"
   },
-  "extensionAuthor": "Author",
+  "extensionAuthor": "Geliştirici",
   "@extensionAuthor": {
     "description": "Extension detail - author"
   },
-  "extensionId": "ID",
+  "extensionId": "Kimlik (ID)",
   "@extensionId": {
     "description": "Extension detail - unique ID"
   },
-  "extensionError": "Error",
+  "extensionError": "Hata",
   "@extensionError": {
     "description": "Extension detail - error message"
   },
-  "extensionCapabilities": "Capabilities",
+  "extensionCapabilities": "Yetenekler",
   "@extensionCapabilities": {
     "description": "Section header - extension features"
   },
-  "extensionMetadataProvider": "Metadata Provider",
+  "extensionMetadataProvider": "Şarkı Verisi (Metadata) Kaynağı",
   "@extensionMetadataProvider": {
     "description": "Capability - provides metadata"
   },
-  "extensionDownloadProvider": "Download Provider",
+  "extensionDownloadProvider": "İndirme Sağlayıcısı",
   "@extensionDownloadProvider": {
     "description": "Capability - provides downloads"
   },
-  "extensionLyricsProvider": "Lyrics Provider",
+  "extensionLyricsProvider": "Şarkı Sözü Sağlayıcısı",
   "@extensionLyricsProvider": {
     "description": "Capability - provides lyrics"
   },
-  "extensionUrlHandler": "URL Handler",
+  "extensionUrlHandler": "Bağlantı Okuyucu",
   "@extensionUrlHandler": {
     "description": "Capability - handles URLs"
   },
-  "extensionQualityOptions": "Quality Options",
+  "extensionQualityOptions": "Kalite Seçenekleri",
   "@extensionQualityOptions": {
     "description": "Capability - quality selection"
   },
-  "extensionPostProcessingHooks": "Post-Processing Hooks",
+  "extensionPostProcessingHooks": "İndirme Sonrası İşlemler",
   "@extensionPostProcessingHooks": {
     "description": "Capability - post-processing"
   },
-  "extensionPermissions": "Permissions",
+  "extensionPermissions": "İzinler",
   "@extensionPermissions": {
     "description": "Section header - required permissions"
   },
-  "extensionSettings": "Settings",
+  "extensionSettings": "Ayarlar",
   "@extensionSettings": {
     "description": "Section header - extension settings"
   },
-  "extensionRemoveButton": "Remove Extension",
+  "extensionRemoveButton": "Eklentiyi Kaldır",
   "@extensionRemoveButton": {
     "description": "Button to uninstall extension"
   },
-  "extensionUpdated": "Updated",
+  "extensionUpdated": "Son Güncelleme",
   "@extensionUpdated": {
     "description": "Extension detail - last update"
   },
-  "extensionMinAppVersion": "Min App Version",
+  "extensionMinAppVersion": "Minimum Uygulama Sürümü",
   "@extensionMinAppVersion": {
     "description": "Extension detail - minimum app version"
   },
-  "extensionCustomTrackMatching": "Custom Track Matching",
+  "extensionCustomTrackMatching": "Özel Eşleştirme Algoritması",
   "@extensionCustomTrackMatching": {
     "description": "Capability - custom track matching algorithm"
   },
-  "extensionPostProcessing": "Post-Processing",
+  "extensionPostProcessing": "İşlem Sonrası Özellikleri",
   "@extensionPostProcessing": {
     "description": "Capability - post-download processing"
   },
-  "extensionHooksAvailable": "{count} hook(s) available",
+  "extensionHooksAvailable": "{count} özel kanca (hook) mevcut",
   "@extensionHooksAvailable": {
     "description": "Post-processing hooks count",
     "placeholders": {
@@ -1655,7 +1751,7 @@
       }
     }
   },
-  "extensionPatternsCount": "{count} pattern(s)",
+  "extensionPatternsCount": "{count} bağlantı kalıbı",
   "@extensionPatternsCount": {
     "description": "URL patterns count",
     "placeholders": {
@@ -1664,7 +1760,7 @@
       }
     }
   },
-  "extensionStrategy": "Strategy: {strategy}",
+  "extensionStrategy": "Eşleştirme Stratejisi: {strategy}",
   "@extensionStrategy": {
     "description": "Track matching strategy name",
     "placeholders": {
@@ -1673,79 +1769,79 @@
       }
     }
   },
-  "extensionsProviderPrioritySection": "Provider Priority",
+  "extensionsProviderPrioritySection": "Sağlayıcı Önceliği",
   "@extensionsProviderPrioritySection": {
     "description": "Section header - provider priority"
   },
-  "extensionsInstalledSection": "Installed Extensions",
+  "extensionsInstalledSection": "Yüklü Eklentiler",
   "@extensionsInstalledSection": {
     "description": "Section header - installed extensions"
   },
-  "extensionsNoExtensions": "No extensions installed",
+  "extensionsNoExtensions": "Henüz eklenti yüklenmemiş",
   "@extensionsNoExtensions": {
     "description": "Empty state - no extensions"
   },
-  "extensionsNoExtensionsSubtitle": "Install .spotiflac-ext files to add new providers",
+  "extensionsNoExtensionsSubtitle": "Yeni müzik kaynakları eklemek için .spotiflac-ext dosyalarını yükleyin",
   "@extensionsNoExtensionsSubtitle": {
     "description": "Empty state subtitle"
   },
-  "extensionsInstallButton": "Install Extension",
+  "extensionsInstallButton": "Eklenti Yükle",
   "@extensionsInstallButton": {
     "description": "Button to install extension from file"
   },
-  "extensionsInfoTip": "Extensions can add new metadata and download providers. Only install extensions from trusted sources.",
+  "extensionsInfoTip": "Eklentiler yeni veri ve indirme kaynakları ekleyebilir. Lütfen eklentileri sadece güvendiğiniz kaynaklardan yükleyin.",
   "@extensionsInfoTip": {
     "description": "Security warning about extensions"
   },
-  "extensionsInstalledSuccess": "Extension installed successfully",
+  "extensionsInstalledSuccess": "Eklenti başarıyla yüklendi",
   "@extensionsInstalledSuccess": {
     "description": "Success message after install"
   },
-  "extensionsDownloadPriority": "Download Priority",
+  "extensionsDownloadPriority": "İndirme Önceliği",
   "@extensionsDownloadPriority": {
     "description": "Setting - download provider order"
   },
-  "extensionsDownloadPrioritySubtitle": "Set download service order",
+  "extensionsDownloadPrioritySubtitle": "İndirme servislerinin deneneceği sırayı belirleyin",
   "@extensionsDownloadPrioritySubtitle": {
     "description": "Subtitle for download priority"
   },
-  "extensionsNoDownloadProvider": "No extensions with download provider",
+  "extensionsNoDownloadProvider": "İndirme sağlayıcısı barındıran bir eklenti yok",
   "@extensionsNoDownloadProvider": {
     "description": "Empty state - no download providers"
   },
-  "extensionsMetadataPriority": "Metadata Priority",
+  "extensionsMetadataPriority": "Arama Kaynağı Önceliği",
   "@extensionsMetadataPriority": {
     "description": "Setting - metadata provider order"
   },
-  "extensionsMetadataPrioritySubtitle": "Set search & metadata source order",
+  "extensionsMetadataPrioritySubtitle": "Arama ve veri kaynaklarının sırasını belirleyin",
   "@extensionsMetadataPrioritySubtitle": {
     "description": "Subtitle for metadata priority"
   },
-  "extensionsNoMetadataProvider": "No extensions with metadata provider",
+  "extensionsNoMetadataProvider": "Şarkı verisi (metadata) barındıran bir eklenti yok",
   "@extensionsNoMetadataProvider": {
     "description": "Empty state - no metadata providers"
   },
-  "extensionsSearchProvider": "Search Provider",
+  "extensionsSearchProvider": "Arama Servisi",
   "@extensionsSearchProvider": {
     "description": "Setting - search provider selection"
   },
-  "extensionsNoCustomSearch": "No extensions with custom search",
+  "extensionsNoCustomSearch": "Özel arama özelliği olan bir eklenti yok",
   "@extensionsNoCustomSearch": {
     "description": "Empty state - no search providers"
   },
-  "extensionsSearchProviderDescription": "Choose which service to use for searching tracks",
+  "extensionsSearchProviderDescription": "Şarkı aramak için kullanılacak servisi seçin",
   "@extensionsSearchProviderDescription": {
     "description": "Search provider setting description"
   },
-  "extensionsCustomSearch": "Custom search",
+  "extensionsCustomSearch": "Özel arama",
   "@extensionsCustomSearch": {
     "description": "Label for custom search provider"
   },
-  "extensionsErrorLoading": "Error loading extension",
+  "extensionsErrorLoading": "Eklenti yüklenirken hata oluştu",
   "@extensionsErrorLoading": {
     "description": "Error message when extension fails to load"
   },
-  "qualityFlacLossless": "FLAC Lossless",
+  "qualityFlacLossless": "FLAC Kayıpsız",
   "@qualityFlacLossless": {
     "description": "Quality option - CD quality FLAC"
   },
@@ -1753,151 +1849,199 @@
   "@qualityFlacLosslessSubtitle": {
     "description": "Technical spec for lossless"
   },
-  "qualityHiResFlac": "Hi-Res FLAC",
+  "qualityHiResFlac": "Hi-Res FLAC (Yüksek Çözünürlüklü)",
   "@qualityHiResFlac": {
     "description": "Quality option - high resolution FLAC"
   },
-  "qualityHiResFlacSubtitle": "24-bit / up to 96kHz",
+  "qualityHiResFlacSubtitle": "24-bit / 96kHz'e kadar",
   "@qualityHiResFlacSubtitle": {
     "description": "Technical spec for hi-res"
   },
-  "qualityHiResFlacMax": "Hi-Res FLAC Max",
+  "qualityHiResFlacMax": "Hi-Res FLAC Maksimum",
   "@qualityHiResFlacMax": {
     "description": "Quality option - maximum resolution FLAC"
   },
-  "qualityHiResFlacMaxSubtitle": "24-bit / up to 192kHz",
+  "qualityHiResFlacMaxSubtitle": "24-bit / 192kHz'e kadar",
   "@qualityHiResFlacMaxSubtitle": {
     "description": "Technical spec for hi-res max"
   },
-  "qualityNote": "Actual quality depends on track availability from the service",
+  "downloadLossy320": "Kayıplı (Lossy) 320kbps",
+  "@downloadLossy320": {
+    "description": "Quality option label for Tidal lossy 320kbps"
+  },
+  "downloadLossyFormat": "Kayıplı Formatı",
+  "@downloadLossyFormat": {
+    "description": "Setting title to pick output format for Tidal lossy downloads"
+  },
+  "downloadLossy320Format": "Kayıplı (Lossy) 320kbps Formatı",
+  "@downloadLossy320Format": {
+    "description": "Title of the Tidal lossy format picker bottom sheet"
+  },
+  "downloadLossy320FormatDesc": "Tidal'dan 320kbps kalitesinde indirirken kullanılacak formatı seçin. Orijinal AAC yayını seçtiğiniz formata dönüştürülecektir.",
+  "@downloadLossy320FormatDesc": {
+    "description": "Description in the Tidal lossy format picker"
+  },
+  "downloadLossyMp3": "MP3 320kbps",
+  "@downloadLossyMp3": {
+    "description": "Tidal lossy format option - MP3 320kbps"
+  },
+  "downloadLossyMp3Subtitle": "En iyi uyumluluk, şarkı başı ~10MB",
+  "@downloadLossyMp3Subtitle": {
+    "description": "Subtitle for MP3 320kbps Tidal lossy option"
+  },
+  "downloadLossyOpus256": "Opus 256kbps",
+  "@downloadLossyOpus256": {
+    "description": "Tidal lossy format option - Opus 256kbps"
+  },
+  "downloadLossyOpus256Subtitle": "En iyi Opus kalitesi, şarkı başı ~8MB",
+  "@downloadLossyOpus256Subtitle": {
+    "description": "Subtitle for Opus 256kbps Tidal lossy option"
+  },
+  "downloadLossyOpus128": "Opus 128kbps",
+  "@downloadLossyOpus128": {
+    "description": "Tidal lossy format option - Opus 128kbps"
+  },
+  "downloadLossyOpus128Subtitle": "En küçük boyut, şarkı başı ~4MB",
+  "@downloadLossyOpus128Subtitle": {
+    "description": "Subtitle for Opus 128kbps Tidal lossy option"
+  },
+  "qualityNote": "Gerçek kalite, şarkının serviste hangi kalitede bulunduğuna bağlıdır.",
   "@qualityNote": {
     "description": "Note about quality availability"
   },
-  "downloadAskBeforeDownload": "Ask Before Download",
+  "downloadAskBeforeDownload": "İndirmeden Önce Sor",
   "@downloadAskBeforeDownload": {
     "description": "Setting - show quality picker"
   },
-  "downloadDirectory": "Download Directory",
+  "downloadDirectory": "İndirme Klasörü",
   "@downloadDirectory": {
     "description": "Setting - download folder"
   },
-  "downloadSeparateSinglesFolder": "Separate Singles Folder",
+  "downloadSeparateSinglesFolder": "Single'ları Ayrı Klasöre Koy",
   "@downloadSeparateSinglesFolder": {
     "description": "Setting - separate folder for singles"
   },
-  "downloadAlbumFolderStructure": "Album Folder Structure",
+  "downloadAlbumFolderStructure": "Albüm Klasörü Düzeni",
   "@downloadAlbumFolderStructure": {
     "description": "Setting - album folder organization"
   },
-  "downloadUseAlbumArtistForFolders": "Use Album Artist for folders",
+  "downloadUseAlbumArtistForFolders": "Klasörler için Albüm Sanatçısını Kullan",
   "@downloadUseAlbumArtistForFolders": {
     "description": "Setting - choose whether artist folders use Album Artist or Track Artist"
   },
-  "downloadUsePrimaryArtistOnly": "Primary artist only for folders",
+  "downloadUsePrimaryArtistOnly": "Klasörlerde Sadece Ana Sanatçı (Düetleri Gizle)",
   "@downloadUsePrimaryArtistOnly": {
     "description": "Setting - strip featured artists from folder name"
   },
-  "downloadUsePrimaryArtistOnlyEnabled": "Featured artists removed from folder name (e.g. Justin Bieber, Quavo → Justin Bieber)",
+  "downloadUsePrimaryArtistOnlyEnabled": "Konuk sanatçılar klasör adından silinir (Örn: Justin Bieber, Quavo → Justin Bieber)",
   "@downloadUsePrimaryArtistOnlyEnabled": {
     "description": "Subtitle when primary artist only is enabled"
   },
-  "downloadUsePrimaryArtistOnlyDisabled": "Full artist string used for folder name",
+  "downloadUsePrimaryArtistOnlyDisabled": "Klasör adına tüm sanatçılar yazılır",
   "@downloadUsePrimaryArtistOnlyDisabled": {
     "description": "Subtitle when primary artist only is disabled"
   },
-  "downloadSelectQuality": "Select Quality",
+  "downloadSelectQuality": "Kaliteyi Seçin",
   "@downloadSelectQuality": {
     "description": "Dialog title - choose audio quality"
   },
-  "downloadFrom": "Download From",
+  "downloadFrom": "İndirme Kaynağı:",
   "@downloadFrom": {
     "description": "Label - download source"
   },
-  "appearanceAmoledDark": "AMOLED Dark",
+  "appearanceAmoledDark": "AMOLED Koyu (Tam Siyah)",
   "@appearanceAmoledDark": {
     "description": "Theme option - pure black"
   },
-  "appearanceAmoledDarkSubtitle": "Pure black background",
+  "appearanceAmoledDarkSubtitle": "Tamamen siyah arka plan (OLED ekranlar için)",
   "@appearanceAmoledDarkSubtitle": {
     "description": "Subtitle for AMOLED dark"
   },
-  "queueClearAll": "Clear All",
+  "queueClearAll": "Tümünü Temizle",
   "@queueClearAll": {
     "description": "Button - clear all queue items"
   },
-  "queueClearAllMessage": "Are you sure you want to clear all downloads?",
+  "queueClearAllMessage": "Tüm indirme sırasını temizlemek istediğinize emin misiniz?",
   "@queueClearAllMessage": {
     "description": "Clear queue confirmation"
   },
-  "settingsAutoExportFailed": "Auto-export failed downloads",
+  "settingsAutoExportFailed": "Başarısız İndirmeleri Otomatik Dışa Aktar",
   "@settingsAutoExportFailed": {
     "description": "Setting toggle for auto-export"
   },
-  "settingsAutoExportFailedSubtitle": "Save failed downloads to TXT file automatically",
+  "settingsAutoExportFailedSubtitle": "İndirilemeyen şarkıların listesini TXT dosyası olarak kaydeder",
   "@settingsAutoExportFailedSubtitle": {
     "description": "Subtitle for auto-export setting"
   },
-  "settingsDownloadNetwork": "Download Network",
+  "settingsDownloadNetwork": "İndirme İçin Kullanılacak Ağ",
   "@settingsDownloadNetwork": {
     "description": "Setting for network type preference"
   },
-  "settingsDownloadNetworkAny": "WiFi + Mobile Data",
+  "settingsDownloadNetworkAny": "Wi-Fi + Mobil Veri",
   "@settingsDownloadNetworkAny": {
     "description": "Network option - use any connection"
   },
-  "settingsDownloadNetworkWifiOnly": "WiFi Only",
+  "settingsDownloadNetworkWifiOnly": "Sadece Wi-Fi",
   "@settingsDownloadNetworkWifiOnly": {
     "description": "Network option - only use WiFi"
   },
-  "settingsDownloadNetworkSubtitle": "Choose which network to use for downloads. When set to WiFi Only, downloads will pause on mobile data.",
+  "settingsDownloadNetworkSubtitle": "Sadece Wi-Fi seçildiğinde, mobil verideyken indirmeler otomatik duraklatılır.",
   "@settingsDownloadNetworkSubtitle": {
     "description": "Subtitle explaining network preference"
   },
-  "albumFolderArtistAlbum": "Artist / Album",
+  "albumFolderArtistAlbum": "Sanatçı / Albüm",
   "@albumFolderArtistAlbum": {
     "description": "Album folder option"
   },
-  "albumFolderArtistAlbumSubtitle": "Albums/Artist Name/Album Name/",
+  "albumFolderArtistAlbumSubtitle": "Albümler/Sanatçı Adı/Albüm Adı/",
   "@albumFolderArtistAlbumSubtitle": {
     "description": "Folder structure example"
   },
-  "albumFolderArtistYearAlbum": "Artist / [Year] Album",
+  "albumFolderArtistYearAlbum": "Sanatçı / [Yıl] Albüm",
   "@albumFolderArtistYearAlbum": {
     "description": "Album folder option with year"
   },
-  "albumFolderArtistYearAlbumSubtitle": "Albums/Artist Name/[2005] Album Name/",
+  "albumFolderArtistYearAlbumSubtitle": "Albümler/Sanatçı Adı/[2005] Albüm Adı/",
   "@albumFolderArtistYearAlbumSubtitle": {
     "description": "Folder structure example"
   },
-  "albumFolderAlbumOnly": "Album Only",
+  "albumFolderAlbumOnly": "Sadece Albüm",
   "@albumFolderAlbumOnly": {
     "description": "Album folder option"
   },
-  "albumFolderAlbumOnlySubtitle": "Albums/Album Name/",
+  "albumFolderAlbumOnlySubtitle": "Albümler/Albüm Adı/",
   "@albumFolderAlbumOnlySubtitle": {
     "description": "Folder structure example"
   },
-  "albumFolderYearAlbum": "[Year] Album",
+  "albumFolderYearAlbum": "[Yıl] Albüm",
   "@albumFolderYearAlbum": {
     "description": "Album folder option with year"
   },
-  "albumFolderYearAlbumSubtitle": "Albums/[2005] Album Name/",
+  "albumFolderYearAlbumSubtitle": "Albümler/[2005] Albüm Adı/",
   "@albumFolderYearAlbumSubtitle": {
     "description": "Folder structure example"
   },
-  "albumFolderArtistAlbumSingles": "Artist / Album + Singles",
+  "albumFolderArtistAlbumSingles": "Sanatçı / Albüm + Single'lar",
   "@albumFolderArtistAlbumSingles": {
     "description": "Album folder option with singles inside artist"
   },
-  "albumFolderArtistAlbumSinglesSubtitle": "Artist/Album/ and Artist/Singles/",
+  "albumFolderArtistAlbumSinglesSubtitle": "Sanatçı/Albüm/ ve Sanatçı/Single'lar/",
   "@albumFolderArtistAlbumSinglesSubtitle": {
     "description": "Folder structure example"
   },
-  "downloadedAlbumDeleteSelected": "Delete Selected",
+  "albumFolderArtistAlbumFlat": "Sanatçı / Albüm (Single'lar ayrı klasörsüz)",
+  "@albumFolderArtistAlbumFlat": {
+    "description": "Album folder option with singles directly in artist folder"
+  },
+  "albumFolderArtistAlbumFlatSubtitle": "Sanatçı/Albüm/ ve Sanatçı/sarki.flac",
+  "@albumFolderArtistAlbumFlatSubtitle": {
+    "description": "Folder structure example for flat singles"
+  },
+  "downloadedAlbumDeleteSelected": "Seçilenleri Sil",
   "@downloadedAlbumDeleteSelected": {
     "description": "Button - delete selected tracks"
   },
-  "downloadedAlbumDeleteMessage": "Delete {count} {count, plural, =1{track} other{tracks}} from this album?\n\nThis will also delete the files from storage.",
+  "downloadedAlbumDeleteMessage": "Bu albümden {count} {count, plural, =1{şarkı} other{şarkı}} silinsin mi?\n\nBu işlem, dosyaları cihazınızdan da tamamen silecek.",
   "@downloadedAlbumDeleteMessage": {
     "description": "Delete confirmation with count",
     "placeholders": {
@@ -1906,7 +2050,7 @@
       }
     }
   },
-  "downloadedAlbumSelectedCount": "{count} selected",
+  "downloadedAlbumSelectedCount": "{count} seçildi",
   "@downloadedAlbumSelectedCount": {
     "description": "Selection count indicator",
     "placeholders": {
@@ -1915,15 +2059,15 @@
       }
     }
   },
-  "downloadedAlbumAllSelected": "All tracks selected",
+  "downloadedAlbumAllSelected": "Tüm şarkılar seçildi",
   "@downloadedAlbumAllSelected": {
     "description": "Status - all items selected"
   },
-  "downloadedAlbumTapToSelect": "Tap tracks to select",
+  "downloadedAlbumTapToSelect": "Seçmek için şarkılara dokunun",
   "@downloadedAlbumTapToSelect": {
     "description": "Selection hint"
   },
-  "downloadedAlbumDeleteCount": "Delete {count} {count, plural, =1{track} other{tracks}}",
+  "downloadedAlbumDeleteCount": "{count} {count, plural, =1{Şarkıyı} other{Şarkıyı}} Sil",
   "@downloadedAlbumDeleteCount": {
     "description": "Delete button text with count",
     "placeholders": {
@@ -1932,11 +2076,11 @@
       }
     }
   },
-  "downloadedAlbumSelectToDelete": "Select tracks to delete",
+  "downloadedAlbumSelectToDelete": "Silinecek şarkıları seçin",
   "@downloadedAlbumSelectToDelete": {
     "description": "Placeholder when nothing selected"
   },
-  "downloadedAlbumDiscHeader": "Disc {discNumber}",
+  "downloadedAlbumDiscHeader": "Disk {discNumber}",
   "@downloadedAlbumDiscHeader": {
     "description": "Header for disc separator in multi-disc albums",
     "placeholders": {
@@ -1946,31 +2090,31 @@
       }
     }
   },
-  "recentTypeArtist": "Artist",
+  "recentTypeArtist": "Sanatçı",
   "@recentTypeArtist": {
     "description": "Recent access item type - artist"
   },
-  "recentTypeAlbum": "Album",
+  "recentTypeAlbum": "Albüm",
   "@recentTypeAlbum": {
     "description": "Recent access item type - album"
   },
-  "recentTypeSong": "Song",
+  "recentTypeSong": "Şarkı",
   "@recentTypeSong": {
     "description": "Recent access item type - song/track"
   },
-  "recentTypePlaylist": "Playlist",
+  "recentTypePlaylist": "Çalma Listesi",
   "@recentTypePlaylist": {
     "description": "Recent access item type - playlist"
   },
-  "recentEmpty": "No recent items yet",
+  "recentEmpty": "Henüz yeni bir arama yok",
   "@recentEmpty": {
     "description": "Empty state text for recent access list"
   },
-  "recentShowAllDownloads": "Show All Downloads",
+  "recentShowAllDownloads": "Tüm İndirmeleri Göster",
   "@recentShowAllDownloads": {
     "description": "Button label to unhide hidden downloads in recent access"
   },
-  "recentPlaylistInfo": "Playlist: {name}",
+  "recentPlaylistInfo": "Çalma Listesi: {name}",
   "@recentPlaylistInfo": {
     "description": "Snackbar message when tapping playlist in recent access",
     "placeholders": {
@@ -1980,15 +2124,15 @@
       }
     }
   },
-  "discographyDownload": "Download Discography",
+  "discographyDownload": "Tüm Diskografiyi İndir",
   "@discographyDownload": {
     "description": "Button - download artist discography"
   },
-  "discographyDownloadAll": "Download All",
+  "discographyDownloadAll": "Tümünü İndir",
   "@discographyDownloadAll": {
     "description": "Option - download entire discography"
   },
-  "discographyDownloadAllSubtitle": "{count} tracks from {albumCount} releases",
+  "discographyDownloadAllSubtitle": "{albumCount} albüm/single üzerinden toplam {count} şarkı",
   "@discographyDownloadAllSubtitle": {
     "description": "Subtitle showing total tracks and albums",
     "placeholders": {
@@ -2000,11 +2144,11 @@
       }
     }
   },
-  "discographyAlbumsOnly": "Albums Only",
+  "discographyAlbumsOnly": "Sadece Albümler",
   "@discographyAlbumsOnly": {
     "description": "Option - download only albums"
   },
-  "discographyAlbumsOnlySubtitle": "{count} tracks from {albumCount} albums",
+  "discographyAlbumsOnlySubtitle": "{albumCount} albümden toplam {count} şarkı",
   "@discographyAlbumsOnlySubtitle": {
     "description": "Subtitle showing album tracks count",
     "placeholders": {
@@ -2016,11 +2160,11 @@
       }
     }
   },
-  "discographySinglesOnly": "Singles & EPs Only",
+  "discographySinglesOnly": "Sadece Single'lar ve EP'ler",
   "@discographySinglesOnly": {
     "description": "Option - download only singles"
   },
-  "discographySinglesOnlySubtitle": "{count} tracks from {albumCount} singles",
+  "discographySinglesOnlySubtitle": "{albumCount} single üzerinden toplam {count} şarkı",
   "@discographySinglesOnlySubtitle": {
     "description": "Subtitle showing singles tracks count",
     "placeholders": {
@@ -2032,19 +2176,19 @@
       }
     }
   },
-  "discographySelectAlbums": "Select Albums...",
+  "discographySelectAlbums": "Albümleri Seç...",
   "@discographySelectAlbums": {
     "description": "Option - manually select albums to download"
   },
-  "discographySelectAlbumsSubtitle": "Choose specific albums or singles",
+  "discographySelectAlbumsSubtitle": "İstediğiniz albümleri veya single'ları kendiniz seçin",
   "@discographySelectAlbumsSubtitle": {
     "description": "Subtitle for select albums option"
   },
-  "discographyFetchingTracks": "Fetching tracks...",
+  "discographyFetchingTracks": "Şarkılar alınıyor...",
   "@discographyFetchingTracks": {
     "description": "Progress - fetching album tracks"
   },
-  "discographyFetchingAlbum": "Fetching {current} of {total}...",
+  "discographyFetchingAlbum": "Alınıyor: {current} / {total}...",
   "@discographyFetchingAlbum": {
     "description": "Progress - fetching specific album",
     "placeholders": {
@@ -2056,7 +2200,7 @@
       }
     }
   },
-  "discographySelectedCount": "{count} selected",
+  "discographySelectedCount": "{count} seçildi",
   "@discographySelectedCount": {
     "description": "Selection count badge",
     "placeholders": {
@@ -2065,11 +2209,11 @@
       }
     }
   },
-  "discographyDownloadSelected": "Download Selected",
+  "discographyDownloadSelected": "Seçilenleri İndir",
   "@discographyDownloadSelected": {
     "description": "Button - download selected albums"
   },
-  "discographyAddedToQueue": "Added {count} tracks to queue",
+  "discographyAddedToQueue": "{count} şarkı indirme sırasına eklendi",
   "@discographyAddedToQueue": {
     "description": "Snackbar - tracks added from discography",
     "placeholders": {
@@ -2078,7 +2222,7 @@
       }
     }
   },
-  "discographySkippedDownloaded": "{added} added, {skipped} already downloaded",
+  "discographySkippedDownloaded": "{added} şarkı eklendi, zaten inmiş olan {skipped} şarkı atlandı",
   "@discographySkippedDownloaded": {
     "description": "Snackbar - with skipped tracks count",
     "placeholders": {
@@ -2090,139 +2234,163 @@
       }
     }
   },
-  "discographyNoAlbums": "No albums available",
+  "discographyNoAlbums": "Bu sanatçıya ait albüm bulunamadı",
   "@discographyNoAlbums": {
     "description": "Error - no albums found for artist"
   },
-  "discographyFailedToFetch": "Failed to fetch some albums",
+  "discographyFailedToFetch": "Bazı albümler yüklenemedi",
   "@discographyFailedToFetch": {
     "description": "Error - some albums failed to load"
   },
-  "sectionStorageAccess": "Storage Access",
+  "sectionStorageAccess": "Depolama Erişimi",
   "@sectionStorageAccess": {
     "description": "Section header for storage access settings"
   },
-  "allFilesAccess": "All Files Access",
+  "allFilesAccess": "Tüm Dosyalara Erişim",
   "@allFilesAccess": {
     "description": "Toggle for MANAGE_EXTERNAL_STORAGE permission"
   },
-  "allFilesAccessEnabledSubtitle": "Can write to any folder",
+  "allFilesAccessEnabledSubtitle": "Cihazdaki herhangi bir klasöre yazabilir",
   "@allFilesAccessEnabledSubtitle": {
     "description": "Subtitle when all files access is enabled"
   },
-  "allFilesAccessDisabledSubtitle": "Limited to media folders only",
+  "allFilesAccessDisabledSubtitle": "Sadece medya klasörleriyle sınırlı",
   "@allFilesAccessDisabledSubtitle": {
     "description": "Subtitle when all files access is disabled"
   },
-  "allFilesAccessDescription": "Enable this if you encounter write errors when saving to custom folders. Android 13+ restricts access to certain directories by default.",
+  "allFilesAccessDescription": "Özel klasörlere kaydederken yazma hatası alıyorsanız bunu açın. Android 13 ve sonrasında bazı klasörlere erişim varsayılan olarak kısıtlanmıştır.",
   "@allFilesAccessDescription": {
     "description": "Description explaining when to enable all files access"
   },
-  "allFilesAccessDeniedMessage": "Permission was denied. Please enable 'All files access' manually in system settings.",
+  "allFilesAccessDeniedMessage": "İzin reddedildi. Lütfen sistem ayarlarından 'Tüm dosyalara erişim' iznini manuel olarak verin.",
   "@allFilesAccessDeniedMessage": {
     "description": "Message when permission is permanently denied"
   },
-  "allFilesAccessDisabledMessage": "All Files Access disabled. The app will use limited storage access.",
+  "allFilesAccessDisabledMessage": "Tüm Dosyalara Erişim devre dışı. Uygulama sınırlı depolama izniyle çalışacak.",
   "@allFilesAccessDisabledMessage": {
     "description": "Snackbar message when user disables all files access"
   },
-  "settingsLocalLibrary": "Local Library",
+  "settingsLocalLibrary": "Yerel Kitaplık",
   "@settingsLocalLibrary": {
     "description": "Settings menu item - local library"
   },
-  "settingsLocalLibrarySubtitle": "Scan music & detect duplicates",
+  "settingsLocalLibrarySubtitle": "Telefonunuzdaki müzikleri tarayıp kopyaları bulun",
   "@settingsLocalLibrarySubtitle": {
     "description": "Subtitle for local library settings"
   },
-  "settingsCache": "Storage & Cache",
+  "settingsCache": "Önbellek ve Depolama",
   "@settingsCache": {
     "description": "Settings menu item - cache management"
   },
-  "settingsCacheSubtitle": "View size and clear cached data",
+  "settingsCacheSubtitle": "Boyutu görüntüleyin ve gereksiz dosyaları temizleyin",
   "@settingsCacheSubtitle": {
     "description": "Subtitle for cache management menu"
   },
-  "libraryTitle": "Local Library",
+  "libraryTitle": "Yerel Kitaplık",
   "@libraryTitle": {
     "description": "Library settings page title"
   },
-  "libraryScanSettings": "Scan Settings",
+  "libraryScanSettings": "Tarama Ayarları",
   "@libraryScanSettings": {
     "description": "Section header for scan settings"
   },
-  "libraryEnableLocalLibrary": "Enable Local Library",
+  "libraryEnableLocalLibrary": "Yerel Kitaplık Taramasını Aç",
   "@libraryEnableLocalLibrary": {
     "description": "Toggle to enable library scanning"
   },
-  "libraryEnableLocalLibrarySubtitle": "Scan and track your existing music",
+  "libraryEnableLocalLibrarySubtitle": "İndirme yaparken elinizde olan şarkıları takip eder",
   "@libraryEnableLocalLibrarySubtitle": {
     "description": "Subtitle for enable toggle"
   },
-  "libraryFolder": "Library Folder",
+  "libraryFolder": "Taranacak Klasör",
   "@libraryFolder": {
     "description": "Folder selection setting"
   },
-  "libraryFolderHint": "Tap to select folder",
+  "libraryFolderHint": "Klasör seçmek için dokunun",
   "@libraryFolderHint": {
     "description": "Placeholder when no folder selected"
   },
-  "libraryShowDuplicateIndicator": "Show Duplicate Indicator",
+  "libraryShowDuplicateIndicator": "Kopya İndikatörünü Göster",
   "@libraryShowDuplicateIndicator": {
     "description": "Toggle for duplicate indicator in search"
   },
-  "libraryShowDuplicateIndicatorSubtitle": "Show when searching for existing tracks",
+  "libraryShowDuplicateIndicatorSubtitle": "Zaten indirmiş olduğunuz şarkıların yanında belirteç gösterir",
   "@libraryShowDuplicateIndicatorSubtitle": {
     "description": "Subtitle for duplicate indicator toggle"
   },
-  "libraryActions": "Actions",
+  "libraryAutoScan": "Otomatik Tarama",
+  "@libraryAutoScan": {
+    "description": "Setting for automatic library scanning"
+  },
+  "libraryAutoScanSubtitle": "Cihazınıza yeni eklenen müzikleri otomatik olarak bulur",
+  "@libraryAutoScanSubtitle": {
+    "description": "Subtitle for auto scan setting"
+  },
+  "libraryAutoScanOff": "Kapalı",
+  "@libraryAutoScanOff": {
+    "description": "Auto scan disabled"
+  },
+  "libraryAutoScanOnOpen": "Uygulama her açıldığında",
+  "@libraryAutoScanOnOpen": {
+    "description": "Auto scan when app opens"
+  },
+  "libraryAutoScanDaily": "Günde bir",
+  "@libraryAutoScanDaily": {
+    "description": "Auto scan once per day"
+  },
+  "libraryAutoScanWeekly": "Haftada bir",
+  "@libraryAutoScanWeekly": {
+    "description": "Auto scan once per week"
+  },
+  "libraryActions": "İşlemler",
   "@libraryActions": {
     "description": "Section header for library actions"
   },
-  "libraryScan": "Scan Library",
+  "libraryScan": "Kitaplığı Tara",
   "@libraryScan": {
     "description": "Button to start library scan"
   },
-  "libraryScanSubtitle": "Scan for audio files",
+  "libraryScanSubtitle": "Klasördeki müzik dosyalarını tarar",
   "@libraryScanSubtitle": {
     "description": "Subtitle for scan button"
   },
-  "libraryScanSelectFolderFirst": "Select a folder first",
+  "libraryScanSelectFolderFirst": "Lütfen önce taranacak bir klasör seçin",
   "@libraryScanSelectFolderFirst": {
     "description": "Message when trying to scan without folder"
   },
-  "libraryCleanupMissingFiles": "Cleanup Missing Files",
+  "libraryCleanupMissingFiles": "Eksik Dosyaları Temizle",
   "@libraryCleanupMissingFiles": {
     "description": "Button to remove entries for missing files"
   },
-  "libraryCleanupMissingFilesSubtitle": "Remove entries for files that no longer exist",
+  "libraryCleanupMissingFilesSubtitle": "Artık cihazınızda olmayan dosyaların kayıtlarını kaldırır",
   "@libraryCleanupMissingFilesSubtitle": {
     "description": "Subtitle for cleanup button"
   },
-  "libraryClear": "Clear Library",
+  "libraryClear": "Kitaplığı Temizle",
   "@libraryClear": {
     "description": "Button to clear all library entries"
   },
-  "libraryClearSubtitle": "Remove all scanned tracks",
+  "libraryClearSubtitle": "Taranmış tüm şarkı kayıtlarını sıfırlar",
   "@libraryClearSubtitle": {
     "description": "Subtitle for clear button"
   },
-  "libraryClearConfirmTitle": "Clear Library",
+  "libraryClearConfirmTitle": "Kitaplık Temizlensin mi?",
   "@libraryClearConfirmTitle": {
     "description": "Dialog title for clear confirmation"
   },
-  "libraryClearConfirmMessage": "This will remove all scanned tracks from your library. Your actual music files will not be deleted.",
+  "libraryClearConfirmMessage": "Uygulamanın kaydettiği tüm taranmış şarkı verileri silinecek. (Gerçek müzik dosyalarınız SİLİNMEYECEK).",
   "@libraryClearConfirmMessage": {
     "description": "Dialog message for clear confirmation"
   },
-  "libraryAbout": "About Local Library",
+  "libraryAbout": "Yerel Kitaplık Hakkında",
   "@libraryAbout": {
     "description": "Section header for about info"
   },
-  "libraryAboutDescription": "Scans your existing music collection to detect duplicates when downloading. Supports FLAC, M4A, MP3, Opus, and OGG formats. Metadata is read from file tags when available.",
+  "libraryAboutDescription": "İndirme yaparken kopyaları (zaten inmiş olanları) tespit etmek için mevcut müzik arşivinizi tarar. FLAC, M4A, MP3, Opus ve OGG formatlarını destekler. Bilgiler şarkı dosyalarının kendi etiketlerinden (ID3 tag vb.) okunur.",
   "@libraryAboutDescription": {
     "description": "Description of local library feature"
   },
-  "libraryTracksUnit": "{count, plural, =1{track} other{tracks}}",
+  "libraryTracksUnit": "{count, plural, =1{şarkı} other{şarkı}}",
   "@libraryTracksUnit": {
     "description": "Unit label for tracks count (without the number itself)",
     "placeholders": {
@@ -2231,7 +2399,7 @@
       }
     }
   },
-  "libraryLastScanned": "Last scanned: {time}",
+  "libraryLastScanned": "Son tarama: {time}",
   "@libraryLastScanned": {
     "description": "Last scan time display",
     "placeholders": {
@@ -2240,15 +2408,15 @@
       }
     }
   },
-  "libraryLastScannedNever": "Never",
+  "libraryLastScannedNever": "Hiç taranmadı",
   "@libraryLastScannedNever": {
     "description": "Shown when library has never been scanned"
   },
-  "libraryScanning": "Scanning...",
+  "libraryScanning": "Taranıyor...",
   "@libraryScanning": {
     "description": "Status during scan"
   },
-  "libraryScanProgress": "{progress}% of {total} files",
+  "libraryScanProgress": "%{progress} (Toplam {total} dosya)",
   "@libraryScanProgress": {
     "description": "Scan progress display",
     "placeholders": {
@@ -2260,11 +2428,11 @@
       }
     }
   },
-  "libraryInLibrary": "In Library",
+  "libraryInLibrary": "Cihazda Var",
   "@libraryInLibrary": {
     "description": "Badge shown on tracks that exist in local library"
   },
-  "libraryRemovedMissingFiles": "Removed {count} missing files from library",
+  "libraryRemovedMissingFiles": "Cihazda olmayan {count} dosyanın kaydı temizlendi",
   "@libraryRemovedMissingFiles": {
     "description": "Snackbar after cleanup",
     "placeholders": {
@@ -2273,71 +2441,71 @@
       }
     }
   },
-  "libraryCleared": "Library cleared",
+  "libraryCleared": "Kitaplık kayıtları temizlendi",
   "@libraryCleared": {
     "description": "Snackbar after clearing library"
   },
-  "libraryStorageAccessRequired": "Storage Access Required",
+  "libraryStorageAccessRequired": "Depolama İzni Gerekli",
   "@libraryStorageAccessRequired": {
     "description": "Dialog title for storage permission"
   },
-  "libraryStorageAccessMessage": "SpotiFLAC needs storage access to scan your music library. Please grant permission in settings.",
+  "libraryStorageAccessMessage": "Müzik kitaplığınızı taramak için SpotiFLAC'ın depolama iznine ihtiyacı var. Lütfen ayarlardan izin verin.",
   "@libraryStorageAccessMessage": {
     "description": "Dialog message for storage permission"
   },
-  "libraryFolderNotExist": "Selected folder does not exist",
+  "libraryFolderNotExist": "Seçilen klasör artık mevcut değil",
   "@libraryFolderNotExist": {
     "description": "Error when folder doesn't exist"
   },
-  "librarySourceDownloaded": "Downloaded",
+  "librarySourceDownloaded": "İndirildi",
   "@librarySourceDownloaded": {
     "description": "Badge for tracks downloaded via SpotiFLAC"
   },
-  "librarySourceLocal": "Local",
+  "librarySourceLocal": "Cihazdan",
   "@librarySourceLocal": {
     "description": "Badge for tracks from local library scan"
   },
-  "libraryFilterAll": "All",
+  "libraryFilterAll": "Tümü",
   "@libraryFilterAll": {
     "description": "Filter chip - show all library items"
   },
-  "libraryFilterDownloaded": "Downloaded",
+  "libraryFilterDownloaded": "Uygulama İle İndirilenler",
   "@libraryFilterDownloaded": {
     "description": "Filter chip - show only downloaded items"
   },
-  "libraryFilterLocal": "Local",
+  "libraryFilterLocal": "Yerel Dosyalar",
   "@libraryFilterLocal": {
     "description": "Filter chip - show only local library items"
   },
-  "libraryFilterTitle": "Filters",
+  "libraryFilterTitle": "Filtreler",
   "@libraryFilterTitle": {
     "description": "Filter bottom sheet title"
   },
-  "libraryFilterReset": "Reset",
+  "libraryFilterReset": "Sıfırla",
   "@libraryFilterReset": {
     "description": "Reset all filters button"
   },
-  "libraryFilterApply": "Apply",
+  "libraryFilterApply": "Uygula",
   "@libraryFilterApply": {
     "description": "Apply filters button"
   },
-  "libraryFilterSource": "Source",
+  "libraryFilterSource": "Kaynak",
   "@libraryFilterSource": {
     "description": "Filter section - source type"
   },
-  "libraryFilterQuality": "Quality",
+  "libraryFilterQuality": "Kalite",
   "@libraryFilterQuality": {
     "description": "Filter section - audio quality"
   },
-  "libraryFilterQualityHiRes": "Hi-Res (24bit)",
+  "libraryFilterQualityHiRes": "Hi-Res (24-bit)",
   "@libraryFilterQualityHiRes": {
     "description": "Filter option - high resolution audio"
   },
-  "libraryFilterQualityCD": "CD (16bit)",
+  "libraryFilterQualityCD": "CD Kalitesi (16-bit)",
   "@libraryFilterQualityCD": {
     "description": "Filter option - CD quality audio"
   },
-  "libraryFilterQualityLossy": "Lossy",
+  "libraryFilterQualityLossy": "Kayıplı (Lossy)",
   "@libraryFilterQualityLossy": {
     "description": "Filter option - lossy compressed audio"
   },
@@ -2345,23 +2513,23 @@
   "@libraryFilterFormat": {
     "description": "Filter section - file format"
   },
-  "libraryFilterSort": "Sort",
+  "libraryFilterSort": "Sıralama",
   "@libraryFilterSort": {
     "description": "Filter section - sort order"
   },
-  "libraryFilterSortLatest": "Latest",
+  "libraryFilterSortLatest": "En Yeniler",
   "@libraryFilterSortLatest": {
     "description": "Sort option - newest first"
   },
-  "libraryFilterSortOldest": "Oldest",
+  "libraryFilterSortOldest": "En Eskiler",
   "@libraryFilterSortOldest": {
     "description": "Sort option - oldest first"
   },
-  "timeJustNow": "Just now",
+  "timeJustNow": "Az önce",
   "@timeJustNow": {
     "description": "Relative time - less than a minute ago"
   },
-  "timeMinutesAgo": "{count, plural, =1{1 minute ago} other{{count} minutes ago}}",
+  "timeMinutesAgo": "{count, plural, =1{1 dakika önce} other{{count} dakika önce}}",
   "@timeMinutesAgo": {
     "description": "Relative time - minutes ago",
     "placeholders": {
@@ -2370,7 +2538,7 @@
       }
     }
   },
-  "timeHoursAgo": "{count, plural, =1{1 hour ago} other{{count} hours ago}}",
+  "timeHoursAgo": "{count, plural, =1{1 saat önce} other{{count} saat önce}}",
   "@timeHoursAgo": {
     "description": "Relative time - hours ago",
     "placeholders": {
@@ -2379,123 +2547,123 @@
       }
     }
   },
-  "tutorialWelcomeTitle": "Welcome to SpotiFLAC!",
+  "tutorialWelcomeTitle": "SpotiFLAC'a Hoş Geldiniz!",
   "@tutorialWelcomeTitle": {
     "description": "Tutorial welcome page title"
   },
-  "tutorialWelcomeDesc": "Let's learn how to download your favorite music in lossless quality. This quick tutorial will show you the basics.",
+  "tutorialWelcomeDesc": "En sevdiğiniz müzikleri kayıpsız kalitede nasıl indireceğinizi öğrenelim. Bu kısa rehber size temelleri gösterecek.",
   "@tutorialWelcomeDesc": {
     "description": "Tutorial welcome page description"
   },
-  "tutorialWelcomeTip1": "Download music from Spotify, Deezer, or paste any supported URL",
+  "tutorialWelcomeTip1": "Müzikleri bulmak için bir Spotify ya da Deezer bağlantısı yapıştırabilir veya adıyla arayabilirsiniz",
   "@tutorialWelcomeTip1": {
     "description": "Tutorial welcome tip 1"
   },
-  "tutorialWelcomeTip2": "Get FLAC quality audio from Tidal, Qobuz, or Deezer",
+  "tutorialWelcomeTip2": "Şarkıları Tidal, Qobuz veya Deezer altyapısıyla en yüksek kalitede (FLAC) indirin",
   "@tutorialWelcomeTip2": {
     "description": "Tutorial welcome tip 2"
   },
-  "tutorialWelcomeTip3": "Automatic metadata, cover art, and lyrics embedding",
+  "tutorialWelcomeTip3": "Albüm kapağı, şarkı sözleri ve tüm şarkı verileri dosyanın içine otomatik olarak gömülür",
   "@tutorialWelcomeTip3": {
     "description": "Tutorial welcome tip 3"
   },
-  "tutorialSearchTitle": "Finding Music",
+  "tutorialSearchTitle": "Müzik Bulmak Çok Kolay",
   "@tutorialSearchTitle": {
     "description": "Tutorial search page title"
   },
-  "tutorialSearchDesc": "There are two easy ways to find music you want to download.",
+  "tutorialSearchDesc": "İstediğiniz müzikleri bulmanın iki basit yolu var.",
   "@tutorialSearchDesc": {
     "description": "Tutorial search page description"
   },
-  "tutorialDownloadTitle": "Downloading Music",
+  "tutorialDownloadTitle": "Müzikleri İndirme",
   "@tutorialDownloadTitle": {
     "description": "Tutorial download page title"
   },
-  "tutorialDownloadDesc": "Downloading music is simple and fast. Here's how it works.",
+  "tutorialDownloadDesc": "Şarkıları indirmek hızlı ve pürüzsüzdür. İşte süreç böyle işliyor:",
   "@tutorialDownloadDesc": {
     "description": "Tutorial download page description"
   },
-  "tutorialLibraryTitle": "Your Library",
+  "tutorialLibraryTitle": "Kişisel Kitaplığınız",
   "@tutorialLibraryTitle": {
     "description": "Tutorial library page title"
   },
-  "tutorialLibraryDesc": "All your downloaded music is organized in the Library tab.",
+  "tutorialLibraryDesc": "İndirdiğiniz tüm müzikler Kitaplık sekmesinde düzenli bir şekilde tutulur.",
   "@tutorialLibraryDesc": {
     "description": "Tutorial library page description"
   },
-  "tutorialLibraryTip1": "View download progress and queue in the Library tab",
+  "tutorialLibraryTip1": "İndirme ilerlemenizi ve sırayı Kitaplık sekmesinden takip edin",
   "@tutorialLibraryTip1": {
     "description": "Tutorial library tip 1"
   },
-  "tutorialLibraryTip2": "Tap any track to play it with your music player",
+  "tutorialLibraryTip2": "İndirdiğiniz şarkıyı favori müzik çalarınızda açmak için üzerine dokunun",
   "@tutorialLibraryTip2": {
     "description": "Tutorial library tip 2"
   },
-  "tutorialLibraryTip3": "Switch between list and grid view for better browsing",
+  "tutorialLibraryTip3": "Daha rahat göz atmak için liste ve ızgara görünümleri arasında geçiş yapın",
   "@tutorialLibraryTip3": {
     "description": "Tutorial library tip 3"
   },
-  "tutorialExtensionsTitle": "Extensions",
+  "tutorialExtensionsTitle": "Eklentilerle Güçlendirin",
   "@tutorialExtensionsTitle": {
     "description": "Tutorial extensions page title"
   },
-  "tutorialExtensionsDesc": "Extend the app's capabilities with community extensions.",
+  "tutorialExtensionsDesc": "Topluluğun geliştirdiği eklentilerle uygulamanın sınırlarını aşın.",
   "@tutorialExtensionsDesc": {
     "description": "Tutorial extensions page description"
   },
-  "tutorialExtensionsTip1": "Browse the Store tab to discover useful extensions",
+  "tutorialExtensionsTip1": "İlginizi çekebilecek eklentileri keşfetmek için Mağaza sekmesine göz atın",
   "@tutorialExtensionsTip1": {
     "description": "Tutorial extensions tip 1"
   },
-  "tutorialExtensionsTip2": "Add new download providers or search sources",
+  "tutorialExtensionsTip2": "Uygulamaya yepyeni indirme ve arama kaynakları ekleyin",
   "@tutorialExtensionsTip2": {
     "description": "Tutorial extensions tip 2"
   },
-  "tutorialExtensionsTip3": "Get lyrics, enhanced metadata, and more features",
+  "tutorialExtensionsTip3": "Farklı şarkı sözü sağlayıcıları ve yepyeni özellikler kazanın",
   "@tutorialExtensionsTip3": {
     "description": "Tutorial extensions tip 3"
   },
-  "tutorialSettingsTitle": "Customize Your Experience",
+  "tutorialSettingsTitle": "Deneyiminizi Kişiselleştirin",
   "@tutorialSettingsTitle": {
     "description": "Tutorial settings page title"
   },
-  "tutorialSettingsDesc": "Personalize the app in Settings to match your preferences.",
+  "tutorialSettingsDesc": "Uygulamanın nasıl davranacağını Ayarlar menüsünden zevkinize göre özelleştirin.",
   "@tutorialSettingsDesc": {
     "description": "Tutorial settings page description"
   },
-  "tutorialSettingsTip1": "Change download location and folder organization",
+  "tutorialSettingsTip1": "İndirme konumunu ve klasörleme biçimini değiştirin",
   "@tutorialSettingsTip1": {
     "description": "Tutorial settings tip 1"
   },
-  "tutorialSettingsTip2": "Set default audio quality and format preferences",
+  "tutorialSettingsTip2": "Varsayılan ses kalitesini ve indirme formatınızı belirleyin",
   "@tutorialSettingsTip2": {
     "description": "Tutorial settings tip 2"
   },
-  "tutorialSettingsTip3": "Customize app theme and appearance",
+  "tutorialSettingsTip3": "Temayı, renkleri ve uygulamanın görünümünü ayarlayın",
   "@tutorialSettingsTip3": {
     "description": "Tutorial settings tip 3"
   },
-  "tutorialReadyMessage": "You're all set! Start downloading your favorite music now.",
+  "tutorialReadyMessage": "İşte bu kadar! Artık favori müziklerinizi indirmeye hazırsınız.",
   "@tutorialReadyMessage": {
     "description": "Tutorial completion message"
   },
-  "libraryForceFullScan": "Force Full Scan",
+  "libraryForceFullScan": "Tam Taramaya Zorla",
   "@libraryForceFullScan": {
     "description": "Button to force a complete rescan of library"
   },
-  "libraryForceFullScanSubtitle": "Rescan all files, ignoring cache",
+  "libraryForceFullScanSubtitle": "Önbelleği yoksayarak klasördeki tüm dosyaları baştan tarar",
   "@libraryForceFullScanSubtitle": {
     "description": "Subtitle for force full scan button"
   },
-  "cleanupOrphanedDownloads": "Cleanup Orphaned Downloads",
+  "cleanupOrphanedDownloads": "Geçersiz İndirmeleri Temizle",
   "@cleanupOrphanedDownloads": {
     "description": "Button to remove history entries for deleted files"
   },
-  "cleanupOrphanedDownloadsSubtitle": "Remove history entries for files that no longer exist",
+  "cleanupOrphanedDownloadsSubtitle": "Cihazdan silinmiş dosyalara ait eski geçmiş kayıtlarını kaldırır",
   "@cleanupOrphanedDownloadsSubtitle": {
     "description": "Subtitle for orphaned cleanup button"
   },
-  "cleanupOrphanedDownloadsResult": "Removed {count} orphaned entries from history",
+  "cleanupOrphanedDownloadsResult": "Geçmişten {count} geçersiz kayıt kaldırıldı",
   "@cleanupOrphanedDownloadsResult": {
     "description": "Snackbar after orphan cleanup",
     "placeholders": {
@@ -2504,23 +2672,23 @@
       }
     }
   },
-  "cleanupOrphanedDownloadsNone": "No orphaned entries found",
+  "cleanupOrphanedDownloadsNone": "Temizlenecek geçersiz kayıt bulunamadı",
   "@cleanupOrphanedDownloadsNone": {
     "description": "Snackbar when no orphans found"
   },
-  "cacheTitle": "Storage & Cache",
+  "cacheTitle": "Önbellek ve Depolama",
   "@cacheTitle": {
     "description": "Cache management page title"
   },
-  "cacheSummaryTitle": "Cache overview",
+  "cacheSummaryTitle": "Önbellek Özeti",
   "@cacheSummaryTitle": {
     "description": "Heading for cache summary card"
   },
-  "cacheSummarySubtitle": "Clearing cache will not remove downloaded music files.",
+  "cacheSummarySubtitle": "Önbelleği temizlemek indirdiğiniz müzik dosyalarını SİLMEZ.",
   "@cacheSummarySubtitle": {
     "description": "Helper text for cache summary card"
   },
-  "cacheEstimatedTotal": "Estimated cache usage: {size}",
+  "cacheEstimatedTotal": "Tahmini önbellek kullanımı: {size}",
   "@cacheEstimatedTotal": {
     "description": "Total cache size shown in summary",
     "placeholders": {
@@ -2529,71 +2697,71 @@
       }
     }
   },
-  "cacheSectionStorage": "Cached Data",
+  "cacheSectionStorage": "Önbelleğe Alınan Veriler",
   "@cacheSectionStorage": {
     "description": "Section header for cache entries"
   },
-  "cacheSectionMaintenance": "Maintenance",
+  "cacheSectionMaintenance": "Bakım ve Temizlik",
   "@cacheSectionMaintenance": {
     "description": "Section header for cleanup actions"
   },
-  "cacheAppDirectory": "App cache directory",
+  "cacheAppDirectory": "Uygulama Önbelleği",
   "@cacheAppDirectory": {
     "description": "Cache item title for app cache directory"
   },
-  "cacheAppDirectoryDesc": "HTTP responses, WebView data, and other temporary app data.",
+  "cacheAppDirectoryDesc": "İnternet yanıtları, küçük resimler ve uygulamanın tuttuğu geçici dosyalar.",
   "@cacheAppDirectoryDesc": {
     "description": "Description of what app cache directory contains"
   },
-  "cacheTempDirectory": "Temporary directory",
+  "cacheTempDirectory": "Geçici Klasör",
   "@cacheTempDirectory": {
     "description": "Cache item title for temporary files directory"
   },
-  "cacheTempDirectoryDesc": "Temporary files from downloads and audio conversion.",
+  "cacheTempDirectoryDesc": "İndirme ve ses dönüştürme işlemleri sırasında oluşan artık dosyalar.",
   "@cacheTempDirectoryDesc": {
     "description": "Description of what temporary directory contains"
   },
-  "cacheCoverImage": "Cover image cache",
+  "cacheCoverImage": "Kapak Resmi Önbelleği",
   "@cacheCoverImage": {
     "description": "Cache item title for persistent cover images"
   },
-  "cacheCoverImageDesc": "Downloaded album and track cover art. Will re-download when viewed.",
+  "cacheCoverImageDesc": "Önceden yüklenmiş albüm kapakları. Silinirse tekrar görüntülediğinizde yeniden indirilir.",
   "@cacheCoverImageDesc": {
     "description": "Description of what cover image cache contains"
   },
-  "cacheLibraryCover": "Library cover cache",
+  "cacheLibraryCover": "Kitaplık Kapağı Önbelleği",
   "@cacheLibraryCover": {
     "description": "Cache item title for local library cover art images"
   },
-  "cacheLibraryCoverDesc": "Cover art extracted from local music files. Will re-extract on next scan.",
+  "cacheLibraryCoverDesc": "Yerel müzik dosyalarınızdan çıkarılmış kapaklar. Silinirse sonraki taramada yeniden oluşturulur.",
   "@cacheLibraryCoverDesc": {
     "description": "Description of what library cover cache contains"
   },
-  "cacheExploreFeed": "Explore feed cache",
+  "cacheExploreFeed": "Keşfet Akışı Önbelleği",
   "@cacheExploreFeed": {
     "description": "Cache item title for explore home feed cache"
   },
-  "cacheExploreFeedDesc": "Explore tab content (new releases, trending). Will refresh on next visit.",
+  "cacheExploreFeedDesc": "Keşfet sekmesindeki (yeni çıkanlar vb.) içerikler. Silerseniz sayfayı açtığınızda yenilenir.",
   "@cacheExploreFeedDesc": {
     "description": "Description of what explore feed cache contains"
   },
-  "cacheTrackLookup": "Track lookup cache",
+  "cacheTrackLookup": "Şarkı Kimliği Önbelleği",
   "@cacheTrackLookup": {
     "description": "Cache item title for track ID lookup cache"
   },
-  "cacheTrackLookupDesc": "Spotify/Deezer track ID lookups. Clearing may slow next few searches.",
+  "cacheTrackLookupDesc": "Spotify/Deezer ID eşleşmeleri. Temizlerseniz ilk birkaç aramanız biraz yavaşlayabilir.",
   "@cacheTrackLookupDesc": {
     "description": "Description of what track lookup cache contains"
   },
-  "cacheCleanupUnusedDesc": "Remove orphaned download history and library entries for missing files.",
+  "cacheCleanupUnusedDesc": "Artık cihazınızda var olmayan dosyaların geçmiş kayıtlarını ve kitaplık verilerini temizler.",
   "@cacheCleanupUnusedDesc": {
     "description": "Description of what cleanup unused data does"
   },
-  "cacheNoData": "No cached data",
+  "cacheNoData": "Veri yok",
   "@cacheNoData": {
     "description": "Label when cache category has no data"
   },
-  "cacheSizeWithFiles": "{size} in {count} files",
+  "cacheSizeWithFiles": "{size} ({count} dosya)",
   "@cacheSizeWithFiles": {
     "description": "Cache size and file count",
     "placeholders": {
@@ -2614,7 +2782,7 @@
       }
     }
   },
-  "cacheEntries": "{count} entries",
+  "cacheEntries": "{count} kayıt",
   "@cacheEntries": {
     "description": "Track cache entry count",
     "placeholders": {
@@ -2623,7 +2791,7 @@
       }
     }
   },
-  "cacheClearSuccess": "Cleared: {target}",
+  "cacheClearSuccess": "Temizlendi: {target}",
   "@cacheClearSuccess": {
     "description": "Snackbar after clearing selected cache",
     "placeholders": {
@@ -2632,11 +2800,11 @@
       }
     }
   },
-  "cacheClearConfirmTitle": "Clear cache?",
+  "cacheClearConfirmTitle": "Önbelleği Temizle?",
   "@cacheClearConfirmTitle": {
     "description": "Dialog title before clearing one cache category"
   },
-  "cacheClearConfirmMessage": "This will clear cached data for {target}. Downloaded music files will not be deleted.",
+  "cacheClearConfirmMessage": "Sadece \"{target}\" için olan önbellek silinecek. İndirdiğiniz hiçbir müzik dosyasına dokunulmayacak.",
   "@cacheClearConfirmMessage": {
     "description": "Dialog message before clearing selected cache",
     "placeholders": {
@@ -2645,27 +2813,27 @@
       }
     }
   },
-  "cacheClearAllConfirmTitle": "Clear all cache?",
+  "cacheClearAllConfirmTitle": "Tüm Önbelleği Temizle?",
   "@cacheClearAllConfirmTitle": {
     "description": "Dialog title before clearing all caches"
   },
-  "cacheClearAllConfirmMessage": "This will clear all cache categories on this page. Downloaded music files will not be deleted.",
+  "cacheClearAllConfirmMessage": "Bu sayfadaki tüm önbellek kategorileri temizlenecek. İndirdiğiniz müzik dosyaları kesinlikle SİLİNMEYECEK.",
   "@cacheClearAllConfirmMessage": {
     "description": "Dialog message before clearing all caches"
   },
-  "cacheClearAll": "Clear all cache",
+  "cacheClearAll": "Tüm Önbelleği Temizle",
   "@cacheClearAll": {
     "description": "Button label to clear all caches"
   },
-  "cacheCleanupUnused": "Cleanup unused data",
+  "cacheCleanupUnused": "Gereksiz Dosyaları Temizle",
   "@cacheCleanupUnused": {
     "description": "Action title for cleaning unused entries"
   },
-  "cacheCleanupUnusedSubtitle": "Remove orphaned download history and missing library entries",
+  "cacheCleanupUnusedSubtitle": "Cihazda olmayan dosyalara ait geçmiş ve kitaplık kayıtlarını kaldırır",
   "@cacheCleanupUnusedSubtitle": {
     "description": "Subtitle for cleanup unused data action"
   },
-  "cacheCleanupResult": "Cleanup completed: {downloadCount} orphaned downloads, {libraryCount} missing library entries",
+  "cacheCleanupResult": "Temizlik Bitti: {downloadCount} geçersiz geçmiş, {libraryCount} eksik kitaplık kaydı kaldırıldı",
   "@cacheCleanupResult": {
     "description": "Snackbar after unused data cleanup",
     "placeholders": {
@@ -2677,43 +2845,43 @@
       }
     }
   },
-  "cacheRefreshStats": "Refresh stats",
+  "cacheRefreshStats": "Boyutları Yenile",
   "@cacheRefreshStats": {
     "description": "Button label to refresh cache statistics"
   },
-  "trackSaveCoverArt": "Save Cover Art",
+  "trackSaveCoverArt": "Albüm Kapağını Kaydet",
   "@trackSaveCoverArt": {
     "description": "Menu action - save album cover art as file"
   },
-  "trackSaveCoverArtSubtitle": "Save album art as .jpg file",
+  "trackSaveCoverArtSubtitle": "Albüm kapağını resim (.jpg) dosyası olarak dışa aktar",
   "@trackSaveCoverArtSubtitle": {
     "description": "Subtitle for save cover art action"
   },
-  "trackSaveLyrics": "Save Lyrics (.lrc)",
+  "trackSaveLyrics": "Şarkı Sözlerini Kaydet (.lrc)",
   "@trackSaveLyrics": {
     "description": "Menu action - save lyrics as .lrc file"
   },
-  "trackSaveLyricsSubtitle": "Fetch and save lyrics as .lrc file",
+  "trackSaveLyricsSubtitle": "Şarkı sözlerini çekip .lrc dosyası olarak kaydeder",
   "@trackSaveLyricsSubtitle": {
     "description": "Subtitle for save lyrics action"
   },
-  "trackSaveLyricsProgress": "Saving lyrics...",
+  "trackSaveLyricsProgress": "Şarkı sözleri kaydediliyor...",
   "@trackSaveLyricsProgress": {
     "description": "Snackbar while saving lyrics to file"
   },
-  "trackReEnrich": "Re-enrich",
+  "trackReEnrich": "Bilgileri İnternetten Güncelle (Re-enrich)",
   "@trackReEnrich": {
     "description": "Menu action - re-embed metadata into audio file"
   },
-  "trackReEnrichOnlineSubtitle": "Search metadata online and embed into file",
+  "trackReEnrichOnlineSubtitle": "İnternetten şarkı verilerini (metadata) bulup dosyaya yeniden işler",
   "@trackReEnrichOnlineSubtitle": {
     "description": "Subtitle for re-enrich metadata action for local items"
   },
-  "trackEditMetadata": "Edit Metadata",
+  "trackEditMetadata": "Şarkı Bilgilerini Düzenle",
   "@trackEditMetadata": {
     "description": "Menu action - edit embedded metadata"
   },
-  "trackCoverSaved": "Cover art saved to {fileName}",
+  "trackCoverSaved": "Kapak resmi \"{fileName}\" adıyla kaydedildi",
   "@trackCoverSaved": {
     "description": "Snackbar after cover art saved",
     "placeholders": {
@@ -2722,11 +2890,11 @@
       }
     }
   },
-  "trackCoverNoSource": "No cover art source available",
+  "trackCoverNoSource": "Geçerli bir kapak resmi kaynağı bulunamadı",
   "@trackCoverNoSource": {
     "description": "Snackbar when no cover art URL or embedded cover"
   },
-  "trackLyricsSaved": "Lyrics saved to {fileName}",
+  "trackLyricsSaved": "Sözler \"{fileName}\" adıyla kaydedildi",
   "@trackLyricsSaved": {
     "description": "Snackbar after lyrics saved",
     "placeholders": {
@@ -2735,23 +2903,64 @@
       }
     }
   },
-  "trackReEnrichProgress": "Re-enriching metadata...",
+  "trackReEnrichProgress": "Şarkı bilgileri (metadata) güncelleniyor...",
   "@trackReEnrichProgress": {
     "description": "Snackbar while re-enriching metadata"
   },
-  "trackReEnrichSearching": "Searching metadata online...",
+  "trackReEnrichSearching": "İnternette şarkı bilgisi (metadata) aranıyor...",
   "@trackReEnrichSearching": {
     "description": "Snackbar while searching metadata from internet for local items"
   },
-  "trackReEnrichSuccess": "Metadata re-enriched successfully",
+  "trackReEnrichSuccess": "Şarkı bilgileri dosyaya başarıyla işlendi",
   "@trackReEnrichSuccess": {
     "description": "Snackbar after successful re-enrichment"
   },
-  "trackReEnrichFfmpegFailed": "FFmpeg metadata embed failed",
+  "trackReEnrichFfmpegFailed": "Sözleri (veya verileri) dosyaya yazarken hata oluştu",
   "@trackReEnrichFfmpegFailed": {
     "description": "Snackbar when FFmpeg embed fails for MP3/Opus"
   },
-  "trackSaveFailed": "Failed: {error}",
+  "queueFlacAction": "Bunu FLAC Olarak İndir",
+  "@queueFlacAction": {
+    "description": "Action/button label for queueing FLAC redownloads for local tracks"
+  },
+  "queueFlacConfirmMessage": "Seçilen şarkılar için internette FLAC eşleşmesi aranacak ve indirme sırasına eklenecek.\n\nMevcut dosyalarınıza dokunulmayacak veya silinmeyecek.\n\nSadece yüksek oranda eşleşenler otomatik olarak sıraya eklenir.\n\n{count} şarkı seçildi",
+  "@queueFlacConfirmMessage": {
+    "description": "Confirmation dialog body before queueing FLAC redownloads for local tracks",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "queueFlacFindingProgress": "FLAC eşleşmeleri aranıyor... ({current}/{total})",
+  "@queueFlacFindingProgress": {
+    "description": "Snackbar while resolving remote matches for local FLAC redownloads",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "queueFlacNoReliableMatches": "Seçiminiz için internette güvenilir bir eşleşme bulunamadı",
+  "@queueFlacNoReliableMatches": {
+    "description": "Snackbar when no safe FLAC redownload matches were found"
+  },
+  "queueFlacQueuedWithSkipped": "{addedCount} şarkı sıraya eklendi, {skippedCount} şarkı eşleşmediği için atlandı",
+  "@queueFlacQueuedWithSkipped": {
+    "description": "Snackbar when some selected local tracks were queued for FLAC redownload and some were skipped",
+    "placeholders": {
+      "addedCount": {
+        "type": "int"
+      },
+      "skippedCount": {
+        "type": "int"
+      }
+    }
+  },
+  "trackSaveFailed": "İşlem başarısız: {error}",
   "@trackSaveFailed": {
     "description": "Snackbar when save operation fails",
     "placeholders": {
@@ -2760,31 +2969,31 @@
       }
     }
   },
-  "trackConvertFormat": "Convert Format",
+  "trackConvertFormat": "Ses Formatını Dönüştür",
   "@trackConvertFormat": {
     "description": "Menu item - convert audio format"
   },
-  "trackConvertFormatSubtitle": "Convert to MP3 or Opus",
+  "trackConvertFormatSubtitle": "Dosyayı MP3, Opus, ALAC veya FLAC formatına çevirin",
   "@trackConvertFormatSubtitle": {
     "description": "Subtitle for convert format menu item"
   },
-  "trackConvertTitle": "Convert Audio",
+  "trackConvertTitle": "Sesi Dönüştür",
   "@trackConvertTitle": {
     "description": "Title of convert bottom sheet"
   },
-  "trackConvertTargetFormat": "Target Format",
+  "trackConvertTargetFormat": "Hedef Format",
   "@trackConvertTargetFormat": {
     "description": "Label for format selection"
   },
-  "trackConvertBitrate": "Bitrate",
+  "trackConvertBitrate": "Bit Hızı (Kalite)",
   "@trackConvertBitrate": {
     "description": "Label for bitrate selection"
   },
-  "trackConvertConfirmTitle": "Confirm Conversion",
+  "trackConvertConfirmTitle": "Dönüşümü Onayla",
   "@trackConvertConfirmTitle": {
     "description": "Confirmation dialog title"
   },
-  "trackConvertConfirmMessage": "Convert from {sourceFormat} to {targetFormat} at {bitrate}?\n\nThe original file will be deleted after conversion.",
+  "trackConvertConfirmMessage": "{sourceFormat} formatından {targetFormat} formatına ({bitrate}) dönüştürülsün mü?\n\nDönüşüm bittikten sonra orijinal dosya tamamen silinecektir.",
   "@trackConvertConfirmMessage": {
     "description": "Confirmation dialog message",
     "placeholders": {
@@ -2799,11 +3008,27 @@
       }
     }
   },
-  "trackConvertConverting": "Converting audio...",
+  "trackConvertConfirmMessageLossless": "{sourceFormat} formatından {targetFormat} formatına dönüştürülsün mü? (Kayıpsız format, kalite kaybı yaşanmaz)\n\nDönüşüm bittikten sonra orijinal dosya tamamen silinecektir.",
+  "@trackConvertConfirmMessageLossless": {
+    "description": "Confirmation dialog message for lossless-to-lossless conversion",
+    "placeholders": {
+      "sourceFormat": {
+        "type": "String"
+      },
+      "targetFormat": {
+        "type": "String"
+      }
+    }
+  },
+  "trackConvertLosslessHint": "Kayıpsız bir formata dönüştürülüyor (Kalite düşüşü olmaz)",
+  "@trackConvertLosslessHint": {
+    "description": "Hint shown when converting between lossless formats"
+  },
+  "trackConvertConverting": "Ses dönüştürülüyor...",
   "@trackConvertConverting": {
     "description": "Snackbar while converting"
   },
-  "trackConvertSuccess": "Converted to {format} successfully",
+  "trackConvertSuccess": "Dosya başarıyla {format} formatına çevrildi",
   "@trackConvertSuccess": {
     "description": "Snackbar after successful conversion",
     "placeholders": {
@@ -2812,19 +3037,19 @@
       }
     }
   },
-  "trackConvertFailed": "Conversion failed",
+  "trackConvertFailed": "Dönüşüm işlemi başarısız oldu",
   "@trackConvertFailed": {
     "description": "Snackbar when conversion fails"
   },
-  "cueSplitTitle": "Split CUE Sheet",
+  "cueSplitTitle": "CUE Dosyasını Parçalara Böl",
   "@cueSplitTitle": {
     "description": "Title for CUE split bottom sheet"
   },
-  "cueSplitSubtitle": "Split CUE+FLAC into individual tracks",
+  "cueSplitSubtitle": "Tek parça olan CUE+FLAC dosyasını ayrı şarkılara böler",
   "@cueSplitSubtitle": {
     "description": "Subtitle for CUE split menu item"
   },
-  "cueSplitAlbum": "Album: {album}",
+  "cueSplitAlbum": "Albüm: {album}",
   "@cueSplitAlbum": {
     "description": "Album name in CUE split sheet",
     "placeholders": {
@@ -2833,7 +3058,7 @@
       }
     }
   },
-  "cueSplitArtist": "Artist: {artist}",
+  "cueSplitArtist": "Sanatçı: {artist}",
   "@cueSplitArtist": {
     "description": "Artist name in CUE split sheet",
     "placeholders": {
@@ -2842,7 +3067,7 @@
       }
     }
   },
-  "cueSplitTrackCount": "{count} tracks",
+  "cueSplitTrackCount": "{count} şarkı var",
   "@cueSplitTrackCount": {
     "description": "Number of tracks in CUE sheet",
     "placeholders": {
@@ -2851,11 +3076,11 @@
       }
     }
   },
-  "cueSplitConfirmTitle": "Split CUE Album",
+  "cueSplitConfirmTitle": "CUE Dosyasını Böl",
   "@cueSplitConfirmTitle": {
     "description": "CUE split confirmation dialog title"
   },
-  "cueSplitConfirmMessage": "Split \"{album}\" into {count} individual FLAC files?\n\nFiles will be saved to the same directory.",
+  "cueSplitConfirmMessage": "\"{album}\" albümünü {count} ayrı FLAC dosyasına bölmek istiyor musunuz?\n\nYeni dosyalar orijinal dosyanın bulunduğu klasöre kaydedilecektir.",
   "@cueSplitConfirmMessage": {
     "description": "CUE split confirmation dialog message",
     "placeholders": {
@@ -2867,7 +3092,7 @@
       }
     }
   },
-  "cueSplitSplitting": "Splitting CUE sheet... ({current}/{total})",
+  "cueSplitSplitting": "CUE dosyası ayrıştırılıyor... ({current}/{total})",
   "@cueSplitSplitting": {
     "description": "Snackbar while splitting CUE",
     "placeholders": {
@@ -2879,7 +3104,7 @@
       }
     }
   },
-  "cueSplitSuccess": "Split into {count} tracks successfully",
+  "cueSplitSuccess": "Dosya başarıyla {count} şarkıya bölündü",
   "@cueSplitSuccess": {
     "description": "Snackbar after successful CUE split",
     "placeholders": {
@@ -2888,59 +3113,59 @@
       }
     }
   },
-  "cueSplitFailed": "CUE split failed",
+  "cueSplitFailed": "CUE bölme işlemi başarısız",
   "@cueSplitFailed": {
     "description": "Snackbar when CUE split fails"
   },
-  "cueSplitNoAudioFile": "Audio file not found for this CUE sheet",
+  "cueSplitNoAudioFile": "Bu CUE ile eşleşen bir ses dosyası bulunamadı",
   "@cueSplitNoAudioFile": {
     "description": "Error when CUE audio file is missing"
   },
-  "cueSplitButton": "Split into Tracks",
+  "cueSplitButton": "Şarkılara Böl",
   "@cueSplitButton": {
     "description": "Button text to start CUE splitting"
   },
-  "actionCreate": "Create",
+  "actionCreate": "Oluştur",
   "@actionCreate": {
     "description": "Generic action button - create"
   },
-  "collectionFoldersTitle": "My folders",
+  "collectionFoldersTitle": "Klasörlerim",
   "@collectionFoldersTitle": {
     "description": "Library section title for custom folders"
   },
-  "collectionWishlist": "Wishlist",
+  "collectionWishlist": "İstek Listesi",
   "@collectionWishlist": {
     "description": "Custom folder for saved tracks to download later"
   },
-  "collectionLoved": "Loved",
+  "collectionLoved": "Favoriler",
   "@collectionLoved": {
     "description": "Custom folder for favorite tracks"
   },
-  "collectionPlaylists": "Playlists",
+  "collectionPlaylists": "Çalma Listeleri",
   "@collectionPlaylists": {
     "description": "Custom user playlists folder"
   },
-  "collectionPlaylist": "Playlist",
+  "collectionPlaylist": "Çalma Listesi",
   "@collectionPlaylist": {
     "description": "Single playlist label"
   },
-  "collectionAddToPlaylist": "Add to playlist",
+  "collectionAddToPlaylist": "Çalma listesine ekle",
   "@collectionAddToPlaylist": {
     "description": "Action to add a track to user playlist"
   },
-  "collectionCreatePlaylist": "Create playlist",
+  "collectionCreatePlaylist": "Yeni çalma listesi oluştur",
   "@collectionCreatePlaylist": {
     "description": "Action to create a new playlist"
   },
-  "collectionNoPlaylistsYet": "No playlists yet",
+  "collectionNoPlaylistsYet": "Henüz listeniz yok",
   "@collectionNoPlaylistsYet": {
     "description": "Empty state title when user has no playlists"
   },
-  "collectionNoPlaylistsSubtitle": "Create a playlist to start categorizing tracks",
+  "collectionNoPlaylistsSubtitle": "Müziklerinizi kategorize etmek için bir çalma listesi oluşturun",
   "@collectionNoPlaylistsSubtitle": {
     "description": "Empty state subtitle when user has no playlists"
   },
-  "collectionPlaylistTracks": "{count, plural, =1{1 track} other{{count} tracks}}",
+  "collectionPlaylistTracks": "{count, plural, =1{1 şarkı} other{{count} şarkı}}",
   "@collectionPlaylistTracks": {
     "description": "Track count label for custom playlists",
     "placeholders": {
@@ -2949,7 +3174,7 @@
       }
     }
   },
-  "collectionAddedToPlaylist": "Added to \"{playlistName}\"",
+  "collectionAddedToPlaylist": "\"{playlistName}\" listesine eklendi",
   "@collectionAddedToPlaylist": {
     "description": "Snackbar after adding track to playlist",
     "placeholders": {
@@ -2958,7 +3183,7 @@
       }
     }
   },
-  "collectionAlreadyInPlaylist": "Already in \"{playlistName}\"",
+  "collectionAlreadyInPlaylist": "Zaten \"{playlistName}\" listesinde var",
   "@collectionAlreadyInPlaylist": {
     "description": "Snackbar when track already exists in playlist",
     "placeholders": {
@@ -2967,27 +3192,27 @@
       }
     }
   },
-  "collectionPlaylistCreated": "Playlist created",
+  "collectionPlaylistCreated": "Çalma listesi oluşturuldu",
   "@collectionPlaylistCreated": {
     "description": "Snackbar after creating playlist"
   },
-  "collectionPlaylistNameHint": "Playlist name",
+  "collectionPlaylistNameHint": "Çalma listesi adı",
   "@collectionPlaylistNameHint": {
     "description": "Hint text for playlist name input"
   },
-  "collectionPlaylistNameRequired": "Playlist name is required",
+  "collectionPlaylistNameRequired": "Lütfen liste için bir isim girin",
   "@collectionPlaylistNameRequired": {
     "description": "Validation error for empty playlist name"
   },
-  "collectionRenamePlaylist": "Rename playlist",
+  "collectionRenamePlaylist": "Yeniden adlandır",
   "@collectionRenamePlaylist": {
     "description": "Action to rename playlist"
   },
-  "collectionDeletePlaylist": "Delete playlist",
+  "collectionDeletePlaylist": "Listeyi sil",
   "@collectionDeletePlaylist": {
     "description": "Action to delete playlist"
   },
-  "collectionDeletePlaylistMessage": "Delete \"{playlistName}\" and all tracks inside it?",
+  "collectionDeletePlaylistMessage": "\"{playlistName}\" listesini ve içindeki tüm şarkıları silmek istiyor musunuz?",
   "@collectionDeletePlaylistMessage": {
     "description": "Confirmation message for deleting playlist",
     "placeholders": {
@@ -2996,47 +3221,47 @@
       }
     }
   },
-  "collectionPlaylistDeleted": "Playlist deleted",
+  "collectionPlaylistDeleted": "Çalma listesi silindi",
   "@collectionPlaylistDeleted": {
     "description": "Snackbar after deleting playlist"
   },
-  "collectionPlaylistRenamed": "Playlist renamed",
+  "collectionPlaylistRenamed": "Çalma listesi adı değiştirildi",
   "@collectionPlaylistRenamed": {
     "description": "Snackbar after renaming playlist"
   },
-  "collectionWishlistEmptyTitle": "Wishlist is empty",
+  "collectionWishlistEmptyTitle": "İstek Listeniz boş",
   "@collectionWishlistEmptyTitle": {
     "description": "Wishlist empty state title"
   },
-  "collectionWishlistEmptySubtitle": "Tap + on tracks to save what you want to download later",
+  "collectionWishlistEmptySubtitle": "Daha sonra indirmek istediğiniz şarkıların yanındaki (+) simgesine dokunun",
   "@collectionWishlistEmptySubtitle": {
     "description": "Wishlist empty state subtitle"
   },
-  "collectionLovedEmptyTitle": "Loved folder is empty",
+  "collectionLovedEmptyTitle": "Favori klasörünüz boş",
   "@collectionLovedEmptyTitle": {
     "description": "Loved empty state title"
   },
-  "collectionLovedEmptySubtitle": "Tap love on tracks to keep your favorites",
+  "collectionLovedEmptySubtitle": "Sevdiğiniz şarkıları burada toplamak için kalp ikonuna dokunun",
   "@collectionLovedEmptySubtitle": {
     "description": "Loved empty state subtitle"
   },
-  "collectionPlaylistEmptyTitle": "Playlist is empty",
+  "collectionPlaylistEmptyTitle": "Bu çalma listesi boş",
   "@collectionPlaylistEmptyTitle": {
     "description": "Playlist empty state title"
   },
-  "collectionPlaylistEmptySubtitle": "Long-press + on any track to add it here",
+  "collectionPlaylistEmptySubtitle": "Buraya eklemek için istediğiniz şarkının üzerindeki (+) butonuna basılı tutun",
   "@collectionPlaylistEmptySubtitle": {
     "description": "Playlist empty state subtitle"
   },
-  "collectionRemoveFromPlaylist": "Remove from playlist",
+  "collectionRemoveFromPlaylist": "Çalma listesinden çıkar",
   "@collectionRemoveFromPlaylist": {
     "description": "Tooltip for removing track from playlist"
   },
-  "collectionRemoveFromFolder": "Remove from folder",
+  "collectionRemoveFromFolder": "Klasörden çıkar",
   "@collectionRemoveFromFolder": {
     "description": "Tooltip for removing track from wishlist/loved folder"
   },
-  "collectionRemoved": "\"{trackName}\" removed",
+  "collectionRemoved": "\"{trackName}\" listeden çıkarıldı",
   "@collectionRemoved": {
     "description": "Snackbar after removing a track from a collection",
     "placeholders": {
@@ -3045,7 +3270,7 @@
       }
     }
   },
-  "collectionAddedToLoved": "\"{trackName}\" added to Loved",
+  "collectionAddedToLoved": "\"{trackName}\" Favoriler klasörüne eklendi",
   "@collectionAddedToLoved": {
     "description": "Snackbar after adding track to loved folder",
     "placeholders": {
@@ -3054,7 +3279,7 @@
       }
     }
   },
-  "collectionRemovedFromLoved": "\"{trackName}\" removed from Loved",
+  "collectionRemovedFromLoved": "\"{trackName}\" Favorilerinizden çıkarıldı",
   "@collectionRemovedFromLoved": {
     "description": "Snackbar after removing track from loved folder",
     "placeholders": {
@@ -3063,7 +3288,7 @@
       }
     }
   },
-  "collectionAddedToWishlist": "\"{trackName}\" added to Wishlist",
+  "collectionAddedToWishlist": "\"{trackName}\" İstek Listenize eklendi",
   "@collectionAddedToWishlist": {
     "description": "Snackbar after adding track to wishlist",
     "placeholders": {
@@ -3072,7 +3297,7 @@
       }
     }
   },
-  "collectionRemovedFromWishlist": "\"{trackName}\" removed from Wishlist",
+  "collectionRemovedFromWishlist": "\"{trackName}\" İstek Listenizden çıkarıldı",
   "@collectionRemovedFromWishlist": {
     "description": "Snackbar after removing track from wishlist",
     "placeholders": {
@@ -3081,31 +3306,31 @@
       }
     }
   },
-  "trackOptionAddToLoved": "Add to Loved",
+  "trackOptionAddToLoved": "Favorilere Ekle",
   "@trackOptionAddToLoved": {
     "description": "Bottom sheet action label - add track to loved folder"
   },
-  "trackOptionRemoveFromLoved": "Remove from Loved",
+  "trackOptionRemoveFromLoved": "Favorilerden Çıkar",
   "@trackOptionRemoveFromLoved": {
     "description": "Bottom sheet action label - remove track from loved folder"
   },
-  "trackOptionAddToWishlist": "Add to Wishlist",
+  "trackOptionAddToWishlist": "İstek Listesine Ekle",
   "@trackOptionAddToWishlist": {
     "description": "Bottom sheet action label - add track to wishlist"
   },
-  "trackOptionRemoveFromWishlist": "Remove from Wishlist",
+  "trackOptionRemoveFromWishlist": "İstek Listesinden Çıkar",
   "@trackOptionRemoveFromWishlist": {
     "description": "Bottom sheet action label - remove track from wishlist"
   },
-  "collectionPlaylistChangeCover": "Change cover image",
+  "collectionPlaylistChangeCover": "Kapak resmini değiştir",
   "@collectionPlaylistChangeCover": {
     "description": "Bottom sheet action to pick a custom cover image for a playlist"
   },
-  "collectionPlaylistRemoveCover": "Remove cover image",
+  "collectionPlaylistRemoveCover": "Kapak resmini kaldır",
   "@collectionPlaylistRemoveCover": {
     "description": "Bottom sheet action to remove custom cover image from a playlist"
   },
-  "selectionShareCount": "Share {count} {count, plural, =1{track} other{tracks}}",
+  "selectionShareCount": "{count} {count, plural, =1{şarkıyı} other{şarkıyı}} paylaş",
   "@selectionShareCount": {
     "description": "Share button text with count in selection mode",
     "placeholders": {
@@ -3114,11 +3339,11 @@
       }
     }
   },
-  "selectionShareNoFiles": "No shareable files found",
+  "selectionShareNoFiles": "Paylaşılabilir bir dosya bulunamadı",
   "@selectionShareNoFiles": {
     "description": "Snackbar when no selected files exist on disk"
   },
-  "selectionConvertCount": "Convert {count} {count, plural, =1{track} other{tracks}}",
+  "selectionConvertCount": "{count} {count, plural, =1{şarkıyı} other{şarkıyı}} dönüştür",
   "@selectionConvertCount": {
     "description": "Convert button text with count in selection mode",
     "placeholders": {
@@ -3127,15 +3352,15 @@
       }
     }
   },
-  "selectionConvertNoConvertible": "No convertible tracks selected",
+  "selectionConvertNoConvertible": "Dönüştürülebilir formatta bir şarkı seçilmedi",
   "@selectionConvertNoConvertible": {
     "description": "Snackbar when no selected tracks support conversion"
   },
-  "selectionBatchConvertConfirmTitle": "Batch Convert",
+  "selectionBatchConvertConfirmTitle": "Toplu Dönüştürme",
   "@selectionBatchConvertConfirmTitle": {
     "description": "Confirmation dialog title for batch conversion"
   },
-  "selectionBatchConvertConfirmMessage": "Convert {count} {count, plural, =1{track} other{tracks}} to {format} at {bitrate}?\n\nOriginal files will be deleted after conversion.",
+  "selectionBatchConvertConfirmMessage": "{count} {count, plural, =1{şarkıyı} other{şarkıyı}} {format} formatına ({bitrate}) dönüştürmek istiyor musunuz?\n\nDönüşüm işlemi bittikten sonra orijinal dosyalar tamamen silinecektir.",
   "@selectionBatchConvertConfirmMessage": {
     "description": "Confirmation dialog message for batch conversion",
     "placeholders": {
@@ -3150,7 +3375,19 @@
       }
     }
   },
-  "selectionBatchConvertProgress": "Converting {current} of {total}...",
+  "selectionBatchConvertConfirmMessageLossless": "{count} {count, plural, =1{şarkıyı} other{şarkıyı}} {format} formatına dönüştürmek istiyor musunuz? (Kayıpsız işlem — kalite kaybı olmaz)\n\nDönüşüm işlemi bittikten sonra orijinal dosyalar tamamen silinecektir.",
+  "@selectionBatchConvertConfirmMessageLossless": {
+    "description": "Confirmation dialog message for lossless batch conversion",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "selectionBatchConvertProgress": "Dönüştürülüyor: {current} / {total}...",
   "@selectionBatchConvertProgress": {
     "description": "Snackbar during batch conversion progress",
     "placeholders": {
@@ -3162,7 +3399,7 @@
       }
     }
   },
-  "selectionBatchConvertSuccess": "Converted {success} of {total} tracks to {format}",
+  "selectionBatchConvertSuccess": "{total} şarkıdan {success} tanesi {format} formatına dönüştürüldü",
   "@selectionBatchConvertSuccess": {
     "description": "Snackbar after batch conversion completes",
     "placeholders": {
@@ -3177,7 +3414,7 @@
       }
     }
   },
-  "downloadedAlbumDownloadedCount": "{count} downloaded",
+  "downloadedAlbumDownloadedCount": "{count} tanesi indirildi",
   "@downloadedAlbumDownloadedCount": {
     "description": "Downloaded tracks count badge",
     "placeholders": {
@@ -3186,12 +3423,628 @@
       }
     }
   },
-  "downloadUseAlbumArtistForFoldersAlbumSubtitle": "Artist folders use Album Artist when available",
+  "downloadUseAlbumArtistForFoldersAlbumSubtitle": "Sanatçı klasörleri için Albüm Sanatçısı adı kullanılır",
   "@downloadUseAlbumArtistForFoldersAlbumSubtitle": {
     "description": "Subtitle when Album Artist is used for folder naming"
   },
-  "downloadUseAlbumArtistForFoldersTrackSubtitle": "Artist folders use Track Artist only",
+  "downloadUseAlbumArtistForFoldersTrackSubtitle": "Sanatçı klasörleri için sadece Şarkı Sanatçısı adı kullanılır",
   "@downloadUseAlbumArtistForFoldersTrackSubtitle": {
     "description": "Subtitle when Track Artist is used for folder naming"
+  },
+  "lyricsProvidersTitle": "Şarkı Sözü Sağlayıcıları",
+  "@lyricsProvidersTitle": {
+    "description": "Title for the lyrics provider priority page"
+  },
+  "lyricsProvidersDescription": "Şarkı sözü kaynaklarını açıp kapatın veya sıralamalarını değiştirin. Uygulama sözleri bulana kadar sağlayıcıları yukarıdan aşağıya doğru sırayla dener.",
+  "@lyricsProvidersDescription": {
+    "description": "Description on the lyrics provider priority page"
+  },
+  "lyricsProvidersInfoText": "Mağazadan yüklediğiniz eklentiler her zaman varsayılan yerleşik sağlayıcılardan önce çalışır. En az bir sağlayıcı her zaman açık kalmalıdır.",
+  "@lyricsProvidersInfoText": {
+    "description": "Info tip on lyrics provider priority page"
+  },
+  "lyricsProvidersEnabledSection": "Açık ({count})",
+  "@lyricsProvidersEnabledSection": {
+    "description": "Section header for enabled providers",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lyricsProvidersDisabledSection": "Kapalı ({count})",
+  "@lyricsProvidersDisabledSection": {
+    "description": "Section header for disabled providers",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "lyricsProvidersAtLeastOne": "En az bir sağlayıcı her zaman açık kalmalıdır",
+  "@lyricsProvidersAtLeastOne": {
+    "description": "Snackbar when user tries to disable the last enabled provider"
+  },
+  "lyricsProvidersSaved": "Şarkı sözü sağlayıcılarının sıralaması kaydedildi",
+  "@lyricsProvidersSaved": {
+    "description": "Snackbar after saving lyrics provider priority"
+  },
+  "lyricsProvidersDiscardContent": "Kaydedilmemiş değişiklikleriniz iptal edilecek.",
+  "@lyricsProvidersDiscardContent": {
+    "description": "Body text of the discard-changes dialog on lyrics provider page"
+  },
+  "lyricsProviderSpotifyApiDesc": "Topluluk API'si üzerinden senkronize Spotify sözleri",
+  "@lyricsProviderSpotifyApiDesc": {
+    "description": "Description for Spotify Lyrics API provider"
+  },
+  "lyricsProviderLrclibDesc": "Açık kaynaklı, senkronize şarkı sözü veritabanı",
+  "@lyricsProviderLrclibDesc": {
+    "description": "Description for LRCLIB provider"
+  },
+  "lyricsProviderNeteaseDesc": "NetEase Cloud Music (Özellikle Asya müzikleri için ideal)",
+  "@lyricsProviderNeteaseDesc": {
+    "description": "Description for Netease provider"
+  },
+  "lyricsProviderMusixmatchDesc": "En geniş şarkı sözü arşivi (Çok dilli)",
+  "@lyricsProviderMusixmatchDesc": {
+    "description": "Description for Musixmatch provider"
+  },
+  "lyricsProviderAppleMusicDesc": "Kelime kelime akan senkronize sözler (Proxy üzerinden)",
+  "@lyricsProviderAppleMusicDesc": {
+    "description": "Description for Apple Music provider"
+  },
+  "lyricsProviderQqMusicDesc": "QQ Music (Özellikle Çince şarkılar için, Proxy üzerinden)",
+  "@lyricsProviderQqMusicDesc": {
+    "description": "Description for QQ Music provider"
+  },
+  "lyricsProviderExtensionDesc": "Eklenti ile sağlanan kaynak",
+  "@lyricsProviderExtensionDesc": {
+    "description": "Generic description for extension-based lyrics providers"
+  },
+  "safMigrationTitle": "Depolama Sistem Güncellemesi",
+  "@safMigrationTitle": {
+    "description": "Title of SAF migration dialog"
+  },
+  "safMigrationMessage1": "SpotiFLAC artık indirme işlemleri için Android'in yeni Depolama Erişim Çerçevesi'ni (SAF) kullanıyor. Bu sayede Android 10 ve üzeri sürümlerdeki \"izin reddedildi\" hataları ortadan kalkıyor.",
+  "@safMigrationMessage1": {
+    "description": "First paragraph of SAF migration dialog"
+  },
+  "safMigrationMessage2": "Yeni depolama sistemine geçiş yapmak için lütfen indirme klasörünüzü tekrar seçin.",
+  "@safMigrationMessage2": {
+    "description": "Second paragraph of SAF migration dialog"
+  },
+  "safMigrationSuccess": "İndirme klasörü başarıyla yeni (SAF) moda geçirildi",
+  "@safMigrationSuccess": {
+    "description": "Snackbar after successfully migrating to SAF"
+  },
+  "settingsDonate": "Bağış Yap",
+  "@settingsDonate": {
+    "description": "Settings menu item - donate"
+  },
+  "settingsDonateSubtitle": "SpotiFLAC-Mobile gelişimine destek olun",
+  "@settingsDonateSubtitle": {
+    "description": "Subtitle for donate menu item"
+  },
+  "tooltipLoveAll": "Tümünü Favorilere Ekle",
+  "@tooltipLoveAll": {
+    "description": "Tooltip for the Love All button on album/playlist screens"
+  },
+  "tooltipAddToPlaylist": "Çalma Listesine Ekle",
+  "@tooltipAddToPlaylist": {
+    "description": "Tooltip for the Add to Playlist button"
+  },
+  "snackbarRemovedTracksFromLoved": "{count} şarkı Favoriler'den çıkarıldı",
+  "@snackbarRemovedTracksFromLoved": {
+    "description": "Snackbar after removing multiple tracks from Loved folder",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "snackbarAddedTracksToLoved": "{count} şarkı Favoriler'e eklendi",
+  "@snackbarAddedTracksToLoved": {
+    "description": "Snackbar after adding multiple tracks to Loved folder",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dialogDownloadAllTitle": "Tümünü İndir",
+  "@dialogDownloadAllTitle": {
+    "description": "Title of the Download All confirmation dialog"
+  },
+  "dialogDownloadAllMessage": "Bu listedeki {count} şarkı indirilsin mi?",
+  "@dialogDownloadAllMessage": {
+    "description": "Body of the Download All confirmation dialog",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dialogDownload": "İndir",
+  "@dialogDownload": {
+    "description": "Confirm button in Download All dialog"
+  },
+  "homeSkipAlreadyDownloaded": "Daha önce inmiş olan şarkıları atla",
+  "@homeSkipAlreadyDownloaded": {
+    "description": "Checkbox label in import dialog to skip already-downloaded songs"
+  },
+  "homeGoToAlbum": "Albüme Git",
+  "@homeGoToAlbum": {
+    "description": "Context menu item to navigate to the album page"
+  },
+  "homeAlbumInfoUnavailable": "Albüm bilgisine ulaşılamıyor",
+  "@homeAlbumInfoUnavailable": {
+    "description": "Snackbar when album info cannot be loaded"
+  },
+  "snackbarLoadingCueSheet": "CUE dosyası yükleniyor...",
+  "@snackbarLoadingCueSheet": {
+    "description": "Snackbar while loading a CUE sheet file"
+  },
+  "snackbarMetadataSaved": "Şarkı verileri dosyaya başarıyla kaydedildi",
+  "@snackbarMetadataSaved": {
+    "description": "Snackbar after successfully saving track metadata"
+  },
+  "snackbarFailedToEmbedLyrics": "Şarkı sözleri dosyaya eklenemedi",
+  "@snackbarFailedToEmbedLyrics": {
+    "description": "Snackbar when lyrics embedding fails"
+  },
+  "snackbarFailedToWriteStorage": "Değişiklikler asıl dosyaya yazılamadı",
+  "@snackbarFailedToWriteStorage": {
+    "description": "Snackbar when writing metadata back to file fails"
+  },
+  "snackbarError": "Hata: {error}",
+  "@snackbarError": {
+    "description": "Generic error snackbar with error detail",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "snackbarNoActionDefined": "Bu buton için henüz bir işlev tanımlanmamış",
+  "@snackbarNoActionDefined": {
+    "description": "Snackbar when an extension button has no action configured"
+  },
+  "noTracksFoundForAlbum": "Bu albümün içinde hiç şarkı bulunamadı",
+  "@noTracksFoundForAlbum": {
+    "description": "Empty state message when an album has no tracks"
+  },
+  "downloadLocationSubtitle": "İndirdiğiniz dosyaların cihazınızda nasıl tutulacağını seçin.",
+  "@downloadLocationSubtitle": {
+    "description": "Subtitle text in Android download location bottom sheet"
+  },
+  "storageModeAppFolder": "Uygulama Klasörü",
+  "@storageModeAppFolder": {
+    "description": "Storage mode option - use legacy app folder"
+  },
+  "storageModeAppFolderSubtitle": "Telefonunuzdaki varsayılan Müzik klasörünü kullanır",
+  "@storageModeAppFolderSubtitle": {
+    "description": "Subtitle for app folder storage mode"
+  },
+  "storageModeSaf": "SAF ile Özel Klasör (Önerilen)",
+  "@storageModeSaf": {
+    "description": "Storage mode option - use Android SAF picker"
+  },
+  "storageModeSafSubtitle": "Android dosya seçicisi ile cihazınızdan dilediğiniz klasörü seçin",
+  "@storageModeSafSubtitle": {
+    "description": "Subtitle for SAF storage mode"
+  },
+  "downloadFilenameDescription": "Şarkıların cihazınızda hangi dosya adıyla kaydedileceğini özelleştirin.",
+  "@downloadFilenameDescription": {
+    "description": "Description text in filename format bottom sheet"
+  },
+  "downloadFilenameInsertTag": "Eklemek için dokunun:",
+  "@downloadFilenameInsertTag": {
+    "description": "Label above filename tag chips"
+  },
+  "downloadSeparateSinglesEnabled": "Sanatçı klasörünün içinde Single'ları ayrı bir klasöre ayırır",
+  "@downloadSeparateSinglesEnabled": {
+    "description": "Subtitle when separate singles folder is enabled"
+  },
+  "downloadSeparateSinglesDisabled": "Single'lar ile albümler aynı yerde durur",
+  "@downloadSeparateSinglesDisabled": {
+    "description": "Subtitle when separate singles folder is disabled"
+  },
+  "downloadArtistNameFilters": "Sanatçı Adı Filtreleri",
+  "@downloadArtistNameFilters": {
+    "description": "Setting title for artist folder filter options"
+  },
+  "downloadCreatePlaylistSourceFolder": "Çalma Listeleri İçin Ana Klasör Oluştur",
+  "@downloadCreatePlaylistSourceFolder": {
+    "description": "Setting title for adding a playlist folder prefix before the normal organization structure"
+  },
+  "downloadCreatePlaylistSourceFolderEnabled": "Çalma listesi indirildiğinde en dışa 'Çalma Listesi Adı' isimli bir klasör oluşturur ve içini normal düzeninize göre dizer.",
+  "@downloadCreatePlaylistSourceFolderEnabled": {
+    "description": "Subtitle when playlist source folder prefix is enabled"
+  },
+  "downloadCreatePlaylistSourceFolderDisabled": "Çalma listesindeki şarkılar da diğerleri gibi doğrudan albüm ve sanatçı klasörlerinize atılır.",
+  "@downloadCreatePlaylistSourceFolderDisabled": {
+    "description": "Subtitle when playlist source folder prefix is disabled"
+  },
+  "downloadCreatePlaylistSourceFolderRedundant": "Klasör Düzeni zaten 'Çalma Listesine Göre' ayarlı olduğu için bu seçenek pasiftir.",
+  "@downloadCreatePlaylistSourceFolderRedundant": {
+    "description": "Subtitle when playlist folder prefix setting is redundant because folder organization is already by playlist"
+  },
+  "downloadSongLinkRegion": "SongLink Arama Bölgesi",
+  "@downloadSongLinkRegion": {
+    "description": "Setting title for SongLink country region"
+  },
+  "downloadNetworkCompatibilityMode": "Ağ Uyumluluk Modu",
+  "@downloadNetworkCompatibilityMode": {
+    "description": "Setting title for network compatibility toggle"
+  },
+  "downloadNetworkCompatibilityModeEnabled": "Açık: Bağlantı HTTP ile denenir ve geçersiz sertifikalar kabul edilir (Güvensiz ama çözümleyici)",
+  "@downloadNetworkCompatibilityModeEnabled": {
+    "description": "Subtitle when network compatibility mode is enabled"
+  },
+  "downloadNetworkCompatibilityModeDisabled": "Kapalı: Katı HTTPS kuralları uygulanır (Önerilen)",
+  "@downloadNetworkCompatibilityModeDisabled": {
+    "description": "Subtitle when network compatibility mode is disabled"
+  },
+  "downloadSelectServiceToEnable": "Seçenekleri açmak için yerleşik bir sağlayıcı seçin",
+  "@downloadSelectServiceToEnable": {
+    "description": "Hint shown instead of Ask-quality subtitle when no built-in service selected"
+  },
+  "downloadSelectTidalQobuz": "Kaliteyi ayarlamak için lütfen yukarıdan Tidal veya Qobuz seçin",
+  "@downloadSelectTidalQobuz": {
+    "description": "Info hint when non-Tidal/Qobuz service is selected"
+  },
+  "downloadEmbedLyricsDisabled": "Şarkı Verilerini Dosyaya Gömme ayarı kapalıyken kullanılamaz",
+  "@downloadEmbedLyricsDisabled": {
+    "description": "Subtitle for Embed Lyrics when Embed Metadata is disabled"
+  },
+  "downloadNeteaseIncludeTranslation": "Netease: Çevirileri Dahil Et",
+  "@downloadNeteaseIncludeTranslation": {
+    "description": "Toggle title for including Netease translated lyrics"
+  },
+  "downloadNeteaseIncludeTranslationEnabled": "Varsa, orijinal sözlere çevirilerini ekler",
+  "@downloadNeteaseIncludeTranslationEnabled": {
+    "description": "Subtitle when Netease translation is enabled"
+  },
+  "downloadNeteaseIncludeTranslationDisabled": "Sadece şarkının kendi sözleri kullanılır",
+  "@downloadNeteaseIncludeTranslationDisabled": {
+    "description": "Subtitle when Netease translation is disabled"
+  },
+  "downloadNeteaseIncludeRomanization": "Netease: Okunuşları (Romanizasyon) Dahil Et",
+  "@downloadNeteaseIncludeRomanization": {
+    "description": "Toggle title for including Netease romanized lyrics"
+  },
+  "downloadNeteaseIncludeRomanizationEnabled": "Varsa, Asya şarkıları için Latin alfabesi okunuşlarını ekler",
+  "@downloadNeteaseIncludeRomanizationEnabled": {
+    "description": "Subtitle when Netease romanization is enabled"
+  },
+  "downloadNeteaseIncludeRomanizationDisabled": "Kapalı",
+  "@downloadNeteaseIncludeRomanizationDisabled": {
+    "description": "Subtitle when Netease romanization is disabled"
+  },
+  "downloadAppleQqMultiPerson": "Apple/QQ: Çoklu Sanatçı Düzeni (Kelime kelime akan sözler)",
+  "@downloadAppleQqMultiPerson": {
+    "description": "Toggle title for Apple/QQ multi-person word-by-word lyrics"
+  },
+  "downloadAppleQqMultiPersonEnabled": "Gelişmiş v1/v2 ve arka plan [bg:] etiketlerini açık tutar",
+  "@downloadAppleQqMultiPersonEnabled": {
+    "description": "Subtitle when multi-person word-by-word is enabled"
+  },
+  "downloadAppleQqMultiPersonDisabled": "Standart kelime kelime senkronizasyon kullanır",
+  "@downloadAppleQqMultiPersonDisabled": {
+    "description": "Subtitle when multi-person word-by-word is disabled"
+  },
+  "downloadMusixmatchLanguage": "Musixmatch Tercih Edilen Dil",
+  "@downloadMusixmatchLanguage": {
+    "description": "Setting title for Musixmatch language preference"
+  },
+  "downloadMusixmatchLanguageAuto": "Otomatik (Orijinal Dil)",
+  "@downloadMusixmatchLanguageAuto": {
+    "description": "Option label when Musixmatch uses original language"
+  },
+  "downloadFilterContributing": "Albüm Sanatçısı etiketinde konuk sanatçıları filtrele",
+  "@downloadFilterContributing": {
+    "description": "Toggle title for filtering contributing artists in Album Artist metadata"
+  },
+  "downloadFilterContributingEnabled": "Albüm Sanatçısı verisinde sadece ana sanatçı ismi tutulur",
+  "@downloadFilterContributingEnabled": {
+    "description": "Subtitle when contributing artist filter is enabled"
+  },
+  "downloadFilterContributingDisabled": "Tüm sanatçı isimlerini olduğu gibi korur",
+  "@downloadFilterContributingDisabled": {
+    "description": "Subtitle when contributing artist filter is disabled"
+  },
+  "downloadProvidersNoneEnabled": "Hiçbir sağlayıcı açık değil",
+  "@downloadProvidersNoneEnabled": {
+    "description": "Subtitle for lyrics providers setting when no providers are enabled"
+  },
+  "downloadMusixmatchLanguageCode": "Dil Kodu",
+  "@downloadMusixmatchLanguageCode": {
+    "description": "Label for the Musixmatch language code text field"
+  },
+  "downloadMusixmatchLanguageHint": "auto / tr / en / es",
+  "@downloadMusixmatchLanguageHint": {
+    "description": "Hint text for the Musixmatch language code field"
+  },
+  "downloadMusixmatchLanguageDesc": "Tercih ettiğiniz söz dilini belirleyin (örnek: tr, en, es). Otomatik seçim için boş bırakın.",
+  "@downloadMusixmatchLanguageDesc": {
+    "description": "Description in the Musixmatch language picker"
+  },
+  "downloadMusixmatchAuto": "Otomatik",
+  "@downloadMusixmatchAuto": {
+    "description": "Button to reset Musixmatch language to automatic"
+  },
+  "downloadNetworkAnySubtitle": "Wi-Fi + Mobil Veri üzerinden indir",
+  "@downloadNetworkAnySubtitle": {
+    "description": "Subtitle for 'Any' network mode option"
+  },
+  "downloadNetworkWifiOnlySubtitle": "Wi-Fi'dan çıkarsanız indirmeler duraklatılır",
+  "@downloadNetworkWifiOnlySubtitle": {
+    "description": "Subtitle for 'WiFi only' network mode option"
+  },
+  "downloadSongLinkRegionDesc": "Şarkı aramalarında SongLink API'ye iletilecek ülke kodunu belirler.",
+  "@downloadSongLinkRegionDesc": {
+    "description": "Description in the SongLink region picker"
+  },
+  "downloadFolderOrganization": "Klasör Düzeni Seçimi",
+  "@downloadFolderOrganization": {
+    "description": "Title of the folder organization picker bottom sheet"
+  },
+  "snackbarUnsupportedAudioFormat": "Bu ses formatı desteklenmiyor",
+  "@snackbarUnsupportedAudioFormat": {
+    "description": "Snackbar when the audio format is not supported for the requested operation"
+  },
+  "cacheRefresh": "Yenile",
+  "@cacheRefresh": {
+    "description": "Tooltip for refresh button on cache management page"
+  },
+  "dialogDownloadPlaylistsMessage": "{playlistCount} {playlistCount, plural, =1{listeden} other{listeden}} toplam {trackCount} şarkı indirilsin mi?",
+  "@dialogDownloadPlaylistsMessage": {
+    "description": "Dialog message for bulk playlist download confirmation",
+    "placeholders": {
+      "trackCount": {
+        "type": "int"
+      },
+      "playlistCount": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkDownloadPlaylistsButton": "Seçili {count} {count, plural, =1{listeyi} other{listeyi}} indir",
+  "@bulkDownloadPlaylistsButton": {
+    "description": "Button label for bulk downloading selected playlists",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bulkDownloadSelectPlaylists": "İndirilecek çalma listelerini seçin",
+  "@bulkDownloadSelectPlaylists": {
+    "description": "Button label when no playlists are selected for download"
+  },
+  "snackbarSelectedPlaylistsEmpty": "Seçilen çalma listelerinde şarkı yok",
+  "@snackbarSelectedPlaylistsEmpty": {
+    "description": "Snackbar when selected playlists contain no tracks"
+  },
+  "playlistsCount": "{count, plural, =1{1 çalma listesi} other{{count} çalma listesi}}",
+  "@playlistsCount": {
+    "description": "Playlist count display",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "editMetadataAutoFill": "İnternetten Otomatik Doldur",
+  "@editMetadataAutoFill": {
+    "description": "Section title for selective online metadata auto-fill in the edit metadata sheet"
+  },
+  "editMetadataAutoFillDesc": "İnternetteki verilerle otomatik doldurulmasını istediğiniz alanları seçin",
+  "@editMetadataAutoFillDesc": {
+    "description": "Description for the auto-fill section"
+  },
+  "editMetadataAutoFillFetch": "Bul ve Doldur",
+  "@editMetadataAutoFillFetch": {
+    "description": "Button label to fetch online metadata and fill selected fields"
+  },
+  "editMetadataAutoFillSearching": "İnternette eşleşme aranıyor...",
+  "@editMetadataAutoFillSearching": {
+    "description": "Snackbar shown while searching for online metadata"
+  },
+  "editMetadataAutoFillNoResults": "İnternette bu şarkıya uygun bir veri bulunamadı",
+  "@editMetadataAutoFillNoResults": {
+    "description": "Snackbar when online metadata search returns no results"
+  },
+  "editMetadataAutoFillDone": "Şarkı verilerinden {count} {count, plural, =1{alan} other{alan}} internetten çekilerek dolduruldu",
+  "@editMetadataAutoFillDone": {
+    "description": "Snackbar confirming how many fields were auto-filled",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "editMetadataAutoFillNoneSelected": "Lütfen otomatik doldurulacak en az bir alan seçin",
+  "@editMetadataAutoFillNoneSelected": {
+    "description": "Snackbar when user taps Fetch without selecting any fields"
+  },
+  "editMetadataFieldTitle": "Şarkı Adı",
+  "@editMetadataFieldTitle": {
+    "description": "Chip label for title field in auto-fill selector"
+  },
+  "editMetadataFieldArtist": "Sanatçı",
+  "@editMetadataFieldArtist": {
+    "description": "Chip label for artist field in auto-fill selector"
+  },
+  "editMetadataFieldAlbum": "Albüm",
+  "@editMetadataFieldAlbum": {
+    "description": "Chip label for album field in auto-fill selector"
+  },
+  "editMetadataFieldAlbumArtist": "Albüm Sanatçısı",
+  "@editMetadataFieldAlbumArtist": {
+    "description": "Chip label for album artist field in auto-fill selector"
+  },
+  "editMetadataFieldDate": "Tarih",
+  "@editMetadataFieldDate": {
+    "description": "Chip label for date field in auto-fill selector"
+  },
+  "editMetadataFieldTrackNum": "Şarkı Sırası",
+  "@editMetadataFieldTrackNum": {
+    "description": "Chip label for track number field in auto-fill selector"
+  },
+  "editMetadataFieldDiscNum": "Disk #",
+  "@editMetadataFieldDiscNum": {
+    "description": "Chip label for disc number field in auto-fill selector"
+  },
+  "editMetadataFieldGenre": "Tür",
+  "@editMetadataFieldGenre": {
+    "description": "Chip label for genre field in auto-fill selector"
+  },
+  "editMetadataFieldIsrc": "ISRC",
+  "@editMetadataFieldIsrc": {
+    "description": "Chip label for ISRC field in auto-fill selector"
+  },
+  "editMetadataFieldLabel": "Plak Şirketi",
+  "@editMetadataFieldLabel": {
+    "description": "Chip label for label field in auto-fill selector"
+  },
+  "editMetadataFieldCopyright": "Telif Hakkı",
+  "@editMetadataFieldCopyright": {
+    "description": "Chip label for copyright field in auto-fill selector"
+  },
+  "editMetadataFieldCover": "Albüm Kapağı",
+  "@editMetadataFieldCover": {
+    "description": "Chip label for cover art field in auto-fill selector"
+  },
+  "editMetadataSelectAll": "Tümü",
+  "@editMetadataSelectAll": {
+    "description": "Button to select all fields for auto-fill"
+  },
+  "editMetadataSelectEmpty": "Sadece boşlar",
+  "@editMetadataSelectEmpty": {
+    "description": "Button to select only fields that are currently empty"
+  },
+  "queueDownloadingCount": "Şu An İnenler ({count})",
+  "@queueDownloadingCount": {
+    "description": "Header for active downloads section with count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "queueDownloadedHeader": "İnenler",
+  "@queueDownloadedHeader": {
+    "description": "Header label for downloaded items section in library"
+  },
+  "queueFilteringIndicator": "Filtreleniyor...",
+  "@queueFilteringIndicator": {
+    "description": "Shown while filter results are being computed"
+  },
+  "queueTrackCount": "{count, plural, =1{1 şarkı} other{{count} şarkı}}",
+  "@queueTrackCount": {
+    "description": "Track count label with plural support",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "queueAlbumCount": "{count, plural, =1{1 albüm} other{{count} albüm}}",
+  "@queueAlbumCount": {
+    "description": "Album count label with plural support",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "queueEmptyAlbums": "İndirilmiş bir albüm yok",
+  "@queueEmptyAlbums": {
+    "description": "Empty state title when no album downloads exist"
+  },
+  "queueEmptyAlbumsSubtitle": "Bir albümden birden fazla şarkı indirdiğinizde burada görünecektir.",
+  "@queueEmptyAlbumsSubtitle": {
+    "description": "Empty state subtitle for album downloads"
+  },
+  "queueEmptySingles": "İndirilmiş bir şarkı yok",
+  "@queueEmptySingles": {
+    "description": "Empty state title when no single track downloads exist"
+  },
+  "queueEmptySinglesSubtitle": "Tek tek indirdiğiniz şarkılar burada görünecektir.",
+  "@queueEmptySinglesSubtitle": {
+    "description": "Empty state subtitle for single track downloads"
+  },
+  "queueEmptyHistory": "İndirme geçmişi boş",
+  "@queueEmptyHistory": {
+    "description": "Empty state title when download history is empty"
+  },
+  "queueEmptyHistorySubtitle": "İndirdiğiniz şarkılar başarıyla tamamlandığında burada görünecektir.",
+  "@queueEmptyHistorySubtitle": {
+    "description": "Empty state subtitle for download history"
+  },
+  "selectionAllPlaylistsSelected": "Tüm listeler seçildi",
+  "@selectionAllPlaylistsSelected": {
+    "description": "Shown when all playlists are selected in selection mode"
+  },
+  "selectionTapPlaylistsToSelect": "Seçmek için listelere dokunun",
+  "@selectionTapPlaylistsToSelect": {
+    "description": "Hint shown in playlist selection mode"
+  },
+  "selectionSelectPlaylistsToDelete": "Silinecek çalma listelerini seçin",
+  "@selectionSelectPlaylistsToDelete": {
+    "description": "Hint shown when no playlists are selected for deletion"
+  },
+  "audioAnalysisTitle": "Ses Kalitesi Analizi",
+  "@audioAnalysisTitle": {
+    "description": "Title for audio analysis section"
+  },
+  "audioAnalysisDescription": "Kayıpsız kalite doğrulaması için spektrum analizi yapın",
+  "@audioAnalysisDescription": {
+    "description": "Description for audio analysis tap-to-analyze prompt"
+  },
+  "audioAnalysisAnalyzing": "Ses dosyası analiz ediliyor...",
+  "@audioAnalysisAnalyzing": {
+    "description": "Loading text while analyzing audio"
+  },
+  "audioAnalysisSampleRate": "Örnekleme Hızı (Sample Rate)",
+  "@audioAnalysisSampleRate": {
+    "description": "Sample rate metric label"
+  },
+  "audioAnalysisBitDepth": "Bit Derinliği",
+  "@audioAnalysisBitDepth": {
+    "description": "Bit depth metric label"
+  },
+  "audioAnalysisChannels": "Kanal",
+  "@audioAnalysisChannels": {
+    "description": "Channels metric label"
+  },
+  "audioAnalysisDuration": "Süre",
+  "@audioAnalysisDuration": {
+    "description": "Duration metric label"
+  },
+  "audioAnalysisNyquist": "Nyquist Frekansı",
+  "@audioAnalysisNyquist": {
+    "description": "Nyquist frequency metric label"
+  },
+  "audioAnalysisFileSize": "Boyut",
+  "@audioAnalysisFileSize": {
+    "description": "File size metric label"
+  },
+  "audioAnalysisDynamicRange": "Dinamik Aralık",
+  "@audioAnalysisDynamicRange": {
+    "description": "Dynamic range metric label"
+  },
+  "audioAnalysisPeak": "Tepe Değeri (Peak)",
+  "@audioAnalysisPeak": {
+    "description": "Peak amplitude metric label"
+  },
+  "audioAnalysisRms": "Ortalama Değer (RMS)",
+  "@audioAnalysisRms": {
+    "description": "RMS level metric label"
+  },
+  "audioAnalysisSamples": "Toplam Örneklem (Samples)",
+  "@audioAnalysisSamples": {
+    "description": "Total samples metric label"
   }
 }
