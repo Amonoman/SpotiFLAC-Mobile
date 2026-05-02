@@ -736,7 +736,7 @@
   "@dialogDeleteSelectedTitle": {
     "description": "Dialog title - delete selected items"
   },
-  "dialogDeleteSelectedMessage": "{count} {count, plural, one {}=1{şarkıyı} other{şarkıyı}} geçmişten silmeye emin misiniz?\n\nBu işlem seçilenleri cihazınızdan da silecektir.",
+  "dialogDeleteSelectedMessage": "{count} {count, plural, =1{şarkıyı} other{şarkıyı}} geçmişten silmeye emin misiniz?\n\nBu işlem seçilenleri cihazınızdan da silecektir.",
   "@dialogDeleteSelectedMessage": {
     "description": "Dialog message - delete selected tracks",
     "placeholders": {
@@ -815,7 +815,7 @@
   "@snackbarCredentialsCleared": {
     "description": "Snackbar - Spotify credentials removed"
   },
-  "snackbarDeletedTracks": "{count} {count, plural, one {}=1{şarkı} other{şarkı}} silindi",
+  "snackbarDeletedTracks": "{count} {count, plural, =1{şarkı} other{şarkı}} silindi",
   "@snackbarDeletedTracks": {
     "description": "Snackbar - tracks deleted",
     "placeholders": {
@@ -1418,7 +1418,7 @@
       }
     }
   },
-  "tracksCount": "{count, plural, one {}=1{1 parça} other{{count} parça}}",
+  "tracksCount": "{count, plural, =1{1 parça} other{{count} parça}}",
   "@tracksCount": {
     "description": "Track count display",
     "placeholders": {
@@ -2045,7 +2045,7 @@
   "@downloadedAlbumDeleteSelected": {
     "description": "Button - delete selected tracks"
   },
-  "downloadedAlbumDeleteMessage": "Bu albümden {count} {count, plural, one {}=1{parça} other{parça}} parça silinsin mi?\n\nBu işlem dosyaları depolama alanından da kalıcı olarak silecektir.",
+  "downloadedAlbumDeleteMessage": "Bu albümden {count} {count, plural, =1{parça} other{parça}} parça silinsin mi?\n\nBu işlem dosyaları depolama alanından da kalıcı olarak silecektir.",
   "@downloadedAlbumDeleteMessage": {
     "description": "Delete confirmation with count",
     "placeholders": {
@@ -2071,7 +2071,7 @@
   "@downloadedAlbumTapToSelect": {
     "description": "Selection hint"
   },
-  "downloadedAlbumDeleteCount": "{count} {count, plural, one {}=1{parçayı} other{parçayı}} sil",
+  "downloadedAlbumDeleteCount": "{count} {count, plural, =1{parçayı} other{parçayı}} sil",
   "@downloadedAlbumDeleteCount": {
     "description": "Delete button text with count",
     "placeholders": {

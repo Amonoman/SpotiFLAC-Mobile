@@ -70,10 +70,10 @@ class MetadataSettingsPage extends ConsumerWidget {
                 children: [
                   SettingsSwitchItem(
                     icon: Icons.sell_outlined,
-                    title: 'Embed Metadata',
+                    title: context.l10n.optionsEmbedMetadata,
                     subtitle: settings.embedMetadata
-                        ? 'Write metadata, cover art, and lyrics to files'
-                        : 'Disabled (advanced): skip all metadata embedding',
+                        ? context.l10n.optionsEmbedMetadataSubtitleOn
+                        : context.l10n.optionsEmbedMetadataSubtitleOff,
                     value: settings.embedMetadata,
                     onChanged: (v) =>
                         ref.read(settingsProvider.notifier).setEmbedMetadata(v),

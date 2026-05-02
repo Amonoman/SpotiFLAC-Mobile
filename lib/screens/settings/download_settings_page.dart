@@ -16,18 +16,15 @@ class DownloadSettingsPage extends ConsumerStatefulWidget {
 }
 
 class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
-  static const _builtInServices = ['tidal', 'qobuz'];
-
   @override
   Widget build(BuildContext context) {
     final settings = ref.watch(settingsProvider);
     final extensionState = ref.watch(extensionProvider);
-    final hasExtensions = extensionState.extensions.isNotEmpty;
+    final hasDownloadExtensions = extensionState.extensions.any(
+      (extension) => extension.enabled && extension.hasDownloadProvider,
+    );
     final colorScheme = Theme.of(context).colorScheme;
     final topPadding = normalizedHeaderTopPadding(context);
-
-    final isBuiltInService = _builtInServices.contains(settings.defaultService);
-    final isTidalService = settings.defaultService == 'tidal';
 
     return PopScope(
       canPop: true,
@@ -103,94 +100,16 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
                   SettingsSwitchItem(
                     icon: Icons.tune,
                     title: context.l10n.downloadAskBeforeDownload,
-                    subtitle: isBuiltInService
+                    subtitle: hasDownloadExtensions
                         ? context.l10n.downloadAskQualitySubtitle
-                        : context.l10n.downloadSelectServiceToEnable,
+                        : context.l10n.extensionsNoDownloadProvider,
                     value: settings.askQualityBeforeDownload,
-                    enabled: isBuiltInService,
+                    enabled: hasDownloadExtensions,
                     onChanged: (value) => ref
                         .read(settingsProvider.notifier)
                         .setAskQualityBeforeDownload(value),
+                    showDivider: false,
                   ),
-                  if (!settings.askQualityBeforeDownload &&
-                      isBuiltInService) ...[
-                    _QualityOption(
-                      title: context.l10n.qualityFlacLossless,
-                      subtitle: context.l10n.qualityFlacLosslessSubtitle,
-                      isSelected: settings.audioQuality == 'LOSSLESS',
-                      onTap: () => ref
-                          .read(settingsProvider.notifier)
-                          .setAudioQuality('LOSSLESS'),
-                    ),
-                    _QualityOption(
-                      title: context.l10n.qualityHiResFlac,
-                      subtitle: context.l10n.qualityHiResFlacSubtitle,
-                      isSelected: settings.audioQuality == 'HI_RES',
-                      onTap: () => ref
-                          .read(settingsProvider.notifier)
-                          .setAudioQuality('HI_RES'),
-                    ),
-                    _QualityOption(
-                      title: context.l10n.qualityHiResFlacMax,
-                      subtitle: context.l10n.qualityHiResFlacMaxSubtitle,
-                      isSelected: settings.audioQuality == 'HI_RES_LOSSLESS',
-                      onTap: () => ref
-                          .read(settingsProvider.notifier)
-                          .setAudioQuality('HI_RES_LOSSLESS'),
-                      showDivider: isTidalService,
-                    ),
-                    if (isTidalService)
-                      _QualityOption(
-                        title: context.l10n.downloadLossy320,
-                        subtitle: _getTidalHighFormatLabel(
-                          context,
-                          settings.tidalHighFormat,
-                        ),
-                        isSelected: settings.audioQuality == 'HIGH',
-                        onTap: () => ref
-                            .read(settingsProvider.notifier)
-                            .setAudioQuality('HIGH'),
-                        showDivider: false,
-                      ),
-                    if (isTidalService && settings.audioQuality == 'HIGH')
-                      SettingsItem(
-                        icon: Icons.tune,
-                        title: context.l10n.downloadLossyFormat,
-                        subtitle: _getTidalHighFormatLabel(
-                          context,
-                          settings.tidalHighFormat,
-                        ),
-                        onTap: () => _showTidalHighFormatPicker(
-                          context,
-                          ref,
-                          settings.tidalHighFormat,
-                        ),
-                        showDivider: false,
-                      ),
-                  ],
-                  if (!isBuiltInService)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.info_outline,
-                            size: 16,
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              context.l10n.downloadSelectTidalQobuz,
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                 ],
               ),
             ),
@@ -257,18 +176,6 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
                     onChanged: (v) =>
                         ref.read(settingsProvider.notifier).setAutoFallback(v),
                   ),
-                  if (hasExtensions)
-                    SettingsSwitchItem(
-                      icon: Icons.extension,
-                      title: context.l10n.optionsUseExtensionProviders,
-                      subtitle: settings.useExtensionProviders
-                          ? context.l10n.optionsUseExtensionProvidersOn
-                          : context.l10n.optionsUseExtensionProvidersOff,
-                      value: settings.useExtensionProviders,
-                      onChanged: (v) => ref
-                          .read(settingsProvider.notifier)
-                          .setUseExtensionProviders(v),
-                    ),
                   SettingsItem(
                     icon: Icons.extension_outlined,
                     title: context.l10n.downloadFallbackExtensions,
@@ -323,19 +230,6 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
     );
   }
 
-  String _getTidalHighFormatLabel(BuildContext context, String format) {
-    switch (format) {
-      case 'mp3_320':
-        return context.l10n.downloadLossyMp3;
-      case 'opus_256':
-        return context.l10n.downloadLossyOpus256;
-      case 'opus_128':
-        return context.l10n.downloadLossyOpus128;
-      default:
-        return context.l10n.downloadLossyMp3;
-    }
-  }
-
   String _getSongLinkRegionLabel(String code) {
     const names = <String, String>{
       'US': 'United States',
@@ -356,91 +250,6 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
     final effective = normalized.isEmpty ? 'US' : normalized;
     final name = names[effective];
     return name == null ? effective : '$effective - $name';
-  }
-
-  void _showTidalHighFormatPicker(
-    BuildContext context,
-    WidgetRef ref,
-    String current,
-  ) {
-    final colorScheme = Theme.of(context).colorScheme;
-    showModalBottomSheet<void>(
-      context: context,
-      useRootNavigator: true,
-      backgroundColor: colorScheme.surfaceContainerHigh,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
-              child: Text(
-                context.l10n.downloadLossy320Format,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-              child: Text(
-                context.l10n.downloadLossy320FormatDesc,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.audiotrack),
-              title: Text(context.l10n.downloadLossyMp3),
-              subtitle: Text(context.l10n.downloadLossyMp3Subtitle),
-              trailing: current == 'mp3_320'
-                  ? Icon(Icons.check, color: colorScheme.primary)
-                  : null,
-              onTap: () {
-                ref
-                    .read(settingsProvider.notifier)
-                    .setTidalHighFormat('mp3_320');
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.graphic_eq),
-              title: Text(context.l10n.downloadLossyOpus256),
-              subtitle: Text(context.l10n.downloadLossyOpus256Subtitle),
-              trailing: current == 'opus_256'
-                  ? Icon(Icons.check, color: colorScheme.primary)
-                  : null,
-              onTap: () {
-                ref
-                    .read(settingsProvider.notifier)
-                    .setTidalHighFormat('opus_256');
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.graphic_eq),
-              title: Text(context.l10n.downloadLossyOpus128),
-              subtitle: Text(context.l10n.downloadLossyOpus128Subtitle),
-              trailing: current == 'opus_128'
-                  ? Icon(Icons.check, color: colorScheme.primary)
-                  : null,
-              onTap: () {
-                ref
-                    .read(settingsProvider.notifier)
-                    .setTidalHighFormat('opus_128');
-                Navigator.pop(context);
-              },
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
   }
 
   void _showNetworkModePicker(
@@ -795,63 +604,61 @@ class _ServiceSelector extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
     final extState = ref.watch(extensionProvider);
-    final builtInServiceIds = ['tidal', 'qobuz'];
 
     final extensionProviders = extState.extensions
         .where((e) => e.enabled && e.hasDownloadProvider)
         .toList();
 
-    final isExtensionService = !builtInServiceIds.contains(currentService);
-    final isCurrentExtensionEnabled = isExtensionService
-        ? extensionProviders.any((e) => e.id == currentService)
-        : true;
-
-    final effectiveService = isCurrentExtensionEnabled ? currentService : '';
+    final effectiveService =
+        extensionProviders.any((extension) => extension.id == currentService)
+        ? currentService
+        : '';
 
     return Padding(
       padding: const EdgeInsets.all(12),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: _ServiceChip(
-                  icon: Icons.music_note,
-                  label: 'Tidal',
-                  isSelected: effectiveService == 'tidal',
-                  onTap: () => onChanged('tidal'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _ServiceChip(
-                  icon: Icons.album,
-                  label: 'Qobuz',
-                  isSelected: effectiveService == 'qobuz',
-                  onTap: () => onChanged('qobuz'),
-                ),
-              ),
-            ],
-          ),
-          if (extensionProviders.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
+      child: extensionProviders.isEmpty
+          ? Row(
               children: [
-                for (final extension in extensionProviders)
-                  _ServiceChip(
-                    icon: Icons.extension,
-                    label: extension.displayName,
-                    isSelected: effectiveService == extension.id,
-                    onTap: () => onChanged(extension.id),
+                Icon(
+                  Icons.info_outline,
+                  size: 18,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    context.l10n.extensionsNoDownloadProvider,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
+                ),
               ],
+            )
+          : LayoutBuilder(
+              builder: (context, constraints) {
+                const spacing = 8.0;
+                final chipWidth = (constraints.maxWidth - spacing) / 2;
+                return Wrap(
+                  spacing: spacing,
+                  runSpacing: spacing,
+                  children: [
+                    for (final extension in extensionProviders)
+                      SizedBox(
+                        width: chipWidth,
+                        child: _ServiceChip(
+                          icon: Icons.extension,
+                          label: extension.displayName,
+                          isSelected: effectiveService == extension.id,
+                          onTap: () => onChanged(extension.id),
+                        ),
+                      ),
+                  ],
+                );
+              },
             ),
-          ],
-        ],
-      ),
     );
   }
 }
@@ -910,67 +717,6 @@ class _ServiceChip extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _QualityOption extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final bool isSelected;
-  final VoidCallback onTap;
-  final bool showDivider;
-  const _QualityOption({
-    required this.title,
-    required this.subtitle,
-    required this.isSelected,
-    required this.onTap,
-    this.showDivider = true,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title, style: Theme.of(context).textTheme.bodyLarge),
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                isSelected
-                    ? Icon(Icons.check_circle, color: colorScheme.primary)
-                    : Icon(Icons.circle_outlined, color: colorScheme.outline),
-              ],
-            ),
-          ),
-        ),
-        if (showDivider)
-          Divider(
-            height: 1,
-            thickness: 1,
-            indent: 20,
-            endIndent: 20,
-            color: colorScheme.outlineVariant.withValues(alpha: 0.3),
-          ),
-      ],
     );
   }
 }
@@ -1112,8 +858,6 @@ class _ConcurrentChip extends StatelessWidget {
 class _MetadataSourceSelector extends ConsumerWidget {
   const _MetadataSourceSelector();
 
-  static const _builtInProviders = {'tidal': 'Tidal', 'qobuz': 'Qobuz'};
-
   Extension? _defaultSearchExtension(List<Extension> extensions) {
     return extensions
             .where(
@@ -1135,34 +879,29 @@ class _MetadataSourceSelector extends ConsumerWidget {
     final extState = ref.watch(extensionProvider);
 
     final rawSearchProvider = settings.searchProvider?.trim() ?? '';
-    final isValidBuiltIn = _builtInProviders.containsKey(rawSearchProvider);
     final primarySearchExtension = _defaultSearchExtension(extState.extensions);
     final defaultProviderTarget =
-        primarySearchExtension?.displayName ?? 'Tidal';
+        primarySearchExtension?.displayName ??
+        context.l10n.extensionsNoCustomSearch;
     final defaultProviderLabel =
         '${context.l10n.extensionsHomeFeedAuto} ($defaultProviderTarget)';
     final searchProvider =
-        isValidBuiltIn ||
-            extState.extensions.any(
-              (e) =>
-                  e.enabled && e.hasCustomSearch && e.id == rawSearchProvider,
-            )
+        extState.extensions.any(
+          (e) => e.enabled && e.hasCustomSearch && e.id == rawSearchProvider,
+        )
         ? rawSearchProvider
         : '';
-    final isBuiltIn = _builtInProviders.containsKey(searchProvider);
 
     Extension? activeExtension;
-    if (searchProvider.isNotEmpty && !isBuiltIn) {
+    if (searchProvider.isNotEmpty) {
       activeExtension = extState.extensions
           .where((e) => e.id == searchProvider && e.enabled)
           .firstOrNull;
     }
-    final hasNonDefaultProvider = isBuiltIn || activeExtension != null;
+    final hasNonDefaultProvider = activeExtension != null;
 
     String subtitle;
-    if (isBuiltIn) {
-      subtitle = 'Using ${_builtInProviders[searchProvider]}';
-    } else if (activeExtension != null) {
+    if (activeExtension != null) {
       subtitle = context.l10n.optionsUsingExtension(
         activeExtension.displayName,
       );
@@ -1191,28 +930,20 @@ class _MetadataSourceSelector extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
+          _SettingsChoiceGrid(
             children: [
-              _SearchProviderChip(
+              _SettingsChoiceChip(
+                icon: Icons.auto_awesome,
                 label: defaultProviderLabel,
                 isSelected: searchProvider.isEmpty,
                 onTap: () =>
                     ref.read(settingsProvider.notifier).setSearchProvider(''),
               ),
-              for (final entry in _builtInProviders.entries)
-                _SearchProviderChip(
-                  label: entry.value,
-                  isSelected: searchProvider == entry.key,
-                  onTap: () => ref
-                      .read(settingsProvider.notifier)
-                      .setSearchProvider(entry.key),
-                ),
               for (final ext in extState.extensions.where(
                 (e) => e.enabled && e.hasCustomSearch,
               ))
-                _SearchProviderChip(
+                _SettingsChoiceChip(
+                  icon: Icons.extension,
                   label: ext.displayName,
                   isSelected: searchProvider == ext.id,
                   onTap: () => ref
@@ -1227,11 +958,36 @@ class _MetadataSourceSelector extends ConsumerWidget {
   }
 }
 
-class _SearchProviderChip extends StatelessWidget {
+class _SettingsChoiceGrid extends StatelessWidget {
+  final List<Widget> children;
+  const _SettingsChoiceGrid({required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const spacing = 8.0;
+        final chipWidth = (constraints.maxWidth - spacing) / 2;
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: [
+            for (final child in children)
+              SizedBox(width: chipWidth, child: child),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _SettingsChoiceChip extends StatelessWidget {
+  final IconData icon;
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
-  const _SearchProviderChip({
+  const _SettingsChoiceChip({
+    required this.icon,
     required this.label,
     required this.isSelected,
     required this.onTap,
@@ -1240,16 +996,51 @@ class _SearchProviderChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return FilterChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (_) => onTap(),
-      selectedColor: colorScheme.primaryContainer,
-      checkmarkColor: colorScheme.onPrimaryContainer,
-      labelStyle: TextStyle(
-        color: isSelected
-            ? colorScheme.onPrimaryContainer
-            : colorScheme.onSurface,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final unselectedColor = isDark
+        ? Color.alphaBlend(
+            Colors.white.withValues(alpha: 0.05),
+            colorScheme.surface,
+          )
+        : colorScheme.surfaceContainerHigh;
+    return Material(
+      color: isSelected ? colorScheme.primaryContainer : unselectedColor,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 18,
+                color: isSelected
+                    ? colorScheme.onPrimaryContainer
+                    : colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: isSelected
+                        ? FontWeight.w600
+                        : FontWeight.normal,
+                    color: isSelected
+                        ? colorScheme.onPrimaryContainer
+                        : colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -1258,21 +1049,67 @@ class _SearchProviderChip extends StatelessWidget {
 class _DefaultSearchTabSelector extends ConsumerWidget {
   const _DefaultSearchTabSelector();
 
+  String _labelForTab(BuildContext context, String tab) {
+    return switch (tab) {
+      'track' => context.l10n.searchTracks,
+      'artist' => context.l10n.searchArtists,
+      'album' => context.l10n.searchAlbums,
+      'playlist' => context.l10n.searchPlaylists,
+      _ => context.l10n.historyFilterAll,
+    };
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
-    return SettingsItem(
-      icon: Icons.tab_outlined,
-      title: context.l10n.optionsDefaultSearchTab,
-      subtitle: settings.defaultSearchTab == 'albums'
-          ? context.l10n.optionsDefaultSearchTabAlbums
-          : context.l10n.optionsDefaultSearchTabTracks,
-      onTap: () {
-        final current = settings.defaultSearchTab;
-        ref
-            .read(settingsProvider.notifier)
-            .setDefaultSearchTab(current == 'albums' ? 'tracks' : 'albums');
-      },
+    final current = settings.defaultSearchTab;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.optionsDefaultSearchTab,
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            context.l10n.optionsDefaultSearchTabSubtitle,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _SettingsChoiceGrid(
+            children: [
+              for (final tab in const [
+                'all',
+                'track',
+                'artist',
+                'album',
+                'playlist',
+              ])
+                _SettingsChoiceChip(
+                  icon: switch (tab) {
+                    'track' => Icons.music_note,
+                    'artist' => Icons.person,
+                    'album' => Icons.album,
+                    'playlist' => Icons.queue_music,
+                    _ => Icons.grid_view,
+                  },
+                  label: _labelForTab(context, tab),
+                  isSelected: current == tab,
+                  onTap: () => ref
+                      .read(settingsProvider.notifier)
+                      .setDefaultSearchTab(tab),
+                ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

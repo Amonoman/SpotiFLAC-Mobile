@@ -429,6 +429,7 @@ class _HomeTabState extends ConsumerState<HomeTab>
       'track' => 'track',
       'artist' => 'artist',
       'album' => 'album',
+      'playlist' => 'playlist',
       _ => null,
     };
 

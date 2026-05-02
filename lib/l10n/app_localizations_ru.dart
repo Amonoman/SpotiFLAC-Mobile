@@ -651,9 +651,9 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other: 'треков',
-      one: 'трек',
       many: 'треков',
       few: 'трека',
+      one: 'трек',
     );
     return 'Удалить $count $_temp0 из истории?\n\nЭто также удалит файлы из хранилища.';
   }
@@ -706,9 +706,9 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other: 'треков',
-      one: 'трек',
       many: 'треков',
       few: 'трека',
+      one: 'трек',
     );
     return 'Удалено $count $_temp0';
   }
@@ -1176,9 +1176,9 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count треков',
-      one: '1 трек',
       many: '$count треков',
       few: '$count трека',
+      one: '$count трек',
     );
     return '$_temp0';
   }
@@ -1685,9 +1685,9 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other: 'треков',
-      one: 'трек',
       many: 'треков',
       few: 'трека',
+      one: 'трек',
     );
     return 'Удалить $count $_temp0 из этого альбома?\n\nЭто также удалит файлы из хранилища.';
   }
@@ -1709,9 +1709,9 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other: 'треков',
-      one: 'трек',
       many: 'треков',
       few: 'трека',
+      one: 'трек',
     );
     return 'Удалить $count $_temp0';
   }
@@ -1942,9 +1942,9 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other: 'треков',
-      one: 'трек',
       many: 'треков',
       few: 'трека',
+      one: 'трек',
     );
     return '$_temp0';
   }
@@ -2098,9 +2098,9 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count минут',
-      one: '1 минуту',
       many: '$count минут',
       few: '$count минуты',
+      one: '$count минуту',
     );
     return '$_temp0 назад';
   }
@@ -2111,9 +2111,9 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count часов',
-      one: '1 час',
       many: '$count часов',
       few: '$count часа',
+      one: '$count час',
     );
     return '$_temp0 назад';
   }
@@ -2598,9 +2598,9 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other: '$count треков',
-      one: '1 трек',
       many: '$count треков',
       few: '$count трека',
+      one: '$count трек',
     );
     return '$_temp0';
   }
@@ -2751,9 +2751,9 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other: 'треков',
-      one: 'трек',
       many: 'треков',
       few: 'трека',
+      one: 'трек',
     );
     return 'Отправить $count $_temp0';
   }
@@ -2768,9 +2768,9 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other: 'треков',
-      one: 'трек',
       many: 'треков',
       few: 'трека',
+      one: 'трек',
     );
     return 'Конвертировать $count $_temp0';
   }

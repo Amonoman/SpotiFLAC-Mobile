@@ -14,6 +14,7 @@ const _settingsKey = 'app_settings';
 const _migrationVersionKey = 'settings_migration_version';
 const _currentMigrationVersion = 11;
 const _spotifyClientSecretKey = 'spotify_client_secret';
+const _retiredBuiltInProviderIds = {'deezer', 'qobuz', 'tidal', 'youtube'};
 final _log = AppLogger('SettingsProvider');
 
 class SettingsNotifier extends Notifier<AppSettings> {
@@ -23,6 +24,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
     'track',
     'artist',
     'album',
+    'playlist',
   };
 
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
@@ -51,6 +53,12 @@ class SettingsNotifier extends Notifier<AppSettings> {
       final sanitizedDefaultSearchTab = _normalizeDefaultSearchTab(
         loaded.defaultSearchTab,
       );
+      final sanitizedDefaultService = _sanitizeRetiredBuiltInProviderId(
+        loaded.defaultService,
+      );
+      final sanitizedSearchProvider = _sanitizeRetiredBuiltInProviderId(
+        loaded.searchProvider,
+      );
       state = loaded.copyWith(
         useExtensionProviders: true,
         downloadFallbackExtensionIds: sanitizedDownloadFallbackExtensionIds,
@@ -58,6 +66,10 @@ class SettingsNotifier extends Notifier<AppSettings> {
             loaded.downloadFallbackExtensionIds != null &&
             sanitizedDownloadFallbackExtensionIds == null,
         defaultSearchTab: sanitizedDefaultSearchTab,
+        defaultService: sanitizedDefaultService ?? '',
+        searchProvider: sanitizedSearchProvider,
+        clearSearchProvider:
+            loaded.searchProvider != null && sanitizedSearchProvider == null,
       );
 
       await _runMigrations(prefs);
@@ -145,9 +157,20 @@ class SettingsNotifier extends Notifier<AppSettings> {
       state = state.copyWith(lastSeenVersion: AppInfo.version);
       // Migration 7/11: retired built-in services no longer fall back to a
       // preinstalled provider.
-      if (state.defaultService == 'youtube' ||
-          state.defaultService == 'deezer') {
-        state = state.copyWith(defaultService: '');
+      final sanitizedDefaultService = _sanitizeRetiredBuiltInProviderId(
+        state.defaultService,
+      );
+      final sanitizedSearchProvider = _sanitizeRetiredBuiltInProviderId(
+        state.searchProvider,
+      );
+      if (sanitizedDefaultService != state.defaultService ||
+          sanitizedSearchProvider != state.searchProvider) {
+        state = state.copyWith(
+          defaultService: sanitizedDefaultService ?? '',
+          searchProvider: sanitizedSearchProvider,
+          clearSearchProvider:
+              state.searchProvider != null && sanitizedSearchProvider == null,
+        );
       }
       if (!state.useExtensionProviders) {
         state = state.copyWith(useExtensionProviders: true);
@@ -211,6 +234,12 @@ class SettingsNotifier extends Notifier<AppSettings> {
     return 'all';
   }
 
+  String? _sanitizeRetiredBuiltInProviderId(String? providerId) {
+    final normalized = providerId?.trim().toLowerCase();
+    if (normalized == null || normalized.isEmpty) return providerId;
+    return _retiredBuiltInProviderIds.contains(normalized) ? null : providerId;
+  }
+
   Future<void> _normalizeSongLinkRegionIfNeeded() async {
     final normalized = _normalizeSongLinkRegion(state.songLinkRegion);
     if (normalized == state.songLinkRegion) return;
@@ -244,7 +273,9 @@ class SettingsNotifier extends Notifier<AppSettings> {
   }
 
   void setDefaultService(String service) {
-    state = state.copyWith(defaultService: service);
+    state = state.copyWith(
+      defaultService: _sanitizeRetiredBuiltInProviderId(service) ?? '',
+    );
     _saveSettings();
   }
 
@@ -430,10 +461,11 @@ class SettingsNotifier extends Notifier<AppSettings> {
   }
 
   void setSearchProvider(String? provider) {
-    if (provider == null || provider.isEmpty) {
+    final sanitized = _sanitizeRetiredBuiltInProviderId(provider);
+    if (sanitized == null || sanitized.isEmpty) {
       state = state.copyWith(clearSearchProvider: true);
     } else {
-      state = state.copyWith(searchProvider: provider);
+      state = state.copyWith(searchProvider: sanitized);
     }
     _saveSettings();
   }

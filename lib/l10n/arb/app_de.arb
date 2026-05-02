@@ -796,7 +796,7 @@
   "@dialogDeleteSelectedTitle": {
     "description": "Dialog title - delete selected items"
   },
-  "dialogDeleteSelectedMessage": "Lösche {count} {count, plural, one {}=1{Track} other{Tracks}} aus dem Verlauf?\n\nDies löscht auch die Dateien aus dem Speicher.",
+  "dialogDeleteSelectedMessage": "Lösche {count} {count, plural, =1{Track} other{Tracks}} aus dem Verlauf?\n\nDies löscht auch die Dateien aus dem Speicher.",
   "@dialogDeleteSelectedMessage": {
     "description": "Dialog message - delete selected tracks",
     "placeholders": {
@@ -2133,7 +2133,7 @@
   "@downloadedAlbumDeleteSelected": {
     "description": "Button - delete selected tracks"
   },
-  "downloadedAlbumDeleteMessage": "{count} {count, plural, one {}=1{Titel} other{Titel}} aus diesem Album löschen?\n\nDadurch werden auch die Dateien aus dem Speicher gelöscht.",
+  "downloadedAlbumDeleteMessage": "{count} {count, plural, =1{Titel} other{Titel}} aus diesem Album löschen?\n\nDadurch werden auch die Dateien aus dem Speicher gelöscht.",
   "@downloadedAlbumDeleteMessage": {
     "description": "Delete confirmation with count",
     "placeholders": {
@@ -2159,7 +2159,7 @@
   "@downloadedAlbumTapToSelect": {
     "description": "Selection hint"
   },
-  "downloadedAlbumDeleteCount": "Lösche {count} {count, plural, one {}=1{Titel}other{Titel}}",
+  "downloadedAlbumDeleteCount": "Lösche {count} {count, plural, =1{Titel}other{Titel}}",
   "@downloadedAlbumDeleteCount": {
     "description": "Delete button text with count",
     "placeholders": {
@@ -2674,7 +2674,7 @@
   "@timeJustNow": {
     "description": "Relative time - less than a minute ago"
   },
-  "timeMinutesAgo": "{count, plural, one {}=1{vor 1 Minute} other{vor {count} Minuten}}",
+  "timeMinutesAgo": "{count, plural, =1{vor 1 Minute} other{vor {count} Minuten}}",
   "@timeMinutesAgo": {
     "description": "Relative time - minutes ago",
     "placeholders": {
@@ -2683,7 +2683,7 @@
       }
     }
   },
-  "timeHoursAgo": "{count, plural, one {}=1{vor 1 Stunde} other{vor {count} Stunden}}",
+  "timeHoursAgo": "{count, plural, =1{vor 1 Stunde} other{vor {count} Stunden}}",
   "@timeHoursAgo": {
     "description": "Relative time - hours ago",
     "placeholders": {
@@ -3507,7 +3507,7 @@
   "@collectionPlaylistRemoveCover": {
     "description": "Bottom sheet action to remove custom cover image from a playlist"
   },
-  "selectionShareCount": "Teile {count} {count, plural, one {}=1{Titel}other{Titel}}",
+  "selectionShareCount": "Teile {count} {count, plural, =1{Titel}other{Titel}}",
   "@selectionShareCount": {
     "description": "Share button text with count in selection mode",
     "placeholders": {
@@ -3520,7 +3520,7 @@
   "@selectionShareNoFiles": {
     "description": "Snackbar when no selected files exist on disk"
   },
-  "selectionConvertCount": "Konvertiere {count} {count, plural, one {}=1{Titel}other{Titel}}",
+  "selectionConvertCount": "Konvertiere {count} {count, plural, =1{Titel}other{Titel}}",
   "@selectionConvertCount": {
     "description": "Convert button text with count in selection mode",
     "placeholders": {
@@ -3537,7 +3537,7 @@
   "@selectionBatchConvertConfirmTitle": {
     "description": "Confirmation dialog title for batch conversion"
   },
-  "selectionBatchConvertConfirmMessage": "Konvertiere {count} {format} {count, plural, one {}=1{Titel} other{Titel}} zu {bitrate}?\n\nOriginaldateien werden nach der Konvertierung gelöscht.",
+  "selectionBatchConvertConfirmMessage": "Konvertiere {count} {format} {count, plural, =1{Titel} other{Titel}} zu {bitrate}?\n\nOriginaldateien werden nach der Konvertierung gelöscht.",
   "@selectionBatchConvertConfirmMessage": {
     "description": "Confirmation dialog message for batch conversion",
     "placeholders": {
@@ -3552,7 +3552,7 @@
       }
     }
   },
-  "selectionBatchConvertConfirmMessageLossless": "Konvertiere {count} {count, plural, one {}=1{Titel} other{Titel}} in {format}? (kein Qualitätsverlust)\n\nOriginaldateien werden nach der Konvertierung gelöscht.",
+  "selectionBatchConvertConfirmMessageLossless": "Konvertiere {count} {count, plural, =1{Titel} other{Titel}} in {format}? (kein Qualitätsverlust)\n\nOriginaldateien werden nach der Konvertierung gelöscht.",
   "@selectionBatchConvertConfirmMessageLossless": {
     "description": "Confirmation dialog message for lossless batch conversion",
     "placeholders": {
@@ -3962,7 +3962,7 @@
   "@cacheRefresh": {
     "description": "Tooltip for refresh button on cache management page"
   },
-  "dialogDownloadPlaylistsMessage": "Lade {trackCount} {trackCount, plural, one {}=1{Titel} other{Titel}} von {playlistCount} {playlistCount, plural, one {}=1{Playlist} other{Playlists}}?",
+  "dialogDownloadPlaylistsMessage": "Lade {trackCount} {trackCount, plural, =1{Titel} other{Titel}} von {playlistCount} {playlistCount, plural, =1{Playlist} other{Playlists}}?",
   "@dialogDownloadPlaylistsMessage": {
     "description": "Dialog message for bulk playlist download confirmation",
     "placeholders": {
