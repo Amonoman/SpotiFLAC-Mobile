@@ -1789,25 +1789,34 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: album.coverUrl != null
-                        ? CachedCoverImage(
-                            imageUrl: album.coverUrl!,
-                            width: tileSize,
-                            height: tileSize,
-                            fit: BoxFit.cover,
-                            memCacheWidth: (tileSize * 2).round(),
-                            placeholder: (context, url) => Container(
+              SizedBox.square(
+                dimension: tileSize,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: album.coverUrl != null
+                          ? CachedCoverImage(
+                              imageUrl: album.coverUrl!,
                               width: tileSize,
                               height: tileSize,
-                              color: colorScheme.surfaceContainerHighest,
-                            ),
-                            errorWidget: (context, url, error) => Container(
-                              width: tileSize,
-                              height: tileSize,
+                              fit: BoxFit.cover,
+                              memCacheWidth: (tileSize * 2).round(),
+                              memCacheHeight: (tileSize * 2).round(),
+                              placeholder: (context, url) => Container(
+                                color: colorScheme.surfaceContainerHighest,
+                              ),
+                              errorWidget: (context, url, error) => Container(
+                                color: colorScheme.surfaceContainerHighest,
+                                child: Icon(
+                                  Icons.album,
+                                  color: colorScheme.onSurfaceVariant,
+                                  size: 40,
+                                ),
+                              ),
+                            )
+                          : Container(
                               color: colorScheme.surfaceContainerHighest,
                               child: Icon(
                                 Icons.album,
@@ -1815,71 +1824,64 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
                                 size: 40,
                               ),
                             ),
-                          )
-                        : Container(
-                            width: tileSize,
-                            height: tileSize,
-                            color: colorScheme.surfaceContainerHighest,
-                            child: Icon(
-                              Icons.album,
-                              color: colorScheme.onSurfaceVariant,
-                              size: 40,
+                    ),
+                    if (_isSelectionMode)
+                      Positioned.fill(
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: isSelected
+                                ? colorScheme.primary.withValues(alpha: 0.3)
+                                : Colors.black.withValues(alpha: 0.1),
+                            border: isSelected
+                                ? Border.all(
+                                    color: colorScheme.primary,
+                                    width: 3,
+                                  )
+                                : null,
+                          ),
+                        ),
+                      ),
+                    if (_isSelectionMode)
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: AnimatedSelectionCheckbox(
+                          visible: true,
+                          selected: isSelected,
+                          colorScheme: colorScheme,
+                          size: 28,
+                          unselectedColor: colorScheme.surface.withValues(
+                            alpha: 0.9,
+                          ),
+                        ),
+                      ),
+                    if (showTypeBadge)
+                      Positioned(
+                        left: 6,
+                        bottom: 6,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.7),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            album.albumType == 'ep' ? 'EP' : 'Single',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                  ),
-                  if (_isSelectionMode)
-                    Positioned.fill(
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: isSelected
-                              ? colorScheme.primary.withValues(alpha: 0.3)
-                              : Colors.black.withValues(alpha: 0.1),
-                          border: isSelected
-                              ? Border.all(color: colorScheme.primary, width: 3)
-                              : null,
                         ),
                       ),
-                    ),
-                  if (_isSelectionMode)
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: AnimatedSelectionCheckbox(
-                        visible: true,
-                        selected: isSelected,
-                        colorScheme: colorScheme,
-                        size: 28,
-                        unselectedColor: colorScheme.surface.withValues(
-                          alpha: 0.9,
-                        ),
-                      ),
-                    ),
-                  if (showTypeBadge)
-                    Positioned(
-                      left: 6,
-                      bottom: 6,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.7),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          album.albumType == 'ep' ? 'EP' : 'Single',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(height: 8),
               Expanded(
