@@ -130,6 +130,8 @@ class LocalLibraryNotifier extends Notifier<LocalLibraryState> {
   Timer? _progressStreamBootstrapTimer;
   StreamSubscription<Map<String, dynamic>>? _progressStreamSub;
   bool _isLoaded = false;
+  bool _hasLoadedFromDatabase = false;
+  Future<void>? _loadFuture;
   bool _scanCancelRequested = false;
   int _progressPollingErrorCount = 0;
   bool _isProgressPollingInFlight = false;
@@ -148,14 +150,22 @@ class LocalLibraryNotifier extends Notifier<LocalLibraryState> {
       _progressStreamSub?.cancel();
     });
 
-    Future.microtask(() async {
-      await _loadFromDatabase();
-    });
+    Future.microtask(_ensureLoadedFromDatabase);
     return LocalLibraryState();
   }
 
+  Future<void> _ensureLoadedFromDatabase() {
+    if (_hasLoadedFromDatabase) {
+      return Future<void>.value();
+    }
+    return _loadFuture ??= _loadFromDatabase();
+  }
+
   Future<void> _loadFromDatabase() async {
-    if (_isLoaded) return;
+    if (_hasLoadedFromDatabase) return;
+    if (_isLoaded) {
+      return _loadFuture ?? Future<void>.value();
+    }
     _isLoaded = true;
 
     try {
@@ -186,14 +196,20 @@ class LocalLibraryNotifier extends Notifier<LocalLibraryState> {
         'Loaded ${items.length} items from library database, lastScannedAt: '
         '$lastScannedAt, excludedDownloadedCount: $excludedDownloadedCount',
       );
+      _hasLoadedFromDatabase = true;
     } catch (e, stack) {
+      _isLoaded = false;
       _log.e('Failed to load library from database: $e', e, stack);
+    } finally {
+      _loadFuture = null;
     }
   }
 
   Future<void> reloadFromStorage() async {
     _isLoaded = false;
-    await _loadFromDatabase();
+    _hasLoadedFromDatabase = false;
+    _loadFuture = null;
+    await _ensureLoadedFromDatabase();
   }
 
   bool _isDownloadedPath(String? filePath, Set<String> downloadedPathKeys) {
@@ -207,6 +223,31 @@ class LocalLibraryNotifier extends Notifier<LocalLibraryState> {
       }
     }
     return false;
+  }
+
+  Future<Map<String, LocalLibraryItem>> _currentItemsByPathForIncrementalScan(
+    Map<String, int> existingFiles,
+  ) async {
+    await _ensureLoadedFromDatabase();
+
+    final loadedItems = state.items;
+    if (loadedItems.isNotEmpty || existingFiles.isEmpty) {
+      return <String, LocalLibraryItem>{
+        for (final item in loadedItems) item.filePath: item,
+      };
+    }
+
+    // Rare fallback: if provider state failed to warm while the database has
+    // rows, preserve correctness instead of applying a diff to an empty base.
+    _log.w(
+      'Library state is empty while database has ${existingFiles.length} files; '
+      'loading incremental scan baseline from database',
+    );
+    final existingJson = await _db.getAll();
+    return <String, LocalLibraryItem>{
+      for (final item in existingJson.map(LocalLibraryItem.fromJson))
+        item.filePath: item,
+    };
   }
 
   Future<void> startScan(
@@ -456,11 +497,9 @@ class LocalLibraryNotifier extends Notifier<LocalLibraryState> {
           '$skippedCount skipped, ${deletedPaths.length} deleted, $totalFiles total',
         );
 
-        final existingJson = await _db.getAll();
-        final currentByPath = <String, LocalLibraryItem>{
-          for (final item in existingJson.map(LocalLibraryItem.fromJson))
-            item.filePath: item,
-        };
+        final currentByPath = await _currentItemsByPathForIncrementalScan(
+          existingFiles,
+        );
         final existingDownloadedPaths = <String>[];
         currentByPath.removeWhere((path, _) {
           final shouldExclude = _isDownloadedPath(path, downloadedPathKeys);

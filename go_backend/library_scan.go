@@ -90,7 +90,7 @@ type scannedCueFileInfo struct {
 func collectLibraryAudioFiles(folderPath string, cancelCh <-chan struct{}) ([]libraryAudioFileInfo, error) {
 	var files []libraryAudioFileInfo
 
-	err := filepath.Walk(folderPath, func(path string, info os.FileInfo, err error) error {
+	err := filepath.WalkDir(folderPath, func(path string, entry os.DirEntry, err error) error {
 		if err != nil {
 			return nil
 		}
@@ -101,12 +101,17 @@ func collectLibraryAudioFiles(folderPath string, cancelCh <-chan struct{}) ([]li
 		default:
 		}
 
-		if info.IsDir() {
+		if entry.IsDir() {
 			return nil
 		}
 
 		ext := strings.ToLower(filepath.Ext(path))
 		if !supportedAudioFormats[ext] {
+			return nil
+		}
+
+		info, err := entry.Info()
+		if err != nil {
 			return nil
 		}
 

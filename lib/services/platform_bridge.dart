@@ -1,12 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:spotiflac_android/services/download_request_payload.dart';
 import 'package:spotiflac_android/utils/logger.dart';
 
 final _log = AppLogger('PlatformBridge');
+
+Object? _decodeJsonInBackground(String json) => jsonDecode(json);
 
 class _BridgeCacheEntry {
   final Map<String, dynamic> value;
@@ -32,6 +35,7 @@ class _BridgeInFlight<T> {
 class PlatformBridge {
   static const _channel = MethodChannel('com.zarz.spotiflac/backend');
   static const _jsonResultFileKey = '__json_file';
+  static const _backgroundJsonDecodeThresholdBytes = 128 * 1024;
   static const _metadataCacheTtl = Duration(minutes: 20);
   static const _availabilityCacheTtl = Duration(minutes: 15);
   static const _bridgeCacheMaxEntries = 256;
@@ -1568,14 +1572,25 @@ class PlatformBridge {
       try {
         final contents = await file.readAsString();
         if (contents.isEmpty) return null;
-        return jsonDecode(contents);
+        return _decodeJsonStringAsync(contents);
       } finally {
         try {
           await file.delete();
         } catch (_) {}
       }
     }
+    if (result is String &&
+        result.length >= _backgroundJsonDecodeThresholdBytes) {
+      return _decodeJsonStringAsync(result);
+    }
     return _decodeJsonResult(result);
+  }
+
+  static Future<Object?> _decodeJsonStringAsync(String json) {
+    if (json.length < _backgroundJsonDecodeThresholdBytes) {
+      return Future<Object?>.value(jsonDecode(json));
+    }
+    return compute(_decodeJsonInBackground, json);
   }
 
   static Map<String, dynamic> _decodeRequiredMapResult(

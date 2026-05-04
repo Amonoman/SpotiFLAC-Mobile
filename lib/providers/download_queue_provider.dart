@@ -1293,19 +1293,11 @@ class DownloadQueueState {
     );
   }
 
-  int get queuedCount => items
-      .where(
-        (i) =>
-            i.status == DownloadStatus.queued ||
-            i.status == DownloadStatus.downloading,
-      )
-      .length;
-  int get completedCount =>
-      items.where((i) => i.status == DownloadStatus.completed).length;
-  int get failedCount =>
-      items.where((i) => i.status == DownloadStatus.failed).length;
+  int get queuedCount => items.isEmpty ? 0 : lookup.queuedCount;
+  int get completedCount => items.isEmpty ? 0 : lookup.completedCount;
+  int get failedCount => items.isEmpty ? 0 : lookup.failedCount;
   int get activeDownloadsCount =>
-      items.where((i) => i.status == DownloadStatus.downloading).length;
+      items.isEmpty ? 0 : lookup.activeDownloadsCount;
 }
 
 class _ProgressUpdate {
@@ -6419,18 +6411,30 @@ class DownloadQueueLookup {
   final Map<String, DownloadItem> byItemId;
   final Map<String, int> indexByItemId;
   final List<String> itemIds;
+  final int queuedCount;
+  final int completedCount;
+  final int failedCount;
+  final int activeDownloadsCount;
 
   const DownloadQueueLookup.empty()
     : byTrackId = const {},
       byItemId = const {},
       indexByItemId = const {},
-      itemIds = const [];
+      itemIds = const [],
+      queuedCount = 0,
+      completedCount = 0,
+      failedCount = 0,
+      activeDownloadsCount = 0;
 
   DownloadQueueLookup._({
     required this.byTrackId,
     required this.byItemId,
     required this.indexByItemId,
     required this.itemIds,
+    required this.queuedCount,
+    required this.completedCount,
+    required this.failedCount,
+    required this.activeDownloadsCount,
   });
 
   factory DownloadQueueLookup.fromItems(List<DownloadItem> items) {
@@ -6438,19 +6442,45 @@ class DownloadQueueLookup {
     final byItemId = <String, DownloadItem>{};
     final indexByItemId = <String, int>{};
     final itemIds = <String>[];
+    var queuedCount = 0;
+    var completedCount = 0;
+    var failedCount = 0;
+    var activeDownloadsCount = 0;
     for (var index = 0; index < items.length; index++) {
       final item = items[index];
       byTrackId.putIfAbsent(item.track.id, () => item);
       byItemId[item.id] = item;
       indexByItemId[item.id] = index;
       itemIds.add(item.id);
+      if (_countsAsQueued(item.status)) queuedCount++;
+      if (item.status == DownloadStatus.completed) completedCount++;
+      if (item.status == DownloadStatus.failed) failedCount++;
+      if (item.status == DownloadStatus.downloading) activeDownloadsCount++;
     }
     return DownloadQueueLookup._(
       byTrackId: byTrackId,
       byItemId: byItemId,
       indexByItemId: indexByItemId,
       itemIds: itemIds,
+      queuedCount: queuedCount,
+      completedCount: completedCount,
+      failedCount: failedCount,
+      activeDownloadsCount: activeDownloadsCount,
     );
+  }
+
+  static bool _countsAsQueued(DownloadStatus status) =>
+      status == DownloadStatus.queued || status == DownloadStatus.downloading;
+
+  static int _deltaForStatus({
+    required DownloadStatus previous,
+    required DownloadStatus next,
+    required bool Function(DownloadStatus status) predicate,
+  }) {
+    final had = predicate(previous);
+    final has = predicate(next);
+    if (had == has) return 0;
+    return has ? 1 : -1;
   }
 
   DownloadQueueLookup updatedForIndices({
@@ -6473,7 +6503,11 @@ class DownloadQueueLookup {
     }
     if (normalizedChanged.isEmpty) return this;
 
-    final nextByItemId = Map<String, DownloadItem>.from(byItemId);
+    var nextQueuedCount = queuedCount;
+    var nextCompletedCount = completedCount;
+    var nextFailedCount = failedCount;
+    var nextActiveDownloadsCount = activeDownloadsCount;
+    Map<String, DownloadItem>? nextByItemId;
     Map<String, DownloadItem>? nextByTrackId;
 
     for (final index in normalizedChanged) {
@@ -6483,18 +6517,43 @@ class DownloadQueueLookup {
         return DownloadQueueLookup.fromItems(nextItems);
       }
 
+      nextByItemId ??= Map<String, DownloadItem>.from(byItemId);
       nextByItemId[next.id] = next;
       if (byTrackId[next.track.id]?.id == previous.id) {
         nextByTrackId ??= Map<String, DownloadItem>.from(byTrackId);
         nextByTrackId[next.track.id] = next;
       }
+      nextQueuedCount += _deltaForStatus(
+        previous: previous.status,
+        next: next.status,
+        predicate: _countsAsQueued,
+      );
+      nextCompletedCount += _deltaForStatus(
+        previous: previous.status,
+        next: next.status,
+        predicate: (status) => status == DownloadStatus.completed,
+      );
+      nextFailedCount += _deltaForStatus(
+        previous: previous.status,
+        next: next.status,
+        predicate: (status) => status == DownloadStatus.failed,
+      );
+      nextActiveDownloadsCount += _deltaForStatus(
+        previous: previous.status,
+        next: next.status,
+        predicate: (status) => status == DownloadStatus.downloading,
+      );
     }
 
     return DownloadQueueLookup._(
       byTrackId: nextByTrackId ?? byTrackId,
-      byItemId: nextByItemId,
+      byItemId: nextByItemId ?? byItemId,
       indexByItemId: indexByItemId,
       itemIds: itemIds,
+      queuedCount: nextQueuedCount,
+      completedCount: nextCompletedCount,
+      failedCount: nextFailedCount,
+      activeDownloadsCount: nextActiveDownloadsCount,
     );
   }
 }
