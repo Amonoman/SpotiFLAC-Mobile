@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spotiflac_android/l10n/l10n.dart';
 import 'package:spotiflac_android/providers/extension_provider.dart';
-import 'package:spotiflac_android/utils/provider_ui_utils.dart';
 import 'package:spotiflac_android/widgets/priority_settings_scaffold.dart';
 
 class MetadataProviderPriorityPage extends ConsumerStatefulWidget {
@@ -67,6 +66,11 @@ class _MetadataProviderPriorityPageState
                 index: index,
                 isFirst: index == 0,
                 isLast: index == _providers.length - 1,
+                extension: ref
+                    .read(extensionProvider)
+                    .extensions
+                    .where((ext) => ext.id == provider)
+                    .firstOrNull,
               );
             },
             onReorder: (oldIndex, newIndex) {
@@ -126,6 +130,7 @@ class _MetadataProviderItem extends StatelessWidget {
   final int index;
   final bool isFirst;
   final bool isLast;
+  final Extension? extension;
 
   const _MetadataProviderItem({
     super.key,
@@ -133,6 +138,7 @@ class _MetadataProviderItem extends StatelessWidget {
     required this.index,
     required this.isFirst,
     required this.isLast,
+    this.extension,
   });
 
   @override
@@ -147,7 +153,7 @@ class _MetadataProviderItem extends StatelessWidget {
           )
         : colorScheme.surfaceContainerHigh;
 
-    final info = _getProviderInfo(context, provider);
+    final info = _getProviderInfo(context, provider, extension);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -184,9 +190,7 @@ class _MetadataProviderItem extends StatelessWidget {
                 const SizedBox(width: 16),
                 Icon(
                   info.icon,
-                  color: info.isBuiltIn
-                      ? colorScheme.primary
-                      : colorScheme.secondary,
+                  color: colorScheme.secondary,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -220,34 +224,12 @@ class _MetadataProviderItem extends StatelessWidget {
   _MetadataProviderInfo _getProviderInfo(
     BuildContext context,
     String provider,
+    Extension? extension,
   ) {
-    final builtIn = builtInProviderSpecForId(provider);
-    if (builtIn != null) {
-      return _MetadataProviderInfo(
-        name: builtIn.displayName,
-        icon: resolveProviderIcon(
-          provider,
-          builtInDefaultIcon: Icons.library_music,
-        ),
-        description: context.l10n.providerBuiltIn,
-        isBuiltIn: true,
-      );
-    }
-
-    if (provider == 'deezer') {
-      return _MetadataProviderInfo(
-        name: 'Deezer',
-        icon: Icons.album,
-        description: context.l10n.providerExtension,
-        isBuiltIn: false,
-      );
-    }
-
     return _MetadataProviderInfo(
-      name: provider,
+      name: extension?.displayName ?? provider,
       icon: Icons.extension,
       description: context.l10n.providerExtension,
-      isBuiltIn: false,
     );
   }
 }
@@ -256,12 +238,10 @@ class _MetadataProviderInfo {
   final String name;
   final IconData icon;
   final String description;
-  final bool isBuiltIn;
 
   _MetadataProviderInfo({
     required this.name,
     required this.icon,
     required this.description,
-    required this.isBuiltIn,
   });
 }

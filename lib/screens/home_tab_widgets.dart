@@ -36,9 +36,7 @@ class _SearchProviderDropdown extends ConsumerWidget {
     final searchProviders = extensions
         .where((ext) => ext.enabled && ext.hasCustomSearch)
         .toList();
-    final builtInProviders = builtInSearchProviderSpecs;
-    final hasAnyProvider =
-        searchProviders.isNotEmpty || builtInProviders.isNotEmpty;
+    final hasAnyProvider = searchProviders.isNotEmpty;
     final isProviderLoading =
         !providerReadiness.isInitialized && providerReadiness.error == null;
 
@@ -71,11 +69,9 @@ class _SearchProviderDropdown extends ConsumerWidget {
     final resolvedCurrentProvider =
         rawCurrentProvider != null &&
             rawCurrentProvider.isNotEmpty &&
-            (isBuiltInSearchProvider(rawCurrentProvider) ||
-                searchProviders.any((e) => e.id == rawCurrentProvider))
+            searchProviders.any((e) => e.id == rawCurrentProvider)
         ? rawCurrentProvider
-        : _defaultSearchExtension(searchProviders)?.id ??
-              defaultBuiltInSearchProviderId;
+        : _defaultSearchExtension(searchProviders)?.id;
     final currentProvider =
         resolvedCurrentProvider != null && resolvedCurrentProvider.isNotEmpty
         ? resolvedCurrentProvider
@@ -88,9 +84,6 @@ class _SearchProviderDropdown extends ConsumerWidget {
           .firstOrNull;
     }
 
-    final isBuiltInProvider =
-        currentProvider != null && isBuiltInSearchProvider(currentProvider);
-
     IconData displayIcon = Icons.search;
     String? iconPath;
     if (currentExt != null) {
@@ -98,8 +91,6 @@ class _SearchProviderDropdown extends ConsumerWidget {
       if (currentExt.searchBehavior?.icon != null) {
         displayIcon = _getIconFromName(currentExt.searchBehavior!.icon!);
       }
-    } else if (isBuiltInProvider) {
-      displayIcon = resolveProviderIcon(currentProvider);
     }
 
     return Padding(
@@ -137,36 +128,6 @@ class _SearchProviderDropdown extends ConsumerWidget {
           onProviderChanged?.call();
         },
         itemBuilder: (context) => [
-          ...builtInProviders.map(
-            (provider) => PopupMenuItem<String>(
-              value: provider.id,
-              child: Row(
-                children: [
-                  Icon(
-                    resolveProviderIcon(provider.id),
-                    size: 20,
-                    color: currentProvider == provider.id
-                        ? colorScheme.primary
-                        : colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      provider.displayName,
-                      style: TextStyle(
-                        fontWeight: currentProvider == provider.id
-                            ? FontWeight.w600
-                            : FontWeight.normal,
-                      ),
-                    ),
-                  ),
-                  if (currentProvider == provider.id)
-                    Icon(Icons.check, size: 18, color: colorScheme.primary),
-                ],
-              ),
-            ),
-          ),
-          if (searchProviders.isNotEmpty) const PopupMenuDivider(),
           ...searchProviders.map(
             (ext) => PopupMenuItem<String>(
               value: ext.id,

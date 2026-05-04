@@ -884,23 +884,6 @@ class PlatformBridge {
     await _channel.invokeMethod('clearTrackCache');
   }
 
-  static Future<Map<String, dynamic>> searchProviderAll(
-    String providerId,
-    String query, {
-    int trackLimit = 15,
-    int artistLimit = 2,
-    String? filter,
-  }) async {
-    final result = await _channel.invokeMethod('searchProviderAll', {
-      'provider_id': providerId,
-      'query': query,
-      'track_limit': trackLimit,
-      'artist_limit': artistLimit,
-      'filter': filter ?? '',
-    });
-    return _decodeRequiredMapResult(result, 'searchProviderAll');
-  }
-
   static Future<Map<String, dynamic>> getDeezerRelatedArtists(
     String artistId, {
     int limit = 12,
@@ -910,13 +893,6 @@ class PlatformBridge {
       'limit': limit,
     });
     return _decodeRequiredMapResult(result, 'getDeezerRelatedArtists');
-  }
-
-  static Future<Map<String, dynamic>> parseProviderUrl(String url) async {
-    final result = await _channel.invokeMethod('parseProviderUrl', {
-      'url': url,
-    });
-    return _decodeRequiredMapResult(result, 'parseProviderUrl');
   }
 
   static Future<Map<String, dynamic>> getProviderMetadata(
@@ -1392,11 +1368,6 @@ class PlatformBridge {
   static Future<List<Map<String, dynamic>>> getSearchProviders() async {
     final result = await _channel.invokeMethod('getSearchProviders');
     return _decodeMapListResult(result, 'getSearchProviders');
-  }
-
-  static Future<List<Map<String, dynamic>>> getBuiltInProviders() async {
-    final result = await _channel.invokeMethod('getBuiltInProviders');
-    return _decodeMapListResult(result, 'getBuiltInProviders');
   }
 
   static Future<Map<String, dynamic>?> handleURLWithExtension(

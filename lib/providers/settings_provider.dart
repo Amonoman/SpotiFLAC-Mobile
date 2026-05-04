@@ -69,12 +69,6 @@ class SettingsNotifier extends Notifier<AppSettings> {
         final sanitizedDefaultSearchTab = _normalizeDefaultSearchTab(
           loaded.defaultSearchTab,
         );
-        final sanitizedDefaultService = _sanitizeRetiredBuiltInProviderId(
-          loaded.defaultService,
-        );
-        final sanitizedSearchProvider = _sanitizeRetiredBuiltInProviderId(
-          loaded.searchProvider,
-        );
         state = loaded.copyWith(
           useExtensionProviders: true,
           downloadFallbackExtensionIds: sanitizedDownloadFallbackExtensionIds,
@@ -82,10 +76,8 @@ class SettingsNotifier extends Notifier<AppSettings> {
               loaded.downloadFallbackExtensionIds != null &&
               sanitizedDownloadFallbackExtensionIds == null,
           defaultSearchTab: sanitizedDefaultSearchTab,
-          defaultService: sanitizedDefaultService ?? '',
-          searchProvider: sanitizedSearchProvider,
-          clearSearchProvider:
-              loaded.searchProvider != null && sanitizedSearchProvider == null,
+          defaultService: loaded.defaultService,
+          searchProvider: loaded.searchProvider,
         );
 
         await _runMigrations(prefs);
@@ -166,23 +158,8 @@ class SettingsNotifier extends Notifier<AppSettings> {
         );
       }
       state = state.copyWith(lastSeenVersion: AppInfo.version);
-      // Migration 7/11: retired built-in services no longer fall back to a
-      // preinstalled provider.
-      final sanitizedDefaultService = _sanitizeRetiredBuiltInProviderId(
-        state.defaultService,
-      );
-      final sanitizedSearchProvider = _sanitizeRetiredBuiltInProviderId(
-        state.searchProvider,
-      );
-      if (sanitizedDefaultService != state.defaultService ||
-          sanitizedSearchProvider != state.searchProvider) {
-        state = state.copyWith(
-          defaultService: sanitizedDefaultService ?? '',
-          searchProvider: sanitizedSearchProvider,
-          clearSearchProvider:
-              state.searchProvider != null && sanitizedSearchProvider == null,
-        );
-      }
+      // Migration 7/11: retired built-in services are now reconciled after
+      // extensions load so manifest-declared replacements can adopt old prefs.
       if (!state.useExtensionProviders) {
         state = state.copyWith(useExtensionProviders: true);
       }

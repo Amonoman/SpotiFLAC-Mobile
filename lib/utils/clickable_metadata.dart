@@ -61,40 +61,11 @@ Future<List<Map<String, dynamic>>> _searchMetadataProvider(
   required String filter,
   required int limit,
 }) async {
-  if (isBuiltInSearchProvider(providerId)) {
-    final result = await PlatformBridge.searchProviderAll(
-      providerId,
-      query,
-      trackLimit: 0,
-      artistLimit: filter == 'artist' ? limit : 0,
-      filter: filter,
-    );
-    return _extractSearchItems(result, filter);
-  }
-
   return PlatformBridge.customSearchWithExtension(
     providerId,
     query,
     options: {'filter': filter, 'limit': limit},
   );
-}
-
-List<Map<String, dynamic>> _extractSearchItems(
-  Map<String, dynamic> result,
-  String filter,
-) {
-  final key = switch (filter) {
-    'artist' => 'artists',
-    'album' => 'albums',
-    _ => '${filter}s',
-  };
-  final items = result[key];
-  if (items is! List) return const [];
-
-  return items
-      .whereType<Map<Object?, Object?>>()
-      .map((item) => Map<String, dynamic>.from(item))
-      .toList(growable: false);
 }
 
 List<String> _metadataSearchProviderCandidates(
@@ -142,10 +113,6 @@ List<String> _metadataSearchProviderCandidates(
     addProvider(extension.id);
   }
 
-  for (final providerId in builtInSearchProviderIds) {
-    addProvider(providerId);
-  }
-
   return candidates;
 }
 
@@ -153,7 +120,6 @@ bool _canSearchMetadataProvider(
   String providerId,
   ExtensionState extensionState,
 ) {
-  if (isBuiltInSearchProvider(providerId)) return true;
   return extensionState.extensions.any(
     (ext) => ext.enabled && ext.hasCustomSearch && ext.id == providerId,
   );
@@ -333,8 +299,7 @@ void _pushArtistScreen(
   String? coverUrl,
   String? extensionId,
 }) {
-  final isExtension =
-      extensionId != null && !isBuiltInMetadataProvider(extensionId);
+  final isExtension = extensionId != null;
   final resolvedProviderId = extensionId;
 
   _pushViaPreferredNavigator(
@@ -362,8 +327,7 @@ void _pushAlbumScreen(
   String? coverUrl,
   String? extensionId,
 }) {
-  final isExtension =
-      extensionId != null && !isBuiltInMetadataProvider(extensionId);
+  final isExtension = extensionId != null;
   final resolvedExtensionId = extensionId;
 
   _pushViaPreferredNavigator(
@@ -677,17 +641,7 @@ bool _canNavigateArtistDirectly({
   required String? extensionId,
 }) {
   if (extensionId != null) return true;
-  final providerPrefix = _resourceProviderPrefix(artistId);
-  if (providerPrefix != null && isBuiltInMetadataProvider(providerPrefix)) {
-    return true;
-  }
   return _spotifyArtistIdPattern.hasMatch(artistId);
-}
-
-String? _resourceProviderPrefix(String resourceId) {
-  final colonIndex = resourceId.indexOf(':');
-  if (colonIndex <= 0) return null;
-  return resourceId.substring(0, colonIndex).trim();
 }
 
 final RegExp _spotifyArtistIdPattern = RegExp(r'^[A-Za-z0-9]{22}$');

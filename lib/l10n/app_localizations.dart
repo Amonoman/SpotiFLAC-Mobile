@@ -1773,7 +1773,7 @@ abstract class AppLocalizations {
   /// Section description for extension fallback selection
   ///
   /// In en, this message translates to:
-  /// **'Choose which installed download extensions can be used during automatic fallback. Built-in providers still follow the priority order above.'**
+  /// **'Choose which installed download extensions can be used during automatic fallback.'**
   String get providerPriorityFallbackExtensionsDescription;
 
   /// Hint below the extension fallback selection list

@@ -726,29 +726,23 @@ class _SearchProviderSelector extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
     final extState = ref.watch(extensionProvider);
     final colorScheme = Theme.of(context).colorScheme;
-    final builtInProviders = builtInSearchProviderSpecs;
 
     final searchProviders = extState.extensions
         .where((e) => e.enabled && e.hasCustomSearch)
         .toList();
 
-    final hasAnyProvider =
-        searchProviders.isNotEmpty || builtInProviders.isNotEmpty;
+    final hasAnyProvider = searchProviders.isNotEmpty;
 
     final resolvedProviderId =
         (settings.searchProvider != null && settings.searchProvider!.isNotEmpty)
         ? settings.searchProvider!
-        : searchProviders.firstOrNull?.id ?? defaultBuiltInSearchProviderId;
+        : searchProviders.firstOrNull?.id;
     String currentProviderName = context.l10n.optionsPrimaryProviderSubtitle;
     if (resolvedProviderId != null && resolvedProviderId.isNotEmpty) {
-      if (isBuiltInSearchProvider(resolvedProviderId)) {
-        currentProviderName = resolveProviderDisplayName(resolvedProviderId);
-      } else {
-        final ext = searchProviders
-            .where((e) => e.id == resolvedProviderId)
-            .firstOrNull;
-        currentProviderName = ext?.displayName ?? resolvedProviderId;
-      }
+      final ext = searchProviders
+          .where((e) => e.id == resolvedProviderId)
+          .firstOrNull;
+      currentProviderName = ext?.displayName ?? resolvedProviderId;
     }
 
     return Column(
@@ -817,7 +811,6 @@ class _SearchProviderSelector extends ConsumerWidget {
     List<Extension> searchProviders,
   ) {
     final colorScheme = Theme.of(context).colorScheme;
-    final builtInProviders = builtInSearchProviderSpecs;
 
     showModalBottomSheet<void>(
       context: context,
@@ -850,25 +843,6 @@ class _SearchProviderSelector extends ConsumerWidget {
                   ),
                 ),
               ),
-              ...builtInProviders.map(
-                (provider) => ListTile(
-                  leading: Icon(Icons.search, color: colorScheme.tertiary),
-                  title: Text(provider.displayName),
-                  subtitle: Text(
-                    ctx.l10n.extensionsSearchWith(provider.displayName),
-                  ),
-                  trailing: settings.searchProvider == provider.id
-                      ? Icon(Icons.check_circle, color: colorScheme.primary)
-                      : Icon(Icons.circle_outlined, color: colorScheme.outline),
-                  onTap: () {
-                    ref
-                        .read(settingsProvider.notifier)
-                        .setSearchProvider(provider.id);
-                    Navigator.pop(ctx);
-                  },
-                ),
-              ),
-              if (searchProviders.isNotEmpty) const Divider(height: 1),
               ...searchProviders.map(
                 (ext) => ListTile(
                   leading: Icon(Icons.extension, color: colorScheme.secondary),

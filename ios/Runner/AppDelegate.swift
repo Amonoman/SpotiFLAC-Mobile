@@ -458,22 +458,6 @@ import Gobackend  // Import Go framework
             if let error = error { throw error }
             return response
             
-        case "searchProviderAll":
-            let args = call.arguments as! [String: Any]
-            let providerId = args["provider_id"] as! String
-            let query = args["query"] as! String
-            let trackLimit = args["track_limit"] as? Int ?? 15
-            let artistLimit = args["artist_limit"] as? Int ?? 3
-            let filter = args["filter"] as? String ?? ""
-            let response = GobackendSearchProviderAllJSON(providerId, query, Int(trackLimit), Int(artistLimit), filter, &error)
-            if let error = error { throw error }
-            return response
-
-        case "getBuiltInProviders":
-            let response = GobackendGetBuiltInProvidersJSON(&error)
-            if let error = error { throw error }
-            return response
-
         case "getDeezerRelatedArtists":
             let args = call.arguments as! [String: Any]
             let artistId = args["artist_id"] as! String
@@ -488,13 +472,6 @@ import Gobackend  // Import Go framework
             let resourceType = args["resource_type"] as! String
             let resourceId = args["resource_id"] as! String
             let response = GobackendGetProviderMetadataJSON(providerId, resourceType, resourceId, &error)
-            if let error = error { throw error }
-            return response
-
-        case "parseProviderUrl":
-            let args = call.arguments as! [String: Any]
-            let url = args["url"] as! String
-            let response = GobackendParseProviderURLJSON(url, &error)
             if let error = error { throw error }
             return response
 

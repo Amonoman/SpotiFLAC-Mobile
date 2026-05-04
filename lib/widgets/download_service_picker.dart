@@ -5,67 +5,6 @@ import 'package:spotiflac_android/providers/extension_provider.dart';
 import 'package:spotiflac_android/providers/settings_provider.dart';
 import 'package:spotiflac_android/l10n/l10n.dart';
 
-class BuiltInService {
-  final String id;
-  final String label;
-  final List<QualityOption> qualityOptions;
-  final bool isDisabled; // If true, service is grayed out (fallback only)
-  final String? disabledReason;
-
-  const BuiltInService({
-    required this.id,
-    required this.label,
-    required this.qualityOptions,
-    this.isDisabled = false,
-    this.disabledReason,
-  });
-}
-
-const _builtInServiceCatalog = {
-  'tidal': BuiltInService(
-    id: 'tidal',
-    label: 'Tidal',
-    qualityOptions: [
-      QualityOption(
-        id: 'LOSSLESS',
-        label: 'FLAC Lossless',
-        description: '16-bit / 44.1kHz',
-      ),
-      QualityOption(
-        id: 'HI_RES',
-        label: 'Hi-Res FLAC',
-        description: '24-bit / up to 96kHz',
-      ),
-      QualityOption(
-        id: 'HI_RES_LOSSLESS',
-        label: 'Hi-Res FLAC Max',
-        description: '24-bit / up to 192kHz',
-      ),
-    ],
-  ),
-  'qobuz': BuiltInService(
-    id: 'qobuz',
-    label: 'Qobuz',
-    qualityOptions: [
-      QualityOption(
-        id: 'LOSSLESS',
-        label: 'FLAC Lossless',
-        description: '16-bit / 44.1kHz',
-      ),
-      QualityOption(
-        id: 'HI_RES',
-        label: 'Hi-Res FLAC',
-        description: '24-bit / up to 96kHz',
-      ),
-      QualityOption(
-        id: 'HI_RES_LOSSLESS',
-        label: 'Hi-Res FLAC Max',
-        description: '24-bit / up to 192kHz',
-      ),
-    ],
-  ),
-};
-
 class DownloadServicePicker extends ConsumerStatefulWidget {
   final String? trackName;
   final String? artistName;
@@ -118,18 +57,6 @@ class DownloadServicePicker extends ConsumerStatefulWidget {
 class _DownloadServicePickerState extends ConsumerState<DownloadServicePicker> {
   late String _selectedService;
 
-  List<BuiltInService> _availableBuiltInServices() {
-    final availableIds = builtInDownloadProviderIds.toSet();
-    final services = <BuiltInService>[];
-    for (final id in availableIds) {
-      final service = _builtInServiceCatalog[id];
-      if (service != null) {
-        services.add(service);
-      }
-    }
-    return services;
-  }
-
   List<Extension> _downloadExtensions() {
     final extensionState = ref.read(extensionProvider);
     return extensionState.extensions
@@ -137,13 +64,8 @@ class _DownloadServicePickerState extends ConsumerState<DownloadServicePicker> {
         .toList(growable: false);
   }
 
-  bool _serviceExists(
-    String serviceId,
-    List<BuiltInService> builtInServices,
-    List<Extension> downloadExtensions,
-  ) {
+  bool _serviceExists(String serviceId, List<Extension> downloadExtensions) {
     if (serviceId.isEmpty) return false;
-    if (builtInServices.any((service) => service.id == serviceId)) return true;
     return downloadExtensions.any((ext) => ext.id == serviceId);
   }
 
@@ -154,39 +76,21 @@ class _DownloadServicePickerState extends ConsumerState<DownloadServicePicker> {
       if (!mounted) return;
       ref.read(extensionProvider.notifier).refreshEnabledExtensionHealth();
     });
-    final builtInServices = _availableBuiltInServices();
     final downloadExtensions = _downloadExtensions();
     final recommended = widget.recommendedService;
-    if (recommended != null &&
-        _serviceExists(recommended, builtInServices, downloadExtensions)) {
+    if (recommended != null && _serviceExists(recommended, downloadExtensions)) {
       _selectedService = recommended;
     } else {
       _selectedService = ref.read(settingsProvider).defaultService;
     }
-    if (!_serviceExists(
-      _selectedService,
-      builtInServices,
-      downloadExtensions,
-    )) {
-      _selectedService = builtInServices.isNotEmpty
-          ? builtInServices.first.id
-          : downloadExtensions.isNotEmpty
+    if (!_serviceExists(_selectedService, downloadExtensions)) {
+      _selectedService = downloadExtensions.isNotEmpty
           ? downloadExtensions.first.id
           : '';
     }
   }
 
-  List<QualityOption> _getQualityOptions(
-    List<BuiltInService> builtInServices,
-    List<Extension> downloadExtensions,
-  ) {
-    final builtIn = builtInServices
-        .where((service) => service.id == _selectedService)
-        .firstOrNull;
-    if (builtIn != null) {
-      return builtIn.qualityOptions;
-    }
-
+  List<QualityOption> _getQualityOptions(List<Extension> downloadExtensions) {
     final ext = downloadExtensions
         .where((e) => e.id == _selectedService)
         .firstOrNull;
@@ -201,14 +105,9 @@ class _DownloadServicePickerState extends ConsumerState<DownloadServicePicker> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final extensionState = ref.watch(extensionProvider);
-    final builtInServices = _availableBuiltInServices();
     final downloadExtensions = _downloadExtensions();
-    final hasProviders =
-        builtInServices.isNotEmpty || downloadExtensions.isNotEmpty;
-    final qualityOptions = _getQualityOptions(
-      builtInServices,
-      downloadExtensions,
-    );
+    final hasProviders = downloadExtensions.isNotEmpty;
+    final qualityOptions = _getQualityOptions(downloadExtensions);
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -257,21 +156,6 @@ class _DownloadServicePickerState extends ConsumerState<DownloadServicePicker> {
                       spacing: 8,
                       runSpacing: 8,
                       children: [
-                        for (final service in builtInServices)
-                          _ServiceChip(
-                            label: service.isDisabled
-                                ? '${service.label} (${service.disabledReason})'
-                                : widget.recommendedService == service.id
-                                ? '${service.label} (Recommended)'
-                                : service.label,
-                            isSelected: _selectedService == service.id,
-                            isDisabled: service.isDisabled,
-                            onTap: service.isDisabled
-                                ? null
-                                : () => setState(
-                                    () => _selectedService = service.id,
-                                  ),
-                          ),
                         for (final ext in downloadExtensions)
                           _ServiceChip(
                             label: widget.recommendedService == ext.id
@@ -302,19 +186,6 @@ class _DownloadServicePickerState extends ConsumerState<DownloadServicePicker> {
                   ),
                 ),
               ),
-              if (builtInServices.any(
-                (service) => service.id == _selectedService,
-              ))
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
-                  child: Text(
-                    context.l10n.qualityNote,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ),
               for (final quality in qualityOptions)
                 _QualityOption(
                   title: _localizedQualityLabel(context, quality),
@@ -429,7 +300,6 @@ class _ServiceChip extends StatelessWidget {
   final VoidCallback? onTap;
   final String? iconPath;
   final String? healthStatus;
-  final bool isDisabled;
 
   const _ServiceChip({
     required this.label,
@@ -437,21 +307,18 @@ class _ServiceChip extends StatelessWidget {
     required this.onTap,
     this.iconPath,
     this.healthStatus,
-    this.isDisabled = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
-      onTap: isDisabled ? null : onTap,
+      onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isDisabled
-              ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
-              : isSelected
+          color: isSelected
               ? colorScheme.primaryContainer
               : colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),
@@ -465,7 +332,7 @@ class _ServiceChip extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (healthStatus != null) ...[
-              _ServiceHealthDot(status: healthStatus!, isDisabled: isDisabled),
+              _ServiceHealthDot(status: healthStatus!),
               const SizedBox(width: 8),
             ],
             if (iconPath != null) ...[
@@ -479,9 +346,7 @@ class _ServiceChip extends StatelessWidget {
                   errorBuilder: (context, error, stackTrace) => Icon(
                     Icons.extension,
                     size: 18,
-                    color: isDisabled
-                        ? colorScheme.onSurfaceVariant.withValues(alpha: 0.4)
-                        : isSelected
+                    color: isSelected
                         ? colorScheme.onPrimaryContainer
                         : colorScheme.onSurfaceVariant,
                   ),
@@ -493,9 +358,7 @@ class _ServiceChip extends StatelessWidget {
               label,
               style: TextStyle(
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isDisabled
-                    ? colorScheme.onSurfaceVariant.withValues(alpha: 0.4)
-                    : isSelected
+                color: isSelected
                     ? colorScheme.onPrimaryContainer
                     : colorScheme.onSurfaceVariant,
               ),
@@ -509,15 +372,12 @@ class _ServiceChip extends StatelessWidget {
 
 class _ServiceHealthDot extends StatelessWidget {
   final String status;
-  final bool isDisabled;
 
-  const _ServiceHealthDot({required this.status, required this.isDisabled});
+  const _ServiceHealthDot({required this.status});
 
   @override
   Widget build(BuildContext context) {
-    final color = isDisabled
-        ? Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.3)
-        : _serviceHealthColor(status);
+    final color = _serviceHealthColor(status);
     return Tooltip(
       message: _serviceHealthTooltip(status),
       child: Container(

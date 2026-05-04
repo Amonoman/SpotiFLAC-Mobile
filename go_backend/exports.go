@@ -1782,28 +1782,6 @@ func ClearTrackIDCache() {
 	ClearTrackCache()
 }
 
-func SearchProviderAllJSON(
-	providerID,
-	query string,
-	trackLimit,
-	artistLimit int,
-	filter string,
-) (string, error) {
-	normalizedProviderID := strings.ToLower(strings.TrimSpace(providerID))
-	if !isBuiltInSearchProvider(normalizedProviderID) {
-		return "", fmt.Errorf("unsupported search provider: %s", providerID)
-	}
-	return searchBuiltInProviderAll(normalizedProviderID, query, trackLimit, artistLimit, filter)
-}
-
-func GetBuiltInProvidersJSON() (string, error) {
-	jsonBytes, err := json.Marshal(getBuiltInProviderSpecs())
-	if err != nil {
-		return "", err
-	}
-	return string(jsonBytes), nil
-}
-
 func GetDeezerRelatedArtists(artistID string, limit int) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
@@ -2076,12 +2054,7 @@ func GetProviderMetadataJSON(providerID, resourceType, resourceID string) (strin
 		return "", fmt.Errorf("empty provider ID")
 	}
 
-	normalizedProviderID := strings.ToLower(trimmedProviderID)
-	if isBuiltInMetadataProvider(normalizedProviderID) {
-		return getBuiltInProviderMetadata(normalizedProviderID, resourceType, resourceID)
-	}
-
-	switch normalizedProviderID {
+	switch strings.ToLower(trimmedProviderID) {
 	case "deezer":
 		return GetDeezerMetadata(resourceType, resourceID)
 	default:
@@ -2096,55 +2069,6 @@ func GetProviderMetadataJSON(providerID, resourceType, resourceID string) (strin
 		}
 		return string(jsonBytes), nil
 	}
-}
-
-func ParseDeezerURLExport(url string) (string, error) {
-	resourceType, resourceID, err := parseDeezerURL(url)
-	if err != nil {
-		return "", err
-	}
-
-	result := map[string]string{
-		"type": resourceType,
-		"id":   resourceID,
-	}
-
-	jsonBytes, err := json.Marshal(result)
-	if err != nil {
-		return "", err
-	}
-
-	return string(jsonBytes), nil
-}
-
-func ParseProviderURLJSON(url string) (string, error) {
-	parsers := []struct {
-		providerID string
-		parse      func(string) (string, string, error)
-	}{
-		{providerID: "deezer", parse: parseDeezerURL},
-	}
-
-	for _, parser := range parsers {
-		resourceType, resourceID, err := parser.parse(url)
-		if err != nil {
-			continue
-		}
-
-		result := map[string]string{
-			"provider_id": parser.providerID,
-			"type":        resourceType,
-			"id":          resourceID,
-		}
-
-		jsonBytes, err := json.Marshal(result)
-		if err != nil {
-			return "", err
-		}
-		return string(jsonBytes), nil
-	}
-
-	return "", fmt.Errorf("unsupported provider URL")
 }
 
 func GetDeezerExtendedMetadata(trackID string) (string, error) {

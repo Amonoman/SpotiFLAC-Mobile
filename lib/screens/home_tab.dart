@@ -29,7 +29,6 @@ import 'package:spotiflac_android/widgets/download_service_picker.dart';
 import 'package:spotiflac_android/widgets/track_collection_quick_actions.dart';
 import 'package:spotiflac_android/widgets/animation_utils.dart';
 import 'package:spotiflac_android/utils/clickable_metadata.dart';
-import 'package:spotiflac_android/utils/provider_ui_utils.dart';
 import 'package:spotiflac_android/widgets/audio_quality_badges.dart';
 import 'package:spotiflac_android/widgets/cached_cover_image.dart';
 
@@ -315,26 +314,20 @@ class _HomeTabState extends ConsumerState<HomeTab>
     final explicit = explicitSearchProvider?.trim();
     if (explicit != null &&
         explicit.isNotEmpty &&
-        (isBuiltInSearchProvider(explicit) ||
-            extensions.any(
-              (ext) => ext.enabled && ext.hasCustomSearch && ext.id == explicit,
-            ))) {
+        extensions.any(
+          (ext) => ext.enabled && ext.hasCustomSearch && ext.id == explicit,
+        )) {
       return explicit;
     }
-    return _defaultSearchExtension(extensions)?.id ??
-        defaultBuiltInSearchProviderId;
+    return _defaultSearchExtension(extensions)?.id;
   }
 
   bool _hasSearchProvider(
     String? explicitSearchProvider,
     List<Extension> extensions,
-    List<BuiltInProviderSpec> builtInProviders,
   ) {
     final explicit = explicitSearchProvider?.trim();
     if (explicit != null && explicit.isNotEmpty) {
-      if (builtInProviders.any((p) => p.supportsSearch && p.id == explicit)) {
-        return true;
-      }
       if (extensions.any(
         (ext) => ext.enabled && ext.hasCustomSearch && ext.id == explicit,
       )) {
@@ -342,8 +335,7 @@ class _HomeTabState extends ConsumerState<HomeTab>
       }
     }
 
-    return extensions.any((ext) => ext.enabled && ext.hasCustomSearch) ||
-        builtInProviders.any((provider) => provider.supportsSearch);
+    return extensions.any((ext) => ext.enabled && ext.hasCustomSearch);
   }
 
   String? _sanitizeSearchFilterForProvider(
@@ -358,8 +350,7 @@ class _HomeTabState extends ConsumerState<HomeTab>
     final canonicalFilter = _canonicalSearchFilterId(filter);
 
     if (currentSearchProvider == null ||
-        currentSearchProvider.isEmpty ||
-        isBuiltInSearchProvider(currentSearchProvider)) {
+        currentSearchProvider.isEmpty) {
       switch (canonicalFilter) {
         case 'track':
         case 'artist':
@@ -554,8 +545,6 @@ class _HomeTabState extends ConsumerState<HomeTab>
 
     if (searchProvider == null || searchProvider.isEmpty) return false;
 
-    if (isBuiltInSearchProvider(searchProvider)) return true;
-
     final extension = extState.extensions
         .where((e) => e.id == searchProvider && e.enabled)
         .firstOrNull;
@@ -655,13 +644,9 @@ class _HomeTabState extends ConsumerState<HomeTab>
     _searchSortOption = _SearchSortOption.defaultOrder;
     _invalidateSearchSortCaches();
 
-    final isBuiltInProvider =
-        searchProvider != null && isBuiltInSearchProvider(searchProvider);
-
     final isExtensionEnabled =
         searchProvider != null &&
         searchProvider.isNotEmpty &&
-        !isBuiltInProvider &&
         extState.extensions.any((e) => e.id == searchProvider && e.enabled);
 
     if (isExtensionEnabled) {
@@ -677,19 +662,10 @@ class _HomeTabState extends ConsumerState<HomeTab>
             options: options,
             selectedFilter: selectedFilter,
           );
-    } else if (isBuiltInProvider) {
-      await ref
-          .read(trackProvider.notifier)
-          .search(
-            query,
-            filterOverride: selectedFilter,
-            builtInSearchProvider: searchProvider,
-          );
     } else {
       if (searchProvider != null &&
           searchProvider.isNotEmpty &&
-          !isExtensionEnabled &&
-          !isBuiltInProvider) {
+          !isExtensionEnabled) {
         ref.read(settingsProvider.notifier).setSearchProvider(null);
       }
       await ref
@@ -1147,7 +1123,6 @@ class _HomeTabState extends ConsumerState<HomeTab>
         (s) => (
           isInitialized: s.isInitialized,
           error: s.error,
-          builtInProviders: s.builtInProviders,
         ),
       ),
     );
@@ -1195,7 +1170,6 @@ class _HomeTabState extends ConsumerState<HomeTab>
     final hasSearchProvider = _hasSearchProvider(
       explicitSearchProvider,
       extensions,
-      extensionReadiness.builtInProviders,
     );
     final showSearchBar = hasSearchProvider || isSearchProviderLoading;
     final hasResults =
@@ -3378,11 +3352,6 @@ class _HomeTabState extends ConsumerState<HomeTab>
     }
 
     if (searchProvider != null && searchProvider.isNotEmpty) {
-      final builtIn = builtInProviderSpecForId(searchProvider);
-      if (builtIn != null && builtIn.supportsSearch) {
-        return context.l10n.homeSearchHintProvider(builtIn.displayName);
-      }
-
       final ext = extState.extensions
           .where((e) => e.id == searchProvider)
           .firstOrNull;

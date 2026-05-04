@@ -946,7 +946,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get providerPriorityFallbackExtensionsDescription =>
-      'Choose which installed download extensions can be used during automatic fallback. Built-in providers still follow the priority order above.';
+      'Choose which installed download extensions can be used during automatic fallback.';
 
   @override
   String get providerPriorityFallbackExtensionsHint =>

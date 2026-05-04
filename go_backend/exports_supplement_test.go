@@ -199,13 +199,6 @@ func TestExportsJSONWrappersAndExtensionManagerSurface(t *testing.T) {
 	if firstNonEmptyTrimmed(" ", " value ") != "value" {
 		t.Fatal("expected first trimmed value")
 	}
-	if jsonText, err := GetBuiltInProvidersJSON(); err != nil || jsonText == "" {
-		t.Fatalf("GetBuiltInProvidersJSON = %q/%v", jsonText, err)
-	}
-	if _, err := SearchProviderAllJSON("missing", "q", 1, 1, ""); err == nil {
-		t.Fatal("expected unsupported search provider")
-	}
-
 	requestJSON := `{"use_extensions":true,"use_fallback":false,"service":"coverage-ext","source":"coverage-ext","track_name":"Song","artist_name":"Artist","album_name":"Album","output_dir":"` + escapeJSONPath(dir) + `","output_ext":".flac","quality":"LOSSLESS"}`
 	if jsonText, err := DownloadWithExtensionsJSON(requestJSON); err != nil || !strings.Contains(jsonText, "coverage-ext") {
 		t.Fatalf("DownloadWithExtensionsJSON = %q/%v", jsonText, err)
@@ -285,15 +278,6 @@ func TestExportsJSONWrappersAndExtensionManagerSurface(t *testing.T) {
 	}
 	if jsonText, err := GetDeezerRelatedArtists("301", 2); err != nil || !strings.Contains(jsonText, "Related") {
 		t.Fatalf("GetDeezerRelatedArtists = %q/%v", jsonText, err)
-	}
-	if jsonText, err := ParseDeezerURLExport("https://www.deezer.com/track/101"); err != nil || !strings.Contains(jsonText, "101") {
-		t.Fatalf("ParseDeezerURLExport = %q/%v", jsonText, err)
-	}
-	if jsonText, err := ParseProviderURLJSON("https://www.deezer.com/album/201"); err != nil || !strings.Contains(jsonText, "deezer") {
-		t.Fatalf("ParseProviderURLJSON = %q/%v", jsonText, err)
-	}
-	if _, err := ParseProviderURLJSON("https://example.com/1"); err == nil {
-		t.Fatal("expected unsupported provider URL")
 	}
 	if jsonText, err := GetDeezerExtendedMetadata("101"); err != nil || !strings.Contains(jsonText, "Label") {
 		t.Fatalf("GetDeezerExtendedMetadata = %q/%v", jsonText, err)

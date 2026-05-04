@@ -1,14 +1,8 @@
 package gobackend
 
 import (
-	"context"
-	"encoding/json"
-	"io"
-	"net/http"
 	"path/filepath"
-	"strings"
 	"testing"
-	"time"
 )
 
 func TestExtensionProviderWrapperFullSurface(t *testing.T) {
@@ -126,79 +120,7 @@ func TestExtensionProviderWrapperFullSurface(t *testing.T) {
 	}
 }
 
-func TestBuiltInProviderAndManagerSelectionHelpers(t *testing.T) {
-	previousRegistry := builtInProviderRegistry
-	builtInProviderRegistry = []builtInProviderSpec{{
-		ID:               "deezer",
-		DisplayName:      "Deezer",
-		SupportsMetadata: true,
-		SupportsSearch:   true,
-		GetMetadata:      GetDeezerMetadata,
-		SearchAll: func(query string, trackLimit, artistLimit int, filter string) (string, error) {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-			result, err := GetDeezerClient().SearchAll(ctx, query, trackLimit, artistLimit, filter)
-			if err != nil {
-				return "", err
-			}
-			data, err := json.Marshal(result)
-			return string(data), err
-		},
-		SearchTracks: func(query string, limit int) ([]ExtTrackMetadata, error) {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-			result, err := GetDeezerClient().SearchAll(ctx, query, limit, limit, "track")
-			if err != nil {
-				return nil, err
-			}
-			tracks := make([]ExtTrackMetadata, len(result.Tracks))
-			for i, track := range result.Tracks {
-				tracks[i] = normalizeBuiltInMetadataTrack(track, "deezer")
-			}
-			return tracks, nil
-		},
-	}}
-	defer func() { builtInProviderRegistry = previousRegistry }()
-
-	deezerClient = &DeezerClient{
-		httpClient: &http.Client{Transport: roundTripFunc(func(req *http.Request) (*http.Response, error) {
-			body := fakeDeezerResponse(req.URL.Path, req.URL.RawQuery)
-			if body == "" {
-				body = `{"data":[]}`
-			}
-			return &http.Response{StatusCode: http.StatusOK, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(body)), Request: req}, nil
-		})},
-		searchCache:          map[string]*cacheEntry{},
-		albumCache:           map[string]*cacheEntry{},
-		artistCache:          map[string]*cacheEntry{},
-		isrcCache:            map[string]string{},
-		cacheCleanupInterval: time.Hour,
-	}
-	deezerClientOnce.Do(func() {})
-
-	if !isBuiltInProvider("deezer") || !isBuiltInMetadataProvider("deezer") || !isBuiltInSearchProvider("deezer") {
-		t.Fatal("expected Deezer built-in provider")
-	}
-	if _, ok := getBuiltInProviderSpec(" missing "); ok {
-		t.Fatal("unexpected missing provider spec")
-	}
-	if _, err := getBuiltInProviderMetadata("missing", "track", "1"); err == nil {
-		t.Fatal("expected unsupported metadata provider")
-	}
-	if jsonText, err := getBuiltInProviderMetadata("deezer", "track", "101"); err != nil || !strings.Contains(jsonText, "Track 101") {
-		t.Fatalf("built-in metadata = %q/%v", jsonText, err)
-	}
-	if jsonText, err := searchBuiltInProviderAll("deezer", "artist song", 2, 2, "track"); err != nil || !strings.Contains(jsonText, "Track 101") {
-		t.Fatalf("built-in search all = %q/%v", jsonText, err)
-	}
-	tracks, err := searchBuiltInProviderTracks("deezer", "artist song", 2)
-	if err != nil || len(tracks) != 1 || tracks[0].ProviderID != "deezer" {
-		t.Fatalf("built-in tracks = %#v/%v", tracks, err)
-	}
-	if _, err := searchBuiltInProviderTracks("missing", "q", 1); err == nil {
-		t.Fatal("expected unsupported built-in tracks")
-	}
-
+func TestExtensionProviderAndManagerSelectionHelpers(t *testing.T) {
 	manifest := &ExtensionManifest{Capabilities: map[string]interface{}{
 		"replacesBuiltInProviders": []interface{}{" Deezer ", 7, ""},
 	}}
@@ -211,21 +133,10 @@ func TestBuiltInProviderAndManagerSelectionHelpers(t *testing.T) {
 	if trimKnownProviderPrefix("Deezer:101", "deezer") != "101" || trimKnownProviderPrefix("101", "deezer") != "101" {
 		t.Fatal("trimKnownProviderPrefix mismatch")
 	}
-	normalized := normalizeBuiltInMetadataTrack(TrackMetadata{SpotifyID: "deezer:101", Name: "Song", Artists: "Artist", ISRC: "ISRC"}, "deezer")
-	if normalized.DeezerID != "101" || normalized.ProviderID != "deezer" {
-		t.Fatalf("normalized built-in track = %#v", normalized)
-	}
 	if metadataTrackDedupKey(ExtTrackMetadata{ISRC: "usrc"}) != "isrc:USRC" ||
 		metadataTrackDedupKey(ExtTrackMetadata{SpotifyID: "sp"}) != "spotify:sp" ||
 		metadataTrackDedupKey(ExtTrackMetadata{ProviderID: "p", ID: "1"}) != "p:1" {
 		t.Fatal("metadata dedup key mismatch")
-	}
-	searchBuiltInMetadataTracksFunc = func(providerID, query string, limit int) ([]ExtTrackMetadata, error) {
-		return []ExtTrackMetadata{{ID: "built-in", ProviderID: providerID}}, nil
-	}
-	defer func() { searchBuiltInMetadataTracksFunc = searchBuiltInMetadataTracks }()
-	if tracks, err := searchBuiltInMetadataTracksForItemID("deezer", "q", 1, "item"); err != nil || len(tracks) != 1 {
-		t.Fatalf("searchBuiltInMetadataTracksForItemID = %#v/%v", tracks, err)
 	}
 
 	manager := &extensionManager{extensions: map[string]*loadedExtension{}}
@@ -247,7 +158,7 @@ func TestBuiltInProviderAndManagerSelectionHelpers(t *testing.T) {
 		t.Fatal("nil fallback list should allow all")
 	}
 	SetMetadataProviderPriority([]string{"spotify", "deezer", "coverage-ext", "coverage-ext"})
-	if priority := GetMetadataProviderPriority(); len(priority) != 2 || priority[0] != "deezer" || priority[1] != "coverage-ext" {
+	if priority := GetMetadataProviderPriority(); len(priority) != 1 || priority[0] != "coverage-ext" {
 		t.Fatalf("metadata priority = %#v", priority)
 	}
 }

@@ -195,7 +195,6 @@ class SearchPlaylist {
 
 class TrackNotifier extends Notifier<TrackState> {
   int _currentRequestId = 0;
-  static const int _maxPreWarmTracksPerRequest = 80;
 
   @override
   TrackState build() {
@@ -204,15 +203,6 @@ class TrackNotifier extends Notifier<TrackState> {
 
   bool _isRequestValid(int requestId) => requestId == _currentRequestId;
 
-  bool _usesBuiltInUrlResolver(String url) {
-    final normalized = url.toLowerCase();
-    return normalized.contains('deezer.com') ||
-        normalized.contains('deezer.page.link') ||
-        normalized.contains('qobuz.com') ||
-        normalized.startsWith('qobuzapp://') ||
-        normalized.contains('tidal.com');
-  }
-
   Future<void> fetchFromUrl(String url, {bool useDeezerFallback = true}) async {
     final requestId = ++_currentRequestId;
 
@@ -220,7 +210,7 @@ class TrackNotifier extends Notifier<TrackState> {
 
     try {
       var extensionHandler = await PlatformBridge.findURLHandler(url);
-      if (extensionHandler == null && !_usesBuiltInUrlResolver(url)) {
+      if (extensionHandler == null) {
         final extensionState = ref.read(extensionProvider);
         if (!extensionState.isInitialized && extensionState.isLoading) {
           _log.i(
@@ -234,132 +224,124 @@ class TrackNotifier extends Notifier<TrackState> {
         }
       }
 
-      if (extensionHandler != null) {
-        _log.i('Found extension URL handler: $extensionHandler for URL: $url');
+      if (extensionHandler == null) {
+        state = TrackState(
+          isLoading: false,
+          error: 'url_not_recognized',
+          hasSearchText: state.hasSearchText,
+        );
+        return;
+      }
 
-        Map<String, dynamic>? result;
-        for (int attempt = 1; attempt <= 3; attempt++) {
-          result = await PlatformBridge.handleURLWithExtension(url);
-          if (!_isRequestValid(requestId)) return;
+      _log.i('Found extension URL handler: $extensionHandler for URL: $url');
 
-          if (result != null &&
-              result['type'] == 'track' &&
-              result['track'] != null) {
-            final trackData = result['track'] as Map<String, dynamic>;
-            final name = trackData['name']?.toString() ?? '';
-            if (name.isNotEmpty) {
-              break;
-            }
-          } else if (result != null &&
-              (result['type'] == 'album' || result['type'] == 'playlist')) {
-            break;
-          } else if (result != null && result['type'] == 'artist') {
+      Map<String, dynamic>? result;
+      for (int attempt = 1; attempt <= 3; attempt++) {
+        result = await PlatformBridge.handleURLWithExtension(url);
+        if (!_isRequestValid(requestId)) return;
+
+        if (result != null &&
+            result['type'] == 'track' &&
+            result['track'] != null) {
+          final trackData = result['track'] as Map<String, dynamic>;
+          final name = trackData['name']?.toString() ?? '';
+          if (name.isNotEmpty) {
             break;
           }
-
-          if (attempt < 3) {
-            await Future<void>.delayed(const Duration(milliseconds: 500));
-          }
+        } else if (result != null &&
+            (result['type'] == 'album' || result['type'] == 'playlist')) {
+          break;
+        } else if (result != null && result['type'] == 'artist') {
+          break;
         }
 
-        if (result != null) {
-          final type = result['type'] as String?;
-          final extensionId = result['extension_id'] as String?;
-
-          if (type == 'track' && result['track'] != null) {
-            final trackData = result['track'] as Map<String, dynamic>;
-            final track = _parseSearchTrack(trackData, source: extensionId);
-
-            if (track.name.isEmpty) {
-              state = TrackState(
-                isLoading: false,
-                error: 'Failed to load track metadata from extension',
-              );
-              return;
-            }
-
-            state = TrackState(
-              tracks: [track],
-              isLoading: false,
-              coverUrl: track.coverUrl,
-              searchExtensionId: extensionId,
-            );
-            return;
-          } else if ((type == 'album' || type == 'playlist') &&
-              result['tracks'] != null) {
-            final trackList = result['tracks'] as List<dynamic>;
-            final tracks = trackList
-                .map(
-                  (t) => _parseSearchTrack(
-                    t as Map<String, dynamic>,
-                    source: extensionId,
-                  ),
-                )
-                .toList();
-            state = TrackState(
-              tracks: tracks,
-              isLoading: false,
-              albumId:
-                  (result['album'] as Map<String, dynamic>?)?['id'] as String?,
-              albumName:
-                  result['name'] as String? ??
-                  (result['album'] as Map<String, dynamic>?)?['name']
-                      as String?,
-              playlistName: type == 'playlist'
-                  ? result['name'] as String?
-                  : null,
-              coverUrl: normalizeCoverReference(
-                result['cover_url']?.toString(),
-              ),
-              searchExtensionId: extensionId,
-            );
-            return;
-          } else if (type == 'artist' && result['artist'] != null) {
-            final artistData = result['artist'] as Map<String, dynamic>;
-            final albumsList = artistData['albums'] as List<dynamic>? ?? [];
-            final albums = albumsList
-                .map((a) => _parseArtistAlbum(a as Map<String, dynamic>))
-                .toList();
-
-            final topTracksList =
-                artistData['top_tracks'] as List<dynamic>? ?? [];
-            final topTracks = topTracksList
-                .map(
-                  (t) => _parseSearchTrack(
-                    t as Map<String, dynamic>,
-                    source: extensionId,
-                  ),
-                )
-                .toList();
-
-            state = TrackState(
-              tracks: [],
-              isLoading: false,
-              artistId: artistData['id'] as String?,
-              artistName: artistData['name'] as String?,
-              coverUrl: normalizeRemoteHttpUrl(
-                (artistData['image_url'] ?? artistData['images'])?.toString(),
-              ),
-              headerImageUrl: normalizeRemoteHttpUrl(
-                artistData['header_image']?.toString(),
-              ),
-              monthlyListeners: artistData['listeners'] as int?,
-              artistAlbums: albums,
-              artistTopTracks: topTracks.isNotEmpty ? topTracks : null,
-              searchExtensionId: extensionId,
-            );
-            return;
-          }
+        if (attempt < 3) {
+          await Future<void>.delayed(const Duration(milliseconds: 500));
         }
       }
 
-      final handledBuiltInUrl = await _tryResolveBuiltInProviderUrl(
-        url,
-        requestId,
-      );
-      if (!_isRequestValid(requestId)) return;
-      if (handledBuiltInUrl) {
-        return;
+      if (result != null) {
+        final type = result['type'] as String?;
+        final extensionId = result['extension_id'] as String?;
+
+        if (type == 'track' && result['track'] != null) {
+          final trackData = result['track'] as Map<String, dynamic>;
+          final track = _parseSearchTrack(trackData, source: extensionId);
+
+          if (track.name.isEmpty) {
+            state = TrackState(
+              isLoading: false,
+              error: 'Failed to load track metadata from extension',
+            );
+            return;
+          }
+
+          state = TrackState(
+            tracks: [track],
+            isLoading: false,
+            coverUrl: track.coverUrl,
+            searchExtensionId: extensionId,
+          );
+          return;
+        } else if ((type == 'album' || type == 'playlist') &&
+            result['tracks'] != null) {
+          final trackList = result['tracks'] as List<dynamic>;
+          final tracks = trackList
+              .map(
+                (t) => _parseSearchTrack(
+                  t as Map<String, dynamic>,
+                  source: extensionId,
+                ),
+              )
+              .toList();
+          state = TrackState(
+            tracks: tracks,
+            isLoading: false,
+            albumId:
+                (result['album'] as Map<String, dynamic>?)?['id'] as String?,
+            albumName:
+                result['name'] as String? ??
+                (result['album'] as Map<String, dynamic>?)?['name'] as String?,
+            playlistName: type == 'playlist' ? result['name'] as String? : null,
+            coverUrl: normalizeCoverReference(result['cover_url']?.toString()),
+            searchExtensionId: extensionId,
+          );
+          return;
+        } else if (type == 'artist' && result['artist'] != null) {
+          final artistData = result['artist'] as Map<String, dynamic>;
+          final albumsList = artistData['albums'] as List<dynamic>? ?? [];
+          final albums = albumsList
+              .map((a) => _parseArtistAlbum(a as Map<String, dynamic>))
+              .toList();
+
+          final topTracksList = artistData['top_tracks'] as List<dynamic>? ?? [];
+          final topTracks = topTracksList
+              .map(
+                (t) => _parseSearchTrack(
+                  t as Map<String, dynamic>,
+                  source: extensionId,
+                ),
+              )
+              .toList();
+
+          state = TrackState(
+            tracks: [],
+            isLoading: false,
+            artistId: artistData['id'] as String?,
+            artistName: artistData['name'] as String?,
+            coverUrl: normalizeRemoteHttpUrl(
+              (artistData['image_url'] ?? artistData['images'])?.toString(),
+            ),
+            headerImageUrl: normalizeRemoteHttpUrl(
+              artistData['header_image']?.toString(),
+            ),
+            monthlyListeners: artistData['listeners'] as int?,
+            artistAlbums: albums,
+            artistTopTracks: topTracks.isNotEmpty ? topTracks : null,
+            searchExtensionId: extensionId,
+          );
+          return;
+        }
       }
 
       state = TrackState(
@@ -377,138 +359,9 @@ class TrackNotifier extends Notifier<TrackState> {
     }
   }
 
-  Future<bool> _tryResolveBuiltInProviderUrl(String url, int requestId) async {
-    Map<String, dynamic> parsed;
-    try {
-      parsed = await PlatformBridge.parseProviderUrl(url);
-    } catch (_) {
-      return false;
-    }
-
-    if (!_isRequestValid(requestId)) return true;
-
-    final providerId = parsed['provider_id']?.toString();
-    final type = parsed['type']?.toString();
-    final id = parsed['id']?.toString();
-    if (providerId == null ||
-        providerId.isEmpty ||
-        type == null ||
-        type.isEmpty ||
-        id == null ||
-        id.isEmpty) {
-      return false;
-    }
-
-    _log.i('Detected built-in provider URL: $providerId:$type:$id');
-
-    final metadata = await _getResolvedProviderMetadata(providerId, type, id);
-    if (!_isRequestValid(requestId)) return true;
-
-    _applyResolvedProviderMetadata(providerId, type, id, metadata);
-    return true;
-  }
-
-  Future<Map<String, dynamic>> _getResolvedProviderMetadata(
-    String providerId,
-    String resourceType,
-    String resourceId,
-  ) async {
-    return PlatformBridge.getProviderMetadata(
-      providerId,
-      resourceType,
-      resourceId,
-    );
-  }
-
-  void _applyResolvedProviderMetadata(
-    String providerId,
-    String resourceType,
-    String resourceId,
-    Map<String, dynamic> metadata,
-  ) {
-    switch (resourceType) {
-      case 'track':
-        final trackData = metadata['track'] as Map<String, dynamic>;
-        final track = _parseTrack(trackData);
-        state = TrackState(
-          tracks: [track],
-          isLoading: false,
-          coverUrl: track.coverUrl,
-        );
-        return;
-      case 'album':
-        final albumInfo = metadata['album_info'] as Map<String, dynamic>;
-        final trackList = metadata['track_list'] as List<dynamic>;
-        final tracks = trackList
-            .map((t) => _parseTrack(t as Map<String, dynamic>))
-            .toList();
-        state = TrackState(
-          tracks: tracks,
-          isLoading: false,
-          albumId: _buildResolvedAlbumId(providerId, resourceId),
-          albumName: albumInfo['name'] as String?,
-          coverUrl: normalizeRemoteHttpUrl(albumInfo['images']?.toString()),
-        );
-        _preWarmCacheForTracks(tracks, service: providerId);
-        return;
-      case 'playlist':
-        final playlistInfo = metadata['playlist_info'] as Map<String, dynamic>;
-        final trackList = metadata['track_list'] as List<dynamic>;
-        final tracks = trackList
-            .map((t) => _parseTrack(t as Map<String, dynamic>))
-            .toList();
-        final owner = playlistInfo['owner'] as Map<String, dynamic>?;
-        final playlistName =
-            (playlistInfo['name'] ?? owner?['name']) as String?;
-        final coverUrl = normalizeRemoteHttpUrl(
-          (playlistInfo['images'] ?? owner?['images'])?.toString(),
-        );
-        state = TrackState(
-          tracks: tracks,
-          isLoading: false,
-          playlistName: playlistName,
-          coverUrl: coverUrl,
-        );
-        _preWarmCacheForTracks(tracks, service: providerId);
-        return;
-      case 'artist':
-        final artistInfo = metadata['artist_info'] as Map<String, dynamic>;
-        final albumsList = metadata['albums'] as List<dynamic>;
-        final albums = albumsList
-            .map((a) => _parseArtistAlbum(a as Map<String, dynamic>))
-            .toList();
-        final topTracksList = metadata['top_tracks'] as List<dynamic>? ?? [];
-        final topTracks = topTracksList
-            .map((t) => _parseTrack(t as Map<String, dynamic>))
-            .toList();
-        state = TrackState(
-          tracks: [],
-          isLoading: false,
-          artistId: artistInfo['id'] as String?,
-          artistName: artistInfo['name'] as String?,
-          coverUrl: normalizeRemoteHttpUrl(artistInfo['images']?.toString()),
-          headerImageUrl: normalizeRemoteHttpUrl(
-            (artistInfo['header_image'] ?? artistInfo['cover_url'])?.toString(),
-          ),
-          monthlyListeners: artistInfo['listeners'] as int?,
-          artistAlbums: albums,
-          artistTopTracks: topTracks.isNotEmpty ? topTracks : null,
-        );
-        return;
-    }
-  }
-
-  String _buildResolvedAlbumId(String providerId, String resourceId) {
-    if (providerId == 'deezer') {
-      return resourceId;
-    }
-    return '$providerId:$resourceId';
-  }
-
   Future<void> search(
     String query, {
     String? filterOverride,
-    String? builtInSearchProvider,
   }) async {
     final requestId = ++_currentRequestId;
     final currentFilter = filterOverride ?? state.selectedSearchFilter;
@@ -516,33 +369,29 @@ class TrackNotifier extends Notifier<TrackState> {
     final settings = ref.read(settingsProvider);
     final extensionState = ref.read(extensionProvider);
 
-    String? resolvedProvider = builtInSearchProvider;
-    if (resolvedProvider == null || resolvedProvider.isEmpty) {
-      final explicitProvider = settings.searchProvider?.trim();
-      if (explicitProvider != null && explicitProvider.isNotEmpty) {
-        resolvedProvider = explicitProvider;
-      } else {
-        resolvedProvider =
-            extensionState.extensions
-                .where(
-                  (ext) =>
-                      ext.enabled &&
-                      ext.hasCustomSearch &&
-                      ext.searchBehavior?.primary == true,
-                )
-                .map((ext) => ext.id)
-                .firstOrNull ??
-            extensionState.extensions
-                .where((ext) => ext.enabled && ext.hasCustomSearch)
-                .map((ext) => ext.id)
-                .firstOrNull;
-      }
-      resolvedProvider ??= defaultBuiltInSearchProviderId;
+    String? resolvedProvider;
+    final explicitProvider = settings.searchProvider?.trim();
+    if (explicitProvider != null && explicitProvider.isNotEmpty) {
+      resolvedProvider = explicitProvider;
+    } else {
+      resolvedProvider =
+          extensionState.extensions
+              .where(
+                (ext) =>
+                    ext.enabled &&
+                    ext.hasCustomSearch &&
+                    ext.searchBehavior?.primary == true,
+              )
+              .map((ext) => ext.id)
+              .firstOrNull ??
+          extensionState.extensions
+              .where((ext) => ext.enabled && ext.hasCustomSearch)
+              .map((ext) => ext.id)
+              .firstOrNull;
     }
 
     if (resolvedProvider != null &&
         resolvedProvider.isNotEmpty &&
-        !isBuiltInSearchProvider(resolvedProvider) &&
         !extensionState.extensions.any(
           (ext) => ext.enabled && ext.id == resolvedProvider,
         ) &&
@@ -562,7 +411,6 @@ class TrackNotifier extends Notifier<TrackState> {
               .where((ext) => ext.enabled && ext.hasCustomSearch)
               .map((ext) => ext.id)
               .firstOrNull;
-      resolvedProvider ??= defaultBuiltInSearchProviderId;
     }
 
     final isEnabledExtensionProvider =
@@ -571,11 +419,9 @@ class TrackNotifier extends Notifier<TrackState> {
         extensionState.extensions.any(
           (ext) => ext.enabled && ext.id == resolvedProvider,
         );
-    final isBuiltInProvider = isBuiltInSearchProvider(resolvedProvider);
 
     if (resolvedProvider != null &&
         resolvedProvider.isNotEmpty &&
-        !isBuiltInProvider &&
         isEnabledExtensionProvider) {
       final resolvedFilter = requestFilter ?? 'track';
       Map<String, dynamic>? options;
@@ -589,23 +435,6 @@ class TrackNotifier extends Notifier<TrackState> {
       return;
     }
 
-    final fallbackBuiltInProvider = builtInSearchProvider?.isNotEmpty == true
-        ? builtInSearchProvider
-        : defaultBuiltInSearchProviderId;
-    final effectiveBuiltInProvider = isBuiltInProvider
-        ? resolvedProvider
-        : fallbackBuiltInProvider;
-
-    if (effectiveBuiltInProvider == null || effectiveBuiltInProvider.isEmpty) {
-      state = TrackState(
-        isLoading: false,
-        hasSearchText: state.hasSearchText,
-        isShowingRecentAccess: state.isShowingRecentAccess,
-        selectedSearchFilter: currentFilter,
-      );
-      return;
-    }
-
     state = TrackState(
       isLoading: true,
       hasSearchText: state.hasSearchText,
@@ -614,47 +443,21 @@ class TrackNotifier extends Notifier<TrackState> {
     );
 
     try {
-      final hasActiveMetadataExtensions = extensionState.extensions.any(
-        (e) => e.enabled && e.hasMetadataProvider,
-      );
-      final includeExtensions =
-          settings.useExtensionProviders && hasActiveMetadataExtensions;
-
-      final effectiveProvider = effectiveBuiltInProvider;
+      final includeExtensions = settings.useExtensionProviders;
 
       _log.i(
-        'Search started: provider=$effectiveProvider, query="$query", includeExtensions=$includeExtensions, filter=$requestFilter',
+        'Search started: provider=metadata_extensions, query="$query", includeExtensions=$includeExtensions, filter=$requestFilter',
       );
 
-      Map<String, dynamic> results;
-      List<Map<String, dynamic>> metadataTrackResults = [];
-
-      if (isBuiltInSearchProvider(effectiveProvider)) {
-        _log.d('Calling built-in search API for $effectiveProvider...');
-        results = await PlatformBridge.searchProviderAll(
-          effectiveProvider,
-          query,
-          trackLimit: 20,
-          artistLimit: 2,
-          filter: requestFilter,
-        );
-      } else {
-        _log.d('Calling metadata provider track search API...');
-        metadataTrackResults =
-            await PlatformBridge.searchTracksWithMetadataProviders(
-              query,
-              limit: 20,
-              includeExtensions: includeExtensions,
-            );
-        results = const <String, List<dynamic>>{
-          'tracks': <dynamic>[],
-          'artists': <dynamic>[],
-          'albums': <dynamic>[],
-          'playlists': <dynamic>[],
-        };
-      }
+      _log.d('Calling metadata provider track search API...');
+      final metadataTrackResults =
+          await PlatformBridge.searchTracksWithMetadataProviders(
+            query,
+            limit: 20,
+            includeExtensions: includeExtensions,
+          );
       _log.i(
-        '$effectiveProvider returned ${(results['tracks'] as List?)?.length ?? 0} tracks, ${(results['artists'] as List?)?.length ?? 0} artists, ${(results['albums'] as List?)?.length ?? 0} albums',
+        'metadata_extensions returned ${metadataTrackResults.length} tracks',
       );
 
       if (!_isRequestValid(requestId)) {
@@ -662,12 +465,9 @@ class TrackNotifier extends Notifier<TrackState> {
         return;
       }
 
-      final trackList = results['tracks'] as List<dynamic>? ?? [];
-      final artistList = results['artists'] as List<dynamic>? ?? [];
-      final albumList = results['albums'] as List<dynamic>? ?? [];
-      final trackSearchResults = metadataTrackResults.isNotEmpty
-          ? metadataTrackResults
-          : trackList.whereType<Map<String, dynamic>>().toList();
+      final trackSearchResults = metadataTrackResults;
+      const artistList = <dynamic>[];
+      const albumList = <dynamic>[];
 
       _log.d(
         'Raw results: ${trackSearchResults.length} tracks, ${artistList.length} artists, ${albumList.length} albums',
@@ -712,7 +512,7 @@ class TrackNotifier extends Notifier<TrackState> {
         }
       }
 
-      final playlistList = results['playlists'] as List<dynamic>? ?? [];
+      const playlistList = <dynamic>[];
       final playlists = <SearchPlaylist>[];
       for (int i = 0; i < playlistList.length; i++) {
         final p = playlistList[i];
@@ -740,7 +540,7 @@ class TrackNotifier extends Notifier<TrackState> {
         hasSearchText: state.hasSearchText,
         isShowingRecentAccess: state.isShowingRecentAccess,
         selectedSearchFilter: currentFilter,
-        searchSource: effectiveProvider,
+        searchSource: resolvedProvider,
       );
     } catch (e, stackTrace) {
       if (!_isRequestValid(requestId)) return;
@@ -915,33 +715,6 @@ class TrackNotifier extends Notifier<TrackState> {
     );
   }
 
-  Track _parseTrack(Map<String, dynamic> data) {
-    final durationMs = _extractDurationMs(data);
-    final spotifyId = (data['spotify_id'] ?? '').toString();
-    final nativeId = (data['id'] ?? '').toString();
-    return Track(
-      id: spotifyId.isNotEmpty ? spotifyId : nativeId,
-      name: data['name'] as String? ?? '',
-      artistName: data['artists'] as String? ?? '',
-      albumName: data['album_name'] as String? ?? '',
-      albumArtist: data['album_artist'] as String?,
-      artistId: (data['artist_id'] ?? data['artistId'])?.toString(),
-      albumId: data['album_id']?.toString(),
-      coverUrl: normalizeCoverReference(data['images']?.toString()),
-      isrc: data['isrc'] as String?,
-      duration: (durationMs / 1000).round(),
-      trackNumber: data['track_number'] as int?,
-      discNumber: data['disc_number'] as int?,
-      totalDiscs: data['total_discs'] as int?,
-      releaseDate: data['release_date'] as String?,
-      albumType: normalizeOptionalString(data['album_type']?.toString()),
-      totalTracks: data['total_tracks'] as int?,
-      composer: data['composer']?.toString(),
-      audioQuality: data['audio_quality']?.toString(),
-      audioModes: data['audio_modes']?.toString(),
-    );
-  }
-
   Track _parseSearchTrack(Map<String, dynamic> data, {String? source}) {
     final durationMs = _extractDurationMs(data);
 
@@ -1054,33 +827,6 @@ class TrackNotifier extends Notifier<TrackState> {
     );
   }
 
-  void _preWarmCacheForTracks(List<Track> tracks, {String? service}) {
-    if (tracks.isEmpty) return;
-    final cacheRequests = <Map<String, String>>[];
-    for (final track in tracks) {
-      final isrc = track.isrc;
-      if (isrc == null || isrc.isEmpty) {
-        continue;
-      }
-      final effectiveService =
-          (track.source?.trim().isNotEmpty == true ? track.source : service)
-              ?.trim();
-      cacheRequests.add({
-        'isrc': isrc,
-        'track_name': track.name,
-        'artist_name': track.artistName,
-        'spotify_id': track.id,
-        if (effectiveService != null && effectiveService.isNotEmpty)
-          'service': effectiveService,
-      });
-      if (cacheRequests.length >= _maxPreWarmTracksPerRequest) {
-        break;
-      }
-    }
-    if (cacheRequests.isEmpty) return;
-
-    PlatformBridge.preWarmTrackCache(cacheRequests).catchError((_) {});
-  }
 }
 
 final trackProvider = NotifierProvider<TrackNotifier, TrackState>(

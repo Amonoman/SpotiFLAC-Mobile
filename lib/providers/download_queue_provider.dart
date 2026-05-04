@@ -2567,9 +2567,6 @@ class DownloadQueueNotifier extends Notifier<DownloadQueueState> {
     if (normalized.isEmpty) {
       return false;
     }
-    if (isBuiltInDownloadProvider(normalized)) {
-      return true;
-    }
 
     final extensionState = ref.read(extensionProvider);
     return extensionState.extensions.any(

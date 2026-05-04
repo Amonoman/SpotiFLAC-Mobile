@@ -2795,23 +2795,6 @@ class MainActivity: FlutterFragmentActivity() {
                             }
                             result.success(null)
                         }
-                        "searchProviderAll" -> {
-                            val providerId = call.argument<String>("provider_id") ?: ""
-                            val query = call.argument<String>("query") ?: ""
-                            val trackLimit = call.argument<Int>("track_limit") ?: 15
-                            val artistLimit = call.argument<Int>("artist_limit") ?: 2
-                            val filter = call.argument<String>("filter") ?: ""
-                            val response = withContext(Dispatchers.IO) {
-                                Gobackend.searchProviderAllJSON(providerId, query, trackLimit.toLong(), artistLimit.toLong(), filter)
-                            }
-                            result.success(response)
-                        }
-                        "getBuiltInProviders" -> {
-                            val response = withContext(Dispatchers.IO) {
-                                Gobackend.getBuiltInProvidersJSON()
-                            }
-                            result.success(response)
-                        }
                         "getDeezerRelatedArtists" -> {
                             val artistId = call.argument<String>("artist_id") ?: ""
                             val limit = call.argument<Int>("limit") ?: 12
@@ -2826,13 +2809,6 @@ class MainActivity: FlutterFragmentActivity() {
                             val resourceId = call.argument<String>("resource_id") ?: ""
                             val response = withContext(Dispatchers.IO) {
                                 Gobackend.getProviderMetadataJSON(providerId, resourceType, resourceId)
-                            }
-                            result.success(response)
-                        }
-                        "parseProviderUrl" -> {
-                            val url = call.argument<String>("url") ?: ""
-                            val response = withContext(Dispatchers.IO) {
-                                Gobackend.parseProviderURLJSON(url)
                             }
                             result.success(response)
                         }

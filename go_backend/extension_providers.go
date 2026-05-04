@@ -101,58 +101,6 @@ type ExtDownloadURLResult struct {
 	SampleRate int    `json:"sample_rate,omitempty"`
 }
 
-type builtInProviderSpec struct {
-	ID               string                                                                         `json:"id"`
-	DisplayName      string                                                                         `json:"display_name"`
-	SupportsMetadata bool                                                                           `json:"supports_metadata"`
-	SupportsSearch   bool                                                                           `json:"supports_search"`
-	GetMetadata      func(resourceType, resourceID string) (string, error)                          `json:"-"`
-	SearchAll        func(query string, trackLimit, artistLimit int, filter string) (string, error) `json:"-"`
-	SearchTracks     func(query string, limit int) ([]ExtTrackMetadata, error)                      `json:"-"`
-}
-
-var builtInProviderRegistry = []builtInProviderSpec{}
-
-func getBuiltInProviderSpecs() []builtInProviderSpec {
-	specs := make([]builtInProviderSpec, len(builtInProviderRegistry))
-	copy(specs, builtInProviderRegistry)
-	return specs
-}
-
-func getBuiltInProviderSpec(providerID string) (builtInProviderSpec, bool) {
-	normalized := strings.ToLower(strings.TrimSpace(providerID))
-	for _, spec := range builtInProviderRegistry {
-		if spec.ID == normalized {
-			return spec, true
-		}
-	}
-	return builtInProviderSpec{}, false
-}
-
-func getBuiltInProviderMetadata(providerID, resourceType, resourceID string) (string, error) {
-	spec, ok := getBuiltInProviderSpec(providerID)
-	if !ok || !spec.SupportsMetadata || spec.GetMetadata == nil {
-		return "", fmt.Errorf("unsupported built-in metadata provider: %s", providerID)
-	}
-	return spec.GetMetadata(resourceType, resourceID)
-}
-
-func searchBuiltInProviderAll(providerID, query string, trackLimit, artistLimit int, filter string) (string, error) {
-	spec, ok := getBuiltInProviderSpec(providerID)
-	if !ok || !spec.SupportsSearch || spec.SearchAll == nil {
-		return "", fmt.Errorf("unsupported search provider: %s", providerID)
-	}
-	return spec.SearchAll(query, trackLimit, artistLimit, filter)
-}
-
-func searchBuiltInProviderTracks(providerID, query string, limit int) ([]ExtTrackMetadata, error) {
-	spec, ok := getBuiltInProviderSpec(providerID)
-	if !ok || !spec.SupportsMetadata || spec.SearchTracks == nil {
-		return nil, fmt.Errorf("unsupported built-in metadata provider: %s", providerID)
-	}
-	return spec.SearchTracks(query, limit)
-}
-
 func manifestCapabilityStringList(manifest *ExtensionManifest, key string) []string {
 	if manifest == nil || manifest.Capabilities == nil {
 		return nil
@@ -1783,40 +1731,6 @@ var extensionFallbackProviderIDsMu sync.RWMutex
 var metadataProviderPriority []string
 var metadataProviderPriorityMu sync.RWMutex
 
-var searchBuiltInMetadataTracksFunc = searchBuiltInMetadataTracks
-
-func searchBuiltInMetadataTracksForItemID(providerID, query string, limit int, itemID string) ([]ExtTrackMetadata, error) {
-	if itemID == "" {
-		return searchBuiltInMetadataTracksFunc(providerID, query, limit)
-	}
-
-	ctx := initDownloadCancel(itemID)
-	defer clearDownloadCancel(itemID)
-	if isDownloadCancelled(itemID) {
-		return nil, ErrDownloadCancelled
-	}
-
-	type searchResult struct {
-		tracks []ExtTrackMetadata
-		err    error
-	}
-	done := make(chan searchResult, 1)
-	go func() {
-		tracks, err := searchBuiltInMetadataTracksFunc(providerID, query, limit)
-		done <- searchResult{tracks: tracks, err: err}
-	}()
-
-	select {
-	case <-ctx.Done():
-		return nil, ErrDownloadCancelled
-	case result := <-done:
-		if isDownloadCancelled(itemID) {
-			return nil, ErrDownloadCancelled
-		}
-		return result.tracks, result.err
-	}
-}
-
 func SetProviderPriority(providerIDs []string) {
 	providerPriorityMu.Lock()
 	defer providerPriorityMu.Unlock()
@@ -1880,11 +1794,8 @@ func isRetiredBuiltInMetadataProvider(providerID string) bool {
 	if normalized == "" {
 		return false
 	}
-	if isBuiltInMetadataProvider(normalized) {
-		return false
-	}
 	switch normalized {
-	case "spotify", "qobuz", "tidal":
+	case "deezer", "spotify", "qobuz", "tidal":
 		return true
 	default:
 		return false
@@ -1980,61 +1891,6 @@ func GetMetadataProviderPriority() []string {
 	return result
 }
 
-func isBuiltInProvider(providerID string) bool {
-	_, ok := getBuiltInProviderSpec(providerID)
-	return ok
-}
-
-func isBuiltInMetadataProvider(providerID string) bool {
-	spec, ok := getBuiltInProviderSpec(providerID)
-	return ok && spec.SupportsMetadata
-}
-
-func isBuiltInSearchProvider(providerID string) bool {
-	spec, ok := getBuiltInProviderSpec(providerID)
-	return ok && spec.SupportsSearch
-}
-
-func normalizeBuiltInMetadataTrack(track TrackMetadata, providerID string) ExtTrackMetadata {
-	deezerID := ""
-	tidalID := ""
-	qobuzID := ""
-	prefixedID := strings.TrimSpace(track.SpotifyID)
-
-	switch providerID {
-	case "deezer":
-		deezerID = strings.TrimPrefix(prefixedID, "deezer:")
-	case "tidal":
-		tidalID = strings.TrimPrefix(prefixedID, "tidal:")
-	case "qobuz":
-		qobuzID = strings.TrimPrefix(prefixedID, "qobuz:")
-	}
-
-	return ExtTrackMetadata{
-		ID:          prefixedID,
-		Name:        track.Name,
-		Artists:     track.Artists,
-		AlbumName:   track.AlbumName,
-		AlbumArtist: track.AlbumArtist,
-		DurationMS:  track.DurationMS,
-		CoverURL:    track.Images,
-		Images:      track.Images,
-		ReleaseDate: track.ReleaseDate,
-		TrackNumber: track.TrackNumber,
-		TotalTracks: track.TotalTracks,
-		DiscNumber:  track.DiscNumber,
-		TotalDiscs:  track.TotalDiscs,
-		ISRC:        track.ISRC,
-		ProviderID:  providerID,
-		SpotifyID:   prefixedID,
-		DeezerID:    deezerID,
-		TidalID:     tidalID,
-		QobuzID:     qobuzID,
-		AlbumType:   track.AlbumType,
-		Composer:    track.Composer,
-	}
-}
-
 func metadataTrackDedupKey(track ExtTrackMetadata) string {
 	if isrc := strings.TrimSpace(track.ISRC); isrc != "" {
 		return "isrc:" + strings.ToUpper(isrc)
@@ -2046,10 +1902,6 @@ func metadataTrackDedupKey(track ExtTrackMetadata) string {
 		return providerID + ":" + strings.TrimSpace(track.ID)
 	}
 	return strings.TrimSpace(track.Name) + "|" + strings.TrimSpace(track.Artists)
-}
-
-func searchBuiltInMetadataTracks(providerID, query string, limit int) ([]ExtTrackMetadata, error) {
-	return searchBuiltInProviderTracks(providerID, query, limit)
 }
 
 func (m *extensionManager) SearchTracksWithMetadataProviders(query string, limit int, includeExtensions bool) ([]ExtTrackMetadata, error) {
@@ -2098,29 +1950,17 @@ func (m *extensionManager) SearchTracksWithMetadataProvidersForItemID(query stri
 			return nil, ErrDownloadCancelled
 		}
 
-		var (
-			providerTracks []ExtTrackMetadata
-			err            error
-		)
-
-		if isBuiltInProvider(providerID) {
-			providerTracks, err = searchBuiltInMetadataTracksForItemID(providerID, query, limit, itemID)
-			if isDownloadCancelled(itemID) {
-				return nil, ErrDownloadCancelled
-			}
-		} else {
-			if !includeExtensions {
-				continue
-			}
-			provider := extensionProviders[providerID]
-			if provider == nil {
-				continue
-			}
-			var result *ExtSearchResult
-			result, err = provider.SearchTracksForItemID(query, limit, itemID)
-			if result != nil {
-				providerTracks = result.Tracks
-			}
+		if !includeExtensions {
+			continue
+		}
+		provider := extensionProviders[providerID]
+		if provider == nil {
+			continue
+		}
+		result, err := provider.SearchTracksForItemID(query, limit, itemID)
+		providerTracks := []ExtTrackMetadata(nil)
+		if result != nil {
+			providerTracks = result.Tracks
 		}
 
 		if err != nil {
@@ -2199,9 +2039,7 @@ func DownloadWithExtensionFallback(req DownloadRequest) (*DownloadResponse, erro
 	var sourceExtensionAvailability *ExtAvailabilityResult
 	var sourceExtensionTrackID string
 
-	if req.Source != "" &&
-		!isBuiltInProvider(strings.ToLower(req.Source)) &&
-		selectedProvider != req.Source {
+	if req.Source != "" && selectedProvider != req.Source {
 		ext, err := extManager.GetExtension(req.Source)
 		if err == nil && ext.Enabled && ext.Error == "" && ext.Manifest.IsDownloadProvider() {
 			provider := newExtensionProviderWrapper(ext)
@@ -2221,7 +2059,7 @@ func DownloadWithExtensionFallback(req DownloadRequest) (*DownloadResponse, erro
 		}
 	}
 
-	if req.Source != "" && !isBuiltInProvider(strings.ToLower(req.Source)) {
+	if req.Source != "" {
 		ext, err := extManager.GetExtension(req.Source)
 		if err == nil && ext.Enabled && ext.Error == "" && ext.Manifest.IsMetadataProvider() {
 			GoLog("[DownloadWithExtensionFallback] Enriching track from extension '%s'...\n", req.Source)
@@ -2328,7 +2166,7 @@ func DownloadWithExtensionFallback(req DownloadRequest) (*DownloadResponse, erro
 		}
 	}
 
-	if req.Source != "" && !isBuiltInProvider(strings.ToLower(req.Source)) &&
+	if req.Source != "" &&
 		req.TrackName != "" && req.ArtistName != "" &&
 		(req.AlbumName == "" || req.ReleaseDate == "" || req.ISRC == "") {
 
@@ -2396,9 +2234,7 @@ func DownloadWithExtensionFallback(req DownloadRequest) (*DownloadResponse, erro
 		}
 	}
 
-	if req.Source != "" &&
-		!isBuiltInProvider(strings.ToLower(req.Source)) &&
-		selectedProvider == req.Source {
+	if req.Source != "" && selectedProvider == req.Source {
 		if isDownloadCancelled(req.ItemID) {
 			return nil, ErrDownloadCancelled
 		}

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:spotiflac_android/l10n/l10n.dart';
 import 'package:spotiflac_android/providers/extension_provider.dart';
 import 'package:spotiflac_android/utils/app_bar_layout.dart';
-import 'package:spotiflac_android/utils/provider_ui_utils.dart';
 
 class ProviderPriorityPage extends ConsumerStatefulWidget {
   const ProviderPriorityPage({super.key});
@@ -139,6 +138,11 @@ class _ProviderPriorityPageState extends ConsumerState<ProviderPriorityPage> {
                     index: index,
                     isFirst: index == 0,
                     isLast: index == _providers.length - 1,
+                    extension: ref
+                        .read(extensionProvider)
+                        .extensions
+                        .where((ext) => ext.id == provider)
+                        .firstOrNull,
                   );
                 },
                 onReorder: (oldIndex, newIndex) {
@@ -232,6 +236,7 @@ class _ProviderItem extends StatelessWidget {
   final int index;
   final bool isFirst;
   final bool isLast;
+  final Extension? extension;
 
   const _ProviderItem({
     super.key,
@@ -239,6 +244,7 @@ class _ProviderItem extends StatelessWidget {
     required this.index,
     required this.isFirst,
     required this.isLast,
+    this.extension,
   });
 
   @override
@@ -253,7 +259,7 @@ class _ProviderItem extends StatelessWidget {
           )
         : colorScheme.surfaceContainerHigh;
 
-    final info = _getProviderInfo(provider);
+    final info = _getProviderInfo(provider, extension);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -290,9 +296,7 @@ class _ProviderItem extends StatelessWidget {
                 const SizedBox(width: 16),
                 Icon(
                   info.icon,
-                  color: info.isBuiltIn
-                      ? colorScheme.primary
-                      : colorScheme.secondary,
+                  color: colorScheme.secondary,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -306,9 +310,7 @@ class _ProviderItem extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        info.isBuiltIn
-                            ? context.l10n.providerBuiltIn
-                            : context.l10n.providerExtension,
+                        context.l10n.providerExtension,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -325,28 +327,10 @@ class _ProviderItem extends StatelessWidget {
     );
   }
 
-  _ProviderInfo _getProviderInfo(String provider) {
-    final builtIn = builtInProviderSpecForId(provider);
-    if (builtIn != null) {
-      return _ProviderInfo(
-        name: builtIn.displayName,
-        icon: resolveProviderIcon(provider),
-        isBuiltIn: true,
-      );
-    }
-
-    if (provider == 'deezer') {
-      return _ProviderInfo(
-        name: 'Deezer',
-        icon: Icons.graphic_eq,
-        isBuiltIn: false,
-      );
-    }
-
+  _ProviderInfo _getProviderInfo(String provider, Extension? extension) {
     return _ProviderInfo(
-      name: provider,
+      name: extension?.displayName ?? provider,
       icon: Icons.extension,
-      isBuiltIn: false,
     );
   }
 }
@@ -354,11 +338,9 @@ class _ProviderItem extends StatelessWidget {
 class _ProviderInfo {
   final String name;
   final IconData icon;
-  final bool isBuiltIn;
 
   _ProviderInfo({
     required this.name,
     required this.icon,
-    required this.isBuiltIn,
   });
 }

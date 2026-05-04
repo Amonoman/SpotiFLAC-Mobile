@@ -372,19 +372,11 @@ func TestCanEmbedGenreLabelRequiresExistingAbsoluteLocalFile(t *testing.T) {
 
 func TestSearchTracksWithMetadataProvidersIgnoresRetiredBuiltIns(t *testing.T) {
 	originalPriority := GetMetadataProviderPriority()
-	originalSearch := searchBuiltInMetadataTracksFunc
 	defer func() {
 		SetMetadataProviderPriority(originalPriority)
-		searchBuiltInMetadataTracksFunc = originalSearch
 	}()
 
 	SetMetadataProviderPriority([]string{"qobuz"})
-
-	var calls []string
-	searchBuiltInMetadataTracksFunc = func(providerID, query string, limit int) ([]ExtTrackMetadata, error) {
-		calls = append(calls, providerID)
-		return nil, nil
-	}
 
 	manager := getExtensionManager()
 	tracks, err := manager.SearchTracksWithMetadataProviders("query", 3, false)
@@ -393,9 +385,6 @@ func TestSearchTracksWithMetadataProvidersIgnoresRetiredBuiltIns(t *testing.T) {
 	}
 	if len(tracks) != 0 {
 		t.Fatalf("expected no tracks from retired built-in provider, got %+v", tracks)
-	}
-	if len(calls) != 0 {
-		t.Fatalf("expected retired built-in provider not to be queried, got %v", calls)
 	}
 }
 

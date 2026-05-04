@@ -205,6 +205,7 @@ object SafDownloadHandler {
         mimeType: String,
         srcPath: String
     ): String? {
+        var stagedDocument: DocumentFile? = null
         return try {
             val treeUri = Uri.parse(treeUriStr)
             val targetDir = ensureDocumentDir(context, treeUri, relativeDir) ?: return null
@@ -213,11 +214,18 @@ object SafDownloadHandler {
             val stagedName = buildStagedSafFileName(finalName, ext)
             val document = createOrReuseDocumentFile(targetDir, mimeType, stagedName)
                 ?: return null
-            context.contentResolver.openOutputStream(document.uri, "wt")?.use { output ->
+            stagedDocument = document
+            val outputStream = context.contentResolver.openOutputStream(document.uri, "wt")
+            if (outputStream == null) {
+                document.delete()
+                stagedDocument = null
+                return null
+            }
+            outputStream.use { output ->
                 File(srcPath).inputStream().use { input ->
                     input.copyTo(output)
                 }
-            } ?: return null
+            }
 
             val existingFinal = targetDir.findFile(finalName)
             if (existingFinal != null && existingFinal.uri != document.uri) {
@@ -227,8 +235,10 @@ object SafDownloadHandler {
                 document.delete()
                 return null
             }
+            stagedDocument = null
             targetDir.findFile(finalName)?.uri?.toString() ?: document.uri.toString()
         } catch (e: Exception) {
+            stagedDocument?.delete()
             android.util.Log.w("SpotiFLAC", "Failed to write file to SAF: ${e.message}")
             null
         }
