@@ -15,6 +15,7 @@ import java.util.Locale
 object SafDownloadHandler {
     private val safDirLock = Any()
     private const val MAX_SAF_DISPLAY_NAME_UTF8_BYTES = 180
+    private const val STAGED_SAF_MIME_TYPE = "application/octet-stream"
 
     fun handle(context: Context, requestJson: String, downloader: (String) -> String): String {
         val req = JSONObject(requestJson)
@@ -31,15 +32,15 @@ object SafDownloadHandler {
         val fileName = buildSafFileName(req, outputExt)
         val deferSafPublish = req.optBoolean("defer_saf_publish", false)
         val useStagedOutput = req.optBoolean("stage_saf_output", false) && !deferSafPublish
-        val stagedFileName = if (useStagedOutput) buildStagedSafFileName(fileName, outputExt) else fileName
-        val staleStagedFileName = buildStagedSafFileName(fileName, outputExt)
+        val stagedFileName = if (useStagedOutput) buildStagedSafFileName(fileName) else fileName
+        val stagedMimeType = if (useStagedOutput) STAGED_SAF_MIME_TYPE else mimeType
 
         val existingDir = findDocumentDir(context, treeUri, relativeDir)
         if (existingDir != null) {
             val existing = existingDir.findFile(fileName)
             if (existing != null && existing.isFile && existing.length() > 0) {
                 if (useStagedOutput || deferSafPublish) {
-                    existingDir.findFile(staleStagedFileName)?.delete()
+                    deleteStaleStagedFiles(existingDir, fileName, outputExt)
                 }
                 val obj = JSONObject()
                 obj.put("success", true)
@@ -55,7 +56,7 @@ object SafDownloadHandler {
             ?: return errorJson("Failed to access SAF directory")
 
         if (deferSafPublish) {
-            targetDir.findFile(staleStagedFileName)?.delete()
+            deleteStaleStagedFiles(targetDir, fileName, outputExt)
             val workingExt = outputExt.ifBlank { ".tmp" }
             val workingFile = File.createTempFile("native_saf_work_", workingExt, context.cacheDir)
             Log.i("SpotiFLAC", "SAF deferred native output: target=$fileName working=${workingFile.name}")
@@ -89,7 +90,7 @@ object SafDownloadHandler {
             }
         }
 
-        var document = createOrReuseDocumentFile(targetDir, mimeType, stagedFileName)
+        var document = createOrReuseDocumentFile(targetDir, stagedMimeType, stagedFileName)
             ?: return errorJson("Failed to create SAF file")
 
         val pfd = context.contentResolver.openFileDescriptor(document.uri, "rw")
@@ -121,14 +122,14 @@ object SafDownloadHandler {
                         if (actualExt.isNotBlank() && actualExt != outputExt) {
                             val actualFileName = buildSafFileName(req, actualExt)
                             val actualStagedFileName = if (useStagedOutput) {
-                                buildStagedSafFileName(actualFileName, actualExt)
+                                buildStagedSafFileName(actualFileName)
                             } else {
                                 actualFileName
                             }
                             val actualMimeType = mimeTypeForExt(actualExt)
                             val replacement = createOrReuseDocumentFile(
                                 targetDir,
-                                actualMimeType,
+                                if (useStagedOutput) STAGED_SAF_MIME_TYPE else actualMimeType,
                                 actualStagedFileName
                             ) ?: throw IllegalStateException(
                                 "failed to create SAF output with actual extension"
@@ -212,8 +213,9 @@ object SafDownloadHandler {
             val targetDir = ensureDocumentDir(context, treeUri, relativeDir) ?: return null
             val finalName = sanitizeFilename(fileName)
             val ext = normalizeExt(finalName.substringAfterLast('.', ""))
-            val stagedName = buildStagedSafFileName(finalName, ext)
-            val document = createOrReuseDocumentFile(targetDir, mimeType, stagedName)
+            val stagedName = buildStagedSafFileName(finalName)
+            deleteStaleStagedFiles(targetDir, finalName, ext)
+            val document = createOrReuseDocumentFile(targetDir, STAGED_SAF_MIME_TYPE, stagedName)
                 ?: return null
             stagedDocument = document
             val outputStream = context.contentResolver.openOutputStream(document.uri, "wt")
@@ -288,13 +290,17 @@ object SafDownloadHandler {
         return safeName + normalizedExt
     }
 
-    private fun buildStagedSafFileName(fileName: String, outputExt: String): String {
+    private fun buildStagedSafFileName(fileName: String): String {
+        val safeName = sanitizeFilename(fileName)
+        return "$safeName.partial"
+    }
+
+    private fun buildLegacyStagedSafFileName(fileName: String, outputExt: String): String {
         val safeName = sanitizeFilename(fileName)
         val ext = normalizeExt(outputExt)
         if (ext.isNotBlank() && safeName.lowercase(Locale.ROOT).endsWith(ext)) {
             return safeName.dropLast(ext.length).trimEnd('.', ' ') + ".partial$ext"
         }
-
         val dot = safeName.lastIndexOf('.')
         if (dot > 0 && dot < safeName.lastIndex) {
             return safeName.substring(0, dot).trimEnd('.', ' ') +
@@ -302,6 +308,19 @@ object SafDownloadHandler {
                 safeName.substring(dot)
         }
         return "$safeName.partial"
+    }
+
+    private fun deleteStaleStagedFiles(parent: DocumentFile, fileName: String, outputExt: String) {
+        val stagedNames = linkedSetOf(
+            buildStagedSafFileName(fileName),
+            buildLegacyStagedSafFileName(fileName, outputExt)
+        )
+        for (stagedName in stagedNames) {
+            try {
+                parent.findFile(stagedName)?.delete()
+            } catch (_: Exception) {
+            }
+        }
     }
 
     private fun sanitizeFilename(name: String): String {

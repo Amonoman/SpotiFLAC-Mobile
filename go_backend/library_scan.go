@@ -87,6 +87,19 @@ type scannedCueFileInfo struct {
 	audioPath string
 }
 
+func isLibraryStagingFile(path string) bool {
+	name := strings.ToLower(filepath.Base(path))
+	if strings.HasSuffix(name, ".partial") {
+		return true
+	}
+	for ext := range supportedAudioFormats {
+		if strings.HasSuffix(name, ".partial"+ext) {
+			return true
+		}
+	}
+	return false
+}
+
 func collectLibraryAudioFiles(folderPath string, cancelCh <-chan struct{}) ([]libraryAudioFileInfo, error) {
 	var files []libraryAudioFileInfo
 
@@ -102,6 +115,9 @@ func collectLibraryAudioFiles(folderPath string, cancelCh <-chan struct{}) ([]li
 		}
 
 		if entry.IsDir() {
+			return nil
+		}
+		if isLibraryStagingFile(path) {
 			return nil
 		}
 
