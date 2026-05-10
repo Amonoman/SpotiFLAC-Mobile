@@ -18,7 +18,9 @@ import 'package:spotiflac_android/services/platform_bridge.dart';
 import 'package:spotiflac_android/services/shell_navigation_service.dart';
 import 'package:spotiflac_android/services/share_intent_service.dart';
 import 'package:spotiflac_android/services/notification_service.dart';
+import 'package:spotiflac_android/services/app_remote_config_service.dart';
 import 'package:spotiflac_android/services/update_checker.dart';
+import 'package:spotiflac_android/widgets/app_announcement_dialog.dart';
 import 'package:spotiflac_android/widgets/update_dialog.dart';
 import 'package:spotiflac_android/widgets/animation_utils.dart';
 import 'package:spotiflac_android/utils/logger.dart';
@@ -38,6 +40,7 @@ class _MainShellState extends ConsumerState<MainShell>
   late final PageController _pageController;
   late final AnimationController _tabJumpTransitionController;
   bool _hasCheckedUpdate = false;
+  bool _hasCheckedAppAnnouncement = false;
   StreamSubscription<String>? _shareSubscription;
   DateTime? _lastBackPress;
   final GlobalKey<NavigatorState> _homeTabNavigatorKey =
@@ -66,10 +69,13 @@ class _MainShellState extends ConsumerState<MainShell>
       currentTabIndex: _currentIndex,
       showRepoTab: false,
     );
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkForUpdates();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       _setupShareListener();
       _checkSafMigration();
+      final updateDialogShown = await _checkForUpdates();
+      if (!updateDialogShown) {
+        await _checkAppAnnouncement();
+      }
     });
   }
 
@@ -127,12 +133,12 @@ class _MainShellState extends ConsumerState<MainShell>
     }
   }
 
-  Future<void> _checkForUpdates() async {
-    if (_hasCheckedUpdate) return;
+  Future<bool> _checkForUpdates() async {
+    if (_hasCheckedUpdate) return false;
     _hasCheckedUpdate = true;
 
     final settings = ref.read(settingsProvider);
-    if (!settings.checkForUpdates) return;
+    if (!settings.checkForUpdates) return false;
 
     final updateInfo = await UpdateChecker.checkForUpdate(
       channel: settings.updateChannel,
@@ -145,7 +151,30 @@ class _MainShellState extends ConsumerState<MainShell>
           ref.read(settingsProvider.notifier).setCheckForUpdates(false);
         },
       );
+      return true;
     }
+
+    return false;
+  }
+
+  Future<void> _checkAppAnnouncement() async {
+    if (_hasCheckedAppAnnouncement) return;
+    _hasCheckedAppAnnouncement = true;
+
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    final remoteConfigService = AppRemoteConfigService();
+    final announcement = await remoteConfigService.fetchActiveAnnouncement(
+      locale: locale,
+    );
+    if (announcement == null || !mounted) return;
+
+    showAppAnnouncementDialog(
+      context,
+      announcement: announcement,
+      onDismiss: () {
+        remoteConfigService.markAnnouncementDismissed(announcement.id);
+      },
+    );
   }
 
   static const _safMigrationShownKey = 'saf_migration_prompt_shown';

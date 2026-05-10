@@ -1,12 +1,57 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:spotiflac_android/constants/app_info.dart';
+import 'package:spotiflac_android/services/app_remote_config_service.dart';
 import 'package:spotiflac_android/utils/app_bar_layout.dart';
 import 'package:spotiflac_android/widgets/donate_icons.dart';
 
-class DonatePage extends StatelessWidget {
+class DonatePage extends StatefulWidget {
   const DonatePage({super.key});
+
+  @override
+  State<DonatePage> createState() => _DonatePageState();
+}
+
+class _DonatePageState extends State<DonatePage> {
+  DonateConfig _config = DonateConfig.fallback();
+  bool _hasRequestedConfig = false;
+  String? _activeRemoteJson;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_hasRequestedConfig) return;
+
+    _hasRequestedConfig = true;
+    _loadConfig(Localizations.localeOf(context).toLanguageTag());
+  }
+
+  Future<void> _loadConfig(String locale) async {
+    final service = AppRemoteConfigService();
+    final cached = await service.readCachedConfig();
+    if (!mounted) return;
+
+    if (cached != null) {
+      _applyRemoteConfig(cached);
+    }
+
+    unawaited(_refreshConfigCache(locale));
+  }
+
+  Future<void> _refreshConfigCache(String locale) async {
+    await AppRemoteConfigService().fetchConfigSnapshot(locale: locale);
+  }
+
+  void _applyRemoteConfig(RemoteConfigSnapshot snapshot) {
+    if (_activeRemoteJson == snapshot.rawJson) return;
+
+    setState(() {
+      _activeRemoteJson = snapshot.rawJson;
+      _config = snapshot.config.donate;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,94 +102,16 @@ class DonatePage extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  _DonateLinksCard(colorScheme: colorScheme),
-
+                  _DonateLinksCard(colorScheme: colorScheme, config: _config),
                   const SizedBox(height: 24),
-
-                  _RecentDonorsCard(colorScheme: colorScheme),
-
+                  _RecentDonorsCard(
+                    colorScheme: colorScheme,
+                    supporters: _config.supporters,
+                  ),
                   const SizedBox(height: 16),
-
-                  Card(
-                    elevation: 0,
-                    color: colorScheme.secondaryContainer.withValues(
-                      alpha: 0.3,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.volunteer_activism_rounded,
-                                size: 20,
-                                color: colorScheme.primary,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Good to Know',
-                                style: Theme.of(context).textTheme.titleSmall
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                      color: colorScheme.onSurface,
-                                    ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          _NoticeLine(
-                            icon: Icons.block,
-                            text:
-                                'Not selling early access, premium features, or paywalls',
-                            colorScheme: colorScheme,
-                          ),
-                          const SizedBox(height: 6),
-                          _NoticeLine(
-                            icon: Icons.build_outlined,
-                            text: 'Funds go to dev tools & testing devices',
-                            colorScheme: colorScheme,
-                          ),
-                          const SizedBox(height: 6),
-                          _NoticeLine(
-                            icon: Icons.favorite_border,
-                            text:
-                                'Your support is the only way to keep this project alive',
-                            colorScheme: colorScheme,
-                          ),
-                          Divider(
-                            height: 24,
-                            color: colorScheme.outlineVariant.withValues(
-                              alpha: 0.3,
-                            ),
-                          ),
-                          _NoticeLine(
-                            icon: Icons.history,
-                            text:
-                                'Your name stays permanently in every version it was included in',
-                            colorScheme: colorScheme,
-                          ),
-                          const SizedBox(height: 6),
-                          _NoticeLine(
-                            icon: Icons.update,
-                            text:
-                                'Supporter list is updated monthly and embedded in the app',
-                            colorScheme: colorScheme,
-                          ),
-                          const SizedBox(height: 6),
-                          _NoticeLine(
-                            icon: Icons.cloud_off,
-                            text:
-                                'No remote server -- everything is stored locally',
-                            colorScheme: colorScheme,
-                          ),
-                        ],
-                      ),
-                    ),
+                  _DonateNoticeCard(
+                    colorScheme: colorScheme,
+                    notices: _config.notices,
                   ),
                 ],
               ),
@@ -156,16 +123,112 @@ class DonatePage extends StatelessWidget {
   }
 }
 
-class _RecentDonorsCard extends StatelessWidget {
+class _DonateLinksCard extends StatelessWidget {
   final ColorScheme colorScheme;
+  final DonateConfig config;
 
-  const _RecentDonorsCard({required this.colorScheme});
+  const _DonateLinksCard({required this.colorScheme, required this.config});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    const donorNames = <String>[];
+    final cardColor = isDark
+        ? Color.alphaBlend(
+            Colors.white.withValues(alpha: 0.08),
+            colorScheme.surface,
+          )
+        : Color.alphaBlend(
+            Colors.black.withValues(alpha: 0.04),
+            colorScheme.surface,
+          );
 
+    return Card(
+      elevation: 0,
+      color: cardColor,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 14),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        config.title,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: colorScheme.onSurface,
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        config.message,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+          ),
+          if (!config.enabled)
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(
+                'Donation links are currently unavailable.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            )
+          else
+            for (var index = 0; index < config.methods.length; index++) ...[
+              _DonateMethodItem(
+                method: config.methods[index],
+                colorScheme: colorScheme,
+              ),
+              if (index < config.methods.length - 1)
+                Divider(
+                  height: 1,
+                  thickness: 1,
+                  indent: 74,
+                  endIndent: 16,
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+                ),
+            ],
+        ],
+      ),
+    );
+  }
+}
+
+class _RecentDonorsCard extends StatelessWidget {
+  final ColorScheme colorScheme;
+  final List<String> supporters;
+
+  const _RecentDonorsCard({
+    required this.colorScheme,
+    required this.supporters,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardColor = isDark
         ? Color.alphaBlend(
             Colors.white.withValues(alpha: 0.08),
@@ -206,7 +269,7 @@ class _RecentDonorsCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            if (donorNames.isEmpty)
+            if (supporters.isEmpty)
               Center(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
@@ -221,7 +284,7 @@ class _RecentDonorsCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'No supporters yet — be the first!',
+                        'No supporters yet - be the first!',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurfaceVariant.withValues(
                             alpha: 0.6,
@@ -236,7 +299,7 @@ class _RecentDonorsCard extends StatelessWidget {
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: donorNames
+                children: supporters
                     .map(
                       (name) =>
                           _SupporterChip(name: name, colorScheme: colorScheme),
@@ -250,135 +313,49 @@ class _RecentDonorsCard extends StatelessWidget {
   }
 }
 
-class _DonateLinksCard extends StatelessWidget {
+class _DonateNoticeCard extends StatelessWidget {
   final ColorScheme colorScheme;
+  final List<String> notices;
 
-  const _DonateLinksCard({required this.colorScheme});
+  const _DonateNoticeCard({required this.colorScheme, required this.notices});
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardColor = isDark
-        ? Color.alphaBlend(
-            Colors.white.withValues(alpha: 0.08),
-            colorScheme.surface,
-          )
-        : Color.alphaBlend(
-            Colors.black.withValues(alpha: 0.04),
-            colorScheme.surface,
-          );
-
     return Card(
       elevation: 0,
-      color: cardColor,
+      color: colorScheme.secondaryContainer.withValues(alpha: 0.3),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          _DonateCardItem(
-            title: 'Ko-fi',
-            subtitle: 'ko-fi.com/zarzet',
-            customIcon: const KofiIcon(size: 22, color: Colors.white),
-            color: const Color(0xFFFF5E5B),
-            url: AppInfo.kofiUrl,
-            colorScheme: colorScheme,
-          ),
-          Divider(
-            height: 1,
-            thickness: 1,
-            indent: 74,
-            endIndent: 16,
-            color: colorScheme.outlineVariant.withValues(alpha: 0.3),
-          ),
-          _DonateCardItem(
-            title: 'GitHub Sponsors',
-            subtitle: 'github.com/sponsors/zarzet',
-            customIcon: const GitHubIcon(size: 22, color: Colors.white),
-            color: const Color(0xFF2D333B),
-            url: AppInfo.githubSponsorsUrl,
-            colorScheme: colorScheme,
-          ),
-          Divider(
-            height: 1,
-            thickness: 1,
-            indent: 74,
-            endIndent: 16,
-            color: colorScheme.outlineVariant.withValues(alpha: 0.3),
-          ),
-          _CryptoWalletItem(
-            title: 'USDT (TRC20)',
-            walletAddress: 'TL7iAqjq9M8BwVMi9AtHvuAGHtdwEvsDta',
-            color: const Color(0xFF26A17B),
-            colorScheme: colorScheme,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DonateCardItem extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final Widget customIcon;
-  final Color color;
-  final String url;
-  final ColorScheme colorScheme;
-
-  const _DonateCardItem({
-    required this.title,
-    required this.subtitle,
-    required this.customIcon,
-    required this.color,
-    required this.url,
-    required this.colorScheme,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () =>
-          launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: Row(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Center(child: customIcon),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: colorScheme.onSurface,
-                    ),
+            Row(
+              children: [
+                Icon(
+                  Icons.volunteer_activism_rounded,
+                  size: 20,
+                  color: colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Good to Know',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            for (var index = 0; index < notices.length; index++) ...[
+              _NoticeLine(
+                icon: _noticeIcon(index),
+                text: notices[index],
+                colorScheme: colorScheme,
               ),
-            ),
-            Icon(
-              Icons.open_in_new,
-              size: 18,
-              color: colorScheme.onSurfaceVariant,
-            ),
+              if (index < notices.length - 1) const SizedBox(height: 6),
+            ],
           ],
         ),
       ),
@@ -386,32 +363,18 @@ class _DonateCardItem extends StatelessWidget {
   }
 }
 
-class _CryptoWalletItem extends StatelessWidget {
-  final String title;
-  final String walletAddress;
-  final Color color;
+class _DonateMethodItem extends StatelessWidget {
+  final DonateMethod method;
   final ColorScheme colorScheme;
 
-  const _CryptoWalletItem({
-    required this.title,
-    required this.walletAddress,
-    required this.color,
-    required this.colorScheme,
-  });
+  const _DonateMethodItem({required this.method, required this.colorScheme});
 
   @override
   Widget build(BuildContext context) {
+    final color = Color(method.color);
+
     return InkWell(
-      onTap: () {
-        Clipboard.setData(ClipboardData(text: walletAddress));
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('$title address copied to clipboard'),
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      },
+      onTap: () => _handleTap(context),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
@@ -423,16 +386,7 @@ class _CryptoWalletItem extends StatelessWidget {
                 color: color,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Center(
-                child: Text(
-                  '\$',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+              child: Center(child: _methodIcon(method)),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -440,7 +394,7 @@ class _CryptoWalletItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    title,
+                    method.title,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: colorScheme.onSurface,
@@ -448,10 +402,12 @@ class _CryptoWalletItem extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    walletAddress,
+                    method.subtitle.isEmpty
+                        ? method.walletAddress ?? method.url ?? ''
+                        : method.subtitle,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
-                      fontSize: 11,
+                      fontSize: method.isWallet ? 11 : null,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -459,7 +415,7 @@ class _CryptoWalletItem extends StatelessWidget {
               ),
             ),
             Icon(
-              Icons.copy_rounded,
+              method.isWallet ? Icons.copy_rounded : Icons.open_in_new,
               size: 18,
               color: colorScheme.onSurfaceVariant,
             ),
@@ -467,6 +423,30 @@ class _CryptoWalletItem extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _handleTap(BuildContext context) async {
+    if (method.isWallet) {
+      await Clipboard.setData(ClipboardData(text: method.walletAddress!));
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${method.title} address copied to clipboard'),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+      return;
+    }
+
+    final url = method.url;
+    if (url == null || url.isEmpty) return;
+
+    final uri = Uri.tryParse(url);
+    if (uri == null) return;
+
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 }
 
@@ -542,4 +522,45 @@ class _NoticeLine extends StatelessWidget {
       ],
     );
   }
+}
+
+Widget _methodIcon(DonateMethod method) {
+  switch (method.icon.toLowerCase()) {
+    case 'kofi':
+    case 'ko-fi':
+      return const KofiIcon(size: 22, color: Colors.white);
+    case 'github':
+    case 'github-sponsors':
+      return const GitHubIcon(size: 22, color: Colors.white);
+    case 'crypto':
+    case 'wallet':
+      return const Text(
+        '\$',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+        ),
+      );
+    case 'coffee':
+      return const Icon(
+        Icons.local_cafe_rounded,
+        color: Colors.white,
+        size: 22,
+      );
+    case 'heart':
+    default:
+      return const Icon(Icons.favorite_rounded, color: Colors.white, size: 22);
+  }
+}
+
+IconData _noticeIcon(int index) {
+  const icons = [
+    Icons.block,
+    Icons.build_outlined,
+    Icons.favorite_border,
+    Icons.history,
+    Icons.update,
+  ];
+  return icons[index % icons.length];
 }

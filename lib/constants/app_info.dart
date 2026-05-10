@@ -17,6 +17,8 @@ class AppInfo {
   static const String githubUrl = 'https://github.com/$githubRepo';
   static const String originalGithubUrl =
       'https://github.com/afkarxyz/SpotiFLAC';
+  static const String remoteConfigApiUrl =
+      'https://api.zarz.moe/v1/spotiflac-mobile/config';
 
   static const String kofiUrl = 'https://ko-fi.com/zarzet';
   static const String githubSponsorsUrl = 'https://github.com/sponsors/zarzet/';
