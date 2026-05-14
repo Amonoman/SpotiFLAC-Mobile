@@ -562,16 +562,24 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                             ],
                           ),
                           const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              _buildShareButton(context),
-                              const SizedBox(width: 12),
-                              _buildLoveAllButton(),
-                              const SizedBox(width: 12),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _buildLoveAllButton(),
+                                  const SizedBox(width: 12),
+                                  _buildAddToPlaylistButton(context),
+                                  const SizedBox(width: 12),
+                                  _buildShareButton(context),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
                               FilledButton.icon(
                                 onPressed: () => _downloadAll(context),
-                                icon: Icon(Icons.download, size: 18),
+                                icon: const Icon(Icons.download, size: 18),
                                 label: Text(
                                   context.l10n.downloadAllCount(tracks.length),
                                 ),
@@ -584,8 +592,6 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              _buildAddToPlaylistButton(context),
                             ],
                           ),
                         ],
@@ -814,11 +820,7 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
           type: 'album',
           sourceExtensionId: widget.extensionId ?? '',
         ),
-        icon: const Icon(
-          Icons.open_in_new_rounded,
-          size: 22,
-          color: Colors.white,
-        ),
+        icon: const Icon(Icons.share_rounded, size: 22, color: Colors.white),
         tooltip: 'In anderen Diensten öffnen',
         padding: EdgeInsets.zero,
       ),

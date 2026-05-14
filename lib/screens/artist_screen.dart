@@ -1309,7 +1309,7 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
                           sourceExtensionId:
                               _directMetadataProviderId() ?? '',
                         ),
-                        icon: const Icon(Icons.open_in_new_rounded, size: 24),
+                        icon: const Icon(Icons.share_rounded, size: 24),
                         color: Colors.black87,
                         tooltip: 'In anderen Diensten öffnen',
                       ),

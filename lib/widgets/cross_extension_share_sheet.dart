@@ -1,27 +1,14 @@
 // lib/widgets/cross_extension_share_sheet.dart
-//
-// Usage example from album_screen.dart:
-//
-//   IconButton(
-//     icon: const Icon(Icons.open_in_new_rounded),
-//     tooltip: 'Open in other services',
-//     onPressed: () => CrossExtensionShareSheet.show(
-//       context,
-//       name: album.name,
-//       artists: album.artists,
-//       type: 'album',
-//       sourceExtensionId: album.providerId,
-//     ),
-//   )
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/cross_extension_share_service.dart';
 
 class CrossExtensionShareSheet extends StatefulWidget {
   final String name;
   final String artists;
-  final String type; // "album" | "artist" | "playlist"
+  final String type; // "album" | "artist"
   final String sourceExtensionId;
 
   const CrossExtensionShareSheet({
@@ -87,7 +74,6 @@ class _CrossExtensionShareSheetState extends State<CrossExtensionShareSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Handle bar
             Center(
               child: Container(
                 margin: const EdgeInsets.only(top: 12, bottom: 4),
@@ -99,20 +85,20 @@ class _CrossExtensionShareSheetState extends State<CrossExtensionShareSheet> {
                 ),
               ),
             ),
-            // Title
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
               child: Text(
-                'Open in other services',
-                style: textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                'In anderen Diensten öffnen',
+                style: textTheme.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w600),
               ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
               child: Text(
-                widget.name,
+                widget.artists.isNotEmpty
+                    ? '${widget.name} · ${widget.artists}'
+                    : widget.name,
                 style: textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -121,13 +107,12 @@ class _CrossExtensionShareSheetState extends State<CrossExtensionShareSheet> {
               ),
             ),
             const Divider(height: 1),
-            // Results
             FutureBuilder<List<CrossExtensionShareResult>>(
               future: _future,
               builder: (context, snapshot) {
                 if (snapshot.connectionState != ConnectionState.done) {
                   return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 32),
+                    padding: EdgeInsets.symmetric(vertical: 40),
                     child: Center(child: CircularProgressIndicator()),
                   );
                 }
@@ -139,7 +124,7 @@ class _CrossExtensionShareSheetState extends State<CrossExtensionShareSheet> {
                     padding: const EdgeInsets.all(32),
                     child: Center(
                       child: Text(
-                        'No other extensions installed.',
+                        'Keine weiteren Extensions installiert.',
                         style: textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -148,17 +133,24 @@ class _CrossExtensionShareSheetState extends State<CrossExtensionShareSheet> {
                   );
                 }
 
-                return ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  itemCount: results.length,
-                  separatorBuilder: (_, __) =>
-                      const Divider(height: 1, indent: 20, endIndent: 20),
-                  itemBuilder: (context, index) {
-                    final res = results[index];
-                    return _ResultTile(result: res);
-                  },
+                return ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.5,
+                  ),
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    itemCount: results.length,
+                    separatorBuilder: (_, __) => const Divider(
+                      height: 1,
+                      indent: 20,
+                      endIndent: 20,
+                    ),
+                    itemBuilder: (context, index) => _ResultTile(
+                      result: results[index],
+                      type: widget.type,
+                    ),
+                  ),
                 );
               },
             ),
@@ -172,8 +164,68 @@ class _CrossExtensionShareSheetState extends State<CrossExtensionShareSheet> {
 
 class _ResultTile extends StatelessWidget {
   final CrossExtensionShareResult result;
+  final String type;
 
-  const _ResultTile({required this.result});
+  const _ResultTile({required this.result, required this.type});
+
+  String _buildLink() {
+    final id = result.itemId ?? '';
+    final ext = result.extensionId.toLowerCase();
+
+    if (ext.contains('spotify')) {
+      return type == 'artist'
+          ? 'https://open.spotify.com/artist/$id'
+          : 'https://open.spotify.com/album/$id';
+    }
+    if (ext.contains('tidal')) {
+      return type == 'artist'
+          ? 'https://tidal.com/browse/artist/$id'
+          : 'https://tidal.com/browse/album/$id';
+    }
+    if (ext.contains('deezer')) {
+      return type == 'artist'
+          ? 'https://www.deezer.com/artist/$id'
+          : 'https://www.deezer.com/album/$id';
+    }
+    if (ext.contains('qobuz')) {
+      return type == 'artist'
+          ? 'https://www.qobuz.com/artist/$id'
+          : 'https://www.qobuz.com/album/$id';
+    }
+    if (ext.contains('apple') || ext.contains('itunes')) {
+      return 'https://music.apple.com/album/$id';
+    }
+    if (ext.contains('youtube') || ext.contains('ytmusic')) {
+      return type == 'artist'
+          ? 'https://music.youtube.com/channel/$id'
+          : 'https://music.youtube.com/browse/$id';
+    }
+    return id;
+  }
+
+  void _copyLink(BuildContext context) {
+    final link = _buildLink();
+    Clipboard.setData(ClipboardData(text: link));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Link kopiert'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  Future<void> _openLink(BuildContext context) async {
+    final link = _buildLink();
+    final uri = Uri.tryParse(link);
+    if (uri == null) return;
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Kann nicht öffnen: $link')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -181,9 +233,8 @@ class _ResultTile extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     if (!result.found) {
-      // Not found state
       return ListTile(
-        leading: _ExtensionIcon(extensionId: result.extensionId),
+        leading: _ExtensionAvatar(extensionId: result.extensionId),
         title: Text(
           result.displayName,
           style: textTheme.bodyMedium?.copyWith(
@@ -191,9 +242,7 @@ class _ResultTile extends StatelessWidget {
           ),
         ),
         subtitle: Text(
-          result.error == 'cross-service playlist matching not supported'
-              ? 'Playlists can\'t be matched across services'
-              : 'Not found',
+          'Nicht gefunden',
           style: textTheme.bodySmall?.copyWith(
             color: colorScheme.onSurfaceVariant.withOpacity(0.6),
           ),
@@ -206,75 +255,46 @@ class _ResultTile extends StatelessWidget {
       );
     }
 
+    final link = _buildLink();
+
     return ListTile(
-      leading: _ExtensionIcon(extensionId: result.extensionId),
+      leading: _ExtensionAvatar(extensionId: result.extensionId),
       title: Text(
         result.displayName,
         style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
       ),
-      subtitle: result.itemName != null
-          ? Text(
-              result.itemName!,
-              style: textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            )
-          : null,
+      subtitle: Text(
+        link,
+        style: textTheme.bodySmall?.copyWith(color: colorScheme.primary),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Copy ID button
-          if (result.itemId != null)
-            IconButton(
-              icon: const Icon(Icons.copy_rounded, size: 18),
-              tooltip: 'Copy ID',
-              onPressed: () {
-                Clipboard.setData(ClipboardData(text: result.itemId!));
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('ID copied: ${result.itemId}'),
-                    duration: const Duration(seconds: 2),
-                  ),
-                );
-              },
-            ),
-          Icon(
-            Icons.check_circle_rounded,
-            color: colorScheme.primary,
-            size: 20,
+          IconButton(
+            icon: const Icon(Icons.copy_rounded, size: 20),
+            tooltip: 'Link kopieren',
+            onPressed: () => _copyLink(context),
+          ),
+          IconButton(
+            icon: const Icon(Icons.open_in_new_rounded, size: 20),
+            tooltip: 'Öffnen',
+            onPressed: () => _openLink(context),
           ),
         ],
       ),
-      onTap: result.itemId != null
-          ? () {
-              // Copy to clipboard as a simple sharing mechanism.
-              // You can extend this to open the extension's detail page instead.
-              Clipboard.setData(ClipboardData(text: result.itemId!));
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    '${result.displayName} ID copied — open in the app to navigate there.',
-                  ),
-                  duration: const Duration(seconds: 3),
-                ),
-              );
-            }
-          : null,
     );
   }
 }
 
-/// Simple colored circle with the first letter of the extension ID.
-/// Replace with actual extension icon loading if your app supports it.
-class _ExtensionIcon extends StatelessWidget {
+class _ExtensionAvatar extends StatelessWidget {
   final String extensionId;
 
-  const _ExtensionIcon({required this.extensionId});
+  const _ExtensionAvatar({required this.extensionId});
 
-  Color _colorFromId(String id) {
-    final colors = [
+  Color _color() {
+    const colors = [
       Colors.deepPurple,
       Colors.teal,
       Colors.indigo,
@@ -289,13 +309,11 @@ class _ExtensionIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final letter =
-        extensionId.isNotEmpty ? extensionId[0].toUpperCase() : '?';
     return CircleAvatar(
       radius: 18,
-      backgroundColor: _colorFromId(extensionId),
+      backgroundColor: _color(),
       child: Text(
-        letter,
+        extensionId.isNotEmpty ? extensionId[0].toUpperCase() : '?',
         style: const TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.bold,
