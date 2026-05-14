@@ -155,9 +155,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
   _queueLibraryCountsCache = {};
   final Map<_QueueLibraryPageRequest, _QueueLibraryPageData>
   _queueLibraryPageDataCache = {};
-  final Map<String, _LibraryScrollTargets> _libraryScrollTargets = {};
-  bool _showLibraryScrollTopButton = false;
-  bool _showLibraryScrollBottomButton = false;
 
   double _effectiveTextScale() {
     final textScale = MediaQuery.textScalerOf(context).scale(1.0);
@@ -195,13 +192,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
 
   void _handleLibraryGridScaleEnd(ScaleEndDetails details) {
     _libraryGridScaleStartExtent = null;
-  }
-
-  _LibraryScrollTargets _scrollTargetsForFilter(String filterMode) {
-    return _libraryScrollTargets.putIfAbsent(
-      filterMode,
-      _LibraryScrollTargets.new,
-    );
   }
 
   @override
@@ -319,17 +309,11 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     required bool hasMoreLibrary,
     required bool isPageLoading,
   }) {
-    if (notification.depth != 0) {
+    if (isPageLoading || !hasMoreLibrary || notification.depth != 0) {
       return false;
     }
 
     final metrics = notification.metrics;
-    _updateLibraryScrollButtons(filterMode, metrics);
-
-    if (isPageLoading || !hasMoreLibrary) {
-      return false;
-    }
-
     if (metrics.maxScrollExtent <= 0) return false;
     final threshold = metrics.maxScrollExtent * 0.7;
     final nearEnd =
@@ -339,40 +323,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
 
     _loadMoreLibraryItems(hasMoreLibrary: hasMoreLibrary);
     return false;
-  }
-
-  void _updateLibraryScrollButtons(String filterMode, ScrollMetrics metrics) {
-    if (!mounted) return;
-    if (filterMode != ref.read(settingsProvider).historyFilterMode) {
-      return;
-    }
-
-    final showTop =
-        metrics.maxScrollExtent > 0 &&
-        metrics.pixels > metrics.viewportDimension * 0.45;
-    final showBottom =
-        metrics.maxScrollExtent > 0 &&
-        metrics.extentAfter > metrics.viewportDimension * 0.75;
-
-    if (showTop == _showLibraryScrollTopButton &&
-        showBottom == _showLibraryScrollBottomButton) {
-      return;
-    }
-
-    setState(() {
-      _showLibraryScrollTopButton = showTop;
-      _showLibraryScrollBottomButton = showBottom;
-    });
-  }
-
-  void _resetLibraryScrollButtons() {
-    if (!_showLibraryScrollTopButton && !_showLibraryScrollBottomButton) {
-      return;
-    }
-    setState(() {
-      _showLibraryScrollTopButton = false;
-      _showLibraryScrollBottomButton = false;
-    });
   }
 
   void _invalidateFilterContentCache() {
@@ -523,54 +473,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     _cachedUnifiedLocalSource = items;
     _cachedUnifiedLocal = unified;
     return unified;
-  }
-
-  Widget _buildLibraryScrollButtons(
-    BuildContext context,
-    double bottomPadding,
-  ) {
-    final visible =
-        _showLibraryScrollTopButton || _showLibraryScrollBottomButton;
-    final colorScheme = Theme.of(context).colorScheme;
-    final bottomOffset =
-        bottomPadding +
-        (_isSelectionMode || _isPlaylistSelectionMode ? 104 : 20);
-
-    return Positioned(
-      right: 16,
-      bottom: bottomOffset,
-      child: IgnorePointer(
-        ignoring: !visible,
-        child: AnimatedOpacity(
-          opacity: visible ? 1 : 0,
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOutCubic,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (_showLibraryScrollTopButton)
-                _LibraryScrollButton(
-                  icon: Icons.keyboard_arrow_up,
-                  colorScheme: colorScheme,
-                  onPressed: () {
-                    unawaited(_scrollLibraryToTop());
-                  },
-                ),
-              if (_showLibraryScrollTopButton && _showLibraryScrollBottomButton)
-                const SizedBox(height: 8),
-              if (_showLibraryScrollBottomButton)
-                _LibraryScrollButton(
-                  icon: Icons.keyboard_arrow_down,
-                  colorScheme: colorScheme,
-                  onPressed: () {
-                    unawaited(_scrollLibraryToBottom());
-                  },
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   Set<String> _downloadedPathKeys(List<DownloadHistoryItem> historyItems) {
@@ -799,7 +701,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
   void _onFilterPageChanged(int index) {
     HapticFeedback.selectionClick();
     final filterMode = _filterModes[index];
-    _resetLibraryScrollButtons();
     ref.read(settingsProvider.notifier).setHistoryFilterMode(filterMode);
   }
 
@@ -808,30 +709,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
       index,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOutCubic,
-    );
-  }
-
-  Future<void> _scrollLibraryToTop() async {
-    final filterMode = ref.read(settingsProvider).historyFilterMode;
-    final context = _libraryScrollTargets[filterMode]?.topKey.currentContext;
-    if (context == null) return;
-    await Scrollable.ensureVisible(
-      context,
-      duration: const Duration(milliseconds: 450),
-      curve: Curves.easeOutCubic,
-      alignment: 0,
-    );
-  }
-
-  Future<void> _scrollLibraryToBottom() async {
-    final filterMode = ref.read(settingsProvider).historyFilterMode;
-    final context = _libraryScrollTargets[filterMode]?.bottomKey.currentContext;
-    if (context == null) return;
-    await Scrollable.ensureVisible(
-      context,
-      duration: const Duration(milliseconds: 550),
-      curve: Curves.easeOutCubic,
-      alignment: 1,
     );
   }
 
@@ -2970,7 +2847,6 @@ class _QueueTabState extends ConsumerState<QueueTab> {
               ),
             ),
           ), // ScrollConfiguration
-          _buildLibraryScrollButtons(context, bottomPadding),
         ],
       ),
     );
@@ -3592,12 +3468,8 @@ class _QueueTabState extends ConsumerState<QueueTab> {
       }
     }
 
-    final scrollTargets = _scrollTargetsForFilter(filterMode);
     final content = CustomScrollView(
       slivers: [
-        SliverToBoxAdapter(
-          child: SizedBox(key: scrollTargets.topKey, height: 0),
-        ),
         if (totalTrackCount > 0 && filterMode == 'all')
           SliverToBoxAdapter(
             child: Padding(
@@ -4027,10 +3899,7 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                 (filteredGroupedAlbums.isNotEmpty ||
                     filteredGroupedLocalAlbums.isNotEmpty)))
           SliverToBoxAdapter(
-            child: SizedBox(
-              key: scrollTargets.bottomKey,
-              height: _isSelectionMode ? 100 : 16,
-            ),
+            child: SizedBox(height: _isSelectionMode ? 100 : 16),
           ),
       ],
     );
@@ -6575,42 +6444,6 @@ class _AnimatedLibrarySliverGrid extends StatefulWidget {
   @override
   State<_AnimatedLibrarySliverGrid> createState() =>
       _AnimatedLibrarySliverGridState();
-}
-
-class _LibraryScrollTargets {
-  final GlobalKey topKey = GlobalKey();
-  final GlobalKey bottomKey = GlobalKey();
-}
-
-class _LibraryScrollButton extends StatelessWidget {
-  final IconData icon;
-  final ColorScheme colorScheme;
-  final VoidCallback onPressed;
-
-  const _LibraryScrollButton({
-    required this.icon,
-    required this.colorScheme,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: colorScheme.surfaceContainerHigh,
-      elevation: 3,
-      shadowColor: colorScheme.shadow.withValues(alpha: 0.18),
-      shape: const CircleBorder(),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onPressed,
-        customBorder: const CircleBorder(),
-        child: SizedBox.square(
-          dimension: 44,
-          child: Icon(icon, color: colorScheme.onSurface),
-        ),
-      ),
-    );
-  }
 }
 
 class _AnimatedLibrarySliverGridState extends State<_AnimatedLibrarySliverGrid>
