@@ -23,6 +23,7 @@ import 'package:spotiflac_android/widgets/track_collection_quick_actions.dart';
 import 'package:spotiflac_android/widgets/animation_utils.dart';
 import 'package:spotiflac_android/utils/clickable_metadata.dart';
 import 'package:spotiflac_android/widgets/cached_cover_image.dart';
+import 'package:spotiflac_android/widgets/cross_extension_share_sheet.dart';
 
 class _ArtistCache {
   static final Map<String, _CacheEntry> _cache = {};
@@ -1287,6 +1288,30 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
                         tooltip: isFavoriteArtist
                             ? context.l10n.artistOptionRemoveFromFavorites
                             : context.l10n.artistOptionAddToFavorites,
+                      ),
+                    ),
+                  ],
+                  if (!_isSelectionMode) ...[
+                    const SizedBox(width: 12),
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        onPressed: () => CrossExtensionShareSheet.show(
+                          context,
+                          name: widget.artistName,
+                          artists: '',
+                          type: 'artist',
+                          sourceExtensionId:
+                              _directMetadataProviderId() ?? '',
+                        ),
+                        icon: const Icon(Icons.open_in_new_rounded, size: 24),
+                        color: Colors.black87,
+                        tooltip: 'In anderen Diensten öffnen',
                       ),
                     ),
                   ],
