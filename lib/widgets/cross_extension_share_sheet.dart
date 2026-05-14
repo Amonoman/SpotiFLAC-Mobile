@@ -168,8 +168,22 @@ class _ResultTile extends StatelessWidget {
 
   const _ResultTile({required this.result, required this.type});
 
+  /// Strips any "provider:" prefix from the id returned by the backend.
+  /// e.g. "spotify:3TVXtAsR1Inumwj472S9r4" → "3TVXtAsR1Inumwj472S9r4"
+  ///      "tidal:12345"                    → "12345"
+  ///      "12345"                          → "12345"
+  String _stripPrefix(String id) {
+    final colonIndex = id.indexOf(':');
+    if (colonIndex > 0 && colonIndex < id.length - 1) {
+      return id.substring(colonIndex + 1);
+    }
+    return id;
+  }
+
   String _buildLink() {
-    final id = result.itemId ?? '';
+    final rawId = result.itemId ?? '';
+    if (rawId.isEmpty) return '';
+    final id = _stripPrefix(rawId);
     final ext = result.extensionId.toLowerCase();
 
     if (ext.contains('spotify')) {
@@ -193,31 +207,36 @@ class _ResultTile extends StatelessWidget {
           : 'https://www.qobuz.com/album/$id';
     }
     if (ext.contains('apple') || ext.contains('itunes')) {
-      return 'https://music.apple.com/album/$id';
+      return type == 'artist'
+          ? 'https://music.apple.com/artist/$id'
+          : 'https://music.apple.com/album/$id';
     }
     if (ext.contains('youtube') || ext.contains('ytmusic')) {
       return type == 'artist'
           ? 'https://music.youtube.com/channel/$id'
           : 'https://music.youtube.com/browse/$id';
     }
+    // Fallback: return the stripped id as-is so at least it's visible
     return id;
   }
 
   void _copyLink(BuildContext context) {
     final link = _buildLink();
+    if (link.isEmpty) return;
     Clipboard.setData(ClipboardData(text: link));
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text('Link kopiert'),
-        duration: const Duration(seconds: 2),
+        duration: Duration(seconds: 2),
       ),
     );
   }
 
   Future<void> _openLink(BuildContext context) async {
     final link = _buildLink();
+    if (link.isEmpty) return;
     final uri = Uri.tryParse(link);
-    if (uri == null) return;
+    if (uri == null || !uri.hasScheme) return;
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else if (context.mounted) {
@@ -264,7 +283,7 @@ class _ResultTile extends StatelessWidget {
         style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
       ),
       subtitle: Text(
-        link,
+        link.isNotEmpty ? link : 'Kein Link verfügbar',
         style: textTheme.bodySmall?.copyWith(color: colorScheme.primary),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
@@ -275,12 +294,12 @@ class _ResultTile extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.copy_rounded, size: 20),
             tooltip: 'Link kopieren',
-            onPressed: () => _copyLink(context),
+            onPressed: link.isNotEmpty ? () => _copyLink(context) : null,
           ),
           IconButton(
             icon: const Icon(Icons.open_in_new_rounded, size: 20),
             tooltip: 'Öffnen',
-            onPressed: () => _openLink(context),
+            onPressed: link.isNotEmpty ? () => _openLink(context) : null,
           ),
         ],
       ),
