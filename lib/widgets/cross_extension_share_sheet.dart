@@ -74,6 +74,7 @@ class _CrossExtensionShareSheetState extends State<CrossExtensionShareSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Handle bar
             Center(
               child: Container(
                 margin: const EdgeInsets.only(top: 12, bottom: 4),
@@ -168,61 +169,7 @@ class _ResultTile extends StatelessWidget {
 
   const _ResultTile({required this.result, required this.type});
 
-  /// Strips any "provider:" prefix from the id returned by the backend.
-  /// e.g. "spotify:3TVXtAsR1Inumwj472S9r4" → "3TVXtAsR1Inumwj472S9r4"
-  ///      "tidal:12345"                    → "12345"
-  ///      "12345"                          → "12345"
-  String _stripPrefix(String id) {
-    final colonIndex = id.indexOf(':');
-    if (colonIndex > 0 && colonIndex < id.length - 1) {
-      return id.substring(colonIndex + 1);
-    }
-    return id;
-  }
-
-  String _buildLink() {
-    final rawId = result.itemId ?? '';
-    if (rawId.isEmpty) return '';
-    final id = _stripPrefix(rawId);
-    final ext = result.extensionId.toLowerCase();
-
-    if (ext.contains('spotify')) {
-      return type == 'artist'
-          ? 'https://open.spotify.com/artist/$id'
-          : 'https://open.spotify.com/album/$id';
-    }
-    if (ext.contains('tidal')) {
-      return type == 'artist'
-          ? 'https://tidal.com/browse/artist/$id'
-          : 'https://tidal.com/browse/album/$id';
-    }
-    if (ext.contains('deezer')) {
-      return type == 'artist'
-          ? 'https://www.deezer.com/artist/$id'
-          : 'https://www.deezer.com/album/$id';
-    }
-    if (ext.contains('qobuz')) {
-      return type == 'artist'
-          ? 'https://www.qobuz.com/artist/$id'
-          : 'https://www.qobuz.com/album/$id';
-    }
-    if (ext.contains('apple') || ext.contains('itunes')) {
-      return type == 'artist'
-          ? 'https://music.apple.com/artist/$id'
-          : 'https://music.apple.com/album/$id';
-    }
-    if (ext.contains('youtube') || ext.contains('ytmusic')) {
-      return type == 'artist'
-          ? 'https://music.youtube.com/channel/$id'
-          : 'https://music.youtube.com/browse/$id';
-    }
-    // Fallback: return the stripped id as-is so at least it's visible
-    return id;
-  }
-
-  void _copyLink(BuildContext context) {
-    final link = _buildLink();
-    if (link.isEmpty) return;
+  void _copyLink(BuildContext context, String link) {
     Clipboard.setData(ClipboardData(text: link));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -232,11 +179,9 @@ class _ResultTile extends StatelessWidget {
     );
   }
 
-  Future<void> _openLink(BuildContext context) async {
-    final link = _buildLink();
-    if (link.isEmpty) return;
+  Future<void> _openLink(BuildContext context, String link) async {
     final uri = Uri.tryParse(link);
-    if (uri == null || !uri.hasScheme) return;
+    if (uri == null) return;
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else if (context.mounted) {
@@ -274,7 +219,31 @@ class _ResultTile extends StatelessWidget {
       );
     }
 
-    final link = _buildLink();
+    final link = result.resolveLink(type);
+
+    if (link == null || link.isEmpty) {
+      // Found in extension but no URL could be built.
+      return ListTile(
+        leading: _ExtensionAvatar(extensionId: result.extensionId),
+        title: Text(
+          result.displayName,
+          style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+        ),
+        subtitle: Text(
+          result.itemName ?? '',
+          style: textTheme.bodySmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        trailing: Icon(
+          Icons.help_outline_rounded,
+          color: colorScheme.onSurfaceVariant.withOpacity(0.4),
+          size: 18,
+        ),
+      );
+    }
 
     return ListTile(
       leading: _ExtensionAvatar(extensionId: result.extensionId),
@@ -283,7 +252,7 @@ class _ResultTile extends StatelessWidget {
         style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
       ),
       subtitle: Text(
-        link.isNotEmpty ? link : 'Kein Link verfügbar',
+        link,
         style: textTheme.bodySmall?.copyWith(color: colorScheme.primary),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
@@ -294,12 +263,12 @@ class _ResultTile extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.copy_rounded, size: 20),
             tooltip: 'Link kopieren',
-            onPressed: link.isNotEmpty ? () => _copyLink(context) : null,
+            onPressed: () => _copyLink(context, link),
           ),
           IconButton(
             icon: const Icon(Icons.open_in_new_rounded, size: 20),
             tooltip: 'Öffnen',
-            onPressed: link.isNotEmpty ? () => _openLink(context) : null,
+            onPressed: () => _openLink(context, link),
           ),
         ],
       ),

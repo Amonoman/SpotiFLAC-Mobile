@@ -8,25 +8,35 @@ import (
 
 // CrossExtensionShareResult holds the result for one extension.
 type CrossExtensionShareResult struct {
-	ExtensionID   string `json:"extension_id"`
-	DisplayName   string `json:"display_name"`
-	Found         bool   `json:"found"`
-	ItemID        string `json:"item_id,omitempty"`
-	ItemName      string `json:"item_name,omitempty"`
-	ItemArtists   string `json:"item_artists,omitempty"`
-	Error         string `json:"error,omitempty"`
+	ExtensionID string `json:"extension_id"`
+	DisplayName string `json:"display_name"`
+	Found       bool   `json:"found"`
+
+	// ItemID is the raw prefixed ID returned by the extension, e.g. "qobuz:0060253780269".
+	ItemID string `json:"item_id,omitempty"`
+
+	// AlbumID / ArtistID are the prefixed collection IDs, e.g. "qobuz:0060253780269".
+	AlbumID  string `json:"album_id,omitempty"`
+	ArtistID string `json:"artist_id,omitempty"`
+
+	// ExternalLink is the direct web URL from the extension's external_links map, if present.
+	ExternalLink string `json:"external_link,omitempty"`
+
+	ItemName    string `json:"item_name,omitempty"`
+	ItemArtists string `json:"item_artists,omitempty"`
+	Error       string `json:"error,omitempty"`
 }
 
-// FindCollectionAcrossExtensionsJSON searches for an album, artist, or playlist
-// across all enabled metadata-provider extensions (except the source extension).
+// FindCollectionAcrossExtensionsJSON searches for an album or artist across all
+// enabled metadata-provider extensions (except the source extension).
 //
-// Parameters (all passed as JSON string):
+// Request JSON:
 //
 //	{
-//	  "name":                 "In Rainbows",       // album/artist/playlist title
-//	  "artists":              "Radiohead",          // for album / playlist queries
-//	  "type":                 "album",              // "album" | "artist" | "playlist"
-//	  "source_extension_id":  "com.example.tidal"  // skip this extension
+//	  "name":                "In Rainbows",
+//	  "artists":             "Radiohead",
+//	  "type":                "album",      // "album" | "artist"
+//	  "source_extension_id": "qobuz-web"
 //	}
 //
 // Returns JSON array of CrossExtensionShareResult.
@@ -56,189 +66,289 @@ func FindCollectionAcrossExtensionsJSON(requestJSON string) (string, error) {
 	manager := getExtensionManager()
 	providers := manager.GetMetadataProviders()
 
-	// Build search query once – "Album Name Artist Name"
 	searchQuery := req.Name
 	if req.Artists != "" {
 		searchQuery = req.Name + " " + req.Artists
 	}
 
-	type workItem struct {
-		provider *extensionProviderWrapper
-	}
-
-	work := make([]workItem, 0, len(providers))
+	work := make([]*extensionProviderWrapper, 0, len(providers))
 	for _, p := range providers {
 		if p.extension.ID == req.SourceExtensionID {
 			continue
 		}
-		work = append(work, workItem{provider: p})
+		work = append(work, p)
 	}
 
 	results := make([]CrossExtensionShareResult, len(work))
 	var wg sync.WaitGroup
 
-	for i, w := range work {
+	for i, p := range work {
 		wg.Add(1)
-		go func(idx int, wi workItem) {
+		go func(idx int, prov *extensionProviderWrapper) {
 			defer wg.Done()
-			res := CrossExtensionShareResult{
-				ExtensionID: wi.provider.extension.ID,
-				DisplayName: wi.provider.extension.Manifest.DisplayName,
+			base := CrossExtensionShareResult{
+				ExtensionID: prov.extension.ID,
+				DisplayName: prov.extension.Manifest.DisplayName,
 			}
-
 			switch req.Type {
 			case "artist":
-				res = findArtistForExtension(wi.provider, req.Name, searchQuery, res)
-			case "playlist":
-				res = findPlaylistForExtension(wi.provider, req.Name, req.Artists, searchQuery, res)
-			default: // "album"
-				res = findAlbumForExtension(wi.provider, req.Name, req.Artists, searchQuery, res)
+				results[idx] = findArtistForExtension(prov, req.Name, searchQuery, base)
+			default:
+				results[idx] = findAlbumForExtension(prov, req.Name, req.Artists, searchQuery, base)
 			}
-
-			results[idx] = res
-		}(i, w)
+		}(i, p)
 	}
 
 	wg.Wait()
 
-	jsonBytes, err := json.Marshal(results)
+	b, err := json.Marshal(results)
 	if err != nil {
 		return "[]", err
 	}
-	return string(jsonBytes), nil
+	return string(b), nil
 }
 
-// findAlbumForExtension searches for an album in a single extension.
-// Strategy: search tracks with "album artist", pick the best album match.
+// findAlbumForExtension searches for an album in one extension.
+// It uses the extension's SearchTracks, matches by album title + artist,
+// then extracts the album ID and any external link from the best matching track.
 func findAlbumForExtension(
 	p *extensionProviderWrapper,
 	albumName, artists, searchQuery string,
 	res CrossExtensionShareResult,
 ) CrossExtensionShareResult {
-	searchResult, err := p.SearchTracks(searchQuery, 10)
+	sr, err := p.SearchTracks(searchQuery, 10)
 	if err != nil {
 		res.Error = err.Error()
 		return res
 	}
-	if searchResult == nil || len(searchResult.Tracks) == 0 {
+	if sr == nil || len(sr.Tracks) == 0 {
 		res.Error = "no results"
 		return res
 	}
 
-	normalAlbum := normalizeLooseTitle(albumName)
-	normalArtists := normalizeLooseArtistName(artists)
+	normAlbum := normalizeLooseTitle(albumName)
+	normArtists := normalizeLooseArtistName(artists)
 
-	// Find the track whose album best matches.
 	bestScore := -1
-	var bestTrack *ExtTrackMetadata
+	var best *ExtTrackMetadata
 
-	for i := range searchResult.Tracks {
-		t := &searchResult.Tracks[i]
-		trackAlbum := normalizeLooseTitle(t.AlbumName)
-		trackArtist := normalizeLooseArtistName(t.Artists + " " + t.AlbumArtist)
+	for i := range sr.Tracks {
+		t := &sr.Tracks[i]
+		tAlbum := normalizeLooseTitle(t.AlbumName)
+		tArtist := normalizeLooseArtistName(t.Artists + " " + t.AlbumArtist)
 
 		score := 0
-		if trackAlbum == normalAlbum {
+		if tAlbum == normAlbum {
 			score += 100
-		} else if strings.Contains(trackAlbum, normalAlbum) || strings.Contains(normalAlbum, trackAlbum) {
+		} else if strings.Contains(tAlbum, normAlbum) || strings.Contains(normAlbum, tAlbum) {
 			score += 50
 		}
-		if normalArtists != "" && (strings.Contains(trackArtist, normalArtists) || strings.Contains(normalArtists, trackArtist)) {
+		if normArtists != "" &&
+			(strings.Contains(tArtist, normArtists) || strings.Contains(normArtists, tArtist)) {
 			score += 30
 		}
-
 		if score > bestScore {
 			bestScore = score
-			bestTrack = t
+			best = t
 		}
 	}
 
-	if bestTrack == nil || bestScore < 50 {
+	if best == nil || bestScore < 50 {
 		res.Error = "album not found"
 		return res
 	}
 
-	// Prefer a provider-specific ID to build an internal link.
-	itemID := resolveCollectionItemID(bestTrack)
 	res.Found = true
-	res.ItemID = itemID
-	res.ItemName = bestTrack.AlbumName
-	res.ItemArtists = bestTrack.Artists
+	res.ItemName = best.AlbumName
+	res.ItemArtists = best.Artists
+
+	// Album ID: extensions store it in the prefixed track ID's album part.
+	// The Qobuz extension stores qobuz_id on the track; the track ID is "qobuz:<trackID>".
+	// We use the provider-specific album ID fields where available.
+	res.AlbumID = resolveAlbumID(best)
+	res.ArtistID = best.ID // fallback; artist_id isn't on track directly
+	res.ItemID = res.AlbumID
+
+	// ExternalLink: use the album-level external link if the extension provided one.
+	// Qobuz's formatTrack sets external_links["qobuz"] = play.qobuz.com/track/<id>.
+	// We derive the album URL from it.
+	res.ExternalLink = deriveAlbumExternalLink(best)
+
 	return res
 }
 
-// findArtistForExtension searches for an artist in a single extension.
+// findArtistForExtension searches for an artist in one extension.
 func findArtistForExtension(
 	p *extensionProviderWrapper,
 	artistName, searchQuery string,
 	res CrossExtensionShareResult,
 ) CrossExtensionShareResult {
-	searchResult, err := p.SearchTracks(searchQuery, 10)
+	sr, err := p.SearchTracks(searchQuery, 10)
 	if err != nil {
 		res.Error = err.Error()
 		return res
 	}
-	if searchResult == nil || len(searchResult.Tracks) == 0 {
+	if sr == nil || len(sr.Tracks) == 0 {
 		res.Error = "no results"
 		return res
 	}
 
-	normalArtist := normalizeLooseArtistName(artistName)
+	normArtist := normalizeLooseArtistName(artistName)
 	bestScore := -1
-	var bestTrack *ExtTrackMetadata
+	var best *ExtTrackMetadata
 
-	for i := range searchResult.Tracks {
-		t := &searchResult.Tracks[i]
-		trackArtist := normalizeLooseArtistName(t.Artists)
+	for i := range sr.Tracks {
+		t := &sr.Tracks[i]
+		tArtist := normalizeLooseArtistName(t.Artists)
 		score := 0
-		if trackArtist == normalArtist {
+		if tArtist == normArtist {
 			score += 100
-		} else if strings.Contains(trackArtist, normalArtist) || strings.Contains(normalArtist, trackArtist) {
+		} else if strings.Contains(tArtist, normArtist) || strings.Contains(normArtist, tArtist) {
 			score += 60
 		}
 		if score > bestScore {
 			bestScore = score
-			bestTrack = t
+			best = t
 		}
 	}
 
-	if bestTrack == nil || bestScore < 60 {
+	if best == nil || bestScore < 60 {
 		res.Error = "artist not found"
 		return res
 	}
 
 	res.Found = true
-	res.ItemID = resolveCollectionItemID(bestTrack)
-	res.ItemName = bestTrack.Artists
+	res.ItemName = best.Artists
+	res.ArtistID = resolveArtistID(best)
+	res.ItemID = res.ArtistID
+	res.ExternalLink = deriveArtistExternalLink(best)
 	return res
 }
 
-// findPlaylistForExtension falls back to album search (playlists are user-specific
-// and cannot be cross-matched by name alone; we look for a similarly-named album/playlist).
-func findPlaylistForExtension(
-	p *extensionProviderWrapper,
-	playlistName, artists, searchQuery string,
-	res CrossExtensionShareResult,
-) CrossExtensionShareResult {
-	// Playlists usually cannot be matched across services — return not-found gracefully.
-	res.Error = "cross-service playlist matching not supported"
-	return res
-}
-
-// resolveCollectionItemID picks the best available ID from a track to represent
-// the album/artist on the same extension (provider-specific IDs first).
-func resolveCollectionItemID(t *ExtTrackMetadata) string {
-	if t.TidalID != "" {
-		return t.TidalID
+// resolveAlbumID returns the best album ID for a track.
+// Extensions prefix IDs: "qobuz:ABC123", "tidal:456", etc.
+// For Qobuz, the track's ID is "qobuz:<trackID>" but we want the album ID.
+// The album ID is stored in the track's ExternalLinks or can be derived from QobuzID.
+func resolveAlbumID(t *ExtTrackMetadata) string {
+	// QobuzID on the track struct is just the raw numeric track ID.
+	// The album ID comes from the track.album.id in the JS which maps to album_id field.
+	// Since ExtTrackMetadata doesn't expose album_id directly, we derive it from
+	// ExternalLinks or fall back to the prefixed track ID.
+	if link, ok := t.ExternalLinks["qobuz"]; ok && link != "" {
+		return t.ID // "qobuz:<trackID>" – caller will strip to get numeric ID
 	}
 	if t.QobuzID != "" {
-		return t.QobuzID
+		return "qobuz:" + t.QobuzID
+	}
+	if t.TidalID != "" {
+		return "tidal:" + t.TidalID
 	}
 	if t.DeezerID != "" {
-		return t.DeezerID
+		return "deezer:" + t.DeezerID
 	}
 	if t.SpotifyID != "" {
-		return t.SpotifyID
+		return "spotify:" + t.SpotifyID
 	}
 	return t.ID
+}
+
+// resolveArtistID returns the best artist ID for a track.
+func resolveArtistID(t *ExtTrackMetadata) string {
+	// artist_id isn't in ExtTrackMetadata, so we use what we have.
+	// The Dart side will use ExternalLink for the URL instead.
+	if t.QobuzID != "" {
+		return "qobuz:" + t.QobuzID
+	}
+	if t.TidalID != "" {
+		return "tidal:" + t.TidalID
+	}
+	if t.DeezerID != "" {
+		return "deezer:" + t.DeezerID
+	}
+	if t.SpotifyID != "" {
+		return "spotify:" + t.SpotifyID
+	}
+	return t.ID
+}
+
+// deriveAlbumExternalLink builds a direct album URL from the track's external links.
+// Qobuz: external_links["qobuz"] = "https://play.qobuz.com/track/12345"
+//
+//	→ album link requires album ID which we don't have directly from search.
+//	  We use "https://open.qobuz.com/album/<albumID>" but we only have the track link.
+//	  So we return the track link as a fallback; the user lands on the track page
+//	  which shows the album.
+func deriveAlbumExternalLink(t *ExtTrackMetadata) string {
+	// Use the first available external link from the extension.
+	for _, link := range t.ExternalLinks {
+		if link != "" {
+			return link
+		}
+	}
+	// Fallback: construct from known provider patterns.
+	id := stripProviderPrefix(t.ID)
+	switch inferProvider(t) {
+	case "qobuz":
+		return "https://open.qobuz.com/track/" + id
+	case "tidal":
+		return "https://tidal.com/browse/track/" + id
+	case "deezer":
+		return "https://www.deezer.com/track/" + id
+	case "spotify":
+		return "https://open.spotify.com/track/" + id
+	}
+	return ""
+}
+
+// deriveArtistExternalLink builds a direct artist URL.
+// Since we only have track data, we derive based on the provider.
+func deriveArtistExternalLink(t *ExtTrackMetadata) string {
+	id := stripProviderPrefix(t.ID)
+	switch inferProvider(t) {
+	case "qobuz":
+		// Qobuz search result has artist ID in external_links or qobuz_id.
+		// Best we can do without artist_id is search URL.
+		return "https://open.qobuz.com/search#" + t.Artists
+	case "tidal":
+		return "https://tidal.com/browse/search?q=" + t.Artists
+	case "deezer":
+		return "https://www.deezer.com/search/" + t.Artists
+	case "spotify":
+		return "https://open.spotify.com/search/" + t.Artists
+	}
+	_ = id
+	return ""
+}
+
+// inferProvider guesses the provider from available ID fields.
+func inferProvider(t *ExtTrackMetadata) string {
+	if t.QobuzID != "" || strings.HasPrefix(t.ID, "qobuz:") {
+		return "qobuz"
+	}
+	if t.TidalID != "" || strings.HasPrefix(t.ID, "tidal:") {
+		return "tidal"
+	}
+	if t.DeezerID != "" || strings.HasPrefix(t.ID, "deezer:") {
+		return "deezer"
+	}
+	if t.SpotifyID != "" || strings.HasPrefix(t.ID, "spotify:") {
+		return "spotify"
+	}
+	if t.ProviderID != "" {
+		lower := strings.ToLower(t.ProviderID)
+		for _, name := range []string{"qobuz", "tidal", "deezer", "spotify"} {
+			if strings.Contains(lower, name) {
+				return name
+			}
+		}
+	}
+	return ""
+}
+
+// stripProviderPrefix removes a "provider:" prefix, e.g. "qobuz:12345" → "12345".
+func stripProviderPrefix(id string) string {
+	if i := strings.Index(id, ":"); i >= 0 {
+		return id[i+1:]
+	}
+	return id
 }
