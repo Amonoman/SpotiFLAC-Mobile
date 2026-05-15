@@ -508,8 +508,10 @@ class _CollectionItemWidget extends StatelessWidget {
                         item.artistName.isNotEmpty
                             ? item.artistName
                             : (isPlaylist
-                                  ? 'Playlist'
-                                  : (isArtist ? 'Artist' : 'Album')),
+                                  ? context.l10n.recentTypePlaylist
+                                  : (isArtist
+                                        ? context.l10n.recentTypeArtist
+                                        : context.l10n.recentTypeAlbum)),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -607,7 +609,7 @@ class _SearchArtistItemWidget extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Artist',
+                        context.l10n.recentTypeArtist,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -707,7 +709,7 @@ class _SearchAlbumItemWidget extends StatelessWidget {
                       ClickableArtistName(
                         artistName: album.artists.isNotEmpty
                             ? album.artists
-                            : 'Album',
+                            : context.l10n.recentTypeAlbum,
                         coverUrl: album.imageUrl,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
@@ -806,7 +808,9 @@ class _SearchPlaylistItemWidget extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        playlist.owner.isNotEmpty ? playlist.owner : 'Playlist',
+                        playlist.owner.isNotEmpty
+                            ? playlist.owner
+                            : context.l10n.recentTypePlaylist,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),

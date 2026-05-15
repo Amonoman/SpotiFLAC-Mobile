@@ -106,6 +106,8 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
   }
 
   Future<void> _requestStoragePermission() async {
+    final permissionAudio = context.l10n.permissionAudio;
+    final permissionStorage = context.l10n.permissionStorage;
     setState(() => _isLoading = true);
     try {
       if (Platform.isIOS) {
@@ -121,7 +123,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
           allGranted = audioStatus.isGranted;
 
           if (audioStatus.isPermanentlyDenied) {
-            await _showPermissionDeniedDialog('Audio');
+            await _showPermissionDeniedDialog(permissionAudio);
             return;
           }
         } else if (_androidSdkVersion >= 30) {
@@ -139,7 +141,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
           final status = await Permission.storage.request();
           allGranted = status.isGranted;
           if (status.isPermanentlyDenied) {
-            await _showPermissionDeniedDialog('Storage');
+            await _showPermissionDeniedDialog(permissionStorage);
             return;
           }
         }
@@ -184,6 +186,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
   }
 
   Future<void> _requestNotificationPermission() async {
+    final permissionNotification = context.l10n.permissionNotification;
     setState(() => _isLoading = true);
     try {
       if (Platform.isIOS) {
@@ -191,14 +194,14 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
         if (status.isGranted || status.isProvisional) {
           setState(() => _notificationPermissionGranted = true);
         } else if (status.isPermanentlyDenied) {
-          await _showPermissionDeniedDialog('Notification');
+          await _showPermissionDeniedDialog(permissionNotification);
         }
       } else if (_androidSdkVersion >= 33) {
         final status = await Permission.notification.request();
         if (status.isGranted) {
           setState(() => _notificationPermissionGranted = true);
         } else if (status.isPermanentlyDenied) {
-          await _showPermissionDeniedDialog('Notification');
+          await _showPermissionDeniedDialog(permissionNotification);
         }
       } else {
         setState(() => _notificationPermissionGranted = true);
@@ -392,7 +395,8 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
-                            validation.errorReason ?? 'Invalid folder selected',
+                            validation.errorReason ??
+                                context.l10n.errorInvalidFolderSelected,
                           ),
                           backgroundColor: Theme.of(context).colorScheme.error,
                           duration: const Duration(seconds: 4),
@@ -410,7 +414,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
                         SnackBar(
                           content: Text(
                             context.l10n.snackbarFolderPickerFailed(
-                              'Could not keep access to the selected folder',
+                              context.l10n.errorCouldNotKeepFolderAccess,
                             ),
                           ),
                           backgroundColor: Theme.of(context).colorScheme.error,
@@ -681,7 +685,7 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(
-                  'assets/images/logo-transparant.png',
+                  'assets/images/logo-transparent.png',
                   width: logoSize,
                   height: logoSize,
                   color: colorScheme.primary,

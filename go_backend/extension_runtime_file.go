@@ -136,6 +136,7 @@ func (r *extensionRuntime) fileDownload(call goja.FunctionCall) goja.Value {
 	var onProgress goja.Callable
 	var headers map[string]string
 	var chunkedDownload bool
+	trackItemBytes := true
 	var chunkSize int64
 	if len(call.Arguments) > 2 && !goja.IsUndefined(call.Arguments[2]) && !goja.IsNull(call.Arguments[2]) {
 		optionsObj := call.Arguments[2].Export()
@@ -149,6 +150,15 @@ func (r *extensionRuntime) fileDownload(call goja.FunctionCall) goja.Value {
 			if progressVal, ok := opts["onProgress"]; ok {
 				if callable, ok := goja.AssertFunction(r.vm.ToValue(progressVal)); ok {
 					onProgress = callable
+				}
+			}
+			if trackBytes, ok := opts["trackItemBytes"]; ok {
+				if v, ok := trackBytes.(bool); ok {
+					trackItemBytes = v
+				}
+			} else if trackBytes, ok := opts["track_item_bytes"]; ok {
+				if v, ok := trackBytes.(bool); ok {
+					trackItemBytes = v
 				}
 			}
 			if chunked, ok := opts["chunked"]; ok {
@@ -194,7 +204,7 @@ func (r *extensionRuntime) fileDownload(call goja.FunctionCall) goja.Value {
 	}
 
 	if chunkedDownload {
-		return r.fileDownloadChunked(client, urlStr, fullPath, headers, ua, chunkSize, onProgress)
+		return r.fileDownloadChunked(client, urlStr, fullPath, headers, ua, chunkSize, onProgress, trackItemBytes)
 	}
 
 	req, err := http.NewRequest("GET", urlStr, nil)
@@ -244,7 +254,7 @@ func (r *extensionRuntime) fileDownload(call goja.FunctionCall) goja.Value {
 	}
 
 	contentLength := resp.ContentLength
-	shouldTrackItemBytes := activeItemID != "" && onProgress == nil
+	shouldTrackItemBytes := activeItemID != "" && trackItemBytes
 	if shouldTrackItemBytes && contentLength > 0 {
 		SetItemBytesTotal(activeItemID, contentLength)
 	}
@@ -301,6 +311,14 @@ func (r *extensionRuntime) fileDownload(call goja.FunctionCall) goja.Value {
 		}
 	}
 
+	if shouldTrackItemBytes {
+		if contentLength > 0 {
+			SetItemProgress(activeItemID, float64(written)/float64(contentLength), written, contentLength)
+		} else if written > 0 {
+			SetItemBytesReceived(activeItemID, written)
+		}
+	}
+
 	GoLog("[Extension:%s] Downloaded %d bytes to %s\n", r.extensionID, written, fullPath)
 
 	return r.vm.ToValue(map[string]interface{}{
@@ -313,7 +331,7 @@ func (r *extensionRuntime) fileDownload(call goja.FunctionCall) goja.Value {
 // fileDownloadChunked downloads a URL using sequential Range requests.
 // This is needed for servers (like YouTube's googlevideo CDN) that reject
 // non-ranged or large-range requests with 403 and require small chunk downloads.
-func (r *extensionRuntime) fileDownloadChunked(client *http.Client, urlStr, fullPath string, headers map[string]string, ua string, chunkSize int64, onProgress goja.Callable) goja.Value {
+func (r *extensionRuntime) fileDownloadChunked(client *http.Client, urlStr, fullPath string, headers map[string]string, ua string, chunkSize int64, onProgress goja.Callable, trackItemBytes bool) goja.Value {
 	// First, get the total content length with a small probe request
 	probeReq, err := http.NewRequest("GET", urlStr, nil)
 	if err != nil {
@@ -383,7 +401,7 @@ func (r *extensionRuntime) fileDownloadChunked(client *http.Client, urlStr, full
 		SetItemDownloading(activeItemID)
 	}
 
-	shouldTrackItemBytes := activeItemID != "" && onProgress == nil
+	shouldTrackItemBytes := activeItemID != "" && trackItemBytes
 	if shouldTrackItemBytes && totalSize > 0 {
 		SetItemBytesTotal(activeItemID, totalSize)
 	}
@@ -523,6 +541,14 @@ func (r *extensionRuntime) fileDownloadChunked(client *http.Client, urlStr, full
 		// Unknown size: if we got less than chunk size, assume done
 		if totalSize <= 0 && chunkWritten < chunkSize {
 			break
+		}
+	}
+
+	if shouldTrackItemBytes {
+		if totalSize > 0 {
+			SetItemProgress(activeItemID, float64(totalWritten)/float64(totalSize), totalWritten, totalSize)
+		} else if totalWritten > 0 {
+			SetItemBytesReceived(activeItemID, totalWritten)
 		}
 	}
 

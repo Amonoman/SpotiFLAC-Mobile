@@ -253,8 +253,10 @@ class _ExtensionDetailPageState extends ConsumerState<ExtensionDetailPage> {
             ),
 
             if (extension.hasServiceHealth) ...[
-              const SliverToBoxAdapter(
-                child: SettingsSectionHeader(title: 'Service Status'),
+              SliverToBoxAdapter(
+                child: SettingsSectionHeader(
+                  title: context.l10n.extensionServiceStatus,
+                ),
               ),
               SliverToBoxAdapter(
                 child: SettingsGroup(
@@ -339,10 +341,12 @@ class _ExtensionDetailPageState extends ConsumerState<ExtensionDetailPage> {
                   ),
                   _CapabilityItem(
                     icon: Icons.monitor_heart_outlined,
-                    title: 'Service health',
+                    title: context.l10n.extensionServiceHealth,
                     enabled: extension.hasServiceHealth,
                     subtitle: extension.hasServiceHealth
-                        ? '${extension.serviceHealth.length} check${extension.serviceHealth.length == 1 ? '' : 's'} configured'
+                        ? context.l10n.extensionHealthChecksConfigured(
+                            extension.serviceHealth.length,
+                          )
                         : null,
                     showDivider: false,
                   ),
@@ -570,7 +574,7 @@ class _OauthLoginLinkPreview extends StatelessWidget {
     final text = value?.trim() ?? '';
     if (text.isEmpty) {
       return Text(
-        'Tap Connect to Spotify to fill this field.',
+        context.l10n.extensionOauthConnectHint,
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
           color: colorScheme.onSurfaceVariant,
           fontStyle: FontStyle.italic,
@@ -725,18 +729,18 @@ IconData _healthStatusIcon(String status) {
   }
 }
 
-String _healthStatusLabel(String status) {
+String _healthStatusLabel(BuildContext context, String status) {
   switch (status) {
     case 'online':
-      return 'Online';
+      return context.l10n.extensionHealthOnline;
     case 'degraded':
-      return 'Degraded';
+      return context.l10n.extensionHealthDegraded;
     case 'offline':
-      return 'Offline';
+      return context.l10n.extensionHealthOffline;
     case 'unsupported':
-      return 'Not configured';
+      return context.l10n.extensionHealthNotConfigured;
     default:
-      return 'Unknown';
+      return context.l10n.extensionHealthUnknown;
   }
 }
 
@@ -771,7 +775,7 @@ class _HealthSummaryItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _healthStatusLabel(statusValue),
+                      _healthStatusLabel(context, statusValue),
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: color,
                         fontWeight: FontWeight.w600,
@@ -780,7 +784,11 @@ class _HealthSummaryItem extends StatelessWidget {
                     if (status?.checkedAt != null) ...[
                       const SizedBox(height: 2),
                       Text(
-                        'Last checked ${TimeOfDay.fromDateTime(status!.checkedAt!.toLocal()).format(context)}',
+                        context.l10n.extensionLastChecked(
+                          TimeOfDay.fromDateTime(
+                            status!.checkedAt!.toLocal(),
+                          ).format(context),
+                        ),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -790,7 +798,7 @@ class _HealthSummaryItem extends StatelessWidget {
                 ),
               ),
               IconButton(
-                tooltip: 'Refresh status',
+                tooltip: context.l10n.extensionRefreshStatus,
                 onPressed: isRefreshing ? null : onRefresh,
                 icon: isRefreshing
                     ? SizedBox(
@@ -829,11 +837,11 @@ class _HealthCheckItem extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final color = _healthStatusColor(colorScheme, check.status);
     final detailParts = <String>[
-      _healthStatusLabel(check.status),
+      _healthStatusLabel(context, check.status),
       if (check.httpStatus != null) 'HTTP ${check.httpStatus}',
       if (check.serviceKey?.isNotEmpty == true) check.serviceKey!,
       if (check.latencyMs > 0) '${check.latencyMs} ms',
-      if (check.required) 'required',
+      if (check.required) context.l10n.extensionHealthRequired,
     ];
     final message = check.error?.trim().isNotEmpty == true
         ? check.error!
@@ -1090,7 +1098,8 @@ class _SettingItemState extends State<_SettingItem> {
                           )
                         else
                           Text(
-                            widget.value?.toString() ?? 'Not set',
+                            widget.value?.toString() ??
+                                context.l10n.extensionSettingNotSet,
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: colorScheme.primary),
                           ),
@@ -1144,7 +1153,7 @@ class _SettingItemState extends State<_SettingItem> {
           final error =
               payload['error'] as String? ??
               result['error'] as String? ??
-              'Action failed';
+              context.l10n.extensionActionFailed;
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text(error)));
@@ -1206,7 +1215,8 @@ class _SettingItemState extends State<_SettingItem> {
               ? TextInputType.number
               : TextInputType.text,
           decoration: InputDecoration(
-            hintText: widget.setting.description ?? 'Enter value',
+            hintText:
+                widget.setting.description ?? context.l10n.extensionEnterValue,
             filled: true,
             fillColor: colorScheme.surfaceContainerHighest.withValues(
               alpha: 0.3,
@@ -1327,7 +1337,7 @@ class _PostProcessingHookItem extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    'Auto',
+                    context.l10n.extensionsHomeFeedAuto,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: colorScheme.onPrimaryContainer,
                     ),
@@ -1384,14 +1394,14 @@ class _URLHandlerInfo extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Custom URL Handling',
+                      context.l10n.extensionCustomUrlHandling,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'This extension can handle links from these sites',
+                      context.l10n.extensionCustomUrlHandlingSubtitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
@@ -1445,7 +1455,7 @@ class _URLHandlerInfo extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Share links from these sites to SpotiFLAC and this extension will handle them.',
+                    context.l10n.extensionCustomUrlHandlingShareHint,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),
@@ -1533,7 +1543,9 @@ class _QualityOptionItem extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    '${quality.settings.length} setting${quality.settings.length > 1 ? 's' : ''}',
+                    context.l10n.extensionSettingsCount(
+                      quality.settings.length,
+                    ),
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                     ),

@@ -495,9 +495,9 @@ class _LogEntryTile extends StatelessWidget {
                         color: Colors.teal.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: const Text(
-                        'Go',
-                        style: TextStyle(
+                      child: Text(
+                        context.l10n.actionGo,
+                        style: const TextStyle(
                           fontSize: 9,
                           fontWeight: FontWeight.bold,
                           color: Colors.teal,
@@ -597,7 +597,7 @@ class _LogSummaryCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Issue Summary',
+                    context.l10n.logIssueSummary,
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: colorScheme.onSurface,
@@ -653,7 +653,7 @@ class _LogSummaryCard extends StatelessWidget {
 
               const SizedBox(height: 12),
               Text(
-                'Total errors: ${analysis.errorCount}',
+                context.l10n.logTotalErrors(analysis.errorCount),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -807,7 +807,7 @@ class _IssueBadge extends StatelessWidget {
           if (domains != null && domains!.isNotEmpty) ...[
             const SizedBox(height: 4),
             Text(
-              'Affected: ${domains!.join(", ")}',
+              context.l10n.logAffectedDomains(domains!.join(', ')),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
                 fontFamily: 'monospace',

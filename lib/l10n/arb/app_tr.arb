@@ -438,7 +438,7 @@
   "@aboutSjdonadoDesc": {
     "description": "Credit description for sjdonado"
   },
-  "aboutAppDescription": "Spotify parçalarını Tidal ve Qobuz aracılığıyla kayıpsız kalitede indirin.",
+  "aboutAppDescription": "Search music metadata, manage extensions, and organize your library.",
   "@aboutAppDescription": {
     "description": "App description in header card"
   },
@@ -4026,6 +4026,14 @@
   "audioAnalysisSamples": "Samples",
   "@audioAnalysisSamples": {
     "description": "Total samples metric label"
+  },
+  "audioAnalysisRescan": "Re-analyze",
+  "@audioAnalysisRescan": {
+    "description": "Tooltip/label for the button that re-runs the audio analysis, discarding cached results"
+  },
+  "audioAnalysisRescanning": "Re-analyzing audio...", 
+  "@audioAnalysisRescanning": {
+    "description": "Loading text while audio is being re-analyzed after an explicit refresh"
   },
   "downloadSingleFilenameFormat": "Single Dosya Adı Formatı",
   "@downloadSingleFilenameFormat": {

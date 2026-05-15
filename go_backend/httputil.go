@@ -79,6 +79,24 @@ var sharedTransport = &http.Transport{
 	DisableCompression:    true,
 }
 
+var extensionAPITransport = &http.Transport{
+	DialContext: (&net.Dialer{
+		Timeout:   30 * time.Second,
+		KeepAlive: 30 * time.Second,
+	}).DialContext,
+	MaxIdleConns:          100,
+	MaxIdleConnsPerHost:   10,
+	MaxConnsPerHost:       20,
+	IdleConnTimeout:       90 * time.Second,
+	TLSHandshakeTimeout:   10 * time.Second,
+	ExpectContinueTimeout: 1 * time.Second,
+	DisableKeepAlives:     false,
+	ForceAttemptHTTP2:     true,
+	WriteBufferSize:       64 * 1024,
+	ReadBufferSize:        64 * 1024,
+	DisableCompression:    false,
+}
+
 var metadataTransport = &http.Transport{
 	DialContext: (&net.Dialer{
 		Timeout:   30 * time.Second,
@@ -131,6 +149,7 @@ func GetDownloadClient() *http.Client {
 
 func CloseIdleConnections() {
 	sharedTransport.CloseIdleConnections()
+	extensionAPITransport.CloseIdleConnections()
 	metadataTransport.CloseIdleConnections()
 }
 
@@ -143,6 +162,7 @@ func SetNetworkCompatibilityOptions(allowHTTP, insecureTLS bool) {
 	networkCompatibilityMu.Unlock()
 
 	applyTLSCompatibility(sharedTransport, insecureTLS)
+	applyTLSCompatibility(extensionAPITransport, insecureTLS)
 	applyTLSCompatibility(metadataTransport, insecureTLS)
 	CloseIdleConnections()
 

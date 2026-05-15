@@ -313,6 +313,7 @@ type DownloadResponse struct {
 	AlreadyExists               bool                    `json:"already_exists,omitempty"`
 	ActualBitDepth              int                     `json:"actual_bit_depth,omitempty"`
 	ActualSampleRate            int                     `json:"actual_sample_rate,omitempty"`
+	AudioCodec                  string                  `json:"audio_codec,omitempty"`
 	ActualExtension             string                  `json:"actual_extension,omitempty"`
 	ActualContainer             string                  `json:"actual_container,omitempty"`
 	RequiresContainerConversion bool                    `json:"requires_container_conversion,omitempty"`
@@ -342,6 +343,7 @@ type DownloadResult struct {
 	FilePath                    string
 	BitDepth                    int
 	SampleRate                  int
+	AudioCodec                  string
 	Title                       string
 	Artist                      string
 	Album                       string
@@ -863,6 +865,7 @@ func buildDownloadSuccessResponse(
 		AlreadyExists:               alreadyExists,
 		ActualBitDepth:              result.BitDepth,
 		ActualSampleRate:            result.SampleRate,
+		AudioCodec:                  result.AudioCodec,
 		ActualExtension:             result.ActualExtension,
 		ActualContainer:             result.ActualContainer,
 		RequiresContainerConversion: result.RequiresContainerConversion,
@@ -920,7 +923,12 @@ func enrichResultQualityFromFile(result *DownloadResult) {
 	if qErr == nil {
 		result.BitDepth = quality.BitDepth
 		result.SampleRate = quality.SampleRate
-		GoLog("[Download] Actual quality from file: %d-bit/%dHz\n", quality.BitDepth, quality.SampleRate)
+		result.AudioCodec = quality.Codec
+		if quality.Codec != "" {
+			GoLog("[Download] Actual quality from file: %s %d-bit/%dHz\n", quality.Codec, quality.BitDepth, quality.SampleRate)
+		} else {
+			GoLog("[Download] Actual quality from file: %d-bit/%dHz\n", quality.BitDepth, quality.SampleRate)
+		}
 		return
 	}
 
@@ -1101,7 +1109,7 @@ func CleanupConnections() {
 func ReadFileMetadata(filePath string) (string, error) {
 	lower := strings.ToLower(filePath)
 	isFlac := strings.HasSuffix(lower, ".flac")
-	isM4A := strings.HasSuffix(lower, ".m4a") || strings.HasSuffix(lower, ".aac")
+	isM4A := strings.HasSuffix(lower, ".m4a") || strings.HasSuffix(lower, ".mp4") || strings.HasSuffix(lower, ".aac")
 	isMp3 := strings.HasSuffix(lower, ".mp3")
 	isOgg := strings.HasSuffix(lower, ".opus") || strings.HasSuffix(lower, ".ogg")
 	isApe := strings.HasSuffix(lower, ".ape")
@@ -1126,9 +1134,13 @@ func ReadFileMetadata(filePath string) (string, error) {
 		"composer":     "",
 		"comment":      "",
 		"duration":     0,
+		"format":       "",
+		"audio_codec":  "",
 	}
 
 	if isFlac {
+		result["format"] = "flac"
+		result["audio_codec"] = "flac"
 		metadata, err := ReadMetadata(filePath)
 		if err != nil {
 			// File may have wrong extension (e.g. opus saved as .flac).
@@ -1161,6 +1173,8 @@ func ReadFileMetadata(filePath string) (string, error) {
 						result["bitrate"] = quality.Bitrate / 1000
 					}
 				}
+				result["format"] = "opus"
+				result["audio_codec"] = "opus"
 			} else {
 				return "", fmt.Errorf("failed to read metadata: %w", err)
 			}
@@ -1190,12 +1204,16 @@ func ReadFileMetadata(filePath string) (string, error) {
 			if qualityErr == nil {
 				result["bit_depth"] = quality.BitDepth
 				result["sample_rate"] = quality.SampleRate
+				if quality.Codec != "" {
+					result["audio_codec"] = quality.Codec
+				}
 				if quality.SampleRate > 0 && quality.TotalSamples > 0 {
 					result["duration"] = int(quality.TotalSamples / int64(quality.SampleRate))
 				}
 			}
 		}
 	} else if isM4A {
+		result["format"] = "m4a"
 		meta, err := ReadM4ATags(filePath)
 		if err == nil && meta != nil {
 			result["title"] = meta.Title
@@ -1227,8 +1245,17 @@ func ReadFileMetadata(filePath string) (string, error) {
 			result["bit_depth"] = quality.BitDepth
 			result["sample_rate"] = quality.SampleRate
 			result["duration"] = quality.Duration
+			result["audio_codec"] = quality.Codec
+			if format := libraryFormatForM4ACodec(quality.Codec); format != "" {
+				result["format"] = format
+			}
+			if quality.Bitrate > 0 && !isLosslessLibraryFormat(fmt.Sprint(result["format"])) {
+				result["bitrate"] = quality.Bitrate
+			}
 		}
 	} else if isMp3 {
+		result["format"] = "mp3"
+		result["audio_codec"] = "mp3"
 		meta, err := ReadID3Tags(filePath)
 		if err == nil && meta != nil {
 			result["title"] = meta.Title
@@ -1265,6 +1292,8 @@ func ReadFileMetadata(filePath string) (string, error) {
 			}
 		}
 	} else if isOgg {
+		result["format"] = "opus"
+		result["audio_codec"] = "opus"
 		meta, err := ReadOggVorbisComments(filePath)
 		if err == nil && meta != nil {
 			result["title"] = meta.Title
@@ -1300,6 +1329,8 @@ func ReadFileMetadata(filePath string) (string, error) {
 			}
 		}
 	} else if isApe || isWv || isMpc {
+		result["format"] = strings.TrimPrefix(filepath.Ext(filePath), ".")
+		result["audio_codec"] = result["format"]
 		// APE, WavPack, Musepack: read APEv2 tags
 		apeTag, apeErr := ReadAPETags(filePath)
 		if apeErr == nil && apeTag != nil {
@@ -1399,6 +1430,19 @@ func EditFileMetadata(filePath, metadataJSON string) (string, error) {
 	isApeFile := strings.HasSuffix(lower, ".ape") || strings.HasSuffix(lower, ".wv") || strings.HasSuffix(lower, ".mpc")
 	isM4AFile := strings.HasSuffix(lower, ".m4a") || strings.HasSuffix(lower, ".mp4") || strings.HasSuffix(lower, ".m4b")
 	coverPath := strings.TrimSpace(fields["cover_path"])
+
+	if hasOnlyM4AReplayGainFields(fields) && (isM4AFile || isMP4ContainerFile(filePath)) {
+		if err := EditM4AReplayGain(filePath, fields); err != nil {
+			return "", fmt.Errorf("failed to write M4A metadata: %w", err)
+		}
+
+		resp := map[string]any{
+			"success": true,
+			"method":  "native_m4a_replaygain",
+		}
+		jsonBytes, _ := json.Marshal(resp)
+		return string(jsonBytes), nil
+	}
 
 	if isFlac {
 		if err := EditFlacFields(filePath, fields); err != nil {
@@ -1510,19 +1554,6 @@ func EditFileMetadata(filePath, metadataJSON string) (string, error) {
 		return string(jsonBytes), nil
 	}
 
-	if isM4AFile && hasOnlyM4AReplayGainFields(fields) {
-		if err := EditM4AReplayGain(filePath, fields); err != nil {
-			return "", fmt.Errorf("failed to write M4A metadata: %w", err)
-		}
-
-		resp := map[string]any{
-			"success": true,
-			"method":  "native_m4a_replaygain",
-		}
-		jsonBytes, _ := json.Marshal(resp)
-		return string(jsonBytes), nil
-	}
-
 	resp := map[string]any{
 		"success": true,
 		"method":  "ffmpeg",
@@ -1530,6 +1561,21 @@ func EditFileMetadata(filePath, metadataJSON string) (string, error) {
 	}
 	jsonBytes, _ := json.Marshal(resp)
 	return string(jsonBytes), nil
+}
+
+func isMP4ContainerFile(filePath string) bool {
+	f, err := os.Open(filePath)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	header := make([]byte, 12)
+	n, err := f.Read(header)
+	if err != nil || n < 8 {
+		return false
+	}
+	return string(header[4:8]) == "ftyp"
 }
 
 func hasOnlyM4AReplayGainFields(fields map[string]string) bool {

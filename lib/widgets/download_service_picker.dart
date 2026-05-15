@@ -78,7 +78,8 @@ class _DownloadServicePickerState extends ConsumerState<DownloadServicePicker> {
     });
     final downloadExtensions = _downloadExtensions();
     final recommended = widget.recommendedService;
-    if (recommended != null && _serviceExists(recommended, downloadExtensions)) {
+    if (recommended != null &&
+        _serviceExists(recommended, downloadExtensions)) {
       _selectedService = recommended;
     } else {
       _selectedService = ref.read(settingsProvider).defaultService;
@@ -379,21 +380,11 @@ class _ServiceHealthDot extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = _serviceHealthColor(status);
     return Tooltip(
-      message: _serviceHealthTooltip(status),
+      message: _serviceHealthTooltip(context, status),
       child: Container(
         width: 8,
         height: 8,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: color.withValues(alpha: 0.35),
-              blurRadius: 6,
-              spreadRadius: 1,
-            ),
-          ],
-        ),
+        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
       ),
     );
   }
@@ -402,27 +393,27 @@ class _ServiceHealthDot extends StatelessWidget {
 Color _serviceHealthColor(String status) {
   switch (status) {
     case 'online':
-      return const Color(0xFF35D07F);
+      return const Color(0xFF24D47A);
     case 'degraded':
     case 'unknown':
-      return const Color(0xFFFFC857);
+      return const Color(0xFFFFC247);
     case 'offline':
-      return const Color(0xFFFF4D5E);
+      return const Color(0xFFFF5A66);
     default:
-      return const Color(0xFFFFC857);
+      return const Color(0xFFFFC247);
   }
 }
 
-String _serviceHealthTooltip(String status) {
+String _serviceHealthTooltip(BuildContext context, String status) {
   switch (status) {
     case 'online':
-      return 'Service online';
+      return context.l10n.extensionHealthServiceOnline;
     case 'degraded':
-      return 'Service degraded';
+      return context.l10n.extensionHealthServiceDegraded;
     case 'offline':
-      return 'Service offline';
+      return context.l10n.extensionHealthServiceOffline;
     default:
-      return 'Service status unknown';
+      return context.l10n.extensionHealthServiceUnknown;
   }
 }
 

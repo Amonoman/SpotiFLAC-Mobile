@@ -4,8 +4,10 @@ import 'package:spotiflac_android/models/download_item.dart';
 import 'package:spotiflac_android/models/settings.dart';
 import 'package:spotiflac_android/models/theme_settings.dart';
 import 'package:spotiflac_android/models/track.dart';
+import 'package:spotiflac_android/services/app_remote_config_service.dart';
 import 'package:spotiflac_android/services/download_request_payload.dart';
 import 'package:spotiflac_android/utils/artist_utils.dart';
+import 'package:spotiflac_android/utils/audio_conversion_utils.dart';
 import 'package:spotiflac_android/utils/mime_utils.dart';
 import 'package:spotiflac_android/utils/path_match_keys.dart';
 import 'package:spotiflac_android/utils/string_utils.dart';
@@ -187,6 +189,7 @@ void main() {
       expect(settings.artistTagMode, artistTagModeJoined);
       expect(settings.autoFallback, isTrue);
       expect(settings.lyricsProviders, ['lrclib', 'apple_music']);
+      expect(settings.lyricsAppleElrcWordSync, isFalse);
       expect(settings.deduplicateDownloads, isTrue);
     });
 
@@ -202,6 +205,7 @@ void main() {
         concurrentDownloads: 4,
         embedReplayGain: true,
         lyricsProviders: ['apple_music'],
+        lyricsAppleElrcWordSync: true,
         deduplicateDownloads: false,
         clearDownloadFallbackExtensionIds: true,
         clearSearchProvider: true,
@@ -212,6 +216,7 @@ void main() {
       expect(updated.concurrentDownloads, 4);
       expect(updated.embedReplayGain, isTrue);
       expect(updated.lyricsProviders, ['apple_music']);
+      expect(updated.lyricsAppleElrcWordSync, isTrue);
       expect(updated.deduplicateDownloads, isFalse);
       expect(updated.downloadFallbackExtensionIds, isNull);
       expect(updated.searchProvider, isNull);
@@ -234,6 +239,7 @@ void main() {
         localLibraryPath: '/music',
         hasCompletedTutorial: true,
         musixmatchLanguage: 'id',
+        lyricsAppleElrcWordSync: true,
         lastSeenVersion: '4.5.0',
         deduplicateDownloads: false,
         nativeDownloadWorkerEnabled: true,
@@ -254,6 +260,7 @@ void main() {
       expect(decoded.localLibraryPath, '/music');
       expect(decoded.hasCompletedTutorial, isTrue);
       expect(decoded.musixmatchLanguage, 'id');
+      expect(decoded.lyricsAppleElrcWordSync, isTrue);
       expect(decoded.lastSeenVersion, '4.5.0');
       expect(decoded.deduplicateDownloads, isFalse);
       expect(decoded.nativeDownloadWorkerEnabled, isTrue);
@@ -328,6 +335,7 @@ void main() {
         safRelativeDir: 'Album',
         safFileName: 'Song.flac',
         safOutputExt: 'flac',
+        outputExt: '.flac',
         songLinkRegion: 'ID',
       );
 
@@ -374,6 +382,7 @@ void main() {
         'saf_relative_dir': 'Album',
         'saf_file_name': 'Song.flac',
         'saf_output_ext': 'flac',
+        'output_ext': '.flac',
         'stage_saf_output': false,
         'defer_saf_publish': false,
         'requires_container_conversion': false,
@@ -415,6 +424,46 @@ void main() {
       expect(splitArtistTagValues('   '), isEmpty);
       expect(shouldSplitVorbisArtistTags(artistTagModeSplitVorbis), isTrue);
       expect(shouldSplitVorbisArtistTags(artistTagModeJoined), isFalse);
+    });
+  });
+
+  group('audio conversion utils', () {
+    test(
+      'detects Dolby formats from stored scan format before file extension',
+      () {
+        expect(
+          convertibleAudioSourceFormat(
+            storedFormat: 'eac3',
+            filePath: 'content://media/song.m4a',
+          ),
+          'EAC3',
+        );
+        expect(convertibleAudioSourceFormat(fileName: 'Song.ac-3'), 'AC3');
+        expect(convertibleAudioSourceFormat(storedFormat: 'ac4'), 'AC4');
+      },
+    );
+
+    test('allows Dolby sources only for lossy batch conversion targets', () {
+      expect(
+        canConvertAudioFormat(sourceFormat: 'EAC3', targetFormat: 'MP3'),
+        isTrue,
+      );
+      expect(
+        canConvertAudioFormat(sourceFormat: 'EAC3', targetFormat: 'Opus'),
+        isTrue,
+      );
+      expect(
+        canConvertAudioFormat(sourceFormat: 'EAC3', targetFormat: 'AAC'),
+        isTrue,
+      );
+      expect(
+        canConvertAudioFormat(sourceFormat: 'EAC3', targetFormat: 'FLAC'),
+        isFalse,
+      );
+      expect(
+        canConvertAudioFormat(sourceFormat: 'EAC3', targetFormat: 'ALAC'),
+        isFalse,
+      );
     });
   });
 
@@ -503,6 +552,129 @@ void main() {
       expect(keys, contains('C:/Music/Song.mp3'));
       expect(keys, contains('c:/music/song.mp3'));
       expect(keys, contains('C:/Music/Song'));
+    });
+  });
+
+  group('AppRemoteConfig', () {
+    test('parses announcement and donate payloads from API JSON', () {
+      final config = AppRemoteConfig.fromJson({
+        'announcement': {
+          'id': 'hello-2026',
+          'enabled': true,
+          'title': 'Server message',
+          'message': 'A clear message for users',
+          'cta_enabled': true,
+          'cta_label': 'Donate',
+          'cta_url': 'https://example.test/donate',
+          'starts_at': '2026-05-01T00:00:00Z',
+          'ends_at': '2026-06-01T00:00:00Z',
+          'min_version': '4.5.0',
+          'priority': 'high',
+        },
+        'donate': {
+          'enabled': true,
+          'title': 'Support SpotiFLAC Mobile',
+          'message': 'Help cover infrastructure.',
+          'methods': [
+            {
+              'id': 'kofi',
+              'title': 'Ko-fi',
+              'subtitle': 'ko-fi.com/example',
+              'url': 'https://ko-fi.com/example',
+              'icon': 'kofi',
+              'color': '#FF5E5B',
+            },
+            {
+              'id': 'wallet',
+              'title': 'USDT',
+              'subtitle': 'TRC20',
+              'wallet_address': 'T123',
+              'icon': 'wallet',
+              'color': '0xFF26A17B',
+            },
+          ],
+          'supporters': ['Alice', 'Bob'],
+          'notices': ['No paywalls'],
+        },
+      });
+
+      expect(config.announcement?.id, 'hello-2026');
+      expect(config.announcement?.hasCta, isTrue);
+      expect(
+        config.announcement?.isActive(
+          now: DateTime.utc(2026, 5, 11),
+          currentVersion: '4.5.1',
+        ),
+        isTrue,
+      );
+      expect(config.donate.title, 'Support SpotiFLAC Mobile');
+      expect(config.donate.methods, hasLength(2));
+      expect(config.donate.methods.first.color, 0xFFFF5E5B);
+      expect(config.donate.methods.last.isWallet, isTrue);
+      expect(config.donate.supporters, ['Alice', 'Bob']);
+      expect(config.donate.notices, ['No paywalls']);
+    });
+
+    test('requires enabled announcement CTA with label and url', () {
+      final disabledCta = RemoteAnnouncement.fromJson({
+        'id': 'notice',
+        'title': 'Notice',
+        'message': 'No button',
+        'cta_label': 'Open',
+        'cta_url': 'https://api.zarz.moe',
+      });
+      final missingLabel = RemoteAnnouncement.fromJson({
+        'id': 'notice',
+        'title': 'Notice',
+        'message': 'No button',
+        'cta_enabled': true,
+        'cta_url': 'https://example.test',
+      });
+      final enabledCta = RemoteAnnouncement.fromJson({
+        'id': 'notice',
+        'title': 'Notice',
+        'message': 'With button',
+        'cta_enabled': true,
+        'cta_label': 'Read More',
+        'cta_url': 'https://example.test',
+      });
+
+      expect(disabledCta.hasCta, isFalse);
+      expect(missingLabel.hasCta, isFalse);
+      expect(enabledCta.hasCta, isTrue);
+      expect(enabledCta.ctaLabel, 'Read More');
+    });
+
+    test('filters inactive announcements by window and app version', () {
+      final announcement = RemoteAnnouncement.fromJson({
+        'id': 'future',
+        'title': 'Future',
+        'message': 'Not yet',
+        'starts_at': '2026-06-01T00:00:00Z',
+        'min_version': '4.6.0',
+      });
+
+      expect(
+        announcement.isActive(
+          now: DateTime.utc(2026, 5, 11),
+          currentVersion: '4.5.1',
+        ),
+        isFalse,
+      );
+      expect(
+        announcement.isActive(
+          now: DateTime.utc(2026, 6, 2),
+          currentVersion: '4.5.1',
+        ),
+        isFalse,
+      );
+      expect(
+        announcement.isActive(
+          now: DateTime.utc(2026, 6, 2),
+          currentVersion: '4.6.0',
+        ),
+        isTrue,
+      );
     });
   });
 }

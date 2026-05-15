@@ -42,6 +42,14 @@ func TestLibraryScanFullIncrementalAndMetadataFallbacks(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(albumDir, "ignored.txt"), []byte("ignore"), 0600); err != nil {
 		t.Fatal(err)
 	}
+	legacyPartialPath := filepath.Join(albumDir, "Artist - Song.partial.flac")
+	if err := os.WriteFile(legacyPartialPath, []byte("partial flac"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	newPartialPath := filepath.Join(albumDir, "Artist - Song.flac.partial")
+	if err := os.WriteFile(newPartialPath, []byte("partial flac"), 0600); err != nil {
+		t.Fatal(err)
+	}
 
 	files, err := collectLibraryAudioFiles(dir, make(chan struct{}))
 	if err != nil {
@@ -49,6 +57,11 @@ func TestLibraryScanFullIncrementalAndMetadataFallbacks(t *testing.T) {
 	}
 	if len(files) < 4 {
 		t.Fatalf("files = %#v", files)
+	}
+	for _, file := range files {
+		if file.path == legacyPartialPath || file.path == newPartialPath {
+			t.Fatalf("staging file should be ignored: %#v", files)
+		}
 	}
 	cancelCh := make(chan struct{})
 	close(cancelCh)

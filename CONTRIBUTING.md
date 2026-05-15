@@ -86,7 +86,7 @@ Translation files are located in `lib/l10n/arb/`.
    git remote add upstream https://github.com/zarzet/SpotiFLAC-Mobile.git
    ```
 
-3. **Use FVM (Flutter Version: 3.38.1)**
+3. **Use FVM (Flutter Version: 3.41.5)**
    ```bash
    fvm use
    ```

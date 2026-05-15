@@ -194,7 +194,7 @@ class _ExtensionDetailsScreenState
                       textColor: colorScheme.onSecondaryContainer,
                     ),
                     _Badge(
-                      label: _getCategoryName(ext.category),
+                      label: _getCategoryName(context, ext.category),
                       color: colorScheme.tertiaryContainer,
                       textColor: colorScheme.onTertiaryContainer,
                     ),
@@ -390,7 +390,7 @@ class _ExtensionDetailsScreenState
               ),
               _MetadataRow(
                 label: context.l10n.extensionMinAppVersion,
-                value: ext.minAppVersion ?? 'Any',
+                value: ext.minAppVersion ?? context.l10n.storeAnyVersion,
                 colorScheme: colorScheme,
                 isLast: true,
               ),
@@ -496,18 +496,18 @@ class _ExtensionDetailsScreenState
     }
   }
 
-  String _getCategoryName(String category) {
+  String _getCategoryName(BuildContext context, String category) {
     switch (category) {
       case 'metadata':
-        return 'Metadata';
+        return context.l10n.storeCategoryMetadata;
       case 'download':
-        return 'Download';
+        return context.l10n.storeCategoryDownload;
       case 'utility':
-        return 'Utility';
+        return context.l10n.storeCategoryUtility;
       case 'lyrics':
-        return 'Lyrics';
+        return context.l10n.storeCategoryLyrics;
       case 'integration':
-        return 'Integration';
+        return context.l10n.storeCategoryIntegration;
       default:
         return category;
     }

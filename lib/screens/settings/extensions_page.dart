@@ -458,7 +458,7 @@ class _ExtensionItem extends StatelessWidget {
                                   context.l10n.extensionsErrorLoading
                             : serviceHealthStatus == null
                             ? 'v${extension.version}'
-                            : 'v${extension.version} · ${_extensionHealthLabel(serviceHealthStatus)}',
+                            : 'v${extension.version} · ${_extensionHealthLabel(context, serviceHealthStatus)}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: hasError
                               ? colorScheme.error
@@ -503,16 +503,16 @@ Color _extensionHealthColor(ColorScheme colorScheme, String status) {
   }
 }
 
-String _extensionHealthLabel(String status) {
+String _extensionHealthLabel(BuildContext context, String status) {
   switch (status) {
     case 'online':
-      return 'Online';
+      return context.l10n.extensionHealthOnline;
     case 'degraded':
-      return 'Degraded';
+      return context.l10n.extensionHealthDegraded;
     case 'offline':
-      return 'Offline';
+      return context.l10n.extensionHealthOffline;
     default:
-      return 'Unknown';
+      return context.l10n.extensionHealthUnknown;
   }
 }
 

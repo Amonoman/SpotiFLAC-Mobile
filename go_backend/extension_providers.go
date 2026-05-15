@@ -236,6 +236,7 @@ func normalizeExtensionDownloadResult(result *ExtDownloadResult) (DownloadResult
 		FilePath:                    strings.TrimSpace(result.FilePath),
 		BitDepth:                    result.BitDepth,
 		SampleRate:                  result.SampleRate,
+		AudioCodec:                  strings.TrimSpace(result.AudioCodec),
 		Title:                       result.Title,
 		Artist:                      result.Artist,
 		Album:                       result.Album,
@@ -420,6 +421,7 @@ type ExtDownloadResult struct {
 	AlreadyExists bool   `json:"already_exists,omitempty"`
 	BitDepth      int    `json:"bit_depth,omitempty"`
 	SampleRate    int    `json:"sample_rate,omitempty"`
+	AudioCodec    string `json:"audio_codec,omitempty"`
 	ErrorMessage  string `json:"error_message,omitempty"`
 	ErrorType     string `json:"error_type,omitempty"`
 
@@ -873,6 +875,7 @@ func parseExtensionDownloadResultValue(vm *goja.Runtime, value goja.Value) ExtDo
 		AlreadyExists:   gojaObjectBool(obj, "already_exists", "alreadyExists"),
 		BitDepth:        gojaObjectInt(obj, "bit_depth", "bitDepth"),
 		SampleRate:      gojaObjectInt(obj, "sample_rate", "sampleRate"),
+		AudioCodec:      gojaObjectString(obj, "audio_codec", "audioCodec", "codec"),
 		ErrorMessage:    gojaObjectString(obj, "error_message", "errorMessage", "error"),
 		ErrorType:       gojaObjectString(obj, "error_type", "errorType"),
 		Title:           gojaObjectString(obj, "title"),

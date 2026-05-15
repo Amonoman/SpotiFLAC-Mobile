@@ -16,6 +16,7 @@ import com.antonkarpenko.ffmpegkit.ReturnCode
 import gobackend.Gobackend
 import org.json.JSONObject
 import java.io.File
+import java.io.RandomAccessFile
 import java.nio.ByteBuffer
 import java.util.Locale
 import java.util.concurrent.CancellationException
@@ -29,7 +30,7 @@ object NativeDownloadFinalizer {
     const val NATIVE_WORKER_CONTRACT_VERSION = 1
     // Native finalizer owns background-safe history writes while Flutter may be suspended.
     // Keep this schema contract in sync with Dart HistoryDatabase before bumping either side.
-    private const val HISTORY_SCHEMA_VERSION = 8
+    private const val HISTORY_SCHEMA_VERSION = 9
     private val activeFFmpegSessionIds = mutableSetOf<Long>()
     private val nativeFFmpegSessionIds = mutableSetOf<Long>()
     private val activeFFmpegSessionLock = Any()
@@ -72,6 +73,8 @@ object NativeDownloadFinalizer {
         "quality",
         "bit_depth",
         "sample_rate",
+        "bitrate",
+        "format",
         "genre",
         "composer",
         "label",
@@ -95,6 +98,7 @@ object NativeDownloadFinalizer {
         ".ogg",
         ".wav",
         ".aac",
+        ".mp4",
     )
 
     private data class FinalizeInput(
@@ -112,6 +116,7 @@ object NativeDownloadFinalizer {
         var bitDepth: Int?,
         var sampleRate: Int?,
         var bitrateKbps: Int? = null,
+        var audioCodec: String? = null,
         var pendingExternalLrc: String? = null,
         var pendingExternalLrcFileName: String? = null,
     )
@@ -174,6 +179,9 @@ object NativeDownloadFinalizer {
             sampleRate = optPositiveInt(result, "actual_sample_rate"),
             bitrateKbps = optPositiveBitrateKbps(result, "bitrate")
                 ?: optPositiveBitrateKbps(result, "actual_bitrate"),
+            audioCodec = normalizeAudioCodec(
+                result.optString("audio_codec", "").ifBlank { result.optString("format", "") },
+            ),
         )
 
         try {
@@ -214,6 +222,7 @@ object NativeDownloadFinalizer {
 
             result.put("file_path", state.filePath)
             if (state.fileName.isNotBlank()) result.put("file_name", state.fileName)
+            if (state.quality.isNotBlank()) result.put("quality", state.quality)
             result.put("native_finalized", true)
             result.put("history_written", true)
             result.put("history_item", historyToJson(history))
@@ -419,7 +428,13 @@ object NativeDownloadFinalizer {
                 for ((candidateOutput, mapAudioOnly) in attempts) {
                     try {
                         val audioMap = if (mapAudioOnly) "-map 0:a " else ""
-                        val command = "-v error -decryption_key ${q(candidate)} -f $inputFormat -i ${q(localInput)} ${audioMap}-c copy ${q(candidateOutput)} -y"
+                        // Force the flac muxer when the target extension is
+                        // .flac. Without this override FFmpeg keeps the ISO-BMFF
+                        // stream layout, producing FLAC-in-MP4 under a .flac
+                        // filename which downstream native FLAC tag writers
+                        // cannot read.
+                        val muxerOverride = if (candidateOutput.lowercase(Locale.ROOT).endsWith(".flac")) "-f flac " else ""
+                        val command = "-v error -decryption_key ${q(candidate)} -f $inputFormat -i ${q(localInput)} ${audioMap}-c copy ${muxerOverride}${q(candidateOutput)} -y"
                         val result = runFFmpeg(command, shouldCancel)
                         lastOutput = result.second
                         if (result.first && File(candidateOutput).exists()) {
@@ -461,13 +476,23 @@ object NativeDownloadFinalizer {
         if (!looksLikeM4a(state.filePath, state.fileName)) return
 
         val tidalHighFormat = input.request.optString("tidal_high_format", "").ifBlank { "mp3_320" }
-        val format = if (tidalHighFormat.startsWith("opus")) "opus" else "mp3"
+        val format = when {
+            tidalHighFormat.startsWith("opus") -> "opus"
+            tidalHighFormat.startsWith("aac") || tidalHighFormat.startsWith("m4a") -> "aac"
+            else -> "mp3"
+        }
+        val metadataFormat = if (format == "aac") "m4a" else format
+        val displayFormat = if (format == "aac") "AAC" else format.uppercase(Locale.ROOT)
         val bitrate = if (tidalHighFormat.contains("_")) {
             "${tidalHighFormat.substringAfterLast("_")}k"
         } else {
             if (format == "opus") "128k" else "320k"
         }
-        val ext = if (format == "opus") ".opus" else ".mp3"
+        val ext = when (format) {
+            "opus" -> ".opus"
+            "aac" -> ".m4a"
+            else -> ".mp3"
+        }
         val localInput = materializeForFFmpeg(context, input, state)
         val deleteLocalInput = state.filePath.startsWith("content://")
         val output = buildOutputPath(localInput, ext)
@@ -475,6 +500,8 @@ object NativeDownloadFinalizer {
         try {
             val command = if (format == "opus") {
                 "-v error -hide_banner -i ${q(localInput)} -codec:a libopus -b:a $bitrate -vbr on -compression_level 10 -map 0:a ${q(output)} -y"
+            } else if (format == "aac") {
+                "-v error -hide_banner -i ${q(localInput)} -codec:a aac -b:a $bitrate -map 0:a -f mp4 ${q(output)} -y"
             } else {
                 "-v error -hide_banner -i ${q(localInput)} -codec:a libmp3lame -b:a $bitrate -map 0:a -id3v2_version 3 ${q(output)} -y"
             }
@@ -482,14 +509,14 @@ object NativeDownloadFinalizer {
             if (!result.first || !File(output).exists()) {
                 throw IllegalStateException("HIGH conversion failed: ${result.second}")
             }
-            embedBasicMetadata(context, output, input, format)
+            embedBasicMetadata(context, output, input, metadataFormat)
             replaceStatePath(context, input, state, output, deleteOld = true)
             adoptedOutput = true
         } finally {
             if (!adoptedOutput) File(output).delete()
             if (deleteLocalInput) File(localInput).delete()
         }
-        state.quality = "${format.uppercase(Locale.ROOT)} ${bitrate.removeSuffix("k")}kbps"
+        state.quality = "$displayFormat ${bitrate.removeSuffix("k")}kbps"
         state.bitDepth = null
         state.sampleRate = null
     }
@@ -501,13 +528,37 @@ object NativeDownloadFinalizer {
         shouldCancel: () -> Boolean,
     ) {
         if (requestQuality(input) == "HIGH" || outputExt(input) != ".flac") return
-        if (!looksLikeM4a(state.filePath, state.fileName) && !shouldForceContainerConversion(input, state)) return
+        val requestedDecryptionExt = requestedDecryptionOutputExt(input)
+        val forceContainerConversion = shouldForceContainerConversion(input, state)
+        if (!forceContainerConversion && requestedDecryptionExt.isNotBlank() && requestedDecryptionExt != ".flac") return
+        val mayNeedContainerConversion = forceContainerConversion ||
+            looksLikeM4a(state.filePath, state.fileName) ||
+            state.filePath.startsWith("content://")
+        if (!mayNeedContainerConversion) return
 
         val localInput = materializeForFFmpeg(context, input, state)
         val deleteLocalInput = state.filePath.startsWith("content://")
         val output = buildOutputPath(localInput, ".flac")
         var adoptedOutput = false
         try {
+            val codec = probePrimaryAudioCodec(localInput, shouldCancel)
+            val isAlreadyNativeFlac = codec == "flac" && isNativeFlacFile(localInput)
+            if (!isLosslessAudioCodec(codec)) {
+                Log.d(TAG, "Preserving native container; audio codec is ${codec.ifBlank { "unknown" }}")
+                return
+            }
+            if (isAlreadyNativeFlac) {
+                Log.d(TAG, "Native FLAC payload detected; publishing as FLAC and embedding metadata")
+                val nativeFlacOutput = if (localInput.lowercase(Locale.ROOT).endsWith(".flac")) {
+                    localInput
+                } else {
+                    File(localInput).copyTo(File(output), overwrite = true).absolutePath
+                }
+                embedBasicMetadata(context, nativeFlacOutput, input, "flac")
+                replaceStatePath(context, input, state, nativeFlacOutput, deleteOld = true)
+                adoptedOutput = true
+                return
+            }
             val result = runFFmpeg(
                 "-v error -xerror -i ${q(localInput)} -c:a flac -compression_level 8 ${q(output)} -y",
                 shouldCancel,
@@ -633,6 +684,17 @@ object NativeDownloadFinalizer {
 
             val bitDepth = optPositiveInt(metadata, "bit_depth")
             val sampleRate = optPositiveInt(metadata, "sample_rate")
+            val probedCodec = normalizeAudioCodec(
+                metadata.optString("audio_codec", "").ifBlank {
+                    metadata.optString("codec", "").ifBlank {
+                        metadata.optString("format", "")
+                    }
+                }
+            )
+            if (probedCodec != null) {
+                state.audioCodec = probedCodec
+                result.put("audio_codec", probedCodec)
+            }
             if (bitDepth != null) {
                 state.bitDepth = bitDepth
                 result.put("actual_bit_depth", bitDepth)
@@ -643,7 +705,7 @@ object NativeDownloadFinalizer {
             }
             val bitrateKbps = optPositiveBitrateKbps(metadata, "bitrate")
                 ?: optPositiveBitrateKbps(metadata, "bit_rate")
-            if (bitrateKbps != null) {
+            if (bitrateKbps != null && isLossyAudioCodec(state.audioCodec)) {
                 state.bitrateKbps = bitrateKbps
                 result.put("bitrate", bitrateKbps)
             }
@@ -654,6 +716,7 @@ object NativeDownloadFinalizer {
                 bitDepth = state.bitDepth,
                 sampleRate = state.sampleRate,
                 bitrateKbps = state.bitrateKbps,
+                audioCodec = state.audioCodec,
                 storedQuality = state.quality,
             )
             if (displayQuality != null) {
@@ -691,15 +754,19 @@ object NativeDownloadFinalizer {
         bitDepth: Int?,
         sampleRate: Int?,
         bitrateKbps: Int?,
+        audioCodec: String? = null,
         storedQuality: String?,
     ): String? {
-        val format = audioFormatForPath(filePath, fileName)
+        val format = audioFormatForCodec(audioCodec) ?: audioFormatForPath(filePath, fileName)
         if (format == "OPUS" ||
             format == "MP3" ||
             format == "AAC" ||
+            format == "EAC3" ||
+            format == "AC3" ||
+            format == "AC4" ||
             (format == "M4A" && (bitDepth == null || bitDepth <= 0))
         ) {
-            return if (bitrateKbps != null && bitrateKbps > 0) {
+            return if (bitrateKbps != null && bitrateKbps >= 16) {
                 "$format ${bitrateKbps}kbps"
             } else {
                 nonPlaceholderQuality(storedQuality) ?: format
@@ -713,6 +780,43 @@ object NativeDownloadFinalizer {
             return "$bitDepth-bit/${sampleRateLabel}kHz"
         }
         return nonPlaceholderQuality(storedQuality) ?: normalizeOptional(storedQuality)
+    }
+
+    private fun audioFormatForCodec(codec: String?): String? {
+        return when (normalizeAudioCodec(codec)) {
+            "flac" -> "FLAC"
+            "alac" -> "ALAC"
+            "aac" -> "AAC"
+            "eac3" -> "EAC3"
+            "ac3" -> "AC3"
+            "ac4" -> "AC4"
+            "mp3" -> "MP3"
+            "opus" -> "OPUS"
+            else -> null
+        }
+    }
+
+    private fun isLossyAudioCodec(codec: String?): Boolean {
+        return when (normalizeAudioCodec(codec)) {
+            "aac", "eac3", "ac3", "ac4", "mp3", "opus", "m4a" -> true
+            else -> false
+        }
+    }
+
+    private fun normalizeAudioCodec(codec: String?): String? {
+        val normalized = normalizeOptional(codec)
+            ?.lowercase(Locale.ROOT)
+            ?.replace('-', '_')
+            ?: return null
+        return when (normalized) {
+            "mp4a" -> "aac"
+            "ec_3" -> "eac3"
+            "ac_3" -> "ac3"
+            "ac_4" -> "ac4"
+            "mp4" -> "m4a"
+            "ogg" -> "opus"
+            else -> normalized
+        }
     }
 
     private fun audioFormatForPath(filePath: String, fileName: String): String? {
@@ -730,6 +834,11 @@ object NativeDownloadFinalizer {
 
     private fun nonPlaceholderQuality(quality: String?): String? {
         val normalized = normalizeOptional(quality) ?: return null
+        val bitrateMatch = Regex("\\b(\\d+)\\s*kbps\\b", RegexOption.IGNORE_CASE).find(normalized)
+        if (bitrateMatch != null) {
+            val bitrate = bitrateMatch.groupValues.getOrNull(1)?.toIntOrNull()
+            if (bitrate != null && bitrate < 16) return null
+        }
         val key = normalized.lowercase(Locale.ROOT).replace(Regex("[^a-z0-9]+"), "_").trim('_')
         val placeholders = setOf(
             "best",
@@ -1146,7 +1255,7 @@ object NativeDownloadFinalizer {
         return when (normalizeExt(File(path).extension)) {
             ".mp3" -> "mp3"
             ".opus", ".ogg" -> "opus"
-            ".m4a", ".mp4" -> "m4a"
+            ".m4a", ".mp4", ".aac" -> "m4a"
             else -> "flac"
         }
     }
@@ -1294,7 +1403,7 @@ object NativeDownloadFinalizer {
         val rawName = input.request.optString("saf_file_name", "")
             .ifBlank { state.fileName }
             .ifBlank { "${trackString(input, "artistName", input.request.optString("artist_name", "Artist"))} - ${trackString(input, "name", input.request.optString("track_name", "Track"))}" }
-        val knownExts = listOf(".flac", ".m4a", ".mp4", ".mp3", ".opus", ".ogg", ".lrc")
+        val knownExts = listOf(".flac", ".m4a", ".mp4", ".aac", ".mp3", ".opus", ".ogg", ".lrc")
         var base = rawName.trim()
         val lower = base.lowercase(Locale.ROOT)
         for (knownExt in knownExts) {
@@ -1315,19 +1424,66 @@ object NativeDownloadFinalizer {
     private fun shouldForceContainerConversion(input: FinalizeInput, state: FinalizeState): Boolean {
         if (input.result.optBoolean("requires_container_conversion", false)) return true
         if (input.request.optBoolean("requires_container_conversion", false)) return true
+        return false
+    }
 
-        val actualExt = normalizeExt(
-            input.result.optString("actual_extension", "")
-                .ifBlank { input.result.optString("output_extension", "") }
+    private fun probePrimaryAudioCodec(path: String, shouldCancel: () -> Boolean = { false }): String {
+        val result = runFFmpeg("-hide_banner -nostdin -i ${q(path)} -map 0:a:0 -frames:a 1 -f null -", shouldCancel)
+        val output = result.second
+        val match = Regex("Audio:\\s*([^,\\s]+)", RegexOption.IGNORE_CASE).find(output)
+        return match?.groupValues?.getOrNull(1)
+            ?.trim()
+            ?.lowercase(Locale.ROOT)
+            ?.replace('-', '_')
+            .orEmpty()
+    }
+
+    /**
+     * Returns true when the file on [path] starts with the native FLAC magic
+     * bytes (`fLaC`). A file may contain a FLAC audio stream yet live inside
+     * an MP4/fMP4 container (e.g. some Amazon Music downloads); native FLAC
+     * tag writers require the raw fLaC header, so we must detect that mismatch
+     * before skipping the container conversion step.
+     */
+    private fun isNativeFlacFile(path: String): Boolean {
+        return try {
+            RandomAccessFile(path, "r").use { raf ->
+                if (raf.length() < 4L) return false
+                val header = ByteArray(4)
+                raf.readFully(header)
+                header[0] == 0x66.toByte() && // 'f'
+                    header[1] == 0x4C.toByte() && // 'L'
+                    header[2] == 0x61.toByte() && // 'a'
+                    header[3] == 0x43.toByte() // 'C'
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Native FLAC magic probe failed for $path: ${e.message}")
+            false
+        }
+    }
+
+    private fun isLosslessAudioCodec(codec: String): Boolean {
+        val normalized = codec.trim().lowercase(Locale.ROOT).replace('-', '_')
+        if (normalized.isBlank()) return false
+        if (normalized.startsWith("pcm_")) return true
+        return normalized in setOf(
+            "alac",
+            "flac",
+            "wavpack",
+            "ape",
+            "tta",
+            "mlp",
+            "truehd",
+            "shorten"
         )
-        if (actualExt == ".m4a" || actualExt == ".mp4") return true
+    }
 
-        val container = input.result.optString("actual_container", "")
-            .ifBlank { input.result.optString("container", "") }
-            .trim()
-            .lowercase(Locale.ROOT)
-            .removePrefix(".")
-        return container == "m4a" || container == "mp4" || container == "mov" || container == "aac"
+    private fun requestedDecryptionOutputExt(input: FinalizeInput): String {
+        val descriptor = input.result.optJSONObject("decryption")
+        return normalizeExt(
+            descriptor?.optString("output_extension", "")
+                ?.ifBlank { input.result.optString("output_extension", "") }
+        )
     }
 
     private fun validateRequestContract(request: JSONObject) {
@@ -1541,6 +1697,10 @@ object NativeDownloadFinalizer {
         values.put("quality", state.quality)
         state.bitDepth?.let { values.put("bit_depth", it) }
         state.sampleRate?.let { values.put("sample_rate", it) }
+        state.bitrateKbps?.takeIf { it >= 16 && isLossyAudioCodec(state.audioCodec) }?.let {
+            values.put("bitrate", it)
+        }
+        normalizeAudioCodec(state.audioCodec)?.let { values.put("format", it) }
         values.put("genre", normalizeOptional(result.optString("genre", "").ifBlank { input.request.optString("genre", "") }))
         values.put("composer", normalizeOptional(resultString(input, "composer").ifBlank { trackString(input, "composer", requestString(input, "composer")) }))
         values.put("label", normalizeOptional(result.optString("label", "").ifBlank { input.request.optString("label", "") }))
@@ -1597,6 +1757,8 @@ object NativeDownloadFinalizer {
                       quality TEXT,
                       bit_depth INTEGER,
                       sample_rate INTEGER,
+                      bitrate INTEGER,
+                      format TEXT,
                       genre TEXT,
                       composer TEXT,
                       label TEXT,
@@ -1612,6 +1774,8 @@ object NativeDownloadFinalizer {
 	                ensureHistoryColumn(db, "composer", "ALTER TABLE history ADD COLUMN composer TEXT")
 	                ensureHistoryColumn(db, "total_tracks", "ALTER TABLE history ADD COLUMN total_tracks INTEGER")
 	                ensureHistoryColumn(db, "total_discs", "ALTER TABLE history ADD COLUMN total_discs INTEGER")
+	                ensureHistoryColumn(db, "bitrate", "ALTER TABLE history ADD COLUMN bitrate INTEGER")
+	                ensureHistoryColumn(db, "format", "ALTER TABLE history ADD COLUMN format TEXT")
 	                ensureHistoryColumn(db, "spotify_id_norm", "ALTER TABLE history ADD COLUMN spotify_id_norm TEXT")
 	                ensureHistoryColumn(db, "isrc_norm", "ALTER TABLE history ADD COLUMN isrc_norm TEXT")
 	                ensureHistoryColumn(db, "match_key", "ALTER TABLE history ADD COLUMN match_key TEXT")
@@ -1983,6 +2147,8 @@ object NativeDownloadFinalizer {
         putCamel("quality", "quality")
         putCamel("bit_depth", "bitDepth")
         putCamel("sample_rate", "sampleRate")
+        putCamel("bitrate", "bitrate")
+        putCamel("format", "format")
         putCamel("genre", "genre")
         putCamel("composer", "composer")
         putCamel("label", "label")
@@ -2014,11 +2180,12 @@ object NativeDownloadFinalizer {
 
     private fun optPositiveBitrateKbps(obj: JSONObject, key: String): Int? {
         val value = optPositiveInt(obj, key) ?: return null
-        return if (value >= 10000) {
+        val kbps = if (value >= 10000) {
             Math.round(value / 1000.0).toInt()
         } else {
             value
         }
+        return if (kbps >= 16) kbps else null
     }
 
     private fun positiveOrNull(primary: Int, fallback: Int): Int? {

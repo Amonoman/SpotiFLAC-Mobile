@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:ffmpeg_kit_flutter_new_full/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_new_full/ffmpeg_kit_config.dart';
 import 'package:ffmpeg_kit_flutter_new_full/ffmpeg_session.dart';
+import 'package:ffmpeg_kit_flutter_new_full/ffprobe_kit.dart';
 import 'package:ffmpeg_kit_flutter_new_full/return_code.dart';
 import 'package:ffmpeg_kit_flutter_new_full/session_state.dart';
 import 'package:path_provider/path_provider.dart';
@@ -66,9 +67,9 @@ class DownloadDecryptionDescriptor {
   ) {
     final rawDecryption = result['decryption'];
     if (rawDecryption is Map) {
-      final descriptor = DownloadDecryptionDescriptor.fromJson(
-        Map<String, dynamic>.from(rawDecryption),
-      );
+      final descriptorJson = Map<String, dynamic>.from(rawDecryption);
+      descriptorJson['output_extension'] ??= result['output_extension'];
+      final descriptor = DownloadDecryptionDescriptor.fromJson(descriptorJson);
       if (descriptor.normalizedStrategy == 'ffmpeg.mov_key' &&
           descriptor.key.isNotEmpty) {
         return descriptor;
@@ -84,6 +85,7 @@ class DownloadDecryptionDescriptor {
       strategy: 'ffmpeg.mov_key',
       key: legacyKey,
       inputFormat: 'mov',
+      outputExtension: (result['output_extension'] as String?)?.trim(),
     );
   }
 
@@ -99,6 +101,12 @@ class DownloadDecryptionDescriptor {
       default:
         return strategy.trim();
     }
+  }
+
+  String? get normalizedOutputExtension {
+    final trimmed = (outputExtension ?? '').trim().toLowerCase();
+    if (trimmed.isEmpty) return null;
+    return trimmed.startsWith('.') ? trimmed : '.$trimmed';
   }
 }
 
@@ -241,6 +249,62 @@ class FFmpegService {
     }
   }
 
+  static Future<String?> probePrimaryAudioCodec(String filePath) async {
+    try {
+      final session = await FFprobeKit.getMediaInformation(filePath);
+      final info = session.getMediaInformation();
+      if (info == null) return null;
+
+      for (final stream in info.getStreams()) {
+        final props = stream.getAllProperties() ?? const <String, dynamic>{};
+        if (props['codec_type']?.toString() != 'audio') continue;
+        final codec = props['codec_name']?.toString().trim().toLowerCase();
+        return codec == null || codec.isEmpty ? null : codec;
+      }
+    } catch (e) {
+      _log.w('Audio codec probe failed for $filePath: $e');
+    }
+    return null;
+  }
+
+  static bool isLosslessAudioCodec(String? codec) {
+    final normalized = codec?.trim().toLowerCase().replaceAll('-', '_') ?? '';
+    if (normalized.isEmpty) return false;
+    if (normalized.startsWith('pcm_')) return true;
+    return const {
+      'alac',
+      'flac',
+      'wavpack',
+      'ape',
+      'tta',
+      'mlp',
+      'truehd',
+      'shorten',
+    }.contains(normalized);
+  }
+
+  /// Returns `true` when [filePath] starts with the native FLAC magic bytes
+  /// (`fLaC`). Useful to distinguish a real FLAC file from a FLAC-in-MP4
+  /// container that carries a `.flac` extension or claims codec=flac.
+  static Future<bool> isNativeFlacFile(String filePath) async {
+    try {
+      final raf = await File(filePath).open();
+      try {
+        final header = await raf.read(4);
+        return header.length == 4 &&
+            header[0] == 0x66 && // 'f'
+            header[1] == 0x4C && // 'L'
+            header[2] == 0x61 && // 'a'
+            header[3] == 0x43; // 'C'
+      } finally {
+        await raf.close();
+      }
+    } catch (e) {
+      _log.w('Native FLAC magic probe failed for $filePath: $e');
+      return false;
+    }
+  }
+
   static Future<String?> convertM4aToFlac(String inputPath) async {
     final outputPath = _buildOutputPath(inputPath, '.flac');
 
@@ -266,7 +330,8 @@ class FFmpegService {
     String? bitrate,
     bool deleteOriginal = true,
   }) async {
-    String bitrateValue = format == 'opus' ? '128k' : '320k';
+    final normalizedFormat = format.toLowerCase();
+    String bitrateValue = normalizedFormat == 'opus' ? '128k' : '320k';
     if (bitrate != null && bitrate.contains('_')) {
       final parts = bitrate.split('_');
       if (parts.length == 2) {
@@ -274,13 +339,20 @@ class FFmpegService {
       }
     }
 
-    final extension = format == 'opus' ? '.opus' : '.mp3';
+    final extension = switch (normalizedFormat) {
+      'opus' => '.opus',
+      'aac' || 'm4a' => '.m4a',
+      _ => '.mp3',
+    };
     final outputPath = _buildOutputPath(inputPath, extension);
 
     String command;
-    if (format == 'opus') {
+    if (normalizedFormat == 'opus') {
       command =
           '-v error -hide_banner -i "$inputPath" -codec:a libopus -b:a $bitrateValue -vbr on -compression_level 10 -map 0:a "$outputPath" -y';
+    } else if (normalizedFormat == 'aac' || normalizedFormat == 'm4a') {
+      command =
+          '-v error -hide_banner -i "$inputPath" -codec:a aac -b:a $bitrateValue -map 0:a -f mp4 "$outputPath" -y';
     } else {
       command =
           '-v error -hide_banner -i "$inputPath" -codec:a libmp3lame -b:a $bitrateValue -map 0:a -id3v2_version 3 "$outputPath" -y';
@@ -297,7 +369,7 @@ class FFmpegService {
       return outputPath;
     }
 
-    _log.e('M4A to $format conversion failed: ${result.output}');
+    _log.e('M4A to $normalizedFormat conversion failed: ${result.output}');
     return null;
   }
 
@@ -393,7 +465,16 @@ class FFmpegService {
       // Force MOV demuxer: -decryption_key is only supported by the MOV/MP4
       // demuxer. The input may carry a .flac extension (SAF mode) while actually
       // containing an encrypted M4A stream, so we must override auto-detection.
-      return '-v error -decryption_key "$key" -f $demuxerFormat -i "$inputPath" $audioMap-c copy "$outputPath" -y';
+      //
+      // When the requested output is a native .flac we also force the flac
+      // muxer (-f flac). Without it, FFmpeg infers the muxer from the output
+      // extension AND keeps the input container's stream layout, which for
+      // FLAC-in-MP4 sources would still emit an ISO-BMFF payload under a
+      // .flac filename. That file fails native FLAC tag writers later on.
+      final muxerOverride = outputPath.toLowerCase().endsWith('.flac')
+          ? '-f flac '
+          : '';
+      return '-v error -decryption_key "$key" -f $demuxerFormat -i "$inputPath" $audioMap-c copy $muxerOverride"$outputPath" -y';
     }
 
     final keyCandidates = _buildDecryptionKeyCandidates(decryptionKey);
@@ -1308,6 +1389,7 @@ class FFmpegService {
   }) async {
     final tempDir = await getTemporaryDirectory();
     final tempOutput = _nextTempEmbedPath(tempDir.path, '.mp3');
+    final lyrics = _extractLyricsForId3(metadata);
 
     // Try with -c:a copy first (fastest, preserves original codec)
     var result = await _runMp3Embed(
@@ -1320,7 +1402,11 @@ class FFmpegService {
     );
 
     if (result.success) {
-      return await _finalizeMp3Embed(mp3Path, tempOutput);
+      final embeddedPath = await _finalizeMp3Embed(mp3Path, tempOutput);
+      if (embeddedPath != null && lyrics != null) {
+        await _ensureMp3UnsyncedLyricsFrame(embeddedPath, lyrics);
+      }
+      return embeddedPath;
     }
 
     // If copy failed (e.g. AAC/Opus in .mp3 container), re-encode to real MP3
@@ -1346,7 +1432,11 @@ class FFmpegService {
       );
 
       if (result.success) {
-        return await _finalizeMp3Embed(mp3Path, reencodeOutput);
+        final embeddedPath = await _finalizeMp3Embed(mp3Path, reencodeOutput);
+        if (embeddedPath != null && lyrics != null) {
+          await _ensureMp3UnsyncedLyricsFrame(embeddedPath, lyrics);
+        }
+        return embeddedPath;
       }
 
       try {
@@ -1456,6 +1546,204 @@ class FFmpegService {
       _log.e('Failed to replace MP3 file after metadata embed: $e');
       return null;
     }
+  }
+
+  static String? _extractLyricsForId3(Map<String, String>? metadata) {
+    if (metadata == null) return null;
+
+    String? fallback;
+    for (final entry in metadata.entries) {
+      final key = entry.key.toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '');
+      if (key != 'UNSYNCEDLYRICS' && key != 'LYRICS') continue;
+
+      final value = entry.value;
+      if (value.trim().isEmpty) continue;
+      if (key == 'UNSYNCEDLYRICS') return value;
+      fallback ??= value;
+    }
+
+    return fallback;
+  }
+
+  static Future<void> _ensureMp3UnsyncedLyricsFrame(
+    String mp3Path,
+    String lyrics,
+  ) async {
+    try {
+      final file = File(mp3Path);
+      if (!await file.exists()) return;
+
+      final bytes = await file.readAsBytes();
+      final updated = _writeId3v23UnsyncedLyrics(bytes, lyrics);
+      if (updated == null) {
+        _log.w('Skipping MP3 USLT lyrics frame update: unsupported ID3 tag');
+        return;
+      }
+
+      await file.writeAsBytes(updated, flush: true);
+      _log.d('MP3 USLT lyrics frame written (${lyrics.length} chars)');
+    } catch (e) {
+      _log.w('Failed to write MP3 USLT lyrics frame: $e');
+    }
+  }
+
+  static Uint8List? _writeId3v23UnsyncedLyrics(Uint8List bytes, String lyrics) {
+    final lyricsFrame = _buildId3v23UnsyncedLyricsFrame(lyrics);
+
+    if (!_hasId3Header(bytes)) {
+      final builder = BytesBuilder(copy: false)
+        ..add(_buildId3v23Tag(lyricsFrame))
+        ..add(bytes);
+      return builder.toBytes();
+    }
+
+    if (bytes.length < 10 || bytes[3] != 3) {
+      return null;
+    }
+
+    final flags = bytes[5];
+    const unsupportedFlags = 0x80 | 0x40 | 0x20;
+    if ((flags & unsupportedFlags) != 0) {
+      return null;
+    }
+
+    final tagSize = _readSynchsafeInt(bytes, 6);
+    if (tagSize == null) return null;
+
+    final tagEnd = 10 + tagSize;
+    if (tagEnd < 10 || tagEnd > bytes.length) {
+      return null;
+    }
+
+    final tagPayload = bytes.sublist(10, tagEnd);
+    final preservedFrames = _removeId3v23Frames(tagPayload, {'USLT'});
+    final newPayload = BytesBuilder(copy: false)
+      ..add(preservedFrames)
+      ..add(lyricsFrame);
+
+    final newTag = _buildId3v23Tag(newPayload.toBytes());
+    final builder = BytesBuilder(copy: false)
+      ..add(newTag)
+      ..add(bytes.sublist(tagEnd));
+    return builder.toBytes();
+  }
+
+  static bool _hasId3Header(Uint8List bytes) {
+    return bytes.length >= 10 &&
+        bytes[0] == 0x49 &&
+        bytes[1] == 0x44 &&
+        bytes[2] == 0x33;
+  }
+
+  static Uint8List _removeId3v23Frames(
+    Uint8List tagPayload,
+    Set<String> frameIds,
+  ) {
+    final builder = BytesBuilder(copy: false);
+    var offset = 0;
+
+    while (offset + 10 <= tagPayload.length) {
+      final idBytes = tagPayload.sublist(offset, offset + 4);
+      if (idBytes.every((byte) => byte == 0)) break;
+
+      final frameId = ascii.decode(idBytes, allowInvalid: true);
+      if (!RegExp(r'^[A-Z0-9]{4}$').hasMatch(frameId)) break;
+
+      final frameSize = _readUint32(tagPayload, offset + 4);
+      if (frameSize <= 0 || offset + 10 + frameSize > tagPayload.length) {
+        break;
+      }
+
+      if (!frameIds.contains(frameId)) {
+        builder.add(tagPayload.sublist(offset, offset + 10 + frameSize));
+      }
+
+      offset += 10 + frameSize;
+    }
+
+    return builder.toBytes();
+  }
+
+  static Uint8List _buildId3v23Tag(Uint8List payload) {
+    final header = Uint8List(10)
+      ..[0] = 0x49
+      ..[1] = 0x44
+      ..[2] = 0x33
+      ..[3] = 3;
+
+    final size = _writeSynchsafeInt(payload.length);
+    header.setRange(6, 10, size);
+
+    final builder = BytesBuilder(copy: false)
+      ..add(header)
+      ..add(payload);
+    return builder.toBytes();
+  }
+
+  static Uint8List _buildId3v23UnsyncedLyricsFrame(String lyrics) {
+    final payload = BytesBuilder(copy: false)
+      ..add(const [0x01, 0x65, 0x6e, 0x67])
+      ..add(const [0xff, 0xfe, 0x00, 0x00])
+      ..add(_utf16LeWithBom(lyrics));
+
+    return _buildId3v23Frame('USLT', payload.toBytes());
+  }
+
+  static Uint8List _buildId3v23Frame(String frameId, Uint8List payload) {
+    final header = Uint8List(10);
+    header.setRange(0, 4, ascii.encode(frameId));
+    final size = _writeUint32(payload.length);
+    header.setRange(4, 8, size);
+
+    final builder = BytesBuilder(copy: false)
+      ..add(header)
+      ..add(payload);
+    return builder.toBytes();
+  }
+
+  static Uint8List _utf16LeWithBom(String value) {
+    final bytes = BytesBuilder(copy: false)..add(const [0xff, 0xfe]);
+    for (final codeUnit in value.codeUnits) {
+      bytes.add([codeUnit & 0xff, (codeUnit >> 8) & 0xff]);
+    }
+    return bytes.toBytes();
+  }
+
+  static int? _readSynchsafeInt(Uint8List bytes, int offset) {
+    if (offset + 4 > bytes.length) return null;
+
+    final b0 = bytes[offset];
+    final b1 = bytes[offset + 1];
+    final b2 = bytes[offset + 2];
+    final b3 = bytes[offset + 3];
+    if ((b0 | b1 | b2 | b3) & 0x80 != 0) return null;
+
+    return (b0 << 21) | (b1 << 14) | (b2 << 7) | b3;
+  }
+
+  static Uint8List _writeSynchsafeInt(int value) {
+    return Uint8List.fromList([
+      (value >> 21) & 0x7f,
+      (value >> 14) & 0x7f,
+      (value >> 7) & 0x7f,
+      value & 0x7f,
+    ]);
+  }
+
+  static int _readUint32(Uint8List bytes, int offset) {
+    return (bytes[offset] << 24) |
+        (bytes[offset + 1] << 16) |
+        (bytes[offset + 2] << 8) |
+        bytes[offset + 3];
+  }
+
+  static Uint8List _writeUint32(int value) {
+    return Uint8List.fromList([
+      (value >> 24) & 0xff,
+      (value >> 16) & 0xff,
+      (value >> 8) & 0xff,
+      value & 0xff,
+    ]);
   }
 
   static Future<String?> embedMetadataToOpus({
@@ -1766,7 +2054,7 @@ class FFmpegService {
   }
 
   /// Unified audio format conversion with full metadata + cover preservation.
-  /// Supports: FLAC/M4A/MP3/Opus -> MP3/Opus/ALAC/FLAC.
+  /// Supports: FLAC/M4A/MP3/Opus -> AAC/M4A/MP3/Opus/ALAC/FLAC.
   /// ALAC and FLAC targets are lossless (bitrate parameter is ignored).
   static Future<String?> convertAudioFormat({
     required String inputPath,
@@ -1778,7 +2066,7 @@ class FFmpegService {
     bool deleteOriginal = true,
   }) async {
     final format = targetFormat.toLowerCase();
-    if (!const {'mp3', 'opus', 'alac', 'flac'}.contains(format)) {
+    if (!const {'mp3', 'opus', 'aac', 'alac', 'flac'}.contains(format)) {
       _log.e('Unsupported target format: $targetFormat');
       return null;
     }
@@ -1801,13 +2089,20 @@ class FFmpegService {
       );
     }
 
-    final extension = format == 'opus' ? '.opus' : '.mp3';
+    final extension = switch (format) {
+      'opus' => '.opus',
+      'aac' => '.m4a',
+      _ => '.mp3',
+    };
     final outputPath = _buildOutputPath(inputPath, extension);
 
     String command;
     if (format == 'opus') {
       command =
           '-v error -hide_banner -i "$inputPath" -codec:a libopus -b:a $bitrate -vbr on -compression_level 10 -map 0:a "$outputPath" -y';
+    } else if (format == 'aac') {
+      command =
+          '-v error -hide_banner -i "$inputPath" -codec:a aac -b:a $bitrate -map 0:a -f mp4 "$outputPath" -y';
     } else {
       command =
           '-v error -hide_banner -i "$inputPath" -codec:a libmp3lame -b:a $bitrate -map 0:a -id3v2_version 3 "$outputPath" -y';
@@ -1833,6 +2128,13 @@ class FFmpegService {
           mp3Path: outputPath,
           coverPath: coverPath,
           metadata: metadata,
+        );
+      } else if (format == 'aac') {
+        embedResult = await embedMetadataToM4a(
+          m4aPath: outputPath,
+          coverPath: coverPath,
+          metadata: metadata,
+          preserveMetadata: true,
         );
       } else {
         embedResult = await embedMetadataToOpus(

@@ -68,6 +68,8 @@ var (
 var supportedAudioFormats = map[string]bool{
 	".flac": true,
 	".m4a":  true,
+	".mp4":  true,
+	".aac":  true,
 	".mp3":  true,
 	".opus": true,
 	".ogg":  true,
@@ -87,6 +89,19 @@ type scannedCueFileInfo struct {
 	audioPath string
 }
 
+func isLibraryStagingFile(path string) bool {
+	name := strings.ToLower(filepath.Base(path))
+	if strings.HasSuffix(name, ".partial") {
+		return true
+	}
+	for ext := range supportedAudioFormats {
+		if strings.HasSuffix(name, ".partial"+ext) {
+			return true
+		}
+	}
+	return false
+}
+
 func collectLibraryAudioFiles(folderPath string, cancelCh <-chan struct{}) ([]libraryAudioFileInfo, error) {
 	var files []libraryAudioFileInfo
 
@@ -102,6 +117,9 @@ func collectLibraryAudioFiles(folderPath string, cancelCh <-chan struct{}) ([]li
 		}
 
 		if entry.IsDir() {
+			return nil
+		}
+		if isLibraryStagingFile(path) {
 			return nil
 		}
 
@@ -314,7 +332,7 @@ func scanAudioFileWithKnownModTimeAndDisplayNameAndCoverCacheKey(filePath, displ
 	switch ext {
 	case ".flac":
 		return scanFLACFile(filePath, result, displayNameHint)
-	case ".m4a":
+	case ".m4a", ".mp4", ".aac":
 		return scanM4AFile(filePath, result, displayNameHint)
 	case ".mp3":
 		return scanMP3File(filePath, result, displayNameHint)
@@ -394,7 +412,6 @@ func scanM4AFile(filePath string, result *LibraryScanResult, displayNameHint str
 	metadata, err := ReadM4ATags(filePath)
 	if err != nil {
 		GoLog("[LibraryScan] M4A read error for %s: %v\n", filePath, err)
-		return scanFromFilename(filePath, displayNameHint, result)
 	}
 
 	if metadata != nil {
@@ -421,10 +438,52 @@ func scanM4AFile(filePath string, result *LibraryScanResult, displayNameHint str
 	if err == nil {
 		result.BitDepth = quality.BitDepth
 		result.SampleRate = quality.SampleRate
+		result.Duration = quality.Duration
+		if quality.Bitrate > 0 {
+			result.Bitrate = quality.Bitrate
+		}
+		if format := libraryFormatForM4ACodec(quality.Codec); format != "" {
+			result.Format = format
+			if isLosslessLibraryFormat(format) {
+				result.Bitrate = 0
+			}
+		}
+	}
+
+	if metadata == nil {
+		return scanFromFilename(filePath, displayNameHint, result)
 	}
 
 	applyDefaultLibraryMetadata(filePath, displayNameHint, result)
 	return result, nil
+}
+
+func libraryFormatForM4ACodec(codec string) string {
+	switch strings.ToLower(strings.TrimSpace(codec)) {
+	case "flac":
+		return "flac"
+	case "alac":
+		return "alac"
+	case "eac3", "ec-3":
+		return "eac3"
+	case "ac3", "ac-3":
+		return "ac3"
+	case "ac4", "ac-4":
+		return "ac4"
+	case "aac", "mp4a":
+		return "m4a"
+	default:
+		return ""
+	}
+}
+
+func isLosslessLibraryFormat(format string) bool {
+	switch strings.ToLower(strings.TrimSpace(format)) {
+	case "flac", "alac":
+		return true
+	default:
+		return false
+	}
 }
 
 func scanMP3File(filePath string, result *LibraryScanResult, displayNameHint string) (*LibraryScanResult, error) {

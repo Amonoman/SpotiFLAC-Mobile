@@ -8,6 +8,7 @@ import 'package:spotiflac_android/models/track.dart';
 import 'package:spotiflac_android/providers/download_queue_provider.dart';
 import 'package:spotiflac_android/providers/extension_provider.dart';
 import 'package:spotiflac_android/providers/settings_provider.dart';
+import 'package:spotiflac_android/utils/audio_conversion_utils.dart';
 import 'package:spotiflac_android/utils/file_access.dart';
 import 'package:spotiflac_android/utils/image_cache_utils.dart';
 import 'package:spotiflac_android/utils/lyrics_metadata_helper.dart';
@@ -440,8 +441,8 @@ class _LocalAlbumScreenState extends ConsumerState<LocalAlbumScreen> {
                                     color: Colors.white,
                                   ),
                                   const SizedBox(width: 4),
-                                  const Text(
-                                    'Local',
+                                  Text(
+                                    context.l10n.librarySourceLocal,
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w600,
@@ -470,7 +471,9 @@ class _LocalAlbumScreenState extends ConsumerState<LocalAlbumScreen> {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    '${_sortedTracksCache.length} tracks',
+                                    context.l10n.queueTrackCount(
+                                      _sortedTracksCache.length,
+                                    ),
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w600,
@@ -1155,7 +1158,11 @@ class _LocalAlbumScreenState extends ConsumerState<LocalAlbumScreen> {
     final failedCount = total - successCount;
     final summary = failedCount <= 0
         ? '${context.l10n.trackReEnrichSuccess} ($successCount/$total)'
-        : '${context.l10n.trackReEnrichSuccess} ($successCount/$total) • Failed: $failedCount';
+        : context.l10n.trackReEnrichSuccessWithFailures(
+            successCount,
+            total,
+            failedCount,
+          );
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(summary)));
@@ -1170,52 +1177,38 @@ class _LocalAlbumScreenState extends ConsumerState<LocalAlbumScreen> {
     for (final id in _selectedIds) {
       final item = tracksById[id];
       if (item == null) continue;
-      String? ext;
-      if (item.format != null && item.format!.isNotEmpty) {
-        final fmt = item.format!.toLowerCase();
-        if (fmt == 'flac') {
-          ext = 'FLAC';
-        } else if (fmt == 'm4a') {
-          ext = 'M4A';
-        } else if (fmt == 'mp3') {
-          ext = 'MP3';
-        } else if (fmt == 'opus' || fmt == 'ogg') {
-          ext = 'Opus';
-        }
-      }
-      if (ext == null) {
-        final lower = item.filePath.toLowerCase();
-        if (lower.endsWith('.flac')) {
-          ext = 'FLAC';
-        } else if (lower.endsWith('.m4a')) {
-          ext = 'M4A';
-        } else if (lower.endsWith('.mp3')) {
-          ext = 'MP3';
-        } else if (lower.endsWith('.opus') || lower.endsWith('.ogg')) {
-          ext = 'Opus';
-        }
-      }
-      if (ext != null) sourceFormats.add(ext);
+      final sourceFormat = convertibleAudioSourceFormat(
+        storedFormat: item.format,
+        filePath: item.filePath,
+      );
+      if (sourceFormat != null) sourceFormats.add(sourceFormat);
     }
 
-    final formats = ['ALAC', 'FLAC', 'MP3', 'Opus'].where((target) {
-      return sourceFormats.any((src) {
-        if (src == target) return false;
-        final isLosslessTarget = target == 'ALAC' || target == 'FLAC';
-        final isLosslessSource = src == 'FLAC' || src == 'M4A';
-        if (isLosslessTarget && !isLosslessSource) return false;
-        return true;
-      });
-    }).toList();
+    final formats = audioConversionTargetFormats
+        .where(
+          (target) => sourceFormats.any(
+            (source) => canConvertAudioFormat(
+              sourceFormat: source,
+              targetFormat: target,
+            ),
+          ),
+        )
+        .toList();
 
     if (formats.isEmpty) return;
 
     String selectedFormat = formats.first;
     bool isLosslessTarget =
         selectedFormat == 'ALAC' || selectedFormat == 'FLAC';
+    String defaultBitrateForFormat(String format) {
+      if (format == 'Opus') return '128k';
+      if (format == 'AAC') return '256k';
+      return '320k';
+    }
+
     String selectedBitrate = isLosslessTarget
         ? '320k'
-        : (selectedFormat == 'Opus' ? '128k' : '320k');
+        : defaultBitrateForFormat(selectedFormat);
 
     showModalBottomSheet<void>(
       context: context,
@@ -1277,9 +1270,9 @@ class _LocalAlbumScreenState extends ConsumerState<LocalAlbumScreen> {
                                 isLosslessTarget =
                                     format == 'ALAC' || format == 'FLAC';
                                 if (!isLosslessTarget) {
-                                  selectedBitrate = format == 'Opus'
-                                      ? '128k'
-                                      : '320k';
+                                  selectedBitrate = defaultBitrateForFormat(
+                                    format,
+                                  );
                                 }
                               });
                             }
@@ -1375,39 +1368,17 @@ class _LocalAlbumScreenState extends ConsumerState<LocalAlbumScreen> {
     for (final id in _selectedIds) {
       final item = tracksById[id];
       if (item == null) continue;
-      // Detect current format: prefer item.format field (works for SAF too),
-      // fall back to file extension for regular paths
-      String? currentFormat;
-      if (item.format != null && item.format!.isNotEmpty) {
-        final fmt = item.format!.toLowerCase();
-        if (fmt == 'flac') {
-          currentFormat = 'FLAC';
-        } else if (fmt == 'm4a') {
-          currentFormat = 'M4A';
-        } else if (fmt == 'mp3') {
-          currentFormat = 'MP3';
-        } else if (fmt == 'opus' || fmt == 'ogg') {
-          currentFormat = 'Opus';
-        }
+      final currentFormat = convertibleAudioSourceFormat(
+        storedFormat: item.format,
+        filePath: item.filePath,
+      );
+      if (currentFormat == null ||
+          !canConvertAudioFormat(
+            sourceFormat: currentFormat,
+            targetFormat: targetFormat,
+          )) {
+        continue;
       }
-      if (currentFormat == null) {
-        // Fallback: try file extension (works for regular paths)
-        final lower = item.filePath.toLowerCase();
-        if (lower.endsWith('.flac')) {
-          currentFormat = 'FLAC';
-        } else if (lower.endsWith('.m4a')) {
-          currentFormat = 'M4A';
-        } else if (lower.endsWith('.mp3')) {
-          currentFormat = 'MP3';
-        } else if (lower.endsWith('.opus') || lower.endsWith('.ogg')) {
-          currentFormat = 'Opus';
-        }
-      }
-      if (currentFormat == null || currentFormat == targetFormat) continue;
-      final isLosslessTarget = targetFormat == 'ALAC' || targetFormat == 'FLAC';
-      final isLosslessSource =
-          currentFormat == 'FLAC' || currentFormat == 'M4A';
-      if (isLosslessTarget && !isLosslessSource) continue;
       selected.add(item);
     }
 
@@ -1602,6 +1573,7 @@ class _LocalAlbumScreenState extends ConsumerState<LocalAlbumScreen> {
                 mimeType = 'audio/opus';
                 break;
               case 'alac':
+              case 'aac':
                 newExt = '.m4a';
                 mimeType = 'audio/mp4';
                 break;
@@ -1636,9 +1608,11 @@ class _LocalAlbumScreenState extends ConsumerState<LocalAlbumScreen> {
               continue;
             }
 
-            try {
-              await PlatformBridge.safDelete(item.filePath);
-            } catch (_) {}
+            if (!isSameContentUri(item.filePath, safUri)) {
+              try {
+                await PlatformBridge.safDelete(item.filePath);
+              } catch (_) {}
+            }
             await localDb.replaceWithConvertedItem(
               item: item,
               newFilePath: safUri,

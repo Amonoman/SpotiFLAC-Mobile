@@ -43,6 +43,7 @@ class DownloadRequestPayload {
   final String safRelativeDir;
   final String safFileName;
   final String safOutputExt;
+  final String outputExt;
   final bool stageSafOutput;
   final bool deferSafPublish;
   final bool requiresContainerConversion;
@@ -91,6 +92,7 @@ class DownloadRequestPayload {
     this.safRelativeDir = '',
     this.safFileName = '',
     this.safOutputExt = '',
+    this.outputExt = '',
     this.stageSafOutput = false,
     this.deferSafPublish = false,
     this.requiresContainerConversion = false,
@@ -141,6 +143,7 @@ class DownloadRequestPayload {
       'saf_relative_dir': safRelativeDir,
       'saf_file_name': safFileName,
       'saf_output_ext': safOutputExt,
+      'output_ext': outputExt,
       'stage_saf_output': stageSafOutput,
       'defer_saf_publish': deferSafPublish,
       'requires_container_conversion': requiresContainerConversion,
@@ -195,6 +198,7 @@ class DownloadRequestPayload {
       safRelativeDir: safRelativeDir,
       safFileName: safFileName,
       safOutputExt: safOutputExt,
+      outputExt: outputExt,
       stageSafOutput: stageSafOutput,
       deferSafPublish: deferSafPublish,
       requiresContainerConversion: requiresContainerConversion,

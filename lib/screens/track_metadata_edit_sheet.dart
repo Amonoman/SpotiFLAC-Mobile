@@ -265,11 +265,11 @@ class _EditMetadataSheetState extends State<_EditMetadataSheet> {
       case 'track_number':
         return l10n.editMetadataFieldTrackNum;
       case 'total_tracks':
-        return 'Track Total';
+        return l10n.editMetadataFieldTrackTotal;
       case 'disc_number':
         return l10n.editMetadataFieldDiscNum;
       case 'total_discs':
-        return 'Disc Total';
+        return l10n.editMetadataFieldDiscTotal;
       case 'genre':
         return l10n.editMetadataFieldGenre;
       case 'isrc':
@@ -281,7 +281,7 @@ class _EditMetadataSheetState extends State<_EditMetadataSheet> {
       case 'copyright':
         return l10n.editMetadataFieldCopyright;
       case 'composer':
-        return 'Composer';
+        return l10n.editMetadataFieldComposer;
       case 'cover':
         return l10n.editMetadataFieldCover;
       default:
@@ -1224,16 +1224,23 @@ class _EditMetadataSheetState extends State<_EditMetadataSheet> {
                   const SizedBox(height: 6),
                   _buildCoverEditor(cs),
                   _buildAutoFillSection(cs),
-                  _field('Title', _titleCtrl),
-                  _field('Artist', _artistCtrl),
-                  _field('Album', _albumCtrl),
-                  _field('Album Artist', _albumArtistCtrl),
-                  _field('Date', _dateCtrl, hint: 'YYYY-MM-DD or YYYY'),
+                  _field(context.l10n.editMetadataFieldTitle, _titleCtrl),
+                  _field(context.l10n.editMetadataFieldArtist, _artistCtrl),
+                  _field(context.l10n.editMetadataFieldAlbum, _albumCtrl),
+                  _field(
+                    context.l10n.editMetadataFieldAlbumArtist,
+                    _albumArtistCtrl,
+                  ),
+                  _field(
+                    context.l10n.editMetadataFieldDate,
+                    _dateCtrl,
+                    hint: context.l10n.editMetadataFieldDateHint,
+                  ),
                   Row(
                     children: [
                       Expanded(
                         child: _field(
-                          'Track #',
+                          context.l10n.editMetadataFieldTrackNum,
                           _trackNumCtrl,
                           keyboard: TextInputType.number,
                         ),
@@ -1241,7 +1248,7 @@ class _EditMetadataSheetState extends State<_EditMetadataSheet> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: _field(
-                          'Track Total',
+                          context.l10n.editMetadataFieldTrackTotal,
                           _trackTotalCtrl,
                           keyboard: TextInputType.number,
                         ),
@@ -1253,7 +1260,7 @@ class _EditMetadataSheetState extends State<_EditMetadataSheet> {
                     children: [
                       Expanded(
                         child: _field(
-                          'Disc #',
+                          context.l10n.editMetadataFieldDiscNum,
                           _discNumCtrl,
                           keyboard: TextInputType.number,
                         ),
@@ -1261,15 +1268,15 @@ class _EditMetadataSheetState extends State<_EditMetadataSheet> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: _field(
-                          'Disc Total',
+                          context.l10n.editMetadataFieldDiscTotal,
                           _discTotalCtrl,
                           keyboard: TextInputType.number,
                         ),
                       ),
                     ],
                   ),
-                  _field('Genre', _genreCtrl),
-                  _field('ISRC', _isrcCtrl),
+                  _field(context.l10n.editMetadataFieldGenre, _genreCtrl),
+                  _field(context.l10n.editMetadataFieldIsrc, _isrcCtrl),
                   _field(
                     context.l10n.trackLyrics,
                     _lyricsCtrl,
@@ -1295,7 +1302,7 @@ class _EditMetadataSheetState extends State<_EditMetadataSheet> {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'Advanced',
+                              context.l10n.editMetadataAdvanced,
                               style: Theme.of(context).textTheme.labelLarge
                                   ?.copyWith(color: cs.onSurfaceVariant),
                             ),
@@ -1305,10 +1312,20 @@ class _EditMetadataSheetState extends State<_EditMetadataSheet> {
                     ),
                   ),
                   if (_showAdvanced) ...[
-                    _field('Label', _labelCtrl),
-                    _field('Copyright', _copyrightCtrl),
-                    _field('Composer', _composerCtrl),
-                    _field('Comment', _commentCtrl, maxLines: 3),
+                    _field(context.l10n.editMetadataFieldLabel, _labelCtrl),
+                    _field(
+                      context.l10n.editMetadataFieldCopyright,
+                      _copyrightCtrl,
+                    ),
+                    _field(
+                      context.l10n.editMetadataFieldComposer,
+                      _composerCtrl,
+                    ),
+                    _field(
+                      context.l10n.editMetadataFieldComment,
+                      _commentCtrl,
+                      maxLines: 3,
+                    ),
                   ],
                   const SizedBox(height: 24),
                 ],
@@ -1501,7 +1518,7 @@ class _EditMetadataSheetState extends State<_EditMetadataSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Cover Art',
+              context.l10n.editMetadataFieldCover,
               style: Theme.of(
                 context,
               ).textTheme.labelLarge?.copyWith(color: cs.onSurface),

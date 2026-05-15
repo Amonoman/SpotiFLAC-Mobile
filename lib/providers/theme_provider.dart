@@ -25,7 +25,7 @@ class ThemeNotifier extends Notifier<ThemeSettings> {
       final useAmoled = prefs.getBool(kUseAmoledKey);
 
       state = ThemeSettings(
-        themeMode: _themeModeFromString(modeString),
+        themeMode: themeModeFromString(modeString),
         useDynamicColor: useDynamic ?? true,
         seedColorValue: seedColor ?? kDefaultSeedColor,
         useAmoled: useAmoled ?? false,
@@ -70,13 +70,5 @@ class ThemeNotifier extends Notifier<ThemeSettings> {
   Future<void> setUseAmoled(bool value) async {
     state = state.copyWith(useAmoled: value);
     await _saveToStorage();
-  }
-
-  ThemeMode _themeModeFromString(String? value) {
-    if (value == null) return ThemeMode.system;
-    return ThemeMode.values.firstWhere(
-      (e) => e.name == value,
-      orElse: () => ThemeMode.system,
-    );
   }
 }

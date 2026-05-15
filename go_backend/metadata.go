@@ -872,7 +872,7 @@ func ExtractLyrics(filePath string) (string, error) {
 		return extractLyricsFromSidecarLRC(filePath)
 	}
 
-	if strings.HasSuffix(lower, ".m4a") || strings.HasSuffix(lower, ".aac") {
+	if strings.HasSuffix(lower, ".m4a") || strings.HasSuffix(lower, ".mp4") || strings.HasSuffix(lower, ".aac") {
 		lyrics, err := extractLyricsFromM4A(filePath)
 		if err == nil && strings.TrimSpace(lyrics) != "" {
 			return lyrics, nil
@@ -1578,10 +1578,12 @@ func looksLikeEmbeddedLyrics(value string) bool {
 }
 
 type AudioQuality struct {
-	BitDepth     int   `json:"bit_depth"`
-	SampleRate   int   `json:"sample_rate"`
-	TotalSamples int64 `json:"total_samples"`
-	Duration     int   `json:"duration"`
+	BitDepth     int    `json:"bit_depth"`
+	SampleRate   int    `json:"sample_rate"`
+	TotalSamples int64  `json:"total_samples"`
+	Duration     int    `json:"duration"`
+	Bitrate      int    `json:"bitrate,omitempty"` // kbps, estimated for compressed MP4-family streams
+	Codec        string `json:"codec,omitempty"`
 }
 
 func GetAudioQuality(filePath string) (AudioQuality, error) {
@@ -1632,6 +1634,7 @@ func GetAudioQuality(filePath string) (AudioQuality, error) {
 			SampleRate:   sampleRate,
 			TotalSamples: totalSamples,
 			Duration:     duration,
+			Codec:        "flac",
 		}, nil
 	}
 
@@ -1695,9 +1698,11 @@ func GetM4AQuality(filePath string) (AudioQuality, error) {
 	//   [26:28] reserved
 	//   [28:32] samplerate (16.16 fixed-point)
 	sampleRate := int(buf[28])<<8 | int(buf[29])
-	bitDepth := int(buf[22])<<8 | int(buf[23])
+	bitDepth := 0
+	codec := normalizeM4AAudioCodec(atomType)
 
 	if atomType == "alac" {
+		bitDepth = int(buf[22])<<8 | int(buf[23])
 		if alacBitDepth, alacSampleRate, ok := readALACSpecificConfig(f, sampleOffset, fileSize); ok {
 			if alacBitDepth > 0 {
 				bitDepth = alacBitDepth
@@ -1706,24 +1711,75 @@ func GetM4AQuality(filePath string) (AudioQuality, error) {
 				sampleRate = alacSampleRate
 			}
 		}
+	} else if atomType == "fLaC" {
+		bitDepth = int(buf[22])<<8 | int(buf[23])
+		if flacBitDepth, flacSampleRate, flacTotalSamples, ok := readMP4FLACSpecificConfig(f, sampleOffset, fileSize); ok {
+			if flacBitDepth > 0 {
+				bitDepth = flacBitDepth
+			}
+			if flacSampleRate > 0 {
+				sampleRate = flacSampleRate
+			}
+			if flacTotalSamples > 0 && sampleRate > 0 && duration <= 0 {
+				duration = int(flacTotalSamples / int64(sampleRate))
+			}
+		}
 	}
 
-	if bitDepth <= 0 {
-		bitDepth = 16
+	bitrate := estimateAudioBitrateKbps(fileSize, duration)
+	if bitrate > 0 && bitrate < 16 {
+		bitrate = 0
 	}
+	return AudioQuality{
+		BitDepth:   bitDepth,
+		SampleRate: sampleRate,
+		Duration:   duration,
+		Bitrate:    bitrate,
+		Codec:      codec,
+	}, nil
+}
 
-	return AudioQuality{BitDepth: bitDepth, SampleRate: sampleRate, Duration: duration}, nil
+func normalizeM4AAudioCodec(atomType string) string {
+	switch atomType {
+	case "mp4a":
+		return "aac"
+	case "alac":
+		return "alac"
+	case "fLaC":
+		return "flac"
+	case "ec-3":
+		return "eac3"
+	case "ac-3":
+		return "ac3"
+	case "ac-4":
+		return "ac4"
+	default:
+		return strings.TrimSpace(atomType)
+	}
+}
+
+func estimateAudioBitrateKbps(fileSize int64, durationSeconds int) int {
+	if fileSize <= 0 || durationSeconds <= 0 {
+		return 0
+	}
+	return int(math.Round(float64(fileSize*8) / float64(durationSeconds) / 1000.0))
 }
 
 func readM4ADurationSeconds(f *os.File, moovHeader atomHeader, fileSize int64) int {
 	childStart := moovHeader.offset + moovHeader.headerSize
 	childSize := moovHeader.size - moovHeader.headerSize
 	mvhdHeader, found, err := findAtomInRange(f, childStart, childSize, "mvhd", fileSize)
-	if err != nil || !found {
-		return 0
+	if err == nil && found {
+		if duration := readMP4DurationAtomSeconds(f, mvhdHeader, fileSize); duration > 0 {
+			return duration
+		}
 	}
 
-	payloadOffset := mvhdHeader.offset + mvhdHeader.headerSize
+	return readM4ATrackDurationSeconds(f, moovHeader, fileSize)
+}
+
+func readMP4DurationAtomSeconds(f *os.File, header atomHeader, fileSize int64) int {
+	payloadOffset := header.offset + header.headerSize
 	versionBuf := make([]byte, 1)
 	if _, err := f.ReadAt(versionBuf, payloadOffset); err != nil {
 		return 0
@@ -1752,6 +1808,53 @@ func readM4ADurationSeconds(f *os.File, moovHeader atomHeader, fileSize int64) i
 		return 0
 	}
 	return int(math.Round(float64(duration) / float64(timescale)))
+}
+
+func readM4ATrackDurationSeconds(f *os.File, moovHeader atomHeader, fileSize int64) int {
+	childStart := moovHeader.offset + moovHeader.headerSize
+	childSize := moovHeader.size - moovHeader.headerSize
+	bestDuration := 0
+	_ = walkMP4AtomsInRange(f, childStart, childSize, fileSize, func(header atomHeader) bool {
+		if header.typ == "mdhd" {
+			if duration := readMP4DurationAtomSeconds(f, header, fileSize); duration > bestDuration {
+				bestDuration = duration
+			}
+			return false
+		}
+		return header.typ == "trak" || header.typ == "mdia"
+	})
+	return bestDuration
+}
+
+func walkMP4AtomsInRange(f *os.File, start, size, fileSize int64, visit func(atomHeader) bool) error {
+	if size <= 0 {
+		return nil
+	}
+
+	end := start + size
+	for pos := start; pos+8 <= end; {
+		header, err := readAtomHeaderAt(f, pos, fileSize)
+		if err != nil {
+			return err
+		}
+		atomSize := header.size
+		if atomSize == 0 {
+			atomSize = end - pos
+		}
+		if atomSize < header.headerSize {
+			return fmt.Errorf("invalid atom size for %s", header.typ)
+		}
+		header.size = atomSize
+		if visit(header) {
+			childStart := header.offset + header.headerSize
+			childSize := header.size - header.headerSize
+			if err := walkMP4AtomsInRange(f, childStart, childSize, fileSize, visit); err != nil {
+				return err
+			}
+		}
+		pos += atomSize
+	}
+	return nil
 }
 
 func readALACSpecificConfig(f *os.File, sampleOffset, fileSize int64) (int, int, bool) {
@@ -1786,6 +1889,79 @@ func readALACSpecificConfig(f *os.File, sampleOffset, fileSize int64) (int, int,
 	}
 
 	return parseALACSpecificConfig(payload)
+}
+
+func readMP4FLACSpecificConfig(f *os.File, sampleOffset, fileSize int64) (int, int, int64, bool) {
+	if sampleOffset < 4 {
+		return 0, 0, 0, false
+	}
+
+	sampleEntryHeader, err := readAtomHeaderAt(f, sampleOffset-4, fileSize)
+	if err != nil {
+		return 0, 0, 0, false
+	}
+
+	childStart := sampleOffset + 32
+	childEnd := sampleEntryHeader.offset + sampleEntryHeader.size
+	if childStart >= childEnd {
+		return 0, 0, 0, false
+	}
+
+	configHeader, found, err := findAtomInRange(f, childStart, childEnd-childStart, "dfLa", fileSize)
+	if err != nil || !found {
+		return 0, 0, 0, false
+	}
+
+	payloadSize := configHeader.size - configHeader.headerSize
+	if payloadSize <= 0 {
+		return 0, 0, 0, false
+	}
+
+	payload := make([]byte, payloadSize)
+	if _, err := f.ReadAt(payload, configHeader.offset+configHeader.headerSize); err != nil {
+		return 0, 0, 0, false
+	}
+
+	return parseMP4FLACSpecificConfig(payload)
+}
+
+func parseMP4FLACSpecificConfig(payload []byte) (int, int, int64, bool) {
+	if len(payload) >= 4 && string(payload[:4]) == "fLaC" {
+		payload = payload[4:]
+	} else if len(payload) >= 4 {
+		// FLACSpecificBox starts with a full-box version/flags field.
+		payload = payload[4:]
+	}
+
+	for len(payload) >= 4 {
+		blockType := payload[0] & 0x7F
+		blockLen := int(payload[1])<<16 | int(payload[2])<<8 | int(payload[3])
+		if blockLen < 0 || len(payload) < 4+blockLen {
+			return 0, 0, 0, false
+		}
+		block := payload[4 : 4+blockLen]
+		if blockType == 0 && len(block) >= 34 {
+			bitDepth, sampleRate, totalSamples := parseFLACStreamInfoQuality(block[:34])
+			return bitDepth, sampleRate, totalSamples, bitDepth > 0 || sampleRate > 0
+		}
+		payload = payload[4+blockLen:]
+	}
+
+	return 0, 0, 0, false
+}
+
+func parseFLACStreamInfoQuality(streamInfo []byte) (int, int, int64) {
+	if len(streamInfo) < 18 {
+		return 0, 0, 0
+	}
+	sampleRate := (int(streamInfo[10]) << 12) | (int(streamInfo[11]) << 4) | (int(streamInfo[12]) >> 4)
+	bitsPerSample := (((int(streamInfo[12]) & 0x01) << 4) | (int(streamInfo[13]) >> 4)) + 1
+	totalSamples := int64(streamInfo[13]&0x0F)<<32 |
+		int64(streamInfo[14])<<24 |
+		int64(streamInfo[15])<<16 |
+		int64(streamInfo[16])<<8 |
+		int64(streamInfo[17])
+	return bitsPerSample, sampleRate, totalSamples
 }
 
 func parseALACSpecificConfig(payload []byte) (int, int, bool) {
@@ -1882,8 +2058,14 @@ func findAtomInRange(f *os.File, start, size int64, target string, fileSize int6
 
 func findAudioSampleEntry(f *os.File, start, end, fileSize int64) (int64, string, error) {
 	const chunkSize = 64 * 1024
-	patternMP4A := []byte("mp4a")
-	patternALAC := []byte("alac")
+	patterns := [][]byte{
+		[]byte("mp4a"),
+		[]byte("alac"),
+		[]byte("fLaC"),
+		[]byte("ec-3"),
+		[]byte("ac-3"),
+		[]byte("ac-4"),
+	}
 
 	var tail []byte
 	readPos := start
@@ -1904,26 +2086,14 @@ func findAudioSampleEntry(f *os.File, start, end, fileSize int64) (int64, string
 		}
 
 		data := append(tail, buf[:n]...)
-		mp4aIdx := bytes.Index(data, patternMP4A)
-		alacIdx := bytes.Index(data, patternALAC)
-
 		bestIdx := -1
 		bestType := ""
-		switch {
-		case mp4aIdx >= 0 && alacIdx >= 0:
-			if mp4aIdx <= alacIdx {
-				bestIdx = mp4aIdx
-				bestType = "mp4a"
-			} else {
-				bestIdx = alacIdx
-				bestType = "alac"
+		for _, pattern := range patterns {
+			idx := bytes.Index(data, pattern)
+			if idx >= 0 && (bestIdx < 0 || idx < bestIdx) {
+				bestIdx = idx
+				bestType = string(pattern)
 			}
-		case mp4aIdx >= 0:
-			bestIdx = mp4aIdx
-			bestType = "mp4a"
-		case alacIdx >= 0:
-			bestIdx = alacIdx
-			bestType = "alac"
 		}
 
 		if bestIdx >= 0 {

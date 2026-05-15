@@ -173,25 +173,25 @@ func (c *AppleMusicClient) FetchLyricsByID(songID string) (string, error) {
 	return bodyStr, nil
 }
 
-func formatPaxLyricsToLRC(rawJSON string, multiPersonWordByWord bool) (string, error) {
+func formatPaxLyricsToLRC(rawJSON string, multiPersonWordByWord bool, preserveWordTiming bool) (string, error) {
 	var paxResp paxResponse
 	if err := json.Unmarshal([]byte(rawJSON), &paxResp); err == nil && paxResp.Content != nil {
-		return formatPaxContent(paxResp.Type, paxResp.Content, multiPersonWordByWord), nil
+		return formatPaxContent(paxResp.Type, paxResp.Content, multiPersonWordByWord, preserveWordTiming), nil
 	}
 
 	var directLyrics []paxLyrics
 	if err := json.Unmarshal([]byte(rawJSON), &directLyrics); err == nil && len(directLyrics) > 0 {
-		return formatPaxContent("Syllable", directLyrics, multiPersonWordByWord), nil
+		return formatPaxContent("Syllable", directLyrics, multiPersonWordByWord, preserveWordTiming), nil
 	}
 
 	return "", fmt.Errorf("failed to parse pax lyrics response")
 }
 
-func appendPaxLyricDetail(builder *strings.Builder, details []paxLyricDetail) {
+func appendPaxLyricDetail(builder *strings.Builder, details []paxLyricDetail, preserveWordTiming bool) {
 	lastStart := ""
 
 	for _, syllable := range details {
-		if syllable.Timestamp != nil {
+		if preserveWordTiming && syllable.Timestamp != nil {
 			start := fmt.Sprintf("<%s>", msToLRCTimestampInline(int64(*syllable.Timestamp)))
 			if start != lastStart {
 				builder.WriteString(start)
@@ -204,13 +204,13 @@ func appendPaxLyricDetail(builder *strings.Builder, details []paxLyricDetail) {
 			builder.WriteString(" ")
 		}
 
-		if syllable.EndTime != nil {
+		if preserveWordTiming && syllable.EndTime != nil {
 			builder.WriteString(fmt.Sprintf("<%s>", msToLRCTimestampInline(int64(*syllable.EndTime))))
 		}
 	}
 }
 
-func formatPaxContent(lyricsType string, content []paxLyrics, multiPersonWordByWord bool) string {
+func formatPaxContent(lyricsType string, content []paxLyrics, multiPersonWordByWord bool, preserveWordTiming bool) string {
 	var sb strings.Builder
 
 	for i, line := range content {
@@ -230,11 +230,11 @@ func formatPaxContent(lyricsType string, content []paxLyrics, multiPersonWordByW
 				}
 			}
 
-			appendPaxLyricDetail(&sb, line.Text)
+			appendPaxLyricDetail(&sb, line.Text, preserveWordTiming)
 
 			if line.Background && multiPersonWordByWord && len(line.BackgroundText) > 0 {
 				sb.WriteString("\n[bg:")
-				appendPaxLyricDetail(&sb, line.BackgroundText)
+				appendPaxLyricDetail(&sb, line.BackgroundText, preserveWordTiming)
 				sb.WriteString("]")
 			}
 		} else {
@@ -253,6 +253,7 @@ func (c *AppleMusicClient) FetchLyrics(
 	artistName string,
 	durationSec float64,
 	multiPersonWordByWord bool,
+	preserveWordTiming bool,
 ) (*LyricsResponse, error) {
 	songID, err := c.SearchSong(trackName, artistName, durationSec)
 	if err != nil {
@@ -267,7 +268,7 @@ func (c *AppleMusicClient) FetchLyrics(
 		return nil, fmt.Errorf("apple music proxy returned non-lyric payload: %s", errMsg)
 	}
 
-	lrcText, err := formatPaxLyricsToLRC(rawLyrics, multiPersonWordByWord)
+	lrcText, err := formatPaxLyricsToLRC(rawLyrics, multiPersonWordByWord, preserveWordTiming)
 	if err != nil {
 		lrcText = rawLyrics
 	}

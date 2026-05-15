@@ -281,7 +281,9 @@ class _RepoTabState extends ConsumerState<RepoTab> {
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                     child: Text(
-                      '${filteredExtensions.length} ${filteredExtensions.length == 1 ? 'extension' : 'extensions'}',
+                      context.l10n.storeExtensionsCount(
+                        filteredExtensions.length,
+                      ),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
@@ -810,7 +812,9 @@ class _ExtensionItem extends StatelessWidget {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                'Requires v${extension.minAppVersion}+',
+                                context.l10n.storeRequiresVersion(
+                                  extension.minAppVersion ?? '',
+                                ),
                                 style: Theme.of(context).textTheme.labelSmall
                                     ?.copyWith(
                                       color: colorScheme.onErrorContainer,
@@ -862,7 +866,7 @@ class _ExtensionItem extends StatelessWidget {
                         Icon(Icons.check, size: 16, color: colorScheme.outline),
                         const SizedBox(width: 4),
                         Text(
-                          'Installed',
+                          context.l10n.storeInstalled,
                           style: TextStyle(color: colorScheme.outline),
                         ),
                       ],

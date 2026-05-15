@@ -131,6 +131,7 @@ func (r *extensionRuntime) ffmpegGetInfo(call goja.FunctionCall) goja.Value {
 		"sample_rate":   quality.SampleRate,
 		"total_samples": quality.TotalSamples,
 		"duration":      float64(quality.TotalSamples) / float64(quality.SampleRate),
+		"codec":         quality.Codec,
 	})
 }
 

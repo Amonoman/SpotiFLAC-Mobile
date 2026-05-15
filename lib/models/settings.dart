@@ -47,7 +47,7 @@ class AppSettings {
   final String locale;
   final String lyricsMode;
   final String
-  tidalHighFormat; // Format for Tidal HIGH quality: 'mp3_320', 'opus_256', or 'opus_128'
+  tidalHighFormat; // Format for Tidal HIGH quality: 'mp3_320', 'aac_320', 'opus_256', or 'opus_128'
   final bool
   useAllFilesAccess; // Android 13+ only: enable MANAGE_EXTERNAL_STORAGE
   final bool
@@ -81,6 +81,8 @@ class AppSettings {
   lyricsIncludeRomanizationNetease; // Append romanized lyrics (Netease)
   final bool
   lyricsMultiPersonWordByWord; // Enable v1/v2 + [bg:] tags for Apple/QQ syllable lyrics
+  final bool
+  lyricsAppleElrcWordSync; // Preserve Apple Music inline word timestamps for eLRC-capable players
   final String
   musixmatchLanguage; // Optional ISO language code for Musixmatch localized lyrics
 
@@ -146,6 +148,7 @@ class AppSettings {
     this.lyricsIncludeTranslationNetease = false,
     this.lyricsIncludeRomanizationNetease = false,
     this.lyricsMultiPersonWordByWord = false,
+    this.lyricsAppleElrcWordSync = false,
     this.musixmatchLanguage = '',
     this.lastSeenVersion = '',
     this.deduplicateDownloads = true,
@@ -210,6 +213,7 @@ class AppSettings {
     bool? lyricsIncludeTranslationNetease,
     bool? lyricsIncludeRomanizationNetease,
     bool? lyricsMultiPersonWordByWord,
+    bool? lyricsAppleElrcWordSync,
     String? musixmatchLanguage,
     String? lastSeenVersion,
     bool? deduplicateDownloads,
@@ -291,6 +295,8 @@ class AppSettings {
           this.lyricsIncludeRomanizationNetease,
       lyricsMultiPersonWordByWord:
           lyricsMultiPersonWordByWord ?? this.lyricsMultiPersonWordByWord,
+      lyricsAppleElrcWordSync:
+          lyricsAppleElrcWordSync ?? this.lyricsAppleElrcWordSync,
       musixmatchLanguage: musixmatchLanguage ?? this.musixmatchLanguage,
       lastSeenVersion: lastSeenVersion ?? this.lastSeenVersion,
       deduplicateDownloads: deduplicateDownloads ?? this.deduplicateDownloads,

@@ -480,7 +480,7 @@ class _LibrarySettingsPageState extends ConsumerState<LibrarySettingsPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Scan cancelled',
+                                context.l10n.libraryScanCancelled,
                                 style: Theme.of(context).textTheme.bodyMedium
                                     ?.copyWith(
                                       fontWeight: FontWeight.w600,
@@ -489,7 +489,7 @@ class _LibrarySettingsPageState extends ConsumerState<LibrarySettingsPage> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'You can retry the scan when ready.',
+                                context.l10n.libraryScanCancelledSubtitle,
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
                                       color: colorScheme.onTertiaryContainer
@@ -760,7 +760,7 @@ class _LibraryHeroCard extends StatelessWidget {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'Scanning...',
+                              context.l10n.libraryScanning,
                               style: TextStyle(
                                 color: colorScheme.onPrimary,
                                 fontSize: 12,
@@ -801,8 +801,9 @@ class _LibraryHeroCard extends StatelessWidget {
                 if (!isScanning && excludedDownloadedCount > 0) ...[
                   const SizedBox(height: 4),
                   Text(
-                    '$excludedDownloadedCount from Downloads history '
-                    '(excluded from list)',
+                    context.l10n.libraryDownloadsHistoryExcluded(
+                      excludedDownloadedCount,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(

@@ -15,10 +15,16 @@ import 'package:spotiflac_android/l10n/l10n.dart';
 import 'package:spotiflac_android/services/platform_bridge.dart';
 
 class AudioAnalysisData {
+  static const cacheVersion = 4;
+
   final String filePath;
   final int fileSize;
+  final String codec;
+  final String container;
+  final String decodedSampleFormat;
   final int sampleRate;
   final int channels;
+  final String channelLayout;
   final int bitsPerSample;
   final double duration;
   final int bitrate;
@@ -26,14 +32,23 @@ class AudioAnalysisData {
   final double dynamicRange;
   final double peakAmplitude;
   final double rmsLevel;
+  final double? integratedLufs;
+  final double? truePeakDb;
+  final int clippingSamples;
+  final double? spectralCutoffHz;
+  final List<ChannelAnalysisStats> channelStats;
   final int totalSamples;
   final SpectrogramData? spectrum;
 
   const AudioAnalysisData({
     required this.filePath,
     required this.fileSize,
+    this.codec = '',
+    this.container = '',
+    this.decodedSampleFormat = '',
     required this.sampleRate,
     required this.channels,
+    this.channelLayout = '',
     required this.bitsPerSample,
     required this.duration,
     required this.bitrate,
@@ -41,15 +56,25 @@ class AudioAnalysisData {
     required this.dynamicRange,
     required this.peakAmplitude,
     required this.rmsLevel,
+    this.integratedLufs,
+    this.truePeakDb,
+    this.clippingSamples = 0,
+    this.spectralCutoffHz,
+    this.channelStats = const [],
     required this.totalSamples,
     this.spectrum,
   });
 
   Map<String, dynamic> toJson() => {
     'filePath': filePath,
+    'cacheVersion': cacheVersion,
     'fileSize': fileSize,
+    'codec': codec,
+    'container': container,
+    'decodedSampleFormat': decodedSampleFormat,
     'sampleRate': sampleRate,
     'channels': channels,
+    'channelLayout': channelLayout,
     'bitsPerSample': bitsPerSample,
     'duration': duration,
     'bitrate': bitrate,
@@ -57,6 +82,11 @@ class AudioAnalysisData {
     'dynamicRange': dynamicRange,
     'peakAmplitude': peakAmplitude,
     'rmsLevel': rmsLevel,
+    'integratedLufs': integratedLufs,
+    'truePeakDb': truePeakDb,
+    'clippingSamples': clippingSamples,
+    'spectralCutoffHz': spectralCutoffHz,
+    'channelStats': channelStats.map((stats) => stats.toJson()).toList(),
     'totalSamples': totalSamples,
   };
 
@@ -64,8 +94,12 @@ class AudioAnalysisData {
     return AudioAnalysisData(
       filePath: json['filePath'] as String,
       fileSize: json['fileSize'] as int,
+      codec: json['codec']?.toString() ?? '',
+      container: json['container']?.toString() ?? '',
+      decodedSampleFormat: json['decodedSampleFormat']?.toString() ?? '',
       sampleRate: json['sampleRate'] as int,
       channels: json['channels'] as int,
+      channelLayout: json['channelLayout']?.toString() ?? '',
       bitsPerSample: json['bitsPerSample'] as int,
       duration: (json['duration'] as num).toDouble(),
       bitrate: json['bitrate'] as int,
@@ -73,7 +107,51 @@ class AudioAnalysisData {
       dynamicRange: (json['dynamicRange'] as num).toDouble(),
       peakAmplitude: (json['peakAmplitude'] as num).toDouble(),
       rmsLevel: (json['rmsLevel'] as num).toDouble(),
+      integratedLufs: (json['integratedLufs'] as num?)?.toDouble(),
+      truePeakDb: (json['truePeakDb'] as num?)?.toDouble(),
+      clippingSamples: (json['clippingSamples'] as num?)?.toInt() ?? 0,
+      spectralCutoffHz: (json['spectralCutoffHz'] as num?)?.toDouble(),
+      channelStats:
+          (json['channelStats'] as List?)
+              ?.whereType<Map<dynamic, dynamic>>()
+              .map((item) => ChannelAnalysisStats.fromJson(item))
+              .toList() ??
+          const [],
       totalSamples: json['totalSamples'] as int,
+    );
+  }
+}
+
+class ChannelAnalysisStats {
+  final int channel;
+  final double? peakDb;
+  final double? rmsDb;
+  final double? dynamicRangeDb;
+  final int peakCount;
+
+  const ChannelAnalysisStats({
+    required this.channel,
+    this.peakDb,
+    this.rmsDb,
+    this.dynamicRangeDb,
+    this.peakCount = 0,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'channel': channel,
+    'peakDb': peakDb,
+    'rmsDb': rmsDb,
+    'dynamicRangeDb': dynamicRangeDb,
+    'peakCount': peakCount,
+  };
+
+  factory ChannelAnalysisStats.fromJson(Map<dynamic, dynamic> json) {
+    return ChannelAnalysisStats(
+      channel: (json['channel'] as num?)?.toInt() ?? 0,
+      peakDb: (json['peakDb'] as num?)?.toDouble(),
+      rmsDb: (json['rmsDb'] as num?)?.toDouble(),
+      dynamicRangeDb: (json['dynamicRangeDb'] as num?)?.toDouble(),
+      peakCount: (json['peakCount'] as num?)?.toInt() ?? 0,
     );
   }
 }
@@ -116,11 +194,20 @@ class _AudioAnalysisCardState extends State<AudioAnalysisCard> {
     '.flac',
     '.mp3',
     '.m4a',
+    '.mp4',
     '.aac',
+    '.ac3',
+    '.eac3',
     '.opus',
     '.ogg',
     '.wav',
     '.wma',
+    '.mka',
+    '.wv',
+    '.ape',
+    '.tta',
+    '.aif',
+    '.aiff',
   };
 
   bool get _isSupported {
@@ -165,15 +252,26 @@ class _AudioAnalysisCardState extends State<AudioAnalysisCard> {
     }
   }
 
-  Future<void> _analyze() async {
+  Future<void> _analyze({bool forceRefresh = false}) async {
     if (_analyzing) return;
     setState(() {
       _analyzing = true;
       _error = null;
+      if (forceRefresh) {
+        _spectrogramImage?.dispose();
+        _spectrogramImage = null;
+        _data = null;
+      }
     });
 
     try {
-      final cached = await _loadFromCache(widget.filePath);
+      if (forceRefresh) {
+        await _clearCache(widget.filePath);
+      }
+
+      final cached = forceRefresh
+          ? null
+          : await _loadFromCache(widget.filePath);
       AudioAnalysisData data;
       bool fromCache = false;
 
@@ -214,6 +312,21 @@ class _AudioAnalysisCardState extends State<AudioAnalysisCard> {
     }
   }
 
+  static Future<void> _clearCache(String filePath) async {
+    try {
+      final dir = await _cacheDir();
+      final key = _cacheKey(filePath);
+      final jsonFile = File('${dir.path}/$key.json');
+      final imageFile = File('${dir.path}/$key.png');
+      if (await jsonFile.exists()) {
+        await jsonFile.delete();
+      }
+      if (await imageFile.exists()) {
+        await imageFile.delete();
+      }
+    } catch (_) {}
+  }
+
   static String _cacheKey(String filePath) {
     var hash = 0xcbf29ce484222325;
     for (final byte in utf8.encode(filePath)) {
@@ -242,11 +355,18 @@ class _AudioAnalysisCardState extends State<AudioAnalysisCard> {
       final json = Map<String, dynamic>.from(
         jsonDecode(await file.readAsString()) as Map,
       );
+      if (json['cacheVersion'] != AudioAnalysisData.cacheVersion) {
+        return null;
+      }
       final cachedSize = json['fileSize'] as int;
 
       if (!filePath.startsWith('content://')) {
         final currentSize = await File(filePath).length();
         if (currentSize != cachedSize) return null;
+      } else {
+        final stat = await PlatformBridge.safStat(filePath);
+        final currentSize = (stat['size'] as num?)?.toInt() ?? 0;
+        if (currentSize > 0 && currentSize != cachedSize) return null;
       }
 
       return AudioAnalysisData.fromJson(json);
@@ -322,7 +442,7 @@ class _AudioAnalysisCardState extends State<AudioAnalysisCard> {
         await _decodeToPCM(workingPath, pcmPath, info.sampleRate);
 
         final pcmBytes = await File(pcmPath).readAsBytes();
-        final result = await compute(
+        final spectrumResult = await compute(
           _analyzeInIsolate,
           _AnalysisParams(
             pcmBytes: pcmBytes,
@@ -330,26 +450,44 @@ class _AudioAnalysisCardState extends State<AudioAnalysisCard> {
             bitsPerSample: info.bitsPerSample,
           ),
         );
-
-        final trueTotalSamples =
-            (info.duration * info.sampleRate * info.channels).round();
+        final levelMetrics = await _runFullStreamLevelAnalysis(workingPath);
+        final loudnessMetrics = await _runLoudnessAnalysis(workingPath);
+        final peakAmplitude =
+            levelMetrics?.peakDb ?? spectrumResult.peakAmplitude;
+        final rmsLevel = levelMetrics?.rmsDb ?? spectrumResult.rmsLevel;
+        final dynamicRange = peakAmplitude - rmsLevel;
+        final spectralCutoffHz = spectrumResult.spectrum == null
+            ? null
+            : await compute(
+                _estimateSpectralCutoffHz,
+                spectrumResult.spectrum!,
+              );
 
         return AudioAnalysisData(
           filePath: filePath,
           fileSize: info.fileSize,
+          codec: info.codec,
+          container: info.container,
+          decodedSampleFormat: info.decodedSampleFormat,
           sampleRate: info.sampleRate,
           channels: info.channels,
+          channelLayout: info.channelLayout,
           bitsPerSample: info.bitsPerSample,
           duration: info.duration,
           bitrate: info.bitrate,
           bitDepth: info.bitsPerSample > 0
               ? '${info.bitsPerSample}-bit'
               : 'N/A',
-          dynamicRange: result.dynamicRange,
-          peakAmplitude: result.peakAmplitude,
-          rmsLevel: result.rmsLevel,
-          totalSamples: trueTotalSamples,
-          spectrum: result.spectrum,
+          dynamicRange: dynamicRange,
+          peakAmplitude: peakAmplitude,
+          rmsLevel: rmsLevel,
+          integratedLufs: loudnessMetrics?.integratedLufs,
+          truePeakDb: loudnessMetrics?.truePeakDb,
+          clippingSamples: levelMetrics?.clippingSamples ?? 0,
+          spectralCutoffHz: spectralCutoffHz,
+          channelStats: levelMetrics?.channelStats ?? const [],
+          totalSamples: info.totalSamples,
+          spectrum: spectrumResult.spectrum,
         );
       } finally {
         try {
@@ -386,28 +524,46 @@ class _AudioAnalysisCardState extends State<AudioAnalysisCard> {
     );
 
     final props = audioStream.getAllProperties() ?? {};
+    final infoProps = info.getAllProperties() ?? {};
+    final codecName = props['codec_name']?.toString().toLowerCase() ?? '';
+    final codecLongName = props['codec_long_name']?.toString() ?? '';
+    final decodedSampleFormat = props['sample_fmt']?.toString() ?? '';
+    final formatName = infoProps['format_name']?.toString() ?? '';
+    final formatLongName = infoProps['format_long_name']?.toString() ?? '';
     final sampleRate =
         int.tryParse(props['sample_rate']?.toString() ?? '') ?? 0;
     final channels = int.tryParse(props['channels']?.toString() ?? '') ?? 0;
+    final channelLayout =
+        props['channel_layout']?.toString() ??
+        props['ch_layout']?.toString() ??
+        '';
+    final streamDuration = double.tryParse(props['duration']?.toString() ?? '');
+    final containerDuration = double.tryParse(info.getDuration() ?? '');
     final duration =
-        double.tryParse(
-          info.getDuration() ?? props['duration']?.toString() ?? '',
-        ) ??
+        (streamDuration != null && streamDuration > 0
+            ? streamDuration
+            : containerDuration) ??
         0;
+    final streamBitrate = int.tryParse(props['bit_rate']?.toString() ?? '');
+    final containerBitrate = int.tryParse(info.getBitrate() ?? '');
     final bitrate =
-        int.tryParse(
-          info.getBitrate() ?? props['bit_rate']?.toString() ?? '',
-        ) ??
-        0;
+        streamBitrate ??
+        containerBitrate ??
+        (duration > 0 && fileSize > 0 ? (fileSize * 8 / duration).round() : 0);
 
-    int bitsPerSample =
-        int.tryParse(props['bits_per_raw_sample']?.toString() ?? '') ?? 0;
-    if (bitsPerSample == 0) {
+    final canReportStoredBitDepth = _codecHasStoredBitDepth(codecName);
+
+    int bitsPerSample = 0;
+    if (canReportStoredBitDepth) {
       bitsPerSample =
-          int.tryParse(props['bits_per_sample']?.toString() ?? '') ?? 0;
+          int.tryParse(props['bits_per_raw_sample']?.toString() ?? '') ?? 0;
+      if (bitsPerSample == 0) {
+        bitsPerSample =
+            int.tryParse(props['bits_per_sample']?.toString() ?? '') ?? 0;
+      }
     }
 
-    if (bitsPerSample == 0) {
+    if (bitsPerSample == 0 && canReportStoredBitDepth) {
       final sampleFmt = props['sample_fmt']?.toString() ?? '';
       if (sampleFmt.contains('16') ||
           sampleFmt == 's16' ||
@@ -424,12 +580,242 @@ class _AudioAnalysisCardState extends State<AudioAnalysisCard> {
 
     return _MediaInfo(
       fileSize: fileSize,
+      codec: _formatCodecLabel(codecName, codecLongName),
+      container: _formatContainerLabel(formatName, formatLongName),
+      decodedSampleFormat: decodedSampleFormat,
       sampleRate: sampleRate,
       channels: channels,
+      channelLayout: channelLayout,
       bitsPerSample: bitsPerSample,
       duration: duration,
       bitrate: bitrate,
+      totalSamples: _estimateTotalSamples(
+        props: props,
+        duration: duration,
+        sampleRate: sampleRate,
+        channels: channels,
+      ),
     );
+  }
+
+  String _formatCodecLabel(String codecName, String codecLongName) {
+    final name = codecName.trim();
+    final longName = _normalizeAnalysisLabel(codecLongName);
+    if (name.isEmpty) return longName;
+    if (longName.isEmpty || longName.toLowerCase() == name.toLowerCase()) {
+      return name.toUpperCase();
+    }
+    return '${name.toUpperCase()} ($longName)';
+  }
+
+  String _formatContainerLabel(String formatName, String formatLongName) {
+    final longName = _normalizeAnalysisLabel(formatLongName);
+    if (longName.isNotEmpty) return longName;
+    final name = formatName.trim();
+    return name.isEmpty ? '' : name.toUpperCase();
+  }
+
+  String _normalizeAnalysisLabel(String value) {
+    final trimmed = value.trim();
+    final lower = trimmed.toLowerCase();
+    if (lower.isEmpty || lower == 'unknown' || lower == 'n/a') return '';
+    return trimmed;
+  }
+
+  int _estimateTotalSamples({
+    required Map<dynamic, dynamic> props,
+    required double duration,
+    required int sampleRate,
+    required int channels,
+  }) {
+    final nbSamples = int.tryParse(props['nb_samples']?.toString() ?? '');
+    if (nbSamples != null && nbSamples > 0) {
+      return nbSamples;
+    }
+
+    final durationTs = int.tryParse(props['duration_ts']?.toString() ?? '');
+    final timeBase = props['time_base']?.toString() ?? '';
+    if (durationTs != null && durationTs > 0 && timeBase.contains('/')) {
+      final parts = timeBase.split('/');
+      final numerator = double.tryParse(parts[0]);
+      final denominator = double.tryParse(parts[1]);
+      if (numerator != null &&
+          numerator > 0 &&
+          denominator != null &&
+          denominator > 0 &&
+          sampleRate > 0) {
+        final seconds = durationTs * numerator / denominator;
+        return (seconds * sampleRate).round();
+      }
+    }
+
+    if (duration > 0 && sampleRate > 0) {
+      return (duration * sampleRate).round();
+    }
+    return 0;
+  }
+
+  bool _codecHasStoredBitDepth(String codecName) {
+    if (codecName.isEmpty) return false;
+    return codecName == 'flac' ||
+        codecName == 'alac' ||
+        codecName == 'wavpack' ||
+        codecName == 'ape' ||
+        codecName == 'tta' ||
+        codecName.startsWith('pcm_');
+  }
+
+  Future<_LevelMetrics?> _runFullStreamLevelAnalysis(String inputPath) async {
+    await FFmpegKitConfig.setLogLevel(Level.avLogInfo);
+    try {
+      final session = await FFmpegKit.executeWithArguments([
+        '-v',
+        'info',
+        '-hide_banner',
+        '-nostats',
+        '-i',
+        inputPath,
+        '-map',
+        '0:a:0',
+        '-vn',
+        '-sn',
+        '-dn',
+        '-af',
+        'astats=metadata=1:reset=0',
+        '-f',
+        'null',
+        '-',
+      ]);
+
+      final returnCode = await session.getReturnCode();
+      if (!ReturnCode.isSuccess(returnCode)) {
+        return null;
+      }
+
+      final logs = await session.getLogsAsString();
+      final overallMatch = RegExp(r'Overall([\s\S]*)').firstMatch(logs);
+      final section = overallMatch?.group(1) ?? logs;
+      final peak = _parseLastAstatsValue(section, 'Peak level dB');
+      final rms = _parseLastAstatsValue(section, 'RMS level dB');
+      if (peak == null || rms == null) return null;
+      final channelStats = _parseChannelStats(logs);
+      final clippingSamples = channelStats.fold<int>(0, (sum, stats) {
+        if (stats.peakDb == null || stats.peakDb! < -0.1) return sum;
+        return sum + stats.peakCount;
+      });
+      return _LevelMetrics(
+        peakDb: peak,
+        rmsDb: rms,
+        clippingSamples: clippingSamples,
+        channelStats: channelStats,
+      );
+    } finally {
+      await FFmpegKitConfig.setLogLevel(Level.avLogError);
+    }
+  }
+
+  Future<_LoudnessMetrics?> _runLoudnessAnalysis(String inputPath) async {
+    await FFmpegKitConfig.setLogLevel(Level.avLogInfo);
+    try {
+      final session = await FFmpegKit.executeWithArguments([
+        '-hide_banner',
+        '-nostats',
+        '-i',
+        inputPath,
+        '-map',
+        '0:a:0',
+        '-vn',
+        '-sn',
+        '-dn',
+        '-af',
+        'ebur128=peak=true:framelog=quiet',
+        '-f',
+        'null',
+        '-',
+      ]);
+
+      final logs = await session.getLogsAsString();
+      final integratedMatches = RegExp(
+        r'I:\s+(-?\d+\.?\d*)\s+LUFS',
+      ).allMatches(logs);
+      final integrated = integratedMatches.isEmpty
+          ? null
+          : double.tryParse(integratedMatches.last.group(1) ?? '');
+
+      double? truePeak;
+      for (final match in RegExp(
+        r'Peak:\s+(-?\d+\.?\d*)\s+dBFS',
+      ).allMatches(logs)) {
+        final value = double.tryParse(match.group(1) ?? '');
+        if (value != null && (truePeak == null || value > truePeak)) {
+          truePeak = value;
+        }
+      }
+
+      if (integrated == null && truePeak == null) return null;
+      return _LoudnessMetrics(integratedLufs: integrated, truePeakDb: truePeak);
+    } finally {
+      await FFmpegKitConfig.setLogLevel(Level.avLogError);
+    }
+  }
+
+  List<ChannelAnalysisStats> _parseChannelStats(String logs) {
+    final stats = <ChannelAnalysisStats>[];
+    final channelMatches = RegExp(
+      r'Channel:\s*(\d+)([\s\S]*?)(?=Channel:\s*\d+|Overall|$)',
+      caseSensitive: false,
+    ).allMatches(logs);
+
+    for (final match in channelMatches) {
+      final channel = int.tryParse(match.group(1) ?? '') ?? 0;
+      final section = match.group(2) ?? '';
+      if (channel <= 0 || section.trim().isEmpty) continue;
+      final peakDb = _parseLastAstatsValue(section, 'Peak level dB');
+      final rmsDb = _parseLastAstatsValue(section, 'RMS level dB');
+      stats.add(
+        ChannelAnalysisStats(
+          channel: channel,
+          peakDb: peakDb,
+          rmsDb: rmsDb,
+          dynamicRangeDb: peakDb != null && rmsDb != null
+              ? peakDb - rmsDb
+              : null,
+          peakCount:
+              _parseLastAstatsInt(section, 'Peak count') ??
+              _parseLastAstatsInt(section, 'Peak count ch') ??
+              0,
+        ),
+      );
+    }
+
+    return stats;
+  }
+
+  double? _parseLastAstatsValue(String text, String label) {
+    final matches = RegExp(
+      '${RegExp.escape(label)}:\\s*([-+]?\\d+(?:\\.\\d+)?)',
+      caseSensitive: false,
+    ).allMatches(text);
+    double? value;
+    for (final match in matches) {
+      final parsed = double.tryParse(match.group(1) ?? '');
+      if (parsed != null && parsed.isFinite) {
+        value = parsed;
+      }
+    }
+    return value;
+  }
+
+  int? _parseLastAstatsInt(String text, String label) {
+    final matches = RegExp(
+      '${RegExp.escape(label)}:\\s*(\\d+)',
+      caseSensitive: false,
+    ).allMatches(text);
+    int? value;
+    for (final match in matches) {
+      value = int.tryParse(match.group(1) ?? '') ?? value;
+    }
+    return value;
   }
 
   Future<void> _decodeToPCM(
@@ -499,6 +885,7 @@ class _AudioAnalysisCardState extends State<AudioAnalysisCard> {
     if (_checkingCache) return const SizedBox.shrink();
 
     if (_analyzing) {
+      final isRescan = _data != null || _spectrogramImage != null;
       return Card(
         color: cs.surfaceContainerLow,
         child: Padding(
@@ -514,7 +901,9 @@ class _AudioAnalysisCardState extends State<AudioAnalysisCard> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  l10n.audioAnalysisAnalyzing,
+                  isRescan
+                      ? l10n.audioAnalysisRescanning
+                      : l10n.audioAnalysisAnalyzing,
                   style: TextStyle(color: cs.onSurfaceVariant, fontSize: 13),
                 ),
               ],
@@ -538,6 +927,15 @@ class _AudioAnalysisCardState extends State<AudioAnalysisCard> {
                   _error!,
                   style: TextStyle(color: cs.onErrorContainer, fontSize: 13),
                 ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.refresh, size: 20),
+                tooltip: l10n.audioAnalysisRescan,
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                color: cs.onErrorContainer,
+                onPressed: () => _analyze(forceRefresh: true),
               ),
             ],
           ),
@@ -592,7 +990,10 @@ class _AudioAnalysisCardState extends State<AudioAnalysisCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _AudioInfoCard(data: data),
+        _AudioInfoCard(
+          data: data,
+          onRescan: () => _analyze(forceRefresh: true),
+        ),
         if (_spectrogramImage != null) ...[
           const SizedBox(height: 12),
           _SpectrogramView(
@@ -608,20 +1009,51 @@ class _AudioAnalysisCardState extends State<AudioAnalysisCard> {
 
 class _MediaInfo {
   final int fileSize;
+  final String codec;
+  final String container;
+  final String decodedSampleFormat;
   final int sampleRate;
   final int channels;
+  final String channelLayout;
   final int bitsPerSample;
   final double duration;
   final int bitrate;
+  final int totalSamples;
 
   const _MediaInfo({
     required this.fileSize,
+    required this.codec,
+    required this.container,
+    required this.decodedSampleFormat,
     required this.sampleRate,
     required this.channels,
+    required this.channelLayout,
     required this.bitsPerSample,
     required this.duration,
     required this.bitrate,
+    required this.totalSamples,
   });
+}
+
+class _LevelMetrics {
+  final double peakDb;
+  final double rmsDb;
+  final int clippingSamples;
+  final List<ChannelAnalysisStats> channelStats;
+
+  const _LevelMetrics({
+    required this.peakDb,
+    required this.rmsDb,
+    this.clippingSamples = 0,
+    this.channelStats = const [],
+  });
+}
+
+class _LoudnessMetrics {
+  final double? integratedLufs;
+  final double? truePeakDb;
+
+  const _LoudnessMetrics({this.integratedLufs, this.truePeakDb});
 }
 
 class _AnalysisParams {
@@ -736,6 +1168,40 @@ SpectrogramData _computeSpectrum(Float64List samples, int sampleRate) {
   );
 }
 
+double? _estimateSpectralCutoffHz(SpectrogramData spectrum) {
+  if (spectrum.magnitudes.isEmpty || spectrum.freqBins <= 0) return null;
+
+  final averages = Float64List(spectrum.freqBins);
+  for (final slice in spectrum.magnitudes) {
+    final limit = math.min(slice.length, spectrum.freqBins);
+    for (int i = 0; i < limit; i++) {
+      averages[i] += slice[i];
+    }
+  }
+
+  var peak = -double.infinity;
+  final startBin = math.max(
+    1,
+    (20 / spectrum.maxFreq * spectrum.freqBins).floor(),
+  );
+  for (int i = startBin; i < averages.length; i++) {
+    averages[i] /= spectrum.magnitudes.length;
+    if (averages[i] > peak) peak = averages[i];
+  }
+  if (!peak.isFinite) return null;
+
+  final threshold = peak - 60.0;
+  var cutoffBin = 0;
+  for (int i = averages.length - 1; i >= startBin; i--) {
+    if (averages[i] >= threshold) {
+      cutoffBin = i;
+      break;
+    }
+  }
+  if (cutoffBin <= 0) return null;
+  return cutoffBin / spectrum.freqBins * spectrum.maxFreq;
+}
+
 /// Cooley-Tukey radix-2 FFT. Returns interleaved [re, im, re, im, ...].
 Float64List _fft(Float64List realInput) {
   final n = realInput.length;
@@ -796,8 +1262,9 @@ Float64List _fft(Float64List realInput) {
 
 class _AudioInfoCard extends StatelessWidget {
   final AudioAnalysisData data;
+  final VoidCallback? onRescan;
 
-  const _AudioInfoCard({required this.data});
+  const _AudioInfoCard({required this.data, this.onRescan});
 
   @override
   Widget build(BuildContext context) {
@@ -815,14 +1282,29 @@ class _AudioInfoCard extends StatelessWidget {
               children: [
                 Icon(Icons.analytics_outlined, color: cs.primary, size: 20),
                 const SizedBox(width: 8),
-                Text(
-                  context.l10n.audioAnalysisTitle,
-                  style: TextStyle(
-                    color: cs.onSurface,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
+                Expanded(
+                  child: Text(
+                    context.l10n.audioAnalysisTitle,
+                    style: TextStyle(
+                      color: cs.onSurface,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
+                if (onRescan != null)
+                  IconButton(
+                    icon: const Icon(Icons.refresh, size: 20),
+                    tooltip: context.l10n.audioAnalysisRescan,
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 32,
+                      minHeight: 32,
+                    ),
+                    color: cs.onSurfaceVariant,
+                    onPressed: onRescan,
+                  ),
               ],
             ),
             const SizedBox(height: 12),
@@ -830,6 +1312,20 @@ class _AudioInfoCard extends StatelessWidget {
               spacing: 16,
               runSpacing: 8,
               children: [
+                if (data.codec.isNotEmpty)
+                  _MetricChip(
+                    icon: Icons.memory,
+                    label: context.l10n.audioAnalysisCodec,
+                    value: data.codec,
+                    cs: cs,
+                  ),
+                if (data.container.isNotEmpty)
+                  _MetricChip(
+                    icon: Icons.inventory_2_outlined,
+                    label: context.l10n.audioAnalysisContainer,
+                    value: data.container,
+                    cs: cs,
+                  ),
                 _MetricChip(
                   icon: Icons.graphic_eq,
                   label: context.l10n.audioAnalysisSampleRate,
@@ -842,14 +1338,24 @@ class _AudioInfoCard extends StatelessWidget {
                   value: data.bitDepth,
                   cs: cs,
                 ),
+                if (data.decodedSampleFormat.isNotEmpty)
+                  _MetricChip(
+                    icon: Icons.data_object,
+                    label: context.l10n.audioAnalysisDecodedFormat,
+                    value: data.decodedSampleFormat,
+                    cs: cs,
+                  ),
+                if (data.bitrate > 0)
+                  _MetricChip(
+                    icon: Icons.speed,
+                    label: context.l10n.trackConvertBitrate,
+                    value: _formatBitrate(data.bitrate),
+                    cs: cs,
+                  ),
                 _MetricChip(
                   icon: Icons.surround_sound,
                   label: context.l10n.audioAnalysisChannels,
-                  value: data.channels == 2
-                      ? 'Stereo'
-                      : data.channels == 1
-                      ? 'Mono'
-                      : '${data.channels}',
+                  value: _formatChannels(context, data),
                   cs: cs,
                 ),
                 _MetricChip(
@@ -859,7 +1365,7 @@ class _AudioInfoCard extends StatelessWidget {
                   cs: cs,
                 ),
                 _MetricChip(
-                  icon: Icons.speed,
+                  icon: Icons.multiline_chart,
                   label: context.l10n.audioAnalysisNyquist,
                   value: '${(nyquist / 1000).toStringAsFixed(1)} kHz',
                   cs: cs,
@@ -898,6 +1404,33 @@ class _AudioInfoCard extends StatelessWidget {
                   value: '${data.rmsLevel.toStringAsFixed(2)} dB',
                   cs: cs,
                 ),
+                if (data.integratedLufs != null)
+                  _MetricChip(
+                    icon: Icons.volume_up_outlined,
+                    label: context.l10n.audioAnalysisLufs,
+                    value: '${data.integratedLufs!.toStringAsFixed(1)} LUFS',
+                    cs: cs,
+                  ),
+                if (data.truePeakDb != null)
+                  _MetricChip(
+                    icon: Icons.warning_amber_outlined,
+                    label: context.l10n.audioAnalysisTruePeak,
+                    value: '${data.truePeakDb!.toStringAsFixed(2)} dBTP',
+                    cs: cs,
+                  ),
+                _MetricChip(
+                  icon: Icons.report_gmailerrorred_outlined,
+                  label: context.l10n.audioAnalysisClipping,
+                  value: _formatClipping(context, data.clippingSamples),
+                  cs: cs,
+                ),
+                if (data.spectralCutoffHz != null)
+                  _MetricChip(
+                    icon: Icons.filter_alt_outlined,
+                    label: context.l10n.audioAnalysisSpectralCutoff,
+                    value: _formatFrequency(data.spectralCutoffHz!),
+                    cs: cs,
+                  ),
                 _MetricChip(
                   icon: Icons.numbers,
                   label: context.l10n.audioAnalysisSamples,
@@ -906,6 +1439,32 @@ class _AudioInfoCard extends StatelessWidget {
                 ),
               ],
             ),
+            if (data.channelStats.length > 1) ...[
+              const SizedBox(height: 8),
+              Divider(color: cs.outlineVariant),
+              const SizedBox(height: 8),
+              Text(
+                context.l10n.audioAnalysisChannelStats,
+                style: TextStyle(
+                  color: cs.onSurfaceVariant,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 12,
+                runSpacing: 8,
+                children: data.channelStats.map((stats) {
+                  return _MetricChip(
+                    icon: Icons.surround_sound,
+                    label: 'Ch ${stats.channel}',
+                    value: _formatChannelStats(stats),
+                    cs: cs,
+                  );
+                }).toList(),
+              ),
+            ],
           ],
         ),
       ),
@@ -918,12 +1477,56 @@ class _AudioInfoCard extends StatelessWidget {
     return '$mins:${secs.toString().padLeft(2, '0')}';
   }
 
+  String _formatChannels(BuildContext context, AudioAnalysisData data) {
+    final layout = data.channelLayout.trim();
+    if (layout.isNotEmpty && layout != 'unknown') {
+      return data.channels > 0 ? '${data.channels} ($layout)' : layout;
+    }
+    if (data.channels == 2) return context.l10n.audioAnalysisStereo;
+    if (data.channels == 1) return context.l10n.audioAnalysisMono;
+    return data.channels > 0 ? '${data.channels}' : 'N/A';
+  }
+
   String _formatFileSize(int bytes) {
     if (bytes == 0) return '0 B';
     const units = ['B', 'KB', 'MB', 'GB'];
     final i = (math.log(bytes) / math.log(1024)).floor();
     final size = bytes / math.pow(1024, i);
     return '${size.toStringAsFixed(1)} ${units[i]}';
+  }
+
+  String _formatFrequency(double hz) {
+    if (hz >= 1000) return '${(hz / 1000).toStringAsFixed(1)} kHz';
+    return '${hz.round()} Hz';
+  }
+
+  String _formatBitrate(int bitsPerSecond) {
+    if (bitsPerSecond >= 1000000) {
+      return '${(bitsPerSecond / 1000000).toStringAsFixed(2)} Mbps';
+    }
+    return '${(bitsPerSecond / 1000).round()} kbps';
+  }
+
+  String _formatClipping(BuildContext context, int samples) {
+    if (samples <= 0) return context.l10n.audioAnalysisNoClipping;
+    return _formatNumber(samples);
+  }
+
+  String _formatChannelStats(ChannelAnalysisStats stats) {
+    final parts = <String>[];
+    if (stats.peakDb != null) {
+      parts.add('P ${stats.peakDb!.toStringAsFixed(1)}');
+    }
+    if (stats.rmsDb != null) {
+      parts.add('R ${stats.rmsDb!.toStringAsFixed(1)}');
+    }
+    if (stats.dynamicRangeDb != null) {
+      parts.add('DR ${stats.dynamicRangeDb!.toStringAsFixed(1)}');
+    }
+    if (stats.peakCount > 0 && (stats.peakDb ?? -100) >= -0.1) {
+      parts.add('Clip ${_formatNumber(stats.peakCount)}');
+    }
+    return parts.isEmpty ? 'N/A' : parts.join(' / ');
   }
 
   String _formatNumber(int n) {
@@ -948,24 +1551,30 @@ class _MetricChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 14, color: cs.onSurfaceVariant),
-        const SizedBox(width: 4),
-        Text(
-          '$label: ',
-          style: TextStyle(color: cs.onSurfaceVariant, fontSize: 12),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            color: cs.onSurface,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 320),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: cs.onSurfaceVariant),
+          const SizedBox(width: 4),
+          Text(
+            '$label: ',
+            style: TextStyle(color: cs.onSurfaceVariant, fontSize: 12),
           ),
-        ),
-      ],
+          Flexible(
+            child: Text(
+              value,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: cs.onSurface,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

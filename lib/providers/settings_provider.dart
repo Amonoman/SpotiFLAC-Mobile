@@ -108,6 +108,7 @@ class SettingsNotifier extends Notifier<AppSettings> {
       'include_translation_netease': state.lyricsIncludeTranslationNetease,
       'include_romanization_netease': state.lyricsIncludeRomanizationNetease,
       'multi_person_word_by_word': state.lyricsMultiPersonWordByWord,
+      'apple_elrc_word_sync': state.lyricsAppleElrcWordSync,
       'musixmatch_language': state.musixmatchLanguage,
     }).catchError((Object e) {
       _log.w('Failed to sync lyrics fetch options to backend: $e');
@@ -363,6 +364,12 @@ class SettingsNotifier extends Notifier<AppSettings> {
 
   void setLyricsMultiPersonWordByWord(bool enabled) {
     state = state.copyWith(lyricsMultiPersonWordByWord: enabled);
+    _saveSettings();
+    _syncLyricsSettingsToBackend();
+  }
+
+  void setLyricsAppleElrcWordSync(bool enabled) {
+    state = state.copyWith(lyricsAppleElrcWordSync: enabled);
     _saveSettings();
     _syncLyricsSettingsToBackend();
   }

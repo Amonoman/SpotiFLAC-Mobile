@@ -199,10 +199,10 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
                   if (Platform.isAndroid)
                     SettingsSwitchItem(
                       icon: Icons.downloading_outlined,
-                      title: 'Native download worker',
+                      title: context.l10n.downloadNativeWorker,
                       titleTrailing: const _BetaBadge(),
                       subtitle: hasDownloadExtensions
-                          ? 'Beta Android service worker for extension downloads'
+                          ? context.l10n.downloadNativeWorkerSubtitle
                           : context.l10n.extensionsNoDownloadProvider,
                       value:
                           settings.nativeDownloadWorkerEnabled &&
@@ -382,6 +382,8 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
     switch (format) {
       case 'mp3_320':
         return context.l10n.downloadLossyMp3;
+      case 'aac_320':
+        return context.l10n.downloadLossyAac;
       case 'opus_256':
         return context.l10n.downloadLossyOpus256;
       case 'opus_128':
@@ -438,6 +440,20 @@ class _DownloadSettingsPageState extends ConsumerState<DownloadSettingsPage> {
                 ref
                     .read(settingsProvider.notifier)
                     .setTidalHighFormat('mp3_320');
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.album_outlined),
+              title: Text(context.l10n.downloadLossyAac),
+              subtitle: Text(context.l10n.downloadLossyAacSubtitle),
+              trailing: current == 'aac_320'
+                  ? Icon(Icons.check, color: colorScheme.primary)
+                  : null,
+              onTap: () {
+                ref
+                    .read(settingsProvider.notifier)
+                    .setTidalHighFormat('aac_320');
                 Navigator.pop(context);
               },
             ),
@@ -829,7 +845,7 @@ class _BetaBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
-        'BETA',
+        context.l10n.badgeBeta,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
           color: colorScheme.onTertiaryContainer,
           fontWeight: FontWeight.w700,

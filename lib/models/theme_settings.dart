@@ -46,7 +46,7 @@ class ThemeSettings {
 
   factory ThemeSettings.fromJson(Map<String, dynamic> json) {
     return ThemeSettings(
-      themeMode: _themeModeFromString(json[kThemeModeKey] as String?),
+      themeMode: themeModeFromString(json[kThemeModeKey] as String?),
       useDynamicColor: json[kUseDynamicColorKey] as bool? ?? true,
       seedColorValue: json[kSeedColorKey] as int? ?? kDefaultSeedColor,
       useAmoled: json[kUseAmoledKey] as bool? ?? false,
@@ -68,7 +68,7 @@ class ThemeSettings {
       themeMode.hashCode ^ useDynamicColor.hashCode ^ seedColorValue.hashCode ^ useAmoled.hashCode;
 }
 
-ThemeMode _themeModeFromString(String? value) {
+ThemeMode themeModeFromString(String? value) {
   if (value == null) return ThemeMode.system;
   return ThemeMode.values.firstWhere(
     (e) => e.name == value,

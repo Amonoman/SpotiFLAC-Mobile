@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spotiflac_android/l10n/l10n.dart';
 import 'package:spotiflac_android/utils/app_bar_layout.dart';
 
 class PrioritySettingsScaffold extends StatelessWidget {
@@ -6,7 +7,7 @@ class PrioritySettingsScaffold extends StatelessWidget {
   final String title;
   final String description;
   final String infoText;
-  final String saveLabel;
+  final String? saveLabel;
   final EdgeInsetsGeometry descriptionPadding;
   final List<Widget> slivers;
   final Future<void> Function() onSave;
@@ -21,7 +22,7 @@ class PrioritySettingsScaffold extends StatelessWidget {
     required this.slivers,
     required this.onSave,
     required this.onConfirmDiscard,
-    this.saveLabel = 'Save',
+    this.saveLabel,
     this.descriptionPadding = const EdgeInsets.fromLTRB(16, 4, 16, 8),
   });
 
@@ -67,7 +68,10 @@ class PrioritySettingsScaffold extends StatelessWidget {
               ),
               actions: [
                 if (hasChanges)
-                  TextButton(onPressed: onSave, child: Text(saveLabel)),
+                  TextButton(
+                    onPressed: onSave,
+                    child: Text(saveLabel ?? context.l10n.dialogSave),
+                  ),
               ],
               flexibleSpace: LayoutBuilder(
                 builder: (context, constraints) {

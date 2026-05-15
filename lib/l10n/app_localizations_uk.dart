@@ -407,7 +407,7 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get aboutAppDescription =>
-      'Кінцеві точки потокового передавання Tidal Hi-Res FLAC. Ключовий елемент пазлу музики без втрат.';
+      'Search music metadata, manage extensions, and organize your library.';
 
   @override
   String get artistAlbums => 'Альбоми';
@@ -1241,6 +1241,11 @@ class AppLocalizationsUk extends AppLocalizations {
   String get trackCopyLyrics => 'Скопіювати тексти пісень';
 
   @override
+  String trackLyricsSource(String source) {
+    return 'Source: $source';
+  }
+
+  @override
   String get trackLyricsNotAvailable =>
       'Текст пісні для цього треку недоступний';
 
@@ -1547,6 +1552,13 @@ class AppLocalizationsUk extends AppLocalizations {
   @override
   String get downloadLossyMp3Subtitle =>
       'Найкраща сумісність, ~10 МБ на доріжку';
+
+  @override
+  String get downloadLossyAac => 'AAC/M4A 320kbps';
+
+  @override
+  String get downloadLossyAacSubtitle =>
+      'Best mobile compatibility, M4A container';
 
   @override
   String get downloadLossyOpus256 => 'Opus 256 кбіт/с';
@@ -3068,6 +3080,17 @@ class AppLocalizationsUk extends AppLocalizations {
       'Спрощене послівне форматування';
 
   @override
+  String get downloadAppleElrcWordSync => 'Apple Music eLRC Word Sync';
+
+  @override
+  String get downloadAppleElrcWordSyncEnabled =>
+      'Raw word-by-word timestamps preserved';
+
+  @override
+  String get downloadAppleElrcWordSyncDisabled =>
+      'Safer line-by-line Apple Music lyrics';
+
+  @override
   String get downloadMusixmatchLanguage => 'Мова Musixmatch';
 
   @override
@@ -3317,6 +3340,15 @@ class AppLocalizationsUk extends AppLocalizations {
   String get audioAnalysisSampleRate => 'Частота дискретизації';
 
   @override
+  String get audioAnalysisCodec => 'Codec';
+
+  @override
+  String get audioAnalysisContainer => 'Container';
+
+  @override
+  String get audioAnalysisDecodedFormat => 'Decoded Format';
+
+  @override
   String get audioAnalysisBitDepth => 'Глибина бітів';
 
   @override
@@ -3341,7 +3373,31 @@ class AppLocalizationsUk extends AppLocalizations {
   String get audioAnalysisRms => 'RMS';
 
   @override
+  String get audioAnalysisLufs => 'LUFS';
+
+  @override
+  String get audioAnalysisTruePeak => 'True Peak';
+
+  @override
+  String get audioAnalysisClipping => 'Clipping';
+
+  @override
+  String get audioAnalysisNoClipping => 'No clipping';
+
+  @override
+  String get audioAnalysisSpectralCutoff => 'Spectral Cutoff';
+
+  @override
+  String get audioAnalysisChannelStats => 'Per-channel Stats';
+
+  @override
   String get audioAnalysisSamples => 'Семпли';
+
+  @override
+  String get audioAnalysisRescan => 'Re-analyze';
+
+  @override
+  String get audioAnalysisRescanning => 'Re-analyzing audio...';
 
   @override
   String extensionsSearchWith(String providerName) {
@@ -3858,4 +3914,337 @@ class AppLocalizationsUk extends AppLocalizations {
   @override
   String get downloadFallbackExtensionsSubtitle =>
       'Choose which extensions can be used as fallback';
+
+  @override
+  String get editMetadataFieldDateHint => 'YYYY-MM-DD or YYYY';
+
+  @override
+  String get editMetadataFieldTrackTotal => 'Track Total';
+
+  @override
+  String get editMetadataFieldDiscTotal => 'Disc Total';
+
+  @override
+  String get editMetadataFieldComposer => 'Composer';
+
+  @override
+  String get editMetadataFieldComment => 'Comment';
+
+  @override
+  String get editMetadataAdvanced => 'Advanced';
+
+  @override
+  String get libraryFilterMetadataMissingTrackNumber => 'Missing track number';
+
+  @override
+  String get libraryFilterMetadataMissingDiscNumber => 'Missing disc number';
+
+  @override
+  String get libraryFilterMetadataMissingArtist => 'Missing artist';
+
+  @override
+  String get libraryFilterMetadataIncorrectIsrcFormat =>
+      'Incorrect ISRC format';
+
+  @override
+  String get libraryFilterMetadataMissingLabel => 'Missing label';
+
+  @override
+  String collectionDeletePlaylistsMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'playlists',
+      one: 'playlist',
+    );
+    return 'Delete $count $_temp0?';
+  }
+
+  @override
+  String collectionPlaylistsDeleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'playlists',
+      one: 'playlist',
+    );
+    return '$count $_temp0 deleted';
+  }
+
+  @override
+  String collectionAddedTracksToPlaylist(int count, String playlistName) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'tracks',
+      one: 'track',
+    );
+    return 'Added $count $_temp0 to $playlistName';
+  }
+
+  @override
+  String collectionAddedTracksToPlaylistWithExisting(
+    int count,
+    String playlistName,
+    int alreadyCount,
+  ) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'tracks',
+      one: 'track',
+    );
+    return 'Added $count $_temp0 to $playlistName ($alreadyCount already in playlist)';
+  }
+
+  @override
+  String itemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'items',
+      one: 'item',
+    );
+    return '$count $_temp0';
+  }
+
+  @override
+  String trackReEnrichSuccessWithFailures(
+    int successCount,
+    int total,
+    int failedCount,
+  ) {
+    return 'Metadata re-enriched successfully ($successCount/$total) - Failed: $failedCount';
+  }
+
+  @override
+  String selectionDeleteTracksCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'tracks',
+      one: 'track',
+    );
+    return 'Delete $count $_temp0';
+  }
+
+  @override
+  String queueDownloadSpeedStatus(String speed) {
+    return 'Downloading - $speed MB/s';
+  }
+
+  @override
+  String get queueDownloadStarting => 'Starting...';
+
+  @override
+  String get a11ySelectTrack => 'Select track';
+
+  @override
+  String get a11yDeselectTrack => 'Deselect track';
+
+  @override
+  String a11yPlayTrackByArtist(String trackName, String artistName) {
+    return 'Play $trackName by $artistName';
+  }
+
+  @override
+  String storeExtensionsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'extensions',
+      one: 'extension',
+    );
+    return '$count $_temp0';
+  }
+
+  @override
+  String storeRequiresVersion(String version) {
+    return 'Requires v$version+';
+  }
+
+  @override
+  String get actionGo => 'Go';
+
+  @override
+  String get logIssueSummary => 'Issue Summary';
+
+  @override
+  String logTotalErrors(int count) {
+    return 'Total errors: $count';
+  }
+
+  @override
+  String logAffectedDomains(String domains) {
+    return 'Affected: $domains';
+  }
+
+  @override
+  String get libraryScanCancelled => 'Scan cancelled';
+
+  @override
+  String get libraryScanCancelledSubtitle =>
+      'You can retry the scan when ready.';
+
+  @override
+  String libraryDownloadsHistoryExcluded(int count) {
+    return '$count from Downloads history (excluded from list)';
+  }
+
+  @override
+  String get downloadNativeWorker => 'Native download worker';
+
+  @override
+  String get downloadNativeWorkerSubtitle =>
+      'Beta Android service worker for extension downloads';
+
+  @override
+  String get badgeBeta => 'BETA';
+
+  @override
+  String get extensionServiceStatus => 'Service Status';
+
+  @override
+  String get extensionServiceHealth => 'Service health';
+
+  @override
+  String extensionHealthChecksConfigured(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'checks',
+      one: 'check',
+    );
+    return '$count $_temp0 configured';
+  }
+
+  @override
+  String get extensionOauthConnectHint =>
+      'Tap Connect to Spotify to fill this field.';
+
+  @override
+  String extensionLastChecked(String time) {
+    return 'Last checked $time';
+  }
+
+  @override
+  String get extensionRefreshStatus => 'Refresh status';
+
+  @override
+  String get extensionCustomUrlHandling => 'Custom URL Handling';
+
+  @override
+  String get extensionCustomUrlHandlingSubtitle =>
+      'This extension can handle links from these sites';
+
+  @override
+  String get extensionCustomUrlHandlingShareHint =>
+      'Share links from these sites to SpotiFLAC Mobile and this extension will handle them.';
+
+  @override
+  String extensionSettingsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'settings',
+      one: 'setting',
+    );
+    return '$count $_temp0';
+  }
+
+  @override
+  String get extensionHealthOnline => 'Online';
+
+  @override
+  String get extensionHealthDegraded => 'Degraded';
+
+  @override
+  String get extensionHealthOffline => 'Offline';
+
+  @override
+  String get extensionHealthNotConfigured => 'Not configured';
+
+  @override
+  String get extensionHealthUnknown => 'Unknown';
+
+  @override
+  String get extensionHealthRequired => 'required';
+
+  @override
+  String get extensionSettingNotSet => 'Not set';
+
+  @override
+  String get extensionActionFailed => 'Action failed';
+
+  @override
+  String get extensionEnterValue => 'Enter value';
+
+  @override
+  String get extensionHealthServiceOnline => 'Service online';
+
+  @override
+  String get extensionHealthServiceDegraded => 'Service degraded';
+
+  @override
+  String get extensionHealthServiceOffline => 'Service offline';
+
+  @override
+  String get extensionHealthServiceUnknown => 'Service status unknown';
+
+  @override
+  String get audioAnalysisStereo => 'Stereo';
+
+  @override
+  String get audioAnalysisMono => 'Mono';
+
+  @override
+  String trackOpenInService(String serviceName) {
+    return 'Open in $serviceName';
+  }
+
+  @override
+  String get trackLyricsEmbeddedSource => 'Embedded';
+
+  @override
+  String get unknownAlbum => 'Unknown Album';
+
+  @override
+  String get unknownArtist => 'Unknown Artist';
+
+  @override
+  String get permissionAudio => 'Audio';
+
+  @override
+  String get permissionStorage => 'Storage';
+
+  @override
+  String get permissionNotification => 'Notification';
+
+  @override
+  String get errorInvalidFolderSelected => 'Invalid folder selected';
+
+  @override
+  String get errorCouldNotKeepFolderAccess =>
+      'Could not keep access to the selected folder';
+
+  @override
+  String get storeAnyVersion => 'Any';
+
+  @override
+  String get storeCategoryMetadata => 'Metadata';
+
+  @override
+  String get storeCategoryDownload => 'Download';
+
+  @override
+  String get storeCategoryUtility => 'Utility';
+
+  @override
+  String get storeCategoryLyrics => 'Lyrics';
+
+  @override
+  String get storeCategoryIntegration => 'Integration';
+
+  @override
+  String get artistReleases => 'Releases';
 }

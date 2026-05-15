@@ -221,6 +221,7 @@ class _FilesSettingsPageState extends ConsumerState<FilesSettingsPage> {
                       icon: Icons.folder_outlined,
                       title: context.l10n.downloadAlbumFolderStructure,
                       subtitle: _getAlbumFolderStructureLabel(
+                        context,
                         settings.albumFolderStructure,
                       ),
                       onTap: () => _showAlbumFolderStructurePicker(
@@ -234,6 +235,7 @@ class _FilesSettingsPageState extends ConsumerState<FilesSettingsPage> {
                       icon: Icons.create_new_folder_outlined,
                       title: context.l10n.downloadFolderOrganization,
                       subtitle: _getFolderOrganizationLabel(
+                        context,
                         settings.folderOrganization,
                       ),
                       onTap: () => _showFolderOrganizationPicker(
@@ -375,35 +377,35 @@ class _FilesSettingsPageState extends ConsumerState<FilesSettingsPage> {
     );
   }
 
-  String _getAlbumFolderStructureLabel(String structure) {
+  String _getAlbumFolderStructureLabel(BuildContext context, String structure) {
     switch (structure) {
       case 'album_only':
-        return 'Albums/Album Name/';
+        return context.l10n.albumFolderAlbumOnlySubtitle;
       case 'artist_year_album':
-        return 'Albums/Artist/[Year] Album/';
+        return context.l10n.albumFolderArtistYearAlbumSubtitle;
       case 'year_album':
-        return 'Albums/[Year] Album/';
+        return context.l10n.albumFolderYearAlbumSubtitle;
       case 'artist_album_singles':
-        return 'Artist/Album/ + Artist/Singles/';
+        return context.l10n.albumFolderArtistAlbumSinglesSubtitle;
       case 'artist_album_flat':
-        return 'Artist/Album/ + Artist/song.flac';
+        return context.l10n.albumFolderArtistAlbumFlatSubtitle;
       default:
-        return 'Albums/Artist/Album Name/';
+        return context.l10n.albumFolderArtistAlbumSubtitle;
     }
   }
 
-  String _getFolderOrganizationLabel(String value) {
+  String _getFolderOrganizationLabel(BuildContext context, String value) {
     switch (value) {
       case 'playlist':
-        return 'By Playlist';
+        return context.l10n.folderOrganizationByPlaylist;
       case 'artist':
-        return 'By Artist';
+        return context.l10n.folderOrganizationByArtist;
       case 'album':
-        return 'By Album';
+        return context.l10n.folderOrganizationByAlbum;
       case 'artist_album':
-        return 'Artist/Album';
+        return context.l10n.folderOrganizationByArtistAlbum;
       default:
-        return 'None';
+        return context.l10n.folderOrganizationNone;
     }
   }
 
@@ -641,7 +643,7 @@ class _FilesSettingsPageState extends ConsumerState<FilesSettingsPage> {
                           SnackBar(
                             content: Text(
                               ctx.l10n.snackbarFolderPickerFailed(
-                                'Could not keep access to the selected folder',
+                                ctx.l10n.errorCouldNotKeepFolderAccess,
                               ),
                             ),
                             backgroundColor: Theme.of(ctx).colorScheme.error,

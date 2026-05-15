@@ -367,8 +367,8 @@ func newIsolatedExtensionRuntime(ext *loadedExtension) (*goja.Runtime, *extensio
 		jar, _ := newSimpleCookieJar()
 		runtime.cookieJar = jar
 	}
-	runtime.httpClient = newExtensionHTTPClient(ext, runtime.cookieJar, extensionHTTPTimeout(ext, 30*time.Second))
-	runtime.downloadClient = newExtensionHTTPClient(ext, runtime.cookieJar, DownloadTimeout)
+	runtime.httpClient = newExtensionHTTPClient(ext, runtime.cookieJar, extensionHTTPTimeout(ext, 30*time.Second), true)
+	runtime.downloadClient = newExtensionHTTPClient(ext, runtime.cookieJar, DownloadTimeout, false)
 	runtime.RegisterAPIs(vm)
 	runtime.RegisterGoBackendAPIs(vm)
 

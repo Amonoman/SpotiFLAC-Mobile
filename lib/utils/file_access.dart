@@ -229,6 +229,22 @@ bool isContentUri(String? path) {
   return path != null && path.startsWith('content://');
 }
 
+bool isSameContentUri(String? first, String? second) {
+  if (first == null || second == null) return false;
+  if (first == second) return true;
+  if (!isContentUri(first) || !isContentUri(second)) return false;
+
+  String decode(String value) {
+    try {
+      return Uri.decodeFull(value);
+    } catch (_) {
+      return value;
+    }
+  }
+
+  return decode(first) == decode(second);
+}
+
 /// Pattern matching CUE virtual path suffixes like #track01, #track12, etc.
 final _cueTrackSuffix = RegExp(r'#track\d+$');
 

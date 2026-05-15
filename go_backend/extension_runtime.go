@@ -140,8 +140,8 @@ func newExtensionRuntime(ext *loadedExtension) *extensionRuntime {
 		storageFlushDelay: defaultStorageFlushDelay,
 	}
 
-	runtime.httpClient = newExtensionHTTPClient(ext, jar, extensionHTTPTimeout(ext, 30*time.Second))
-	runtime.downloadClient = newExtensionHTTPClient(ext, jar, DownloadTimeout)
+	runtime.httpClient = newExtensionHTTPClient(ext, jar, extensionHTTPTimeout(ext, 30*time.Second), true)
+	runtime.downloadClient = newExtensionHTTPClient(ext, jar, DownloadTimeout, false)
 
 	return runtime
 }
@@ -247,13 +247,18 @@ func (r *extensionRuntime) bindDownloadCancelContext(req *http.Request) *http.Re
 	return req.WithContext(initDownloadCancel(itemID))
 }
 
-func newExtensionHTTPClient(ext *loadedExtension, jar http.CookieJar, timeout time.Duration) *http.Client {
+func newExtensionHTTPClient(ext *loadedExtension, jar http.CookieJar, timeout time.Duration, compressResponses bool) *http.Client {
 	// Extension sandbox enforces HTTPS-only domains. Do not apply global
 	// allow_http scheme downgrade here, because some extension APIs (e.g.
 	// spotify-web) will redirect http -> https and can end up in 301 loops.
-	// We still reuse sharedTransport so insecure TLS compatibility mode remains effective.
+	// API calls can use response compression for faster metadata/search loads,
+	// while media downloads keep identity transfer semantics for progress/streaming.
+	transport := sharedTransport
+	if compressResponses {
+		transport = extensionAPITransport
+	}
 	client := &http.Client{
-		Transport: sharedTransport,
+		Transport: transport,
 		Timeout:   timeout,
 		Jar:       jar,
 	}

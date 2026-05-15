@@ -508,7 +508,7 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
                   if (releases.isNotEmpty)
                     SliverToBoxAdapter(
                       child: _buildAlbumSection(
-                        'Releases',
+                        context.l10n.artistReleases,
                         releases,
                         colorScheme,
                       ),

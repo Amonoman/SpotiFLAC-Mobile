@@ -837,7 +837,7 @@ abstract class AppLocalizations {
   /// App description in header card
   ///
   /// In en, this message translates to:
-  /// **'Download Spotify tracks in lossless quality from Tidal and Qobuz.'**
+  /// **'Search music metadata, manage extensions, and organize your library.'**
   String get aboutAppDescription;
 
   /// Section header for artist albums
@@ -2286,6 +2286,12 @@ abstract class AppLocalizations {
   /// **'Copy lyrics'**
   String get trackCopyLyrics;
 
+  /// Label showing the lyrics source/provider
+  ///
+  /// In en, this message translates to:
+  /// **'Source: {source}'**
+  String trackLyricsSource(String source);
+
   /// Message when lyrics not found
   ///
   /// In en, this message translates to:
@@ -2837,6 +2843,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Best compatibility, ~10MB per track'**
   String get downloadLossyMp3Subtitle;
+
+  /// Tidal lossy format option - AAC in M4A container at 320kbps
+  ///
+  /// In en, this message translates to:
+  /// **'AAC/M4A 320kbps'**
+  String get downloadLossyAac;
+
+  /// Subtitle for AAC/M4A 320kbps Tidal lossy option
+  ///
+  /// In en, this message translates to:
+  /// **'Best mobile compatibility, M4A container'**
+  String get downloadLossyAacSubtitle;
 
   /// Tidal lossy format option - Opus 256kbps
   ///
@@ -4299,7 +4317,7 @@ abstract class AppLocalizations {
   /// Subtitle for convert format menu item
   ///
   /// In en, this message translates to:
-  /// **'Convert to MP3, Opus, ALAC, or FLAC'**
+  /// **'Convert to AAC/M4A, MP3, Opus, ALAC, or FLAC'**
   String get trackConvertFormatSubtitle;
 
   /// Title of convert bottom sheet
@@ -5209,6 +5227,24 @@ abstract class AppLocalizations {
   /// **'Standard lyrics without speaker labels'**
   String get downloadAppleQqMultiPersonDisabled;
 
+  /// Setting for preserving Apple Music word-by-word eLRC timestamps
+  ///
+  /// In en, this message translates to:
+  /// **'Apple Music eLRC Word Sync'**
+  String get downloadAppleElrcWordSync;
+
+  /// Subtitle when Apple Music eLRC word sync is enabled
+  ///
+  /// In en, this message translates to:
+  /// **'Raw word-by-word timestamps preserved'**
+  String get downloadAppleElrcWordSyncEnabled;
+
+  /// Subtitle when Apple Music eLRC word sync is disabled
+  ///
+  /// In en, this message translates to:
+  /// **'Safer line-by-line Apple Music lyrics'**
+  String get downloadAppleElrcWordSyncDisabled;
+
   /// Setting for Musixmatch lyrics translation language
   ///
   /// In en, this message translates to:
@@ -5563,6 +5599,24 @@ abstract class AppLocalizations {
   /// **'Sample Rate'**
   String get audioAnalysisSampleRate;
 
+  /// Audio codec metric label
+  ///
+  /// In en, this message translates to:
+  /// **'Codec'**
+  String get audioAnalysisCodec;
+
+  /// Audio container metric label
+  ///
+  /// In en, this message translates to:
+  /// **'Container'**
+  String get audioAnalysisContainer;
+
+  /// Decoded sample format metric label
+  ///
+  /// In en, this message translates to:
+  /// **'Decoded Format'**
+  String get audioAnalysisDecodedFormat;
+
   /// Bit depth metric label
   ///
   /// In en, this message translates to:
@@ -5611,11 +5665,59 @@ abstract class AppLocalizations {
   /// **'RMS'**
   String get audioAnalysisRms;
 
+  /// Integrated loudness metric label
+  ///
+  /// In en, this message translates to:
+  /// **'LUFS'**
+  String get audioAnalysisLufs;
+
+  /// True peak metric label
+  ///
+  /// In en, this message translates to:
+  /// **'True Peak'**
+  String get audioAnalysisTruePeak;
+
+  /// Clipping metric label
+  ///
+  /// In en, this message translates to:
+  /// **'Clipping'**
+  String get audioAnalysisClipping;
+
+  /// Displayed when no clipped samples were detected
+  ///
+  /// In en, this message translates to:
+  /// **'No clipping'**
+  String get audioAnalysisNoClipping;
+
+  /// Estimated spectral cutoff metric label
+  ///
+  /// In en, this message translates to:
+  /// **'Spectral Cutoff'**
+  String get audioAnalysisSpectralCutoff;
+
+  /// Per-channel audio analysis section label
+  ///
+  /// In en, this message translates to:
+  /// **'Per-channel Stats'**
+  String get audioAnalysisChannelStats;
+
   /// Total samples metric label
   ///
   /// In en, this message translates to:
   /// **'Samples'**
   String get audioAnalysisSamples;
+
+  /// Tooltip/label for the button that re-runs the audio analysis, discarding cached results
+  ///
+  /// In en, this message translates to:
+  /// **'Re-analyze'**
+  String get audioAnalysisRescan;
+
+  /// Loading text while audio is being re-analyzed after an explicit refresh
+  ///
+  /// In en, this message translates to:
+  /// **'Re-analyzing audio...'**
+  String get audioAnalysisRescanning;
 
   /// Extensions page - subtitle for built-in search provider option
   ///
@@ -6416,6 +6518,470 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose which extensions can be used as fallback'**
   String get downloadFallbackExtensionsSubtitle;
+
+  /// Hint text for the edit metadata date field
+  ///
+  /// In en, this message translates to:
+  /// **'YYYY-MM-DD or YYYY'**
+  String get editMetadataFieldDateHint;
+
+  /// Label for total tracks field in the edit metadata sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Track Total'**
+  String get editMetadataFieldTrackTotal;
+
+  /// Label for total discs field in the edit metadata sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Disc Total'**
+  String get editMetadataFieldDiscTotal;
+
+  /// Label for composer field in the edit metadata sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Composer'**
+  String get editMetadataFieldComposer;
+
+  /// Label for comment field in the edit metadata sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Comment'**
+  String get editMetadataFieldComment;
+
+  /// Expandable section label for advanced metadata fields
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced'**
+  String get editMetadataAdvanced;
+
+  /// Filter option - items missing track number
+  ///
+  /// In en, this message translates to:
+  /// **'Missing track number'**
+  String get libraryFilterMetadataMissingTrackNumber;
+
+  /// Filter option - items missing disc number
+  ///
+  /// In en, this message translates to:
+  /// **'Missing disc number'**
+  String get libraryFilterMetadataMissingDiscNumber;
+
+  /// Filter option - items missing artist
+  ///
+  /// In en, this message translates to:
+  /// **'Missing artist'**
+  String get libraryFilterMetadataMissingArtist;
+
+  /// Filter option - items with an invalid ISRC format
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect ISRC format'**
+  String get libraryFilterMetadataIncorrectIsrcFormat;
+
+  /// Filter option - items missing record label
+  ///
+  /// In en, this message translates to:
+  /// **'Missing label'**
+  String get libraryFilterMetadataMissingLabel;
+
+  /// Confirmation message for deleting selected playlists
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {count} {count, plural, =1{playlist} other{playlists}}?'**
+  String collectionDeletePlaylistsMessage(int count);
+
+  /// Snackbar after deleting selected playlists
+  ///
+  /// In en, this message translates to:
+  /// **'{count} {count, plural, =1{playlist} other{playlists}} deleted'**
+  String collectionPlaylistsDeleted(int count);
+
+  /// Snackbar after adding multiple tracks to a playlist
+  ///
+  /// In en, this message translates to:
+  /// **'Added {count} {count, plural, =1{track} other{tracks}} to {playlistName}'**
+  String collectionAddedTracksToPlaylist(int count, String playlistName);
+
+  /// Snackbar after adding multiple tracks to a playlist when some were already present
+  ///
+  /// In en, this message translates to:
+  /// **'Added {count} {count, plural, =1{track} other{tracks}} to {playlistName} ({alreadyCount} already in playlist)'**
+  String collectionAddedTracksToPlaylistWithExisting(
+    int count,
+    String playlistName,
+    int alreadyCount,
+  );
+
+  /// Generic item count label
+  ///
+  /// In en, this message translates to:
+  /// **'{count} {count, plural, =1{item} other{items}}'**
+  String itemCount(int count);
+
+  /// Snackbar summary after batch metadata re-enrichment finishes with failures
+  ///
+  /// In en, this message translates to:
+  /// **'Metadata re-enriched successfully ({successCount}/{total}) - Failed: {failedCount}'**
+  String trackReEnrichSuccessWithFailures(
+    int successCount,
+    int total,
+    int failedCount,
+  );
+
+  /// Button label for deleting selected tracks
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {count} {count, plural, =1{track} other{tracks}}'**
+  String selectionDeleteTracksCount(int count);
+
+  /// Queue status while downloading with speed
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading - {speed} MB/s'**
+  String queueDownloadSpeedStatus(String speed);
+
+  /// Queue status before download progress is available
+  ///
+  /// In en, this message translates to:
+  /// **'Starting...'**
+  String get queueDownloadStarting;
+
+  /// Accessibility label for selecting a track
+  ///
+  /// In en, this message translates to:
+  /// **'Select track'**
+  String get a11ySelectTrack;
+
+  /// Accessibility label for deselecting a track
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect track'**
+  String get a11yDeselectTrack;
+
+  /// Accessibility label for playing a local library track
+  ///
+  /// In en, this message translates to:
+  /// **'Play {trackName} by {artistName}'**
+  String a11yPlayTrackByArtist(String trackName, String artistName);
+
+  /// Store extension result count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} {count, plural, =1{extension} other{extensions}}'**
+  String storeExtensionsCount(int count);
+
+  /// Store compatibility badge for minimum app version
+  ///
+  /// In en, this message translates to:
+  /// **'Requires v{version}+'**
+  String storeRequiresVersion(String version);
+
+  /// Generic action button label
+  ///
+  /// In en, this message translates to:
+  /// **'Go'**
+  String get actionGo;
+
+  /// Header for log issue analysis summary
+  ///
+  /// In en, this message translates to:
+  /// **'Issue Summary'**
+  String get logIssueSummary;
+
+  /// Total error count in log issue analysis
+  ///
+  /// In en, this message translates to:
+  /// **'Total errors: {count}'**
+  String logTotalErrors(int count);
+
+  /// Affected domains in log issue analysis
+  ///
+  /// In en, this message translates to:
+  /// **'Affected: {domains}'**
+  String logAffectedDomains(String domains);
+
+  /// Library scan status when a scan was cancelled
+  ///
+  /// In en, this message translates to:
+  /// **'Scan cancelled'**
+  String get libraryScanCancelled;
+
+  /// Library scan status subtitle after cancellation
+  ///
+  /// In en, this message translates to:
+  /// **'You can retry the scan when ready.'**
+  String get libraryScanCancelledSubtitle;
+
+  /// Library count note for downloaded history items excluded from the local list
+  ///
+  /// In en, this message translates to:
+  /// **'{count} from Downloads history (excluded from list)'**
+  String libraryDownloadsHistoryExcluded(int count);
+
+  /// Setting title for Android native download worker
+  ///
+  /// In en, this message translates to:
+  /// **'Native download worker'**
+  String get downloadNativeWorker;
+
+  /// Setting subtitle for Android native download worker
+  ///
+  /// In en, this message translates to:
+  /// **'Beta Android service worker for extension downloads'**
+  String get downloadNativeWorkerSubtitle;
+
+  /// Badge label for beta features
+  ///
+  /// In en, this message translates to:
+  /// **'BETA'**
+  String get badgeBeta;
+
+  /// Extension detail section header for service status
+  ///
+  /// In en, this message translates to:
+  /// **'Service Status'**
+  String get extensionServiceStatus;
+
+  /// Extension capability label for service health checks
+  ///
+  /// In en, this message translates to:
+  /// **'Service health'**
+  String get extensionServiceHealth;
+
+  /// Extension service health check count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} {count, plural, =1{check} other{checks}} configured'**
+  String extensionHealthChecksConfigured(int count);
+
+  /// Hint for an OAuth login link field before connecting Spotify
+  ///
+  /// In en, this message translates to:
+  /// **'Tap Connect to Spotify to fill this field.'**
+  String get extensionOauthConnectHint;
+
+  /// Timestamp for the latest extension service health check
+  ///
+  /// In en, this message translates to:
+  /// **'Last checked {time}'**
+  String extensionLastChecked(String time);
+
+  /// Tooltip for refreshing extension service health status
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh status'**
+  String get extensionRefreshStatus;
+
+  /// Extension detail section title for custom URL handling
+  ///
+  /// In en, this message translates to:
+  /// **'Custom URL Handling'**
+  String get extensionCustomUrlHandling;
+
+  /// Extension detail subtitle for custom URL handling
+  ///
+  /// In en, this message translates to:
+  /// **'This extension can handle links from these sites'**
+  String get extensionCustomUrlHandlingSubtitle;
+
+  /// Extension detail hint explaining share-to-app URL handling
+  ///
+  /// In en, this message translates to:
+  /// **'Share links from these sites to SpotiFLAC Mobile and this extension will handle them.'**
+  String get extensionCustomUrlHandlingShareHint;
+
+  /// Count of settings exposed by an extension quality option
+  ///
+  /// In en, this message translates to:
+  /// **'{count} {count, plural, =1{setting} other{settings}}'**
+  String extensionSettingsCount(int count);
+
+  /// Extension service health status - online
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get extensionHealthOnline;
+
+  /// Extension service health status - degraded
+  ///
+  /// In en, this message translates to:
+  /// **'Degraded'**
+  String get extensionHealthDegraded;
+
+  /// Extension service health status - offline
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get extensionHealthOffline;
+
+  /// Extension service health status - not configured
+  ///
+  /// In en, this message translates to:
+  /// **'Not configured'**
+  String get extensionHealthNotConfigured;
+
+  /// Extension service health status - unknown
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get extensionHealthUnknown;
+
+  /// Label for a required extension service health check
+  ///
+  /// In en, this message translates to:
+  /// **'required'**
+  String get extensionHealthRequired;
+
+  /// Value shown when an extension setting has no value
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get extensionSettingNotSet;
+
+  /// Fallback error when an extension action fails without details
+  ///
+  /// In en, this message translates to:
+  /// **'Action failed'**
+  String get extensionActionFailed;
+
+  /// Hint for editing an extension setting value
+  ///
+  /// In en, this message translates to:
+  /// **'Enter value'**
+  String get extensionEnterValue;
+
+  /// Tooltip for online extension service
+  ///
+  /// In en, this message translates to:
+  /// **'Service online'**
+  String get extensionHealthServiceOnline;
+
+  /// Tooltip for degraded extension service
+  ///
+  /// In en, this message translates to:
+  /// **'Service degraded'**
+  String get extensionHealthServiceDegraded;
+
+  /// Tooltip for offline extension service
+  ///
+  /// In en, this message translates to:
+  /// **'Service offline'**
+  String get extensionHealthServiceOffline;
+
+  /// Tooltip for unknown extension service health
+  ///
+  /// In en, this message translates to:
+  /// **'Service status unknown'**
+  String get extensionHealthServiceUnknown;
+
+  /// Audio channel layout label - stereo
+  ///
+  /// In en, this message translates to:
+  /// **'Stereo'**
+  String get audioAnalysisStereo;
+
+  /// Audio channel layout label - mono
+  ///
+  /// In en, this message translates to:
+  /// **'Mono'**
+  String get audioAnalysisMono;
+
+  /// Button label to open a track in a named music service
+  ///
+  /// In en, this message translates to:
+  /// **'Open in {serviceName}'**
+  String trackOpenInService(String serviceName);
+
+  /// Lyrics source label for embedded lyrics
+  ///
+  /// In en, this message translates to:
+  /// **'Embedded'**
+  String get trackLyricsEmbeddedSource;
+
+  /// Fallback album name when metadata is missing
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Album'**
+  String get unknownAlbum;
+
+  /// Fallback artist name when metadata is missing
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Artist'**
+  String get unknownArtist;
+
+  /// Audio permission type label
+  ///
+  /// In en, this message translates to:
+  /// **'Audio'**
+  String get permissionAudio;
+
+  /// Storage permission type label
+  ///
+  /// In en, this message translates to:
+  /// **'Storage'**
+  String get permissionStorage;
+
+  /// Notification permission type label
+  ///
+  /// In en, this message translates to:
+  /// **'Notification'**
+  String get permissionNotification;
+
+  /// Error when the selected folder is invalid
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid folder selected'**
+  String get errorInvalidFolderSelected;
+
+  /// Error when persistent folder access cannot be saved
+  ///
+  /// In en, this message translates to:
+  /// **'Could not keep access to the selected folder'**
+  String get errorCouldNotKeepFolderAccess;
+
+  /// Store detail value when any app version is accepted
+  ///
+  /// In en, this message translates to:
+  /// **'Any'**
+  String get storeAnyVersion;
+
+  /// Store extension category - metadata
+  ///
+  /// In en, this message translates to:
+  /// **'Metadata'**
+  String get storeCategoryMetadata;
+
+  /// Store extension category - download
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get storeCategoryDownload;
+
+  /// Store extension category - utility
+  ///
+  /// In en, this message translates to:
+  /// **'Utility'**
+  String get storeCategoryUtility;
+
+  /// Store extension category - lyrics
+  ///
+  /// In en, this message translates to:
+  /// **'Lyrics'**
+  String get storeCategoryLyrics;
+
+  /// Store extension category - integration
+  ///
+  /// In en, this message translates to:
+  /// **'Integration'**
+  String get storeCategoryIntegration;
+
+  /// Section header for all artist releases
+  ///
+  /// In en, this message translates to:
+  /// **'Releases'**
+  String get artistReleases;
 }
 
 class _AppLocalizationsDelegate

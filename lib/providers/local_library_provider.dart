@@ -54,11 +54,6 @@ class LocalLibraryState {
        _isrcSet = isrcSet ?? const <String>{},
        _filePathById = filePathById ?? const <String, String>{};
 
-  @Deprecated(
-    'LocalLibraryState no longer owns full track rows. Use DB-backed page providers.',
-  )
-  List<LocalLibraryItem> get items => const <LocalLibraryItem>[];
-
   bool hasIsrc(String isrc) => _isrcSet.contains(isrc);
 
   bool hasTrack(String trackName, String artistName) {

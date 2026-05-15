@@ -87,7 +87,7 @@ func formatQQLyricsMetadataToLRC(rawJSON string, multiPersonWordByWord bool) (st
 	if len(response.Lyrics) == 0 {
 		return "", fmt.Errorf("qq metadata lyrics response was empty")
 	}
-	return formatPaxContent("Syllable", response.Lyrics, multiPersonWordByWord), nil
+	return formatPaxContent("Syllable", response.Lyrics, multiPersonWordByWord, true), nil
 }
 
 func (c *QQMusicClient) FetchLyrics(
@@ -106,7 +106,7 @@ func (c *QQMusicClient) FetchLyrics(
 
 	lrcText, err := formatQQLyricsMetadataToLRC(rawLyrics, multiPersonWordByWord)
 	if err != nil {
-		if fallback, fallbackErr := formatPaxLyricsToLRC(rawLyrics, multiPersonWordByWord); fallbackErr == nil {
+		if fallback, fallbackErr := formatPaxLyricsToLRC(rawLyrics, multiPersonWordByWord, true); fallbackErr == nil {
 			lrcText = fallback
 		} else {
 			lrcText = rawLyrics

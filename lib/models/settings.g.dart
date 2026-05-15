@@ -78,6 +78,7 @@ AppSettings _$AppSettingsFromJson(Map<String, dynamic> json) => AppSettings(
       json['lyricsIncludeRomanizationNetease'] as bool? ?? false,
   lyricsMultiPersonWordByWord:
       json['lyricsMultiPersonWordByWord'] as bool? ?? false,
+  lyricsAppleElrcWordSync: json['lyricsAppleElrcWordSync'] as bool? ?? false,
   musixmatchLanguage: json['musixmatchLanguage'] as String? ?? '',
   lastSeenVersion: json['lastSeenVersion'] as String? ?? '',
   deduplicateDownloads: json['deduplicateDownloads'] as bool? ?? true,
@@ -142,6 +143,7 @@ Map<String, dynamic> _$AppSettingsToJson(
   'lyricsIncludeTranslationNetease': instance.lyricsIncludeTranslationNetease,
   'lyricsIncludeRomanizationNetease': instance.lyricsIncludeRomanizationNetease,
   'lyricsMultiPersonWordByWord': instance.lyricsMultiPersonWordByWord,
+  'lyricsAppleElrcWordSync': instance.lyricsAppleElrcWordSync,
   'musixmatchLanguage': instance.musixmatchLanguage,
   'lastSeenVersion': instance.lastSeenVersion,
   'deduplicateDownloads': instance.deduplicateDownloads,

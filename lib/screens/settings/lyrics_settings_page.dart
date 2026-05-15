@@ -77,8 +77,7 @@ class LyricsSettingsPage extends ConsumerWidget {
                     onChanged: (value) => ref
                         .read(settingsProvider.notifier)
                         .setEmbedLyrics(value),
-                    showDivider:
-                        settings.embedMetadata && settings.embedLyrics,
+                    showDivider: settings.embedMetadata && settings.embedLyrics,
                   ),
                   if (settings.embedMetadata && settings.embedLyrics) ...[
                     SettingsItem(
@@ -88,8 +87,11 @@ class LyricsSettingsPage extends ConsumerWidget {
                         context,
                         settings.lyricsMode,
                       ),
-                      onTap: () =>
-                          _showLyricsModePicker(context, ref, settings.lyricsMode),
+                      onTap: () => _showLyricsModePicker(
+                        context,
+                        ref,
+                        settings.lyricsMode,
+                      ),
                     ),
                     SettingsItem(
                       icon: Icons.source_outlined,
@@ -124,8 +126,12 @@ class LyricsSettingsPage extends ConsumerWidget {
                       icon: Icons.translate_outlined,
                       title: context.l10n.downloadNeteaseIncludeTranslation,
                       subtitle: settings.lyricsIncludeTranslationNetease
-                          ? context.l10n.downloadNeteaseIncludeTranslationEnabled
-                          : context.l10n.downloadNeteaseIncludeTranslationDisabled,
+                          ? context
+                                .l10n
+                                .downloadNeteaseIncludeTranslationEnabled
+                          : context
+                                .l10n
+                                .downloadNeteaseIncludeTranslationDisabled,
                       value: settings.lyricsIncludeTranslationNetease,
                       onChanged: (value) => ref
                           .read(settingsProvider.notifier)
@@ -156,6 +162,17 @@ class LyricsSettingsPage extends ConsumerWidget {
                       onChanged: (value) => ref
                           .read(settingsProvider.notifier)
                           .setLyricsMultiPersonWordByWord(value),
+                    ),
+                    SettingsSwitchItem(
+                      icon: Icons.graphic_eq_outlined,
+                      title: context.l10n.downloadAppleElrcWordSync,
+                      subtitle: settings.lyricsAppleElrcWordSync
+                          ? context.l10n.downloadAppleElrcWordSyncEnabled
+                          : context.l10n.downloadAppleElrcWordSyncDisabled,
+                      value: settings.lyricsAppleElrcWordSync,
+                      onChanged: (value) => ref
+                          .read(settingsProvider.notifier)
+                          .setLyricsAppleElrcWordSync(value),
                     ),
                     SettingsItem(
                       icon: Icons.language_outlined,
@@ -199,6 +216,11 @@ class LyricsSettingsPage extends ConsumerWidget {
     'musixmatch': 'Musixmatch',
     'apple_music': 'Apple Music',
     'qqmusic': 'QQ Music',
+    'spotify': 'Spotify',
+    'deezer': 'Deezer',
+    'youtube': 'YouTube',
+    'kugou': 'Kugou',
+    'genius': 'Genius',
   };
 
   String _getLyricsProvidersSubtitle(
@@ -206,9 +228,7 @@ class LyricsSettingsPage extends ConsumerWidget {
     List<String> providers,
   ) {
     if (providers.isEmpty) return context.l10n.downloadProvidersNoneEnabled;
-    return providers
-        .map((p) => _providerDisplayNames[p] ?? p)
-        .join(' > ');
+    return providers.map((p) => _providerDisplayNames[p] ?? p).join(' > ');
   }
 
   void _showLyricsModePicker(
@@ -233,16 +253,18 @@ class LyricsSettingsPage extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
               child: Text(
                 context.l10n.lyricsMode,
-                style: Theme.of(context).textTheme.titleLarge
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
               child: Text(
                 context.l10n.lyricsModeDescription,
-                style: Theme.of(context).textTheme.bodyMedium
-                    ?.copyWith(color: colorScheme.onSurfaceVariant),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
             ListTile(
@@ -311,14 +333,16 @@ class LyricsSettingsPage extends ConsumerWidget {
           children: [
             Text(
               context.l10n.downloadMusixmatchLanguage,
-              style: Theme.of(context).textTheme.titleLarge
-                  ?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               context.l10n.downloadMusixmatchLanguageDesc,
-              style: Theme.of(context).textTheme.bodyMedium
-                  ?.copyWith(color: colorScheme.onSurfaceVariant),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 16),
             TextField(

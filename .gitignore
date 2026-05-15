@@ -44,6 +44,7 @@ go_backend/*.xcframework/
 # Android
 android/.gradle/
 android/app/libs/gobackend.aar
+android/app/libs/gobackend-sources.jar
 android/local.properties
 android/*.iml
 android/key.properties
@@ -57,7 +58,6 @@ ios/Pods/
 ios/.symlinks/
 ios/Flutter/Flutter.framework/
 ios/Flutter/Flutter.podspec
-android/app/libs/gobackend-sources.jar
 
 # Extension folder
 extension/
@@ -67,7 +67,10 @@ AGENTS.md
 
 # Temp/misc
 nul
+NUL
 network_requests.txt
+*.bak
+/AndroidManifest.xml
 
 # Log files
 *.log

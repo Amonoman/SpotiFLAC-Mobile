@@ -21,6 +21,15 @@ class _BridgeCacheEntry {
   bool get isExpired => DateTime.now().isAfter(expiresAt);
 }
 
+class _BridgeListCacheEntry {
+  final List<Map<String, dynamic>> value;
+  final DateTime expiresAt;
+
+  const _BridgeListCacheEntry({required this.value, required this.expiresAt});
+
+  bool get isExpired => DateTime.now().isAfter(expiresAt);
+}
+
 class _BridgeInFlight<T> {
   final String requestId;
   final String scopeKey;
@@ -39,6 +48,8 @@ class PlatformBridge {
   static const _backgroundJsonDecodeThresholdBytes = 128 * 1024;
   static const _metadataCacheTtl = Duration(minutes: 20);
   static const _availabilityCacheTtl = Duration(minutes: 15);
+  static const _urlHandleCacheTtl = Duration(minutes: 5);
+  static const _customSearchCacheTtl = Duration(minutes: 2);
   static const _bridgeCacheMaxEntries = 256;
   static const _metadataPersistentCacheKey = 'bridge_metadata_lookup_cache_v1';
   static const _availabilityPersistentCacheKey =
@@ -51,8 +62,12 @@ class PlatformBridge {
   );
   static final Map<String, _BridgeCacheEntry> _metadataCache = {};
   static final Map<String, _BridgeCacheEntry> _availabilityCache = {};
+  static final Map<String, _BridgeCacheEntry> _urlHandleCache = {};
+  static final Map<String, _BridgeListCacheEntry> _customSearchCache = {};
   static final Map<String, Future<Map<String, dynamic>>> _metadataInFlight = {};
   static final Map<String, Future<Map<String, dynamic>>> _availabilityInFlight =
+      {};
+  static final Map<String, Future<Map<String, dynamic>?>> _urlHandleInFlight =
       {};
   static final Map<String, _BridgeInFlight<List<Map<String, dynamic>>>>
   _customSearchInFlight = {};
@@ -329,8 +344,11 @@ class PlatformBridge {
     _persistentLookupCacheLoadFuture = null;
     _metadataCache.clear();
     _availabilityCache.clear();
+    _urlHandleCache.clear();
+    _customSearchCache.clear();
     _metadataInFlight.clear();
     _availabilityInFlight.clear();
+    _urlHandleInFlight.clear();
     for (final inFlight in _customSearchInFlight.values) {
       _cancelExtensionRequestUnawaited(inFlight.requestId);
     }
@@ -1388,7 +1406,11 @@ class PlatformBridge {
       _cancelCustomSearchInFlightForScope(scopeKey, exceptKey: cacheKey);
     }
 
+    final cached = _getCachedMapList(_customSearchCache, cacheKey);
+    if (cached != null) return cached;
+
     final requestId = _nextExtensionRequestId('customSearch', extensionId);
+    final generation = _lookupCacheGeneration;
     final future = (() async {
       final result = await _channel.invokeMethod('customSearchWithExtension', {
         'extension_id': extensionId,
@@ -1396,7 +1418,16 @@ class PlatformBridge {
         'options': optionsJson,
         'request_id': requestId,
       });
-      return _decodeMapListResult(result, 'customSearchWithExtension');
+      final decoded = _decodeMapListResult(result, 'customSearchWithExtension');
+      if (generation == _lookupCacheGeneration) {
+        _putMemoryCachedMapList(
+          _customSearchCache,
+          cacheKey,
+          decoded,
+          _customSearchCacheTtl,
+        );
+      }
+      return decoded;
     })();
 
     final entry = _BridgeInFlight<List<Map<String, dynamic>>>(
@@ -1422,14 +1453,115 @@ class PlatformBridge {
   static Future<Map<String, dynamic>?> handleURLWithExtension(
     String url,
   ) async {
+    final cacheKey = url.trim();
+    if (cacheKey.isEmpty) return null;
+
+    final cached = _getCachedMap(_urlHandleCache, cacheKey);
+    if (cached != null) return cached;
+
+    final inFlight = _urlHandleInFlight[cacheKey];
+    if (inFlight != null) return _copyNullableStringMap(await inFlight);
+
+    final generation = _lookupCacheGeneration;
+    final future = (() async {
+      try {
+        final result = await _channel.invokeMethod('handleURLWithExtension', {
+          'url': url,
+        });
+        final decoded = _decodeNullableMapResult(
+          result,
+          'handleURLWithExtension',
+        );
+        if (generation == _lookupCacheGeneration &&
+            decoded != null &&
+            _isCacheableURLHandleResult(decoded)) {
+          _putMemoryCachedMap(
+            _urlHandleCache,
+            cacheKey,
+            decoded,
+            _urlHandleCacheTtl,
+          );
+        }
+        return decoded;
+      } catch (e) {
+        return null;
+      }
+    })();
+
+    _urlHandleInFlight[cacheKey] = future;
     try {
-      final result = await _channel.invokeMethod('handleURLWithExtension', {
-        'url': url,
-      });
-      return _decodeNullableMapResult(result, 'handleURLWithExtension');
-    } catch (e) {
+      return _copyNullableStringMap(await future);
+    } finally {
+      if (identical(_urlHandleInFlight[cacheKey], future)) {
+        _urlHandleInFlight.remove(cacheKey);
+      }
+    }
+  }
+
+  static bool _isCacheableURLHandleResult(Map<String, dynamic> result) {
+    final type = result['type']?.toString();
+    if (type == null || type.isEmpty) return false;
+    if (type == 'track') {
+      final track = result['track'];
+      if (track is! Map) return false;
+      final name = track['name']?.toString().trim() ?? '';
+      return name.isNotEmpty;
+    }
+    return type == 'album' || type == 'playlist' || type == 'artist';
+  }
+
+  static void _putMemoryCachedMap(
+    Map<String, _BridgeCacheEntry> cache,
+    String key,
+    Map<String, dynamic> value,
+    Duration ttl,
+  ) {
+    _pruneExpiredBridgeCache(cache);
+    while (cache.length >= _bridgeCacheMaxEntries && cache.isNotEmpty) {
+      cache.remove(cache.keys.first);
+    }
+    cache[key] = _BridgeCacheEntry(
+      value: _copyStringMap(value),
+      expiresAt: DateTime.now().add(ttl),
+    );
+  }
+
+  static List<Map<String, dynamic>>? _getCachedMapList(
+    Map<String, _BridgeListCacheEntry> cache,
+    String key,
+  ) {
+    _pruneExpiredBridgeListCache(cache);
+    final entry = cache[key];
+    if (entry == null) return null;
+    if (entry.isExpired) {
+      cache.remove(key);
       return null;
     }
+    return _copyMapList(entry.value);
+  }
+
+  static void _putMemoryCachedMapList(
+    Map<String, _BridgeListCacheEntry> cache,
+    String key,
+    List<Map<String, dynamic>> value,
+    Duration ttl,
+  ) {
+    _pruneExpiredBridgeListCache(cache);
+    while (cache.length >= _bridgeCacheMaxEntries && cache.isNotEmpty) {
+      cache.remove(cache.keys.first);
+    }
+    cache[key] = _BridgeListCacheEntry(
+      value: _copyMapList(value),
+      expiresAt: DateTime.now().add(ttl),
+    );
+  }
+
+  static void _pruneExpiredBridgeListCache(
+    Map<String, _BridgeListCacheEntry> cache,
+  ) {
+    if (cache.isEmpty) return;
+    final now = DateTime.now();
+    cache.removeWhere((_, entry) => now.isAfter(entry.expiresAt));
   }
 
   static Future<String?> findURLHandler(String url) async {

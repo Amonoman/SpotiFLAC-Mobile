@@ -10,6 +10,7 @@ import 'package:spotiflac_android/services/ffmpeg_service.dart';
 import 'package:spotiflac_android/services/platform_bridge.dart';
 import 'package:spotiflac_android/l10n/l10n.dart';
 import 'package:spotiflac_android/utils/app_bar_layout.dart';
+import 'package:spotiflac_android/utils/audio_conversion_utils.dart';
 import 'package:spotiflac_android/utils/file_access.dart';
 import 'package:spotiflac_android/utils/lyrics_metadata_helper.dart';
 import 'package:spotiflac_android/models/download_item.dart';
@@ -40,6 +41,49 @@ import 'package:spotiflac_android/widgets/animation_utils.dart';
 
 part 'queue_tab_helpers.dart';
 part 'queue_tab_widgets.dart';
+
+String _formatDownloadSizeMB(num bytes) {
+  return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+}
+
+String _formatDownloadProgressLabel(BuildContext context, DownloadItem item) {
+  final progress = item.progress.clamp(0.0, 1.0);
+  final speedSuffix = item.speedMBps > 0
+      ? ' • ${item.speedMBps.toStringAsFixed(1)} MB/s'
+      : '';
+
+  if (item.bytesTotal > 0) {
+    final received = item.bytesReceived > 0
+        ? item.bytesReceived
+        : item.bytesTotal * progress;
+    final percent = (progress * 100).toStringAsFixed(0);
+    return '${_formatDownloadSizeMB(received)} / ${_formatDownloadSizeMB(item.bytesTotal)} • $percent%$speedSuffix';
+  }
+
+  if (item.bytesReceived > 0) {
+    final canEstimateTotal = progress > 0.01 && progress < 0.995;
+    if (canEstimateTotal) {
+      final estimatedTotal = item.bytesReceived / progress;
+      if (estimatedTotal > item.bytesReceived) {
+        return '${_formatDownloadSizeMB(item.bytesReceived)} / ~${_formatDownloadSizeMB(estimatedTotal)}$speedSuffix';
+      }
+    }
+    return '${_formatDownloadSizeMB(item.bytesReceived)}$speedSuffix';
+  }
+
+  if (progress > 0) {
+    final percent = (progress * 100).toStringAsFixed(0);
+    return '$percent%$speedSuffix';
+  }
+
+  if (item.speedMBps > 0) {
+    return context.l10n.queueDownloadSpeedStatus(
+      item.speedMBps.toStringAsFixed(1),
+    );
+  }
+
+  return context.l10n.queueDownloadStarting;
+}
 
 class QueueTab extends ConsumerStatefulWidget {
   final PageController? parentPageController;
@@ -1001,9 +1045,7 @@ class _QueueTabState extends ConsumerState<QueueTab> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(ctx.l10n.collectionDeletePlaylist),
-        content: Text(
-          'Delete $count ${count == 1 ? 'playlist' : 'playlists'}?',
-        ),
+        content: Text(ctx.l10n.collectionDeletePlaylistsMessage(count)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -1030,11 +1072,7 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     if (!context.mounted) return;
     _exitPlaylistSelectionMode();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '$count ${count == 1 ? 'playlist' : 'playlists'} deleted',
-        ),
-      ),
+      SnackBar(content: Text(context.l10n.collectionPlaylistsDeleted(count))),
     );
   }
 
@@ -1363,6 +1401,18 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     return filePath.substring(dotIndex + 1).toLowerCase();
   }
 
+  String _itemFormatLower(UnifiedLibraryItem item) {
+    final localFormat = normalizeOptionalString(item.localItem?.format);
+    if (localFormat != null) {
+      return localFormat.toLowerCase().replaceAll('-', '_');
+    }
+    final historyFormat = normalizeOptionalString(item.historyItem?.format);
+    if (historyFormat != null) {
+      return historyFormat.toLowerCase().replaceAll('-', '_');
+    }
+    return _fileExtLower(item.filePath);
+  }
+
   List<UnifiedLibraryItem> _applyAdvancedFilters(
     List<UnifiedLibraryItem> items,
   ) {
@@ -1400,7 +1450,7 @@ class _QueueTabState extends ConsumerState<QueueTab> {
             }
 
             if (_filterFormat != null) {
-              final ext = _fileExtLower(item.filePath);
+              final ext = _itemFormatLower(item);
               if (ext != _filterFormat) return false;
             }
 
@@ -1533,8 +1583,21 @@ class _QueueTabState extends ConsumerState<QueueTab> {
   Set<String> _getAvailableFormats(List<UnifiedLibraryItem> items) {
     final formats = <String>{};
     for (final item in items) {
-      final ext = _fileExtLower(item.filePath);
-      if (['flac', 'mp3', 'm4a', 'opus', 'ogg', 'wav', 'aiff'].contains(ext)) {
+      final ext = _itemFormatLower(item);
+      if ([
+        'flac',
+        'alac',
+        'mp3',
+        'm4a',
+        'aac',
+        'eac3',
+        'ac3',
+        'ac4',
+        'opus',
+        'ogg',
+        'wav',
+        'aiff',
+      ].contains(ext)) {
         formats.add(ext);
       }
     }
@@ -1785,7 +1848,11 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                                 ),
                               ),
                               FilterChip(
-                                label: const Text('Missing track number'),
+                                label: Text(
+                                  context
+                                      .l10n
+                                      .libraryFilterMetadataMissingTrackNumber,
+                                ),
                                 selected:
                                     tempMetadata == 'missing-track-number',
                                 onSelected: (_) => setSheetState(
@@ -1793,21 +1860,33 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                                 ),
                               ),
                               FilterChip(
-                                label: const Text('Missing disc number'),
+                                label: Text(
+                                  context
+                                      .l10n
+                                      .libraryFilterMetadataMissingDiscNumber,
+                                ),
                                 selected: tempMetadata == 'missing-disc-number',
                                 onSelected: (_) => setSheetState(
                                   () => tempMetadata = 'missing-disc-number',
                                 ),
                               ),
                               FilterChip(
-                                label: const Text('Missing artist'),
+                                label: Text(
+                                  context
+                                      .l10n
+                                      .libraryFilterMetadataMissingArtist,
+                                ),
                                 selected: tempMetadata == 'missing-artist',
                                 onSelected: (_) => setSheetState(
                                   () => tempMetadata = 'missing-artist',
                                 ),
                               ),
                               FilterChip(
-                                label: const Text('Incorrect ISRC format'),
+                                label: Text(
+                                  context
+                                      .l10n
+                                      .libraryFilterMetadataIncorrectIsrcFormat,
+                                ),
                                 selected:
                                     tempMetadata == 'incorrect-isrc-format',
                                 onSelected: (_) => setSheetState(
@@ -1815,7 +1894,11 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                                 ),
                               ),
                               FilterChip(
-                                label: const Text('Missing label'),
+                                label: Text(
+                                  context
+                                      .l10n
+                                      .libraryFilterMetadataMissingLabel,
+                                ),
                                 selected: tempMetadata == 'missing-label',
                                 onSelected: (_) => setSheetState(
                                   () => tempMetadata = 'missing-label',
@@ -2401,8 +2484,16 @@ class _QueueTabState extends ConsumerState<QueueTab> {
 
       if (!context.mounted) return;
       final message = addedCount > 0
-          ? 'Added $addedCount ${addedCount == 1 ? 'track' : 'tracks'} to $playlistName'
-                '${alreadyCount > 0 ? ' ($alreadyCount already in playlist)' : ''}'
+          ? alreadyCount > 0
+                ? context.l10n.collectionAddedTracksToPlaylistWithExisting(
+                    addedCount,
+                    playlistName,
+                    alreadyCount,
+                  )
+                : context.l10n.collectionAddedTracksToPlaylist(
+                    addedCount,
+                    playlistName,
+                  )
           : context.l10n.collectionAlreadyInPlaylist(playlistName);
       ScaffoldMessenger.of(
         context,
@@ -3107,7 +3198,7 @@ class _QueueTabState extends ConsumerState<QueueTab> {
               ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
             ),
             Text(
-              '$count ${count == 1 ? 'item' : 'items'}',
+              context.l10n.itemCount(count),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -4601,7 +4692,11 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     final failedCount = total - successCount;
     final summary = failedCount <= 0
         ? '${context.l10n.trackReEnrichSuccess} ($successCount/$total)'
-        : '${context.l10n.trackReEnrichSuccess} ($successCount/$total) • Failed: $failedCount';
+        : context.l10n.trackReEnrichSuccessWithFailures(
+            successCount,
+            total,
+            failedCount,
+          );
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(summary)));
@@ -4657,46 +4752,39 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     for (final id in _selectedIds) {
       final item = itemsById[id];
       if (item == null) continue;
-      String nameToCheck;
-      if (item.historyItem?.safFileName != null &&
-          item.historyItem!.safFileName!.isNotEmpty) {
-        nameToCheck = item.historyItem!.safFileName!.toLowerCase();
-      } else if (item.localItem?.format != null &&
-          item.localItem!.format!.isNotEmpty) {
-        nameToCheck = '.${item.localItem!.format!.toLowerCase()}';
-      } else {
-        nameToCheck = item.filePath.toLowerCase();
-      }
-      final ext = nameToCheck.endsWith('.flac')
-          ? 'FLAC'
-          : nameToCheck.endsWith('.m4a')
-          ? 'M4A'
-          : nameToCheck.endsWith('.mp3')
-          ? 'MP3'
-          : (nameToCheck.endsWith('.opus') || nameToCheck.endsWith('.ogg'))
-          ? 'Opus'
-          : null;
-      if (ext != null) sourceFormats.add(ext);
+      final sourceFormat = convertibleAudioSourceFormat(
+        storedFormat: item.localItem?.format ?? item.historyItem?.format,
+        filePath: item.filePath,
+        fileName: item.historyItem?.safFileName,
+      );
+      if (sourceFormat != null) sourceFormats.add(sourceFormat);
     }
 
-    final formats = ['ALAC', 'FLAC', 'MP3', 'Opus'].where((target) {
-      return sourceFormats.any((src) {
-        if (src == target) return false;
-        final isLosslessTarget = target == 'ALAC' || target == 'FLAC';
-        final isLosslessSource = src == 'FLAC' || src == 'M4A';
-        if (isLosslessTarget && !isLosslessSource) return false;
-        return true;
-      });
-    }).toList();
+    final formats = audioConversionTargetFormats
+        .where(
+          (target) => sourceFormats.any(
+            (source) => canConvertAudioFormat(
+              sourceFormat: source,
+              targetFormat: target,
+            ),
+          ),
+        )
+        .toList();
 
     if (formats.isEmpty) return;
 
     String selectedFormat = formats.first;
     bool isLosslessTarget =
         selectedFormat == 'ALAC' || selectedFormat == 'FLAC';
+    String defaultBitrateForFormat(String format) {
+      if (format == 'Opus') return '128k';
+      if (format == 'AAC') return '256k';
+      return '320k';
+    }
+
     String selectedBitrate = isLosslessTarget
         ? '320k'
-        : (selectedFormat == 'Opus' ? '128k' : '320k');
+        : defaultBitrateForFormat(selectedFormat);
     var didStartConversion = false;
 
     _hideSelectionOverlay();
@@ -4762,9 +4850,9 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                                 isLosslessTarget =
                                     format == 'ALAC' || format == 'FLAC';
                                 if (!isLosslessTarget) {
-                                  selectedBitrate = format == 'Opus'
-                                      ? '128k'
-                                      : '320k';
+                                  selectedBitrate = defaultBitrateForFormat(
+                                    format,
+                                  );
                                 }
                               });
                             }
@@ -4875,29 +4963,18 @@ class _QueueTabState extends ConsumerState<QueueTab> {
     for (final id in _selectedIds) {
       final item = itemsById[id];
       if (item == null) continue;
-      String nameToCheck;
-      if (item.historyItem?.safFileName != null &&
-          item.historyItem!.safFileName!.isNotEmpty) {
-        nameToCheck = item.historyItem!.safFileName!.toLowerCase();
-      } else if (item.localItem?.format != null &&
-          item.localItem!.format!.isNotEmpty) {
-        nameToCheck = '.${item.localItem!.format!.toLowerCase()}';
-      } else {
-        nameToCheck = item.filePath.toLowerCase();
+      final sourceFormat = convertibleAudioSourceFormat(
+        storedFormat: item.localItem?.format ?? item.historyItem?.format,
+        filePath: item.filePath,
+        fileName: item.historyItem?.safFileName,
+      );
+      if (sourceFormat == null ||
+          !canConvertAudioFormat(
+            sourceFormat: sourceFormat,
+            targetFormat: targetFormat,
+          )) {
+        continue;
       }
-      final ext = nameToCheck.endsWith('.flac')
-          ? 'FLAC'
-          : nameToCheck.endsWith('.m4a')
-          ? 'M4A'
-          : nameToCheck.endsWith('.mp3')
-          ? 'MP3'
-          : (nameToCheck.endsWith('.opus') || nameToCheck.endsWith('.ogg'))
-          ? 'Opus'
-          : null;
-      if (ext == null || ext == targetFormat) continue;
-      final isLosslessTarget = targetFormat == 'ALAC' || targetFormat == 'FLAC';
-      final isLosslessSource = ext == 'FLAC' || ext == 'M4A';
-      if (isLosslessTarget && !isLosslessSource) continue;
       selectedItems.add(item);
     }
 
@@ -5065,6 +5142,7 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                 mimeType = 'audio/opus';
                 break;
               case 'alac':
+              case 'aac':
                 newExt = '.m4a';
                 mimeType = 'audio/mp4';
                 break;
@@ -5099,15 +5177,22 @@ class _QueueTabState extends ConsumerState<QueueTab> {
               continue;
             }
 
-            try {
-              await PlatformBridge.safDelete(item.filePath);
-            } catch (_) {}
+            if (!isSameContentUri(item.filePath, safUri)) {
+              try {
+                await PlatformBridge.safDelete(item.filePath);
+              } catch (_) {}
+            }
 
             await historyDb.updateFilePath(
               hi.id,
               safUri,
               newSafFileName: newFileName,
               newQuality: newQuality,
+              newFormat: normalizedConvertedAudioFormat(targetFormat),
+              newBitrate: convertedAudioBitrateKbps(
+                targetFormat: targetFormat,
+                bitrate: bitrate,
+              ),
               clearAudioSpecs: true,
             );
           }
@@ -5170,6 +5255,7 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                 mimeType = 'audio/opus';
                 break;
               case 'alac':
+              case 'aac':
                 newExt = '.m4a';
                 mimeType = 'audio/mp4';
                 break;
@@ -5204,9 +5290,11 @@ class _QueueTabState extends ConsumerState<QueueTab> {
               continue;
             }
 
-            try {
-              await PlatformBridge.safDelete(item.filePath);
-            } catch (_) {}
+            if (!isSameContentUri(item.filePath, safUri)) {
+              try {
+                await PlatformBridge.safDelete(item.filePath);
+              } catch (_) {}
+            }
             await LibraryDatabase.instance.replaceWithConvertedItem(
               item: item.localItem!,
               newFilePath: safUri,
@@ -5228,6 +5316,11 @@ class _QueueTabState extends ConsumerState<QueueTab> {
             item.historyItem!.id,
             newPath,
             newQuality: newQuality,
+            newFormat: normalizedConvertedAudioFormat(targetFormat),
+            newBitrate: convertedAudioBitrateKbps(
+              targetFormat: targetFormat,
+              bitrate: bitrate,
+            ),
             clearAudioSpecs: true,
           );
         } else if (item.localItem != null) {
@@ -5426,7 +5519,7 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                   icon: const Icon(Icons.delete_outline),
                   label: Text(
                     selectedCount > 0
-                        ? 'Delete $selectedCount ${selectedCount == 1 ? 'track' : 'tracks'}'
+                        ? context.l10n.selectionDeleteTracksCount(selectedCount)
                         : context.l10n.selectionSelectToDelete,
                   ),
                   style: FilledButton.styleFrom(
@@ -5541,43 +5634,31 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                               ?.copyWith(color: colorScheme.onSurfaceVariant),
                         ),
                         if (item.status == DownloadStatus.downloading) ...[
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(4),
-                                  child: LinearProgressIndicator(
-                                    value: item.progress > 0
-                                        ? item.progress
-                                        : null,
-                                    backgroundColor:
-                                        colorScheme.surfaceContainerHighest,
+                          const SizedBox(height: 6),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              _formatDownloadProgressLabel(context, item),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.right,
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
                                     color: colorScheme.primary,
-                                    minHeight: 6,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                item.bytesTotal > 0
-                                    ? '${(item.progress * 100).toStringAsFixed(0)}%'
-                                    : (item.bytesReceived > 0
-                                          ? '${(item.bytesReceived / (1024 * 1024)).toStringAsFixed(1)} MB${item.speedMBps > 0 ? ' • ${item.speedMBps.toStringAsFixed(1)} MB/s' : ''}'
-                                          : (item.progress > 0
-                                                ? (item.speedMBps > 0
-                                                      ? '${(item.progress * 100).toStringAsFixed(0)}% • ${item.speedMBps.toStringAsFixed(1)} MB/s'
-                                                      : '${(item.progress * 100).toStringAsFixed(0)}%')
-                                                : (item.speedMBps > 0
-                                                      ? 'Downloading • ${item.speedMBps.toStringAsFixed(1)} MB/s'
-                                                      : 'Starting...'))),
-                                style: Theme.of(context).textTheme.labelSmall
-                                    ?.copyWith(
-                                      color: colorScheme.primary,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ],
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: item.progress > 0 ? item.progress : null,
+                              backgroundColor:
+                                  colorScheme.surfaceContainerHighest,
+                              color: colorScheme.primary,
+                              minHeight: 6,
+                            ),
                           ),
                         ],
                         if (item.status == DownloadStatus.failed) ...[
@@ -5998,7 +6079,9 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                 if (_isSelectionMode) ...[
                   Semantics(
                     checked: isSelected,
-                    label: isSelected ? 'Deselect track' : 'Select track',
+                    label: isSelected
+                        ? context.l10n.a11yDeselectTrack
+                        : context.l10n.a11ySelectTrack,
                     child: AnimatedSelectionCheckbox(
                       visible: true,
                       selected: isSelected,
@@ -6261,8 +6344,10 @@ class _QueueTabState extends ConsumerState<QueueTab> {
                           return fileExists
                               ? Semantics(
                                   button: true,
-                                  label:
-                                      'Play ${item.trackName} by ${item.artistName}',
+                                  label: context.l10n.a11yPlayTrackByArtist(
+                                    item.trackName,
+                                    item.artistName,
+                                  ),
                                   child: GestureDetector(
                                     onTap: () => _openFile(
                                       item.filePath,

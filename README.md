@@ -1,9 +1,9 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/images/banner-readme-dark.png">
-  <source media="(prefers-color-scheme: light)" srcset="assets/images/banner-readme-light.png">
-  <img alt="SpotiFLAC Mobile" src="assets/images/banner-readme-light.png" width="650" height="auto">
+  <source media="(prefers-color-scheme: dark)" srcset="assets/readme/banner-readme-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="assets/readme/banner-readme-light.png">
+  <img alt="SpotiFLAC Mobile" src="assets/readme/banner-readme-light.png" width="650" height="auto">
 </picture>
 
 <p align="center">
@@ -28,10 +28,10 @@
 ## Screenshots
 
 <p align="center">
-  <img src="assets/images/1.jpg?v=2" width="200" />
-  <img src="assets/images/2.jpg?v=2" width="200" />
-  <img src="assets/images/3.jpg?v=2" width="200" />
-  <img src="assets/images/4.jpg?v=2" width="200" />
+  <img src="assets/readme/1.jpg?v=2" width="200" />
+  <img src="assets/readme/2.jpg?v=2" width="200" />
+  <img src="assets/readme/3.jpg?v=2" width="200" />
+  <img src="assets/readme/4.jpg?v=2" width="200" />
 </p>
 
 ---
