@@ -74,7 +74,6 @@ class _CrossExtensionShareSheetState extends State<CrossExtensionShareSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Handle bar
             Center(
               child: Container(
                 margin: const EdgeInsets.only(top: 12, bottom: 4),
@@ -167,6 +166,9 @@ class _ResultTile extends StatelessWidget {
   final CrossExtensionShareResult result;
   final String type;
 
+  // Method channel to the backend – reuse the same one the app uses.
+  static const _channel = MethodChannel('com.zarz.spotiflac/backend');
+
   const _ResultTile({required this.result, required this.type});
 
   void _copyLink(BuildContext context, String link) {
@@ -179,7 +181,24 @@ class _ResultTile extends StatelessWidget {
     );
   }
 
-  Future<void> _openLink(BuildContext context, String link) async {
+  /// Opens the URL inside SpotiFLAC by passing it through the share-intent
+  /// pipeline (same path as sharing a link from another app).
+  /// For URLs whose host is already registered in AndroidManifest (Spotify,
+  /// Deezer, Tidal, YouTube Music) this is handled natively.
+  /// For all other URLs (Qobuz, Apple Music, SoundCloud…) we send it as a
+  /// text/plain share intent so SpotiFLAC's ShareIntentService picks it up.
+  Future<void> _openInApp(BuildContext context, String link) async {
+    try {
+      // Tell the backend to process this URL as if it were shared into the app.
+      await _channel.invokeMethod('handleSharedUrl', link);
+      if (context.mounted) Navigator.of(context).pop();
+    } on PlatformException {
+      // Fallback: open in browser.
+      _openInBrowser(context, link);
+    }
+  }
+
+  Future<void> _openInBrowser(BuildContext context, String link) async {
     final uri = Uri.tryParse(link);
     if (uri == null) return;
     if (await canLaunchUrl(uri)) {
@@ -222,7 +241,6 @@ class _ResultTile extends StatelessWidget {
     final link = result.resolveLink(type);
 
     if (link == null || link.isEmpty) {
-      // Found in extension but no URL could be built.
       return ListTile(
         leading: _ExtensionAvatar(extensionId: result.extensionId),
         title: Text(
@@ -230,10 +248,9 @@ class _ResultTile extends StatelessWidget {
           style: textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
         ),
         subtitle: Text(
-          result.itemName ?? '',
-          style: textTheme.bodySmall?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-          ),
+          result.itemName ?? 'Gefunden – kein Link verfügbar',
+          style: textTheme.bodySmall
+              ?.copyWith(color: colorScheme.onSurfaceVariant),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -260,15 +277,17 @@ class _ResultTile extends StatelessWidget {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Copy link
           IconButton(
             icon: const Icon(Icons.copy_rounded, size: 20),
             tooltip: 'Link kopieren',
             onPressed: () => _copyLink(context, link),
           ),
+          // Open in SpotiFLAC
           IconButton(
             icon: const Icon(Icons.open_in_new_rounded, size: 20),
-            tooltip: 'Öffnen',
-            onPressed: () => _openLink(context, link),
+            tooltip: 'In SpotiFLAC öffnen',
+            onPressed: () => _openInApp(context, link),
           ),
         ],
       ),

@@ -772,7 +772,6 @@ class MainActivity: FlutterFragmentActivity() {
         return when {
             name.endsWith(".m4a") -> ".m4a"
             name.endsWith(".mp4") -> ".mp4"
-            name.endsWith(".aac") -> ".aac"
             name.endsWith(".mp3") -> ".mp3"
             name.endsWith(".opus") -> ".opus"
             name.endsWith(".flac") -> ".flac"
@@ -784,10 +783,6 @@ class MainActivity: FlutterFragmentActivity() {
     private fun extFromMimeType(mime: String?): String {
         return when (mime) {
             "audio/mp4" -> ".m4a"
-            "audio/aac" -> ".aac"
-            "audio/eac3" -> ".m4a"
-            "audio/ac3" -> ".m4a"
-            "audio/ac4" -> ".m4a"
             "audio/mpeg" -> ".mp3"
             "audio/ogg" -> ".opus"
             "audio/flac" -> ".flac"
@@ -1068,7 +1063,7 @@ class MainActivity: FlutterFragmentActivity() {
     }
 
     private val cueSiblingAudioExtensions = listOf(
-        ".flac", ".wav", ".ape", ".mp3", ".ogg", ".wv", ".m4a", ".mp4", ".aac"
+        ".flac", ".wav", ".ape", ".mp3", ".ogg", ".wv", ".m4a"
     )
 
     private fun getSafChildFileLookup(
@@ -1140,7 +1135,7 @@ class MainActivity: FlutterFragmentActivity() {
             it.currentFile = "Scanning folders..."
         }
 
-        val supportedAudioExt = setOf(".flac", ".m4a", ".mp4", ".aac", ".mp3", ".opus", ".ogg")
+        val supportedAudioExt = setOf(".flac", ".m4a", ".mp3", ".opus", ".ogg")
         val audioFiles = mutableListOf<Pair<DocumentFile, String>>()
         val cueFiles = mutableListOf<Pair<DocumentFile, DocumentFile>>()
         val visitedDirUris = mutableSetOf<String>()
@@ -1440,7 +1435,7 @@ class MainActivity: FlutterFragmentActivity() {
             it.currentFile = "Scanning folders..."
         }
 
-        val supportedAudioExt = setOf(".flac", ".m4a", ".mp4", ".aac", ".mp3", ".opus", ".ogg")
+        val supportedAudioExt = setOf(".flac", ".m4a", ".mp3", ".opus", ".ogg")
         val audioFiles = mutableListOf<Triple<DocumentFile, String, Long>>()
         val cueFilesToScan = mutableListOf<Triple<DocumentFile, DocumentFile, Long>>()
         val unchangedCueFiles = mutableListOf<Pair<DocumentFile, DocumentFile>>()
@@ -3480,7 +3475,7 @@ class MainActivity: FlutterFragmentActivity() {
                                                 } catch (_: Exception) { "" }
                                                 val cueBaseName = cueName.substringBeforeLast('.')
                                                 if (cueBaseName.isNotBlank()) {
-                                                    val commonExts = listOf(".flac", ".wav", ".ape", ".mp3", ".ogg", ".wv", ".m4a", ".mp4", ".aac")
+                                                    val commonExts = listOf(".flac", ".wav", ".ape", ".mp3", ".ogg", ".wv", ".m4a")
                                                     for (ext in commonExts) {
                                                         audioDoc = try { parentDir.findFile(cueBaseName + ext) } catch (_: Exception) { null }
                                                         if (audioDoc != null) break
@@ -3535,6 +3530,18 @@ class MainActivity: FlutterFragmentActivity() {
                                 Gobackend.findCollectionAcrossExtensionsJSON(requestJson)
                             }
                             result.success(response)
+                        }
+                        "handleSharedUrl" -> {
+                            val url = call.arguments as? String ?: ""
+                            if (url.isNotEmpty()) {
+                                withContext(Dispatchers.Main) {
+                                    flutterEngine?.dartExecutor?.let { executor ->
+                                        MethodChannel(executor.binaryMessenger, "com.zarz.spotiflac/share_intent")
+                                            .invokeMethod("onSharedUrl", url)
+                                    }
+                                }
+                            }
+                            result.success(null)
                         }
                         else -> result.notImplemented()
                     }

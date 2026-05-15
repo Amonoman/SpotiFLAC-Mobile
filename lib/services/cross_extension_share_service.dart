@@ -7,16 +7,8 @@ class CrossExtensionShareResult {
   final String extensionId;
   final String displayName;
   final bool found;
-
-  /// Raw prefixed ID, e.g. "qobuz:0060253780269" or "tidal:456".
   final String? itemId;
-  final String? albumId;
-  final String? artistId;
-
-  /// Direct web URL returned by the extension, e.g. "https://play.qobuz.com/track/12345".
-  /// May be a track URL if no album URL is available – still opens the correct context.
   final String? externalLink;
-
   final String? itemName;
   final String? itemArtists;
   final String? error;
@@ -26,8 +18,6 @@ class CrossExtensionShareResult {
     required this.displayName,
     required this.found,
     this.itemId,
-    this.albumId,
-    this.artistId,
     this.externalLink,
     this.itemName,
     this.itemArtists,
@@ -40,8 +30,6 @@ class CrossExtensionShareResult {
       displayName: json['display_name'] as String? ?? '',
       found: json['found'] as bool? ?? false,
       itemId: json['item_id'] as String?,
-      albumId: json['album_id'] as String?,
-      artistId: json['artist_id'] as String?,
       externalLink: json['external_link'] as String?,
       itemName: json['item_name'] as String?,
       itemArtists: json['item_artists'] as String?,
@@ -49,15 +37,21 @@ class CrossExtensionShareResult {
     );
   }
 
-  /// Returns the best available URL for this result.
-  /// Prefers [externalLink], then constructs one from [itemId].
+  /// Returns the best shareable URL for this result.
+  /// Prefers [externalLink] returned by Go. Falls back to constructing
+  /// one from [itemId] based on the known extension ID.
   String? resolveLink(String type) {
+    // 1. Use what Go already figured out.
     if (externalLink != null && externalLink!.isNotEmpty) {
       return externalLink;
     }
-    final id = _stripPrefix(itemId ?? albumId ?? artistId ?? '');
+
+    // 2. Fallback: build from itemId.
+    final raw = itemId ?? '';
+    if (raw.isEmpty) return null;
+    final id = _stripPrefix(raw);
     if (id.isEmpty) return null;
-    return _buildFallbackLink(extensionId, id, type);
+    return _buildLink(extensionId.toLowerCase(), id, type);
   }
 
   static String _stripPrefix(String id) {
@@ -65,8 +59,7 @@ class CrossExtensionShareResult {
     return colon >= 0 ? id.substring(colon + 1) : id;
   }
 
-  static String _buildFallbackLink(String extensionId, String id, String type) {
-    final ext = extensionId.toLowerCase();
+  static String? _buildLink(String ext, String id, String type) {
     if (ext.contains('qobuz')) {
       return type == 'artist'
           ? 'https://open.qobuz.com/interpreter/$id'
@@ -87,15 +80,24 @@ class CrossExtensionShareResult {
           ? 'https://open.spotify.com/artist/$id'
           : 'https://open.spotify.com/album/$id';
     }
-    if (ext.contains('apple') || ext.contains('itunes')) {
-      return 'https://music.apple.com/album/$id';
+    if (ext.contains('apple') || ext.contains('applemusic')) {
+      // Apple Music URLs: music.apple.com/{storefront}/{type}/{name}/{id}
+      // We don't know the storefront or slug, so use the minimal form.
+      return type == 'artist'
+          ? 'https://music.apple.com/us/artist/$id'
+          : 'https://music.apple.com/us/album/$id';
+    }
+    if (ext.contains('soundcloud')) {
+      // SoundCloud needs a slug in the URL which we don't have from the ID alone.
+      // Return null — the Go layer should have found the permalink_url via customSearch.
+      return null;
     }
     if (ext.contains('youtube') || ext.contains('ytmusic')) {
       return type == 'artist'
           ? 'https://music.youtube.com/channel/$id'
           : 'https://music.youtube.com/browse/$id';
     }
-    return id;
+    return null;
   }
 }
 
@@ -124,7 +126,8 @@ class CrossExtensionShareService {
 
     final List<dynamic> decoded = jsonDecode(responseJson) as List<dynamic>;
     return decoded
-        .map((e) => CrossExtensionShareResult.fromJson(e as Map<String, dynamic>))
+        .map((e) =>
+            CrossExtensionShareResult.fromJson(e as Map<String, dynamic>))
         .toList();
   }
 }
