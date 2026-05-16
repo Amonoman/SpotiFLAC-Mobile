@@ -3531,18 +3531,6 @@ class MainActivity: FlutterFragmentActivity() {
                             }
                             result.success(response)
                         }
-                        "handleSharedUrl" -> {
-                            val url = call.arguments as? String ?: ""
-                            if (url.isNotEmpty()) {
-                                withContext(Dispatchers.Main) {
-                                    flutterEngine?.dartExecutor?.let { executor ->
-                                        MethodChannel(executor.binaryMessenger, "com.zarz.spotiflac/share_intent")
-                                            .invokeMethod("onSharedUrl", url)
-                                    }
-                                }
-                            }
-                            result.success(null)
-                        }
                         else -> result.notImplemented()
                     }
                 } catch (e: Exception) {

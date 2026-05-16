@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/cross_extension_share_service.dart';
+import '../services/share_intent_service.dart';
 
 class CrossExtensionShareSheet extends StatefulWidget {
   final String name;
@@ -166,9 +167,6 @@ class _ResultTile extends StatelessWidget {
   final CrossExtensionShareResult result;
   final String type;
 
-  // Method channel to the backend – reuse the same one the app uses.
-  static const _channel = MethodChannel('com.zarz.spotiflac/backend');
-
   const _ResultTile({required this.result, required this.type});
 
   void _copyLink(BuildContext context, String link) {
@@ -181,21 +179,12 @@ class _ResultTile extends StatelessWidget {
     );
   }
 
-  /// Opens the URL inside SpotiFLAC by passing it through the share-intent
-  /// pipeline (same path as sharing a link from another app).
-  /// For URLs whose host is already registered in AndroidManifest (Spotify,
-  /// Deezer, Tidal, YouTube Music) this is handled natively.
-  /// For all other URLs (Qobuz, Apple Music, SoundCloud…) we send it as a
-  /// text/plain share intent so SpotiFLAC's ShareIntentService picks it up.
-  Future<void> _openInApp(BuildContext context, String link) async {
-    try {
-      // Tell the backend to process this URL as if it were shared into the app.
-      await _channel.invokeMethod('handleSharedUrl', link);
-      if (context.mounted) Navigator.of(context).pop();
-    } on PlatformException {
-      // Fallback: open in browser.
-      _openInBrowser(context, link);
-    }
+  /// Opens the URL inside SpotiFLAC by injecting it into the ShareIntentService
+  /// stream – the same path used when a link is shared from another app.
+  /// MainShell._handleSharedUrl will navigate to the home tab and load the URL.
+  void _openInApp(BuildContext context, String link) {
+    ShareIntentService().injectUrl(link);
+    Navigator.of(context).pop();
   }
 
   Future<void> _openInBrowser(BuildContext context, String link) async {
